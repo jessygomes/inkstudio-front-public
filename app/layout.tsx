@@ -1,15 +1,32 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Didact_Gothic, Exo_2, Montserrat_Alternates } from "next/font/google";
+import { Toaster } from "@/components/Shared/Sonner";
 import "./globals.css";
+import Header from "@/components/Shared/Header";
+import Footer from "@/components/Shared/Footer";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const didact_gothic = Didact_Gothic({
+  weight: ["400"],
+  style: ["normal"],
   subsets: ["latin"],
+  display: "swap",
+  variable: "--font-one",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const exo_2 = Exo_2({
+  weight: ["400"],
+  style: ["normal"],
   subsets: ["latin"],
+  display: "swap",
+  variable: "--font-two",
+});
+
+const montserrat_alternates = Montserrat_Alternates({
+  weight: ["400"],
+  style: ["normal"],
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-three",
 });
 
 export const metadata: Metadata = {
@@ -23,11 +40,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="fr">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${didact_gothic.variable} ${exo_2.variable} ${montserrat_alternates.variable} antialiased relative`}
       >
-        {children}
+        <Toaster />
+        <div className="absolute top-0 left-0 w-full">
+          <Header />
+        </div>
+        <main>{children}</main>
+        <Footer />
       </body>
     </html>
   );
