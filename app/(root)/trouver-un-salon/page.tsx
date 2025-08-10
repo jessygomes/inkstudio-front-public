@@ -16,10 +16,10 @@ export default function TrouverUnSalonPage() {
               />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-white font-one tracking-wide uppercase mb-1">
+              <h1 className="text-xl font-bold text-white font-var(--font-one) tracking-wide uppercase mb-1">
                 Trouver mon salon
               </h1>
-              <p className="text-white/60 text-xs font-one">
+              <p className="text-white/60 text-xs font-var(--font-one)">
                 Trouvez facilement un salon de tatouage près de chez vous.
                 Filtrez par ville, style ou artiste.
               </p>

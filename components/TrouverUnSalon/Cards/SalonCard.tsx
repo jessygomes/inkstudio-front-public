@@ -1,15 +1,17 @@
 import { SalonProps } from "@/lib/type";
+import { toSlug } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
 export function SalonCard({ salon }: { salon: SalonProps }) {
-  // Construire la liste des images, en filtrant les valeurs vides
-  const images = useMemo(
-    () =>
-      [salon.image, ...(salon.salonPhotos ?? [])].filter(Boolean) as string[],
-    [salon.image, salon.salonPhotos]
-  );
+  //! Construire la liste des images : profil salon + photos tatoueurs
+  const images = useMemo(() => {
+    const tattooerImages = Array.isArray(salon.Tatoueur)
+      ? salon.Tatoueur.map((t: { img?: string }) => t.img).filter(Boolean)
+      : [];
+    return [salon.image, ...tattooerImages].filter(Boolean) as string[];
+  }, [salon.image, salon.Tatoueur]);
   const [current, setCurrent] = useState(0);
   const hasImages = images.length > 0;
 
@@ -27,6 +29,14 @@ export function SalonCard({ salon }: { salon: SalonProps }) {
     if (e.key === "ArrowLeft")
       setCurrent((c) => (c - 1 + images.length) % images.length);
   };
+
+  //! Construire une URL à 2 segments lisibles et uniques
+  const nameSlug = toSlug(salon.salonName || "salon");
+  const locSource = [salon.city, salon.postalCode] // city-75001
+    .filter((v) => typeof v === "string" && v.trim() !== "")
+    .join("-");
+  const locSlug = toSlug(locSource) || "localisation";
+  const salonHref = `/salon/${nameSlug}/${locSlug}`;
 
   return (
     <div
@@ -54,7 +64,7 @@ export function SalonCard({ salon }: { salon: SalonProps }) {
 
         {/* Badge Ville */}
         {salon.city && (
-          <span className="absolute top-3 right-3 px-4 py-1 rounded-lg text-xs font-medium text-white shadow-lg bg-gradient-to-br from-[var(--color-tertiary-400)] to-[var(--color-tertiary-500)]">
+          <span className="absolute top-3 right-3 px-4 py-1 rounded-lg text-xs font-var(--font-one) tracking-widest text-white shadow-lg bg-gradient-to-br from-[var(--color-tertiary-400)] to-[var(--color-tertiary-500)]">
             {salon.city}
           </span>
         )}
@@ -80,12 +90,20 @@ export function SalonCard({ salon }: { salon: SalonProps }) {
 
       {/* Contenu */}
       <div className="p-5 sm:p-5">
-        <h3 className="text-white text-xl sm:text-2xl font-one tracking-widest">
+        <h3 className="text-white text-xl sm:text-2xl font-var(--font-one) tracking-widest">
           {salon.salonName}
         </h3>
 
         {/* Ligne d’infos (ajoute ce que tu veux : tags, prestations, etc.) */}
-        <div className="mt-2 flex flex-wrap items-center gap-2 text-sm">
+        <div className="mt-2 flex flex-wrap items-center gap-2 font-var(--font-one) text-white/70 text-xs">
+          {(() => {
+            const list = Array.isArray(salon.Tatoueur) ? salon.Tatoueur : [];
+            if (list.length === 0) return "Tatoueur : Inconnu";
+            const label = list.length > 1 ? "Tatoueurs" : "Tatoueur";
+            return `${label} - ${list
+              .map((t: { name: string }) => t.name)
+              .join(", ")}`;
+          })()}
           {/* Exemple de chip “ouvert aux rdv” si tu as l'info */}
           {/* <span className="px-2.5 py-1 rounded-full bg-white/5 text-white/80 border border-white/10">Prend des rendez-vous</span> */}
         </div>
@@ -94,15 +112,15 @@ export function SalonCard({ salon }: { salon: SalonProps }) {
         <div className="mt-5 flex items-center gap-3">
           {/* 🔗 Adapte l'URL à ta route réelle */}
           <Link
-            href={`/salons/${salon.id}`}
-            className="cursor-pointer w-[175px] flex justify-center items-center gap-2 py-2 bg-gradient-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white rounded-lg transition-all duration-300 font-medium font-one text-xs shadow-lg"
+            href={salonHref}
+            className="cursor-pointer w-[175px] flex justify-center items-center gap-2 py-2 bg-gradient-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white rounded-lg transition-all duration-300 font-medium font-var(--font-one) text-xs shadow-lg"
           >
             Voir le salon
           </Link>
 
           <button
             type="button"
-            className="cursor-pointer px-3 py-2 rounded-lg text-xs font-one text-white/90 border border-white/10 hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-white/30 transition"
+            className="cursor-pointer px-3 py-2 rounded-lg text-xs font-var(--font-one) text-white/90 border border-white/10 hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-white/30 transition"
             onClick={() => {
               // Place ton action secondaire ici (ex: ouvrir une modal, like, etc.)
             }}

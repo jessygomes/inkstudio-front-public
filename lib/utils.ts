@@ -65,3 +65,15 @@ export function removeKeysFromQuery({
     { skipNull: true }
   );
 }
+
+// Petit helper pour slugifier proprement (sans lib)
+export function toSlug(input: string) {
+  return (input || "")
+    .toString()
+    .normalize("NFD") // séparations accents
+    .replace(/[\u0300-\u036f]/g, "") // supprime accents
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-") // tout ce qui n'est pas alphanum -> "-"
+    .replace(/^-+|-+$/g, ""); // trim des "-"
+}
