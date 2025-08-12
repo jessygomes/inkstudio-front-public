@@ -2,8 +2,6 @@ import type { Metadata } from "next";
 import { Didact_Gothic, Exo_2, Montserrat_Alternates } from "next/font/google";
 import { Toaster } from "@/components/Shared/Sonner";
 import "./globals.css";
-import Header from "@/components/Shared/Header";
-import Footer from "@/components/Shared/Footer";
 
 const didact_gothic = Didact_Gothic({
   weight: ["400"],
@@ -45,11 +43,7 @@ export default function RootLayout({
         className={`${didact_gothic.variable} ${exo_2.variable} ${montserrat_alternates.variable} antialiased relative`}
       >
         <Toaster />
-        <div className="absolute top-0 left-0 w-full">
-          <Header />
-        </div>
         <main>{children}</main>
-        <Footer />
       </body>
     </html>
   );
