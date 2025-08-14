@@ -5,11 +5,13 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useForm, FormProvider, useFormContext } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import Image from "next/image";
 import { appointmentRequestSchema } from "@/lib/zod/validator-schema";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { toSlug } from "@/lib/utils";
+import ImageUploader from "../Shared/ImageUploader";
+import { uploadFiles } from "@/lib/utils/uploadthing";
+import imageCompression from "browser-image-compression";
 
 // --- Types
 type Tatoueur = {
@@ -148,8 +150,42 @@ export default function BookingFlow({
   };
   const goPrev = () => setStep((s) => Math.max(1, s - 1));
 
+  const [sketchFile, setSketchFile] = useState<File | null>(null);
+  const [referenceFile, setReferenceFile] = useState<File | null>(null);
+
   // Submit → POST /appointment-request
   const onSubmit = async (data: AppointmentRequestForm) => {
+    // Upload images si fichiers présents (avec compression)
+    let sketchUrl = "";
+    let referenceUrl = "";
+
+    if (sketchFile) {
+      const compressedSketch = await imageCompression(sketchFile, {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 1920,
+        useWebWorker: true,
+        fileType: "image/webp",
+        initialQuality: 0.8,
+      });
+      const res = await uploadFiles("imageUploader", {
+        files: [compressedSketch],
+      });
+      sketchUrl = res?.[0]?.url || "";
+    }
+    if (referenceFile) {
+      const compressedReference = await imageCompression(referenceFile, {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 1920,
+        useWebWorker: true,
+        fileType: "image/webp",
+        initialQuality: 0.8,
+      });
+      const res = await uploadFiles("imageUploader", {
+        files: [compressedReference],
+      });
+      referenceUrl = res?.[0]?.url || "";
+    }
+
     // availability en JSON string (conforme à ta table)
     const availabilityPayload = {
       primary: {
@@ -176,6 +212,8 @@ export default function BookingFlow({
       zone: data.details.zone,
       size: data.details.size,
       colorStyle: data.details.colorStyle,
+      ...(sketchUrl && { sketch: sketchUrl }),
+      ...(referenceUrl && { reference: referenceUrl }),
     };
 
     const body = {
@@ -225,36 +263,6 @@ export default function BookingFlow({
         })}
         className="w-full"
       >
-        {/* Contexte salon */}
-        <div className="mb-4 rounded-xl border border-white/10 bg-white/[0.06] p-3">
-          <div className="flex items-center gap-3">
-            <div className="relative h-10 w-10 rounded-lg overflow-hidden border border-white/10 bg-white/10">
-              {salon.image ? (
-                <Image
-                  src={salon.image}
-                  alt={salon.name}
-                  fill
-                  className="object-cover"
-                />
-              ) : (
-                <div className="h-full w-full grid place-items-center text-white/40 text-[10px]">
-                  N/A
-                </div>
-              )}
-            </div>
-            <div className="min-w-0">
-              <div className="text-white/90 text-sm font-one truncate">
-                {salon.name}
-              </div>
-              <div className="text-white/55 text-[11px]">
-                {[salon.address, salon.postalCode, salon.city]
-                  .filter(Boolean)
-                  .join(" · ")}
-              </div>
-            </div>
-          </div>
-        </div>
-
         {/* Header étapes */}
         <div className="mb-4 flex items-center gap-2">
           {steps.map((label, i) => (
@@ -383,7 +391,7 @@ export default function BookingFlow({
         {/* Étape 3 : Infos client & détails */}
         {step === 3 && (
           <Section title="Vos informations">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className="grid grid-cols-4 gap-4">
               <TextInput
                 name="client.lastName"
                 label="Nom"
@@ -410,29 +418,61 @@ export default function BookingFlow({
               />
             </div>
 
-            {/* Détails selon prestation */}
-            <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="mt-4">
               <TextArea
                 name="details.description"
                 label="Description"
                 placeholder="Explique ton projet (taille, style, contraintes...)"
               />
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <TextInput
-                  name="details.zone"
-                  label="Zone du corps"
-                  placeholder="Avant-bras droit"
-                />
-                <TextInput
-                  name="details.size"
-                  label="Taille"
-                  placeholder="20cm x 30cm"
-                />
-                <TextInput
-                  name="details.colorStyle"
-                  label="Style/Couleur"
-                  placeholder="Blackwork, rouge/noir"
-                />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+
+            {/* Détails selon prestation */}
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <TextInput
+                name="details.zone"
+                label="Zone du corps"
+                placeholder="Avant-bras droit"
+              />
+              <TextInput
+                name="details.size"
+                label="Taille"
+                placeholder="20cm x 30cm"
+              />
+              <TextInput
+                name="details.colorStyle"
+                label="Style/Couleur"
+                placeholder="Blackwork, rouge/noir"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-xs text-white/70 font-one">
+                  Image de référence 1
+                </label>
+                <div className="bg-white/5 rounded-lg p-2 border border-white/10">
+                  <ImageUploader
+                    file={referenceFile}
+                    onFileSelect={setReferenceFile}
+                    compact={true}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs text-white/70 font-one">
+                  Croquis / Référence 2
+                </label>
+                <div className="bg-white/5 rounded-lg p-2 border border-white/10">
+                  <ImageUploader
+                    file={sketchFile}
+                    onFileSelect={setSketchFile}
+                    compact={true}
+                  />
+                </div>
               </div>
             </div>
 
