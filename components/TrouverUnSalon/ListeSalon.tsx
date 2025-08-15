@@ -12,7 +12,9 @@ export default function ListeSalon() {
   const [error, setError] = useState<string | null>(null);
   const [salons, setSalons] = useState<SalonProps[]>([]);
   const [cities, setCities] = useState<string[]>([]);
+  const [styles, setStyles] = useState<string[]>([]);
   const [selectedCity, setSelectedCity] = useState<string>("");
+  const [selectedStyle, setSelectedStyle] = useState<string>("");
 
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -36,6 +38,7 @@ export default function ListeSalon() {
     params: {
       query?: string;
       city?: string;
+      style?: string;
       page?: number;
       limit?: number;
     } = {}
@@ -47,6 +50,7 @@ export default function ListeSalon() {
       const url = new URL(`${base}/users`);
       if (params.query) url.searchParams.set("query", params.query);
       if (params.city) url.searchParams.set("city", params.city);
+      if (params.style) url.searchParams.set("style", params.style);
       url.searchParams.set("page", String(params.page ?? 1));
       url.searchParams.set("limit", String(params.limit ?? 12));
 
@@ -83,16 +87,33 @@ export default function ListeSalon() {
     }
   };
 
+  // Fetch des styles
+  const fetchStyles = async () => {
+    try {
+      const base = process.env.NEXT_PUBLIC_BACK_URL!;
+      const url = new URL(`${base}/users/styleTattoo`);
+      const res = await fetch(url.toString());
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      setStyles(data as string[]);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   //! SYNCHRO URL -> STATE + FETCH
   useEffect(() => {
     const query = searchParams.get("query") || undefined;
     const city = searchParams.get("city") || undefined;
+    const style = searchParams.get("style") || undefined;
     const page = Number(searchParams.get("page")) || 1;
     const limit = Number(searchParams.get("limit")) || 12;
 
     fetchCities();
+    fetchStyles();
     setSelectedCity(city ?? "");
-    fetchSalons({ query, city, page, limit });
+    setSelectedStyle(style ?? "");
+    fetchSalons({ query, city, style, page, limit });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
@@ -102,7 +123,7 @@ export default function ListeSalon() {
     if (value && value !== "") params.set(key, value);
     else params.delete(key);
 
-    if (key === "city" || key === "query") {
+    if (key === "city" || key === "query" || key === "style") {
       params.set("page", "1"); // reset page si filtre modifié
     }
 
@@ -114,22 +135,17 @@ export default function ListeSalon() {
     updateParam("city", value || undefined);
   };
 
+  const handleStyleChange = (value: string) => {
+    setSelectedStyle(value);
+    updateParam("style", value || undefined);
+  };
+
   const goToPage = (p: number) => updateParam("page", String(p));
 
-  // //! LISTE DES VILLES (depuis résultats courants)
-  // const cities = useMemo(() => {
-  //   const set = new Set<string>();
-  //   salons.forEach((s) => {
-  //     if (s.city && s.city.trim() !== "") set.add(s.city.trim());
-  //   });
-  //   return Array.from(set).sort((a, b) =>
-  //     a.localeCompare(b, "fr", { sensitivity: "base" })
-  //   );
-  // }, [salons]);
-
   //! CLEAR FILTERS
-  const clearFilter = (key: "query" | "city") => {
+  const clearFilter = (key: "query" | "city" | "style") => {
     if (key === "city") setSelectedCity("");
+    if (key === "style") setSelectedStyle("");
     updateParam(key, undefined); // supprime + remet page=1
   };
 
@@ -137,8 +153,10 @@ export default function ListeSalon() {
     const params = new URLSearchParams(searchParams.toString());
     params.delete("query");
     params.delete("city");
+    params.delete("style");
     params.set("page", "1"); // reset page
     setSelectedCity("");
+    setSelectedStyle("");
     updateURL(params);
   };
 
@@ -146,33 +164,61 @@ export default function ListeSalon() {
   return (
     <section className="space-y-4">
       {/* Filtres */}
-      <div className="flex gap-8">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <label
-            className="text-xs text-white/80 font-var(--font-one)"
-            htmlFor="city-select"
-          >
-            Filtrer par ville
-          </label>
-          <select
-            id="city-select"
-            className="w-full sm:w-64 text-xs font-var(--font-one) rounded-lg border border-white/10 bg-black/20 text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-tertiary-500 transition"
-            value={selectedCity}
-            onChange={(e) => handleCityChange(e.target.value)}
-          >
-            <option value="" className="bg-noir-500">
-              Toutes les villes
-            </option>
-            {cities.map((c) => (
-              <option key={c} value={c} className="bg-noir-500">
-                {c}
+      <div className="flex flex-col gap-4">
+        <div className="flex gap-8 flex-col sm:flex-row">
+          {/* Ville */}
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <label
+              className="text-xs text-white/80 font-var(--font-one)"
+              htmlFor="city-select"
+            >
+              Filtrer par ville
+            </label>
+            <select
+              id="city-select"
+              className="w-full sm:w-64 text-xs font-var(--font-one) rounded-lg border border-white/10 bg-black/20 text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-tertiary-500 transition"
+              value={selectedCity}
+              onChange={(e) => handleCityChange(e.target.value)}
+            >
+              <option value="" className="bg-noir-500">
+                Toutes les villes
               </option>
-            ))}
-          </select>
+              {cities.map((c) => (
+                <option key={c} value={c} className="bg-noir-500">
+                  {c}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Style */}
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <label
+              className="text-xs text-white/80 font-var(--font-one)"
+              htmlFor="style-select"
+            >
+              Filtrer par style
+            </label>
+            <select
+              id="style-select"
+              className="w-full sm:w-64 text-xs font-var(--font-one) rounded-lg border border-white/10 bg-black/20 text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-tertiary-500 transition"
+              value={selectedStyle}
+              onChange={(e) => handleStyleChange(e.target.value)}
+            >
+              <option value="" className="bg-noir-500">
+                Tous les styles
+              </option>
+              {styles.map((s) => (
+                <option key={s} value={s} className="bg-noir-500">
+                  {s}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         {/* Filtres actifs */}
-        {selectedCity && (
+        {(selectedCity || selectedStyle) && (
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-xs font-var(--font-one) text-white/50">
               Filtres actifs :
@@ -185,6 +231,19 @@ export default function ListeSalon() {
                   onClick={() => clearFilter("city")}
                   className="cursor-pointer hover:text-white/90"
                   aria-label="Supprimer filtre ville"
+                >
+                  ✕
+                </button>
+              </span>
+            )}
+
+            {selectedStyle && (
+              <span className="inline-flex items-center gap-2 px-2 py-1 bg-violet-400/20 text-violet-300 rounded-full text-xs font-var(--font-one) border border-violet-400/30">
+                style: {selectedStyle}
+                <button
+                  onClick={() => clearFilter("style")}
+                  className="cursor-pointer hover:text-white/90"
+                  aria-label="Supprimer filtre style"
                 >
                   ✕
                 </button>
@@ -206,12 +265,13 @@ export default function ListeSalon() {
         Affichage de {pagination?.startIndex ?? 0} à {pagination?.endIndex ?? 0}{" "}
         sur {pagination?.totalUsers ?? 0} salon
         {(pagination?.totalUsers ?? 0) > 1 ? "s" : ""}
-        {(queryValue || selectedCity) && (
+        {(queryValue || selectedCity || selectedStyle) && (
           <span className="ml-1">
             (
             {[
               queryValue ? `recherche: "${queryValue}"` : null,
               selectedCity ? `ville: ${selectedCity}` : null,
+              selectedStyle ? `style: ${selectedStyle}` : null,
             ]
               .filter(Boolean)
               .join(", ")}
@@ -252,7 +312,13 @@ export default function ListeSalon() {
             </p>
             <button
               onClick={() =>
-                fetchSalons({ page: pageFromUrl, limit: limitFromUrl })
+                fetchSalons({
+                  query: queryValue,
+                  city: selectedCity,
+                  style: selectedStyle,
+                  page: pageFromUrl,
+                  limit: limitFromUrl,
+                })
               }
               className="cursor-pointer mt-2 px-6 py-2 bg-gradient-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white rounded-lg font-medium font-var(--font-one) text-xs shadow-lg transition-all"
             >

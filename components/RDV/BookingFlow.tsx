@@ -29,6 +29,7 @@ type SalonSummary = {
   city?: string | null;
   postalCode?: string | null;
   tatoueurs?: Tatoueur[] | null;
+  prestations: string[];
 };
 
 type Props = {
@@ -292,28 +293,23 @@ export default function BookingFlow({
         {step === 1 && (
           <Section title="Choisir la prestation">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {[
-                { key: "TATTOO", label: "Tatouage" },
-                { key: "PROJET", label: "Projet" },
-                { key: "RETOUCHE", label: "Retouche" },
-                { key: "PIERCING", label: "Piercing" },
-              ].map((p) => (
+              {(salon.prestations || []).map((p) => (
                 <button
-                  key={p.key}
+                  key={p}
                   type="button"
                   onClick={() =>
-                    methods.setValue("prestation", p.key as any, {
+                    methods.setValue("prestation", p as any, {
                       shouldValidate: true,
                     })
                   }
                   className={classNames(
                     "cursor-pointer rounded-xl border px-3 py-3 text-sm font-one transition",
-                    prestation === p.key
+                    prestation === p
                       ? "border-tertiary-500/50 bg-tertiary-500/10 shadow"
                       : "border-white/10 bg-white/[0.06] hover:bg-white/[0.1]"
                   )}
                 >
-                  {p.label}
+                  {p}
                 </button>
               ))}
             </div>
@@ -391,6 +387,7 @@ export default function BookingFlow({
         {/* Étape 3 : Infos client & détails */}
         {step === 3 && (
           <Section title="Vos informations">
+            {/* Infos client : toujours affiché */}
             <div className="grid grid-cols-4 gap-4">
               <TextInput
                 name="client.lastName"
@@ -418,64 +415,81 @@ export default function BookingFlow({
               />
             </div>
 
-            <div className="mt-4">
-              <TextArea
-                name="details.description"
-                label="Description"
-                placeholder="Explique ton projet (taille, style, contraintes...)"
-              />
-            </div>
+            {/* Champs conditionnels selon la prestation */}
+            {(prestation === "PROJET" ||
+              prestation === "TATTOO" ||
+              prestation === "RETOUCHE" ||
+              prestation === "PIERCING") && (
+              <div className="mt-2">
+                <TextArea
+                  name="details.description"
+                  label="Description"
+                  placeholder="Explique ton projet (taille, style, contraintes...)"
+                />
+              </div>
+            )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+            {(prestation === "PROJET" ||
+              prestation === "TATTOO" ||
+              prestation === "RETOUCHE" ||
+              prestation === "PIERCING") && (
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <TextInput
+                  name="details.zone"
+                  label="Zone du corps"
+                  placeholder="Avant-bras droit"
+                />
+                {(prestation === "PROJET" ||
+                  prestation === "TATTOO" ||
+                  prestation === "RETOUCHE") && (
+                  <>
+                    <TextInput
+                      name="details.size"
+                      label="Taille"
+                      placeholder="20cm x 30cm"
+                    />
+                    <TextInput
+                      name="details.colorStyle"
+                      label="Style/Couleur"
+                      placeholder="Blackwork, rouge/noir"
+                    />
+                  </>
+                )}
+              </div>
+            )}
 
-            {/* Détails selon prestation */}
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <TextInput
-                name="details.zone"
-                label="Zone du corps"
-                placeholder="Avant-bras droit"
-              />
-              <TextInput
-                name="details.size"
-                label="Taille"
-                placeholder="20cm x 30cm"
-              />
-              <TextInput
-                name="details.colorStyle"
-                label="Style/Couleur"
-                placeholder="Blackwork, rouge/noir"
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-xs text-white/70 font-one">
-                  Image de référence 1
-                </label>
-                <div className="bg-white/5 rounded-lg p-2 border border-white/10">
-                  <ImageUploader
-                    file={referenceFile}
-                    onFileSelect={setReferenceFile}
-                    compact={true}
-                  />
+            {(prestation === "PROJET" ||
+              prestation === "TATTOO" ||
+              prestation === "RETOUCHE") && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                <div className="space-y-2">
+                  <label className="text-xs text-white/70 font-one">
+                    Image de référence 1
+                  </label>
+                  <div className="bg-white/5 rounded-lg p-2 border border-white/10">
+                    <ImageUploader
+                      file={referenceFile}
+                      onFileSelect={setReferenceFile}
+                      compact={true}
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs text-white/70 font-one">
+                    Croquis / Référence 2
+                  </label>
+                  <div className="bg-white/5 rounded-lg p-2 border border-white/10">
+                    <ImageUploader
+                      file={sketchFile}
+                      onFileSelect={setSketchFile}
+                      compact={true}
+                    />
+                  </div>
                 </div>
               </div>
+            )}
 
-              <div className="space-y-2">
-                <label className="text-xs text-white/70 font-one">
-                  Croquis / Référence 2
-                </label>
-                <div className="bg-white/5 rounded-lg p-2 border border-white/10">
-                  <ImageUploader
-                    file={sketchFile}
-                    onFileSelect={setSketchFile}
-                    compact={true}
-                  />
-                </div>
-              </div>
-            </div>
-
+            {/* Message : toujours affiché */}
             <div className="mt-4">
               <TextArea
                 name="message"
@@ -719,61 +733,171 @@ function Recap({ salon }: { salon: SalonSummary }) {
   const avail = watch("availability");
   const prestation = watch("prestation");
   const client = watch("client");
+  const details = watch("details");
+
+  // Helper pour afficher une image si présente
+  const RecapImage = ({ url, label }: { url?: string; label: string }) =>
+    url ? (
+      <div className="flex flex-col items-start gap-1">
+        <span className="text-xs text-white/60 font-one">{label}</span>
+        <div className="w-40 h-40 rounded-lg overflow-hidden border border-white/10 bg-white/10">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={url}
+            alt={label}
+            className="object-contain w-full h-full"
+            style={{ background: "#222" }}
+          />
+        </div>
+      </div>
+    ) : null;
 
   return (
-    <div className="grid gap-3 text-sm">
-      <Row label="Salon" value={salon.name} />
-      <Row label="Prestation" value={prestation || "—"} />
-      <Row
-        label="Disponibilité"
-        value={
-          <>
-            <div>
-              <b>
-                {avail.date
-                  ? frFmt(new Date(avail.date + "T12:00:00"), {
-                      weekday: "long",
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                    })
-                  : "—"}
-              </b>{" "}
-              — {avail.from || "—"} à {avail.to || "—"}
-            </div>
-            {avail.alt?.date && avail.alt?.from && avail.alt?.to ? (
-              <div className="text-white/70">
-                Alternative :{" "}
-                <b>
-                  {frFmt(new Date(avail.alt.date + "T12:00:00"), {
+    <div className="grid gap-5 text-sm">
+      {/* Salon & prestation */}
+      <div className="flex flex-col sm:flex-row gap-4">
+        <div className="flex-1">
+          <div className="text-xs text-white/60 font-one mb-2">Salon</div>
+          <div className="text-white/90 font-one font-semibold">
+            {salon.name}
+          </div>
+        </div>
+        <div className="flex-1">
+          <div className="text-xs text-white/60 font-one mb-2">Prestation</div>
+          <div className="text-white/90 font-one">{prestation || "—"}</div>
+        </div>
+      </div>
+
+      {/* Disponibilité */}
+      <div>
+        <div className="text-xs text-white/60 font-one mb-2">
+          Mes disponibilités
+        </div>
+        <div className="flex items-center gap-4">
+          <div className="text-white/90 font-one">
+            <b>
+              {avail.date
+                ? frFmt(new Date(avail.date + "T12:00:00"), {
                     weekday: "long",
                     day: "numeric",
                     month: "long",
                     year: "numeric",
-                  })}
-                </b>{" "}
-                — {avail.alt.from} à {avail.alt.to}
+                  })
+                : "—"}
+            </b>{" "}
+            — {avail.from || "—"} à {avail.to || "—"}
+          </div>
+          {avail.alt?.date && avail.alt?.from && avail.alt?.to && (
+            <div className="text-white/70 font-one">
+              Alternative :{" "}
+              <b>
+                {frFmt(new Date(avail.alt.date + "T12:00:00"), {
+                  weekday: "long",
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })}
+              </b>{" "}
+              — {avail.alt.from} à {avail.alt.to}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Infos client */}
+      <div>
+        <div className="text-xs text-white/60 font-one mb-2">Mes infos</div>
+        <div className="bg-white/5 p-4 border border-white/10 rounded-xl">
+          <div className="text-white/90 font-one grid grid-cols-3">
+            <div>
+              <p className="text-xs text-white/60 font-one">Nom</p>
+              <p>
+                {client.firstName} {client.lastName}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs text-white/60 font-one">Email</p>
+              <p>{client.email}</p>
+            </div>
+            <div>
+              <p className="text-xs text-white/60 font-one">Téléphone</p>
+              <p>{client.phone}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Détails projet/tatouage */}
+      {(details?.description ||
+        details?.zone ||
+        details?.size ||
+        details?.colorStyle ||
+        details?.sketch ||
+        details?.reference) && (
+        <div className="">
+          <div className="text-xs text-white/60 font-one mb-2">Détails</div>
+          <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+            <div className="grid grid-cols-1 gap-4">
+              <div className="space-y-2">
+                {details?.description && (
+                  <div>
+                    <span className="text-xs text-white/60 font-one">
+                      Description
+                    </span>
+                    <div className="text-white/90 font-one">
+                      {details.description}
+                    </div>
+                  </div>
+                )}
+                {details?.zone && (
+                  <div>
+                    <span className="text-xs text-white/60 font-one">
+                      Zone du corps
+                    </span>
+                    <div className="text-white/90 font-one">{details.zone}</div>
+                  </div>
+                )}
+                {details?.size && (
+                  <div>
+                    <span className="text-xs text-white/60 font-one">
+                      Taille
+                    </span>
+                    <div className="text-white/90 font-one">{details.size}</div>
+                  </div>
+                )}
+                {details?.colorStyle && (
+                  <div>
+                    <span className="text-xs text-white/60 font-one">
+                      Style/Couleur
+                    </span>
+                    <div className="text-white/90 font-one">
+                      {details.colorStyle}
+                    </div>
+                  </div>
+                )}
               </div>
-            ) : null}
-          </>
-        }
-        multiline
-      />
-      <Row
-        label="Client"
-        value={`${client.firstName} ${client.lastName} • ${client.email}${
-          client.phone ? " • " + client.phone : ""
-        }`}
-      />
-      {watch("details.description") && (
-        <Row
-          label="Description"
-          value={watch("details.description")!}
-          multiline
-        />
+              <div className="flex flex-col gap-4">
+                <RecapImage
+                  url={details?.reference}
+                  label="Image de référence"
+                />
+                <RecapImage url={details?.sketch} label="Croquis" />
+              </div>
+            </div>
+          </div>
+        </div>
       )}
+
+      {/* Message */}
       {watch("message") && (
-        <Row label="Message" value={watch("message")!} multiline />
+        <div>
+          <div className="text-xs text-white/60 font-one mb-2">Message</div>
+          <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+            <div className="text-white/90 font-one whitespace-pre-wrap">
+              {watch("message")}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

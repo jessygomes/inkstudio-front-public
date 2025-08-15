@@ -5,13 +5,17 @@ export function TeamCard({
   img,
   description,
   instagram,
-  phone, // on le garde dans les props pour compatibilité, mais on ne l'affiche plus
+  phone, // compat
+  skills,
+  style,
 }: {
   name: string;
   img?: string | null;
   description?: string | null;
   instagram?: string | null;
   phone?: string | null;
+  skills?: string[] | null;
+  style?: string[] | null;
 }) {
   const instaUrl = instagram
     ? instagram.startsWith("http")
@@ -19,11 +23,28 @@ export function TeamCard({
       : `https://instagram.com/${instagram.replace(/^@/, "")}`
     : null;
 
+  // -- Styles (chips)
+  const cleaned = (style ?? [])
+    .map((s) => (typeof s === "string" ? s.trim() : ""))
+    .filter(Boolean);
+  const seen = new Set<string>();
+  const unique: string[] = [];
+  for (const s of cleaned) {
+    const key = s.toLowerCase();
+    if (!seen.has(key)) {
+      seen.add(key);
+      unique.push(s);
+    }
+  }
+  const MAX = 8;
+  const styleChips = unique.slice(0, MAX);
+  const remainingCount = unique.length > MAX ? unique.length - MAX : 0;
+
   return (
     <li className="group relative rounded-xl border border-white/10 bg-white/[0.06] p-5 hover:bg-white/[0.1] transition-colors">
       {/* Header */}
       <div className="flex items-center gap-5">
-        {/* Avatar + anneau dégradé (plus grand) */}
+        {/* Avatar */}
         <div className="relative">
           <div className="absolute -inset-1 rounded-xl" />
           <div className="relative h-24 w-24 md:h-28 md:w-28 rounded-xl overflow-hidden ring-1 ring-white/15 bg-white/10">
@@ -75,18 +96,43 @@ export function TeamCard({
         </div>
       </div>
 
-      {/* Description (entière) */}
+      {/* Description */}
       {description && (
         <p className="mt-4 text-white/80 font-var(--font-one) text-xs leading-7 whitespace-pre-line">
           {description}
         </p>
       )}
 
-      {/* Footer: uniquement un bouton/lien Instagram */}
+      {/* Styles (au-dessus de "Profil artiste") */}
+      {styleChips.length > 0 ? (
+        <div className="mt-4 flex flex-wrap gap-2">
+          {styleChips.map((s, i) => (
+            <span
+              key={`${s}-${i}`}
+              className="px-2.5 py-1 rounded-full bg-white/5 text-white/80 border border-white/10 text-[11px] font-var(--font-one)"
+              title={s}
+            >
+              {s}
+            </span>
+          ))}
+          {remainingCount > 0 && (
+            <span className="px-2.5 py-1 rounded-full bg-white/5 text-white/80 border border-white/10 text-[11px] font-var(--font-one)">
+              +{remainingCount}
+            </span>
+          )}
+        </div>
+      ) : (
+        <div className="mt-4 text-[11px] text-white/50 font-var(--font-one)">
+          Styles : non renseignés
+        </div>
+      )}
+
+      {/* Footer */}
       <div className="mt-5 flex items-center justify-between border-t border-white/10 pt-3">
         <div className="text-xs text-white/50 font-var(--font-one)">
           Profil artiste
         </div>
+        {/* Bouton Instagram optionnel */}
         {/* {instaUrl && (
           <a
             href={instaUrl}

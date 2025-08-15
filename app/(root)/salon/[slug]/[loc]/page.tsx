@@ -4,8 +4,14 @@ import { TeamCard } from "@/components/ProfilSalon/TeamCard";
 import { hoursToLines, parseSalonHours } from "@/lib/horaireHelper";
 import { SalonProfilProps } from "@/lib/type";
 import Image from "next/image";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import Script from "next/script";
+// import { loading } from "next/loading";
+
+import { CiInstagram, CiFacebook } from "react-icons/ci";
+import { PiTiktokLogoThin } from "react-icons/pi";
+import { TfiWorld } from "react-icons/tfi";
 
 type PageParams = { params: { slug: string; loc: string } };
 
@@ -48,27 +54,6 @@ export async function generateMetadata({ params }: PageParams) {
         : undefined,
     },
   };
-}
-
-// --- small helpers
-function socialLink(href?: string | null, label?: string) {
-  if (!href) return null;
-  try {
-    const url = new URL(href);
-    return (
-      <a
-        href={url.toString()}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="cursor-pointer inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-white/10 bg-white/5 text-white/80 hover:bg-white/10 hover:text-white transition font-var(--font-one) text-xs"
-      >
-        <span className="h-1.5 w-1.5 rounded-full bg-tertiary-400" />
-        {label ?? url.hostname.replace("www.", "")}
-      </a>
-    );
-  } catch {
-    return null;
-  }
 }
 
 // Ouvert maintenant ? (Europe/Paris, robuste)
@@ -167,6 +152,29 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
     url: salon.website,
   };
 
+  // Prestations (dédupliquées, insensibles à la casse) — compat `prestation` ou `prestations`
+  const prestRaw =
+    (Array.isArray((salon as any).prestations) && (salon as any).prestations) ||
+    (Array.isArray((salon as any).prestation) && (salon as any).prestation) ||
+    [];
+
+  const prestCleaned = prestRaw
+    .map((p: unknown) => (typeof p === "string" ? p.trim() : ""))
+    .filter(Boolean);
+
+  const prestSeen = new Set<string>();
+  const prestations: string[] = [];
+  for (const p of prestCleaned) {
+    const key = p.toLowerCase();
+    if (!prestSeen.has(key)) {
+      prestSeen.add(key);
+      prestations.push(p);
+    }
+  }
+  const PREST_MAX = 8;
+  const prestationsVisibles = prestations.slice(0, PREST_MAX);
+  const prestationsRestantes = Math.max(0, prestations.length - PREST_MAX);
+
   console.log(salon);
 
   return (
@@ -264,10 +272,47 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
               </ul>
 
               <div className="mt-4 flex flex-wrap gap-2">
-                {socialLink(salon.website, "Site web")}
-                {socialLink(salon.instagram, "Instagram")}
-                {socialLink(salon.facebook, "Facebook")}
-                {socialLink(salon.tiktok, "TikTok")}
+                <div>
+                  <p className="text-white/60 font-one text-xs mb-1">Réseaux</p>
+                  <div className="flex flex-wrap gap-2 mt-1">
+                    {salon.instagram && (
+                      <Link
+                        href={salon.instagram}
+                        target="_blank"
+                        className="flex items-center gap-2 font-one px-2 py-1 bg-pink-500/20 text-white border border-pink-500/30 rounded-lg text-[10px] hover:bg-pink-500/30 transition-colors"
+                      >
+                        <CiInstagram size={20} />
+                      </Link>
+                    )}
+                    {salon.facebook && (
+                      <Link
+                        href={salon.facebook}
+                        target="_blank"
+                        className="flex items-center gap-2 font-one px-2 py-1 bg-blue-500/20 text-white border border-blue-500/30 rounded-lg text-xs hover:bg-blue-500/30 transition-colors"
+                      >
+                        <CiFacebook size={20} />
+                      </Link>
+                    )}
+                    {salon.tiktok && (
+                      <Link
+                        href={salon.tiktok}
+                        target="_blank"
+                        className="flex items-center gap-2 font-one px-2 py-1 bg-gray-500/20 text-white border border-gray-500/30 rounded-lg text-xs hover:bg-gray-500/30 transition-colors"
+                      >
+                        <PiTiktokLogoThin size={20} />
+                      </Link>
+                    )}
+                    {salon.website && (
+                      <Link
+                        href={salon.website}
+                        target="_blank"
+                        className="flex items-center gap-2 font-one px-2 py-1 bg-green-500/20 text-white border border-green-500/30 rounded-lg text-[10px] hover:bg-green-500/30 transition-colors"
+                      >
+                        <TfiWorld size={18} />
+                      </Link>
+                    )}
+                  </div>
+                </div>
               </div>
 
               <div className="mt-4 flex gap-2">
@@ -392,7 +437,32 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
                 <h2 className="text-white/95 font-var(--font-one) text-xs tracking-[0.22em] uppercase">
                   Présentation
                 </h2>
+                <div className="flex flex-wrap gap-1">
+                  {prestationsVisibles.length > 0 ? (
+                    <>
+                      {prestationsVisibles.map((p, idx) => (
+                        <span
+                          key={`${p}-${idx}`}
+                          className="px-2.5 py-1 rounded-lg bg-white/5 text-white/80 border border-white/10 text-[11px] font-var(--font-one)"
+                          title={p}
+                        >
+                          {p}
+                        </span>
+                      ))}
+                      {prestationsRestantes > 0 && (
+                        <span className="px-2.5 py-1 rounded-lg bg-white/5 text-white/80 border border-white/10 text-[11px] font-var(--font-one)">
+                          +{prestationsRestantes}
+                        </span>
+                      )}
+                    </>
+                  ) : (
+                    <span className="text-white/50 text-[11px] font-var(--font-one)">
+                      Aucune prestation renseignée
+                    </span>
+                  )}
+                </div>
               </div>
+
               <p className="text-white/80 text-sm font-var(--font-one) leading-relaxed">
                 {salon.description || "Aucune description disponible."}
               </p>
@@ -428,6 +498,8 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
                       description={t.description}
                       instagram={t.instagram}
                       phone={t.phone}
+                      style={t.style}
+                      skills={t.skills}
                     />
                   ))}
                 </ul>

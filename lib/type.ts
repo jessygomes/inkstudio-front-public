@@ -15,15 +15,16 @@ export type SalonProps = {
     description: string;
     email: string;
     phone: string;
-  };
+    style: string[];
+    skills: string[];
+  }[];
   salonPhotos: string[];
   instagram: string;
   facebook: string;
   tiktok: string;
   website: string;
   description: string;
-  // services: string[];
-  // artists: string[];
+  prestations: string[];
 };
 
 export type TatoueurProps = {

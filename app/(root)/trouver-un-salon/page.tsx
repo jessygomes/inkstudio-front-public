@@ -1,4 +1,4 @@
-import { Search } from "@/components/Shared/Search";
+import { Search } from "@/components/Shared/Search/Search";
 import ListeSalon from "@/components/TrouverUnSalon/ListeSalon";
 import { IoBusinessOutline } from "react-icons/io5";
 

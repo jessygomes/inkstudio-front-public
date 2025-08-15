@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useRef } from "react";
-import { Search } from "../Search";
+import SearchNavbar from "../Search/SearchNavbar";
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -42,7 +42,7 @@ export default function Navbar() {
             </li>
           );
         })}
-        <Search />
+        <SearchNavbar className="hidden md:block" />
       </ul>
     </nav>
   );
