@@ -240,7 +240,7 @@ export function SalonCard({ salon }: { salon: SalonProps }) {
         </div>
       </div>
 
-      <div className="pointer-events-none h-2 w-full bg-gradient-to-r from-tertiary-400/80 to-tertiary-500/80 opacity-80" />
+      <div className="pointer-events-none h-2 w-full bg-gradient-to-r from-tertiary-400/80 to-tertiary-500/80 opacity-90 animate-pulse" />
     </div>
   );
 }

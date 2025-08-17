@@ -11,6 +11,14 @@ import { BiDetail } from "react-icons/bi";
 import { MdOutlineDateRange } from "react-icons/md";
 import { FaCircleInfo } from "react-icons/fa6";
 
+interface ProposedSlot {
+  id: string;
+  from: string; // ISO
+  to: string; // ISO
+  tatoueurId?: string | null;
+  status?: string;
+}
+
 interface ProposeRdvInfo {
   id: string;
   prestation: string;
@@ -18,9 +26,6 @@ interface ProposeRdvInfo {
   clientLastname: string;
   clientEmail: string;
   clientPhone: string;
-  proposedDate: string;
-  proposedFrom: string;
-  proposedTo: string;
   status: string;
   details: string | null;
   salonName: string;
@@ -31,6 +36,7 @@ interface ProposeRdvInfo {
   salonAddress: string;
   salonPostalCode: string;
   salonCity: string;
+  proposedSlots?: ProposedSlot[];
 }
 
 interface TokenValidation {
@@ -49,6 +55,8 @@ export default function RdvRequestPage() {
     isValid: false,
     error: null,
   });
+
+  const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
 
   // État pour le message du client
   const [clientMessage, setClientMessage] = useState<string>("");
@@ -76,8 +84,6 @@ export default function RdvRequestPage() {
         );
 
         const data = await response.json();
-
-        console.log("Token validation response:", data);
 
         if (data.error) {
           let errorMessage = data.message || "Token invalide";
@@ -123,8 +129,6 @@ export default function RdvRequestPage() {
 
     validateToken();
   }, [token]);
-
-  console.log("Token validation state:", tokenValidation);
 
   if (tokenValidation.isLoading) {
     return (
@@ -175,23 +179,34 @@ export default function RdvRequestPage() {
   // Fonction pour accepter la proposition
   async function handleAccept() {
     if (!token) return;
+    if (!selectedSlotId) {
+      toast.error("Merci de choisir un créneau.");
+      return;
+    }
+
+    console.log("Accepting slot:", selectedSlotId);
+
     try {
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_BACK_URL}/appointments/appointment-request-response`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ token, action: "accept" }),
+          body: JSON.stringify({
+            token,
+            action: "accept",
+            slotId: selectedSlotId,
+          }),
         }
       );
       const result = await res.json();
       if (result.error) {
         toast.error(result.message || "Erreur lors de l'acceptation");
       } else {
-        toast.success("Rendez-vous accepté !");
+        toast.success("Rendez-vous confirmé !");
         setIsSuccessful(true);
       }
-    } catch (e) {
+    } catch {
       toast.error("Erreur serveur");
     }
   }
@@ -219,7 +234,7 @@ export default function RdvRequestPage() {
         toast.success("Proposition déclinée !");
         setIsSuccessful(true);
       }
-    } catch (e) {
+    } catch {
       toast.error("Erreur serveur");
     }
   }
@@ -448,32 +463,34 @@ export default function RdvRequestPage() {
                                 </div>
                               )}
                               {/* Affichage des images sketch et reference */}
-                              {details.sketch && (
-                                <div className="mt-2">
-                                  <div className="w-full max-w-xs rounded-lg overflow-hidden border border-white/10 bg-white/10">
-                                    <Image
-                                      src={details.sketch}
-                                      alt="Croquis"
-                                      width={300}
-                                      height={300}
-                                      className="object-contain w-full h-auto"
-                                    />
+                              <div className="grid grid-cols-2 gap-4 bg-white/5 p-4 rounded-xl">
+                                {details.sketch && (
+                                  <div className="mt-2">
+                                    <div className="w-full max-w-xs rounded-lg overflow-hidden border border-white/10 bg-white/10">
+                                      <Image
+                                        src={details.sketch}
+                                        alt="Croquis"
+                                        width={300}
+                                        height={300}
+                                        className="object-contain w-full h-auto"
+                                      />
+                                    </div>
                                   </div>
-                                </div>
-                              )}
-                              {details.reference && (
-                                <div className="mt-2">
-                                  <div className="w-full max-w-xs rounded-lg overflow-hidden border border-white/10 bg-white/10">
-                                    <Image
-                                      src={details.reference}
-                                      alt="Référence"
-                                      width={300}
-                                      height={300}
-                                      className="object-contain w-full h-auto"
-                                    />
+                                )}
+                                {details.reference && (
+                                  <div className="mt-2">
+                                    <div className="w-full max-w-xs rounded-lg overflow-hidden border border-white/10 bg-white/10">
+                                      <Image
+                                        src={details.reference}
+                                        alt="Référence"
+                                        width={300}
+                                        height={300}
+                                        className="object-contain w-full h-auto"
+                                      />
+                                    </div>
                                   </div>
-                                </div>
-                              )}
+                                )}
+                              </div>
                             </>
                           );
                         })()}
@@ -537,40 +554,47 @@ export default function RdvRequestPage() {
 
               {/* Proposition du salon */}
               <div className="bg-white/5 rounded-2xl p-6 border border-white/10 mb-6">
-                <h2 className="flex gap-2 items-center text-lg font-semibold text-white font-one mb-2">
+                <h2 className="flex gap-2 items-center text-lg font-semibold text-white font-one mb-4">
                   <MdOutlineDateRange
                     size={25}
                     className="bg-gradient-to-br from-tertiary-500/80 to-tertiary-400/80 p-1 rounded"
-                  />{" "}
-                  Proposition du salon
+                  />
+                  Propositions du salon
                 </h2>
-                <div className="space-y-2 text-white/80 font-one text-sm">
-                  <div>
-                    <span className="text-white/60 text-xs">Date</span>
-                    <div>
-                      {formatDateJour(
-                        tokenValidation.appointmentRequest.proposedFrom
-                      )}
-                    </div>
+
+                {!tokenValidation.appointmentRequest?.proposedSlots?.length ? (
+                  <p className="text-white/70 text-sm font-one">
+                    Aucun créneau pour le moment.
+                  </p>
+                ) : (
+                  <div className="space-y-3">
+                    {tokenValidation.appointmentRequest.proposedSlots.map(
+                      (slot) => (
+                        <label
+                          key={slot.id}
+                          className="flex items-center gap-3 p-3 rounded-lg border border-white/10 bg-white/5 cursor-pointer"
+                        >
+                          <input
+                            type="radio"
+                            name="slot"
+                            className="accent-tertiary-500"
+                            checked={selectedSlotId === slot.id}
+                            onChange={() => setSelectedSlotId(slot.id)}
+                          />
+                          <div className="text-white/90 font-one">
+                            <div className="font-semibold">
+                              {formatDateJour(slot.from)}
+                            </div>
+                            <div className="text-white/70 text-sm">
+                              De {formatHeure(slot.from)} à{" "}
+                              {formatHeure(slot.to)}
+                            </div>
+                          </div>
+                        </label>
+                      )
+                    )}
                   </div>
-                  <div>
-                    <span className="text-white/60 text-xs">Heure</span>
-                    <div>
-                      De{" "}
-                      {formatHeure(
-                        tokenValidation.appointmentRequest.proposedFrom
-                      )}{" "}
-                      à{" "}
-                      {formatHeure(
-                        tokenValidation.appointmentRequest.proposedTo
-                      )}
-                    </div>
-                  </div>
-                  <div>
-                    <span className="text-white/60 text-xs">Type</span>
-                    <div>{tokenValidation.appointmentRequest.prestation}</div>
-                  </div>
-                </div>
+                )}
               </div>
 
               <textarea
@@ -583,6 +607,7 @@ export default function RdvRequestPage() {
               {/* Actions */}
               <div className="flex flex-col md:flex-row gap-4 justify-center items-center mt-4">
                 <button
+                  disabled={!selectedSlotId}
                   className="cursor-pointer w-[175px] flex justify-center items-center gap-2 py-2 bg-gradient-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white rounded-lg transition-all duration-300 font-medium font-one text-xs shadow-lg"
                   onClick={handleAccept}
                 >
