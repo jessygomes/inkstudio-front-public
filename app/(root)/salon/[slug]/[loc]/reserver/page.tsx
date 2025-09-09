@@ -6,8 +6,7 @@ import { notFound } from "next/navigation";
 import { CiInstagram, CiFacebook } from "react-icons/ci";
 import { PiTiktokLogoThin } from "react-icons/pi";
 import { TfiWorld } from "react-icons/tfi";
-import HoursBadge from "@/components/Shared/HoursBadge";
-import { hoursToLines, parseSalonHours } from "@/lib/horaireHelper";
+import { parseSalonHours, hoursToLines } from "@/lib/horaireHelper";
 
 type PageParams = { params: { slug: string; loc: string } };
 
@@ -65,14 +64,6 @@ function getOpenNow(raw: any) {
   return { open, today: { start: slot.start, end: slot.end } };
 }
 
-function todayLabelFR() {
-  const p = new Intl.DateTimeFormat("fr-FR", {
-    timeZone: "Europe/Paris",
-    weekday: "long",
-  }).formatToParts(new Date());
-  return (p.find((x) => x.type === "weekday")?.value || "").toLowerCase();
-}
-
 export default async function Page({ params }: PageParams) {
   const salon = await getSalon(params.slug, params.loc);
   if (!salon) notFound();
@@ -92,8 +83,17 @@ export default async function Page({ params }: PageParams) {
 
   // horaires normalisés + statut
   const normalized = parseSalonHours(salon.salonHours as any);
-  const hoursLines = hoursToLines(normalized); // [{ day, value }]
+  const hoursLines = hoursToLines(normalized);
   const openNow = getOpenNow(salon.salonHours);
+
+  // Jour actuel en français pour highlighting
+  function todayLabelFR() {
+    const p = new Intl.DateTimeFormat("fr-FR", {
+      timeZone: "Europe/Paris",
+      weekday: "long",
+    }).formatToParts(new Date());
+    return (p.find((x) => x.type === "weekday")?.value || "").toLowerCase();
+  }
   const todayFR = todayLabelFR();
 
   // pour itinéraire (si tu veux l’ajouter plus tard)
@@ -103,121 +103,300 @@ export default async function Page({ params }: PageParams) {
   // const directionsHref = `https://www.google.com/maps/search/?api=1&query=${mapsQuery}`;
 
   return (
-    <div className="min-h-screen bg-noir-700 sm:px-8 lg:px-20 pt-24">
-      <section className="px-4 py-8">
-        <div className="mx-auto max-w-5xl">
-          {/* En-tête salon */}
-          <div className="flex flex-col md:flex-row gap-6 mb-10 items-start">
-            {/* Image principale */}
-            <div className="relative h-36 w-full md:w-60 md:h-60 rounded-2xl overflow-hidden shadow-lg border border-white/10 bg-noir-600/40">
-              {salon.image ? (
-                <Image
-                  src={salon.image}
-                  alt={salon.salonName}
-                  className="h-full w-full object-cover"
-                  width={800}
-                  height={800}
-                  priority
-                />
-              ) : (
-                <div className="h-full w-full grid place-items-center text-white/40 text-xs">
-                  N/A
+    <div className="min-h-screen bg-gradient-to-br from-noir-700 via-noir-600 to-noir-800 pt-20">
+      <section className="px-4 sm:px-6 lg:px-8 xl:px-16 py-4">
+        <div className="mx-auto max-w-7xl">
+          {/* Header ultra-compact */}
+          <div className="relative overflow-hidden rounded-xl border border-white/10 bg-gradient-to-br from-white/[0.08] to-white/[0.02] backdrop-blur-lg shadow-lg mb-5">
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 p-5">
+              {/* Photo compacte - 1/5 sur desktop */}
+              <div className="lg:col-span-1">
+                <div className="relative h-32 lg:h-full rounded-lg overflow-hidden border border-white/10">
+                  {salon.image ? (
+                    <Image
+                      src={salon.image}
+                      alt={salon.salonName}
+                      fill
+                      className="object-cover"
+                      priority
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-noir-600 to-noir-800 grid place-items-center">
+                      <div className="text-center text-white/60">
+                        <div className="w-8 h-8 bg-white/10 rounded-full grid place-items-center mx-auto mb-1">
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={1.5}
+                              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                            />
+                          </svg>
+                        </div>
+                        <span className="text-xs font-one">N/A</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Status badge compact */}
+                  <div className="absolute top-2 right-2">
+                    <span
+                      className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-one border backdrop-blur-md ${
+                        openNow.open
+                          ? "bg-emerald-500/30 text-emerald-200 border-emerald-400/50"
+                          : "bg-red-500/30 text-red-200 border-red-400/50"
+                      }`}
+                    >
+                      <span
+                        className={`h-1 w-1 rounded-full ${
+                          openNow.open ? "bg-emerald-300" : "bg-red-300"
+                        }`}
+                      />
+                      {openNow.open ? "Ouvert" : "Fermé"}
+                    </span>
+                  </div>
                 </div>
-              )}
-            </div>
-            {/* Infos principales */}
-            <div className="flex-1 w-full rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.06] to-white/[0.03] p-6 backdrop-blur shadow-[0_6px_24px_rgba(0,0,0,0.25)]">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-white/10 pb-4">
-                <div>
-                  <h1 className="text-white font-one text-2xl sm:text-3xl tracking-[0.18em] uppercase font-bold mb-1">
+              </div>
+
+              {/* Informations principales - 4/5 sur desktop */}
+              <div className="lg:col-span-4">
+                {/* En-tête compact */}
+                <div className="mb-4">
+                  <h1 className="text-2xl lg:text-3xl font-one text-white font-bold tracking-wide mb-1">
                     {salon.salonName}
                   </h1>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {salon.city && (
-                      <span className="inline-block px-3 py-1 rounded-lg bg-tertiary-500/10 text-tertiary-400 border border-tertiary-500/20 text-xs font-one">
-                        {salon.city}
-                      </span>
-                    )}
-                    {salon.prestations && salon.prestations.length > 0 && (
-                      <span className="inline-block px-3 py-1 rounded-lg bg-white/10 text-white/70 border border-white/10 text-xs font-one">
-                        {salon.prestations.join("  •  ")}
-                      </span>
-                    )}
+                  <div className="flex items-center gap-1.5 text-white/70">
+                    <svg
+                      className="w-3 h-3"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                    <span className="font-one text-sm">
+                      {[salon.city, salon.postalCode]
+                        .filter(Boolean)
+                        .join(" • ")}
+                    </span>
                   </div>
                 </div>
-                {/* Réseaux sociaux */}
-                <div className="flex items-center gap-2">
-                  {salon.instagram && (
-                    <Link
-                      href={salon.instagram}
-                      target="_blank"
-                      className="flex items-center justify-center h-9 w-9 rounded-lg bg-pink-500/20 text-white border border-pink-500/30 hover:bg-pink-500/30 transition"
-                      aria-label="Instagram"
-                    >
-                      <CiInstagram size={18} />
-                    </Link>
-                  )}
-                  {salon.facebook && (
-                    <Link
-                      href={salon.facebook}
-                      target="_blank"
-                      className="flex items-center justify-center h-9 w-9 rounded-lg bg-blue-500/20 text-white border border-blue-500/30 hover:bg-blue-500/30 transition"
-                      aria-label="Facebook"
-                    >
-                      <CiFacebook size={18} />
-                    </Link>
-                  )}
-                  {salon.tiktok && (
-                    <Link
-                      href={salon.tiktok}
-                      target="_blank"
-                      className="flex items-center justify-center h-9 w-9 rounded-lg bg-gray-500/20 text-white border border-gray-500/30 hover:bg-gray-500/30 transition"
-                      aria-label="TikTok"
-                    >
-                      <PiTiktokLogoThin size={18} />
-                    </Link>
-                  )}
-                  {salon.website && (
-                    <Link
-                      href={salon.website}
-                      target="_blank"
-                      className="flex items-center justify-center h-9 px-2 rounded-lg bg-green-500/20 text-white border border-green-500/30 hover:bg-green-500/30 transition text-[11px]"
-                      aria-label="Site web"
-                    >
-                      <TfiWorld size={16} />
-                    </Link>
-                  )}
-                </div>
-              </div>
-              {/* Adresse et téléphone */}
-              <div className="mt-4 flex flex-col gap-2">
-                <div className="flex items-center gap-2 text-white/60 text-xs">
-                  <span className="font-one">Adresse :</span>
-                  <span>
-                    {[salon.address, salon.postalCode, salon.city]
-                      .filter(Boolean)
-                      .join(", ")}
-                  </span>
-                </div>
-                {salon.phone && (
-                  <div className="flex items-center gap-2 text-white/60 text-xs">
-                    <span className="font-one">Téléphone :</span>
-                    <span>{salon.phone}</span>
+
+                {/* Grid 3 colonnes ultra-compact */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {/* Prestations compact */}
+
+                  {/* Contact compact */}
+                  <div className="bg-white/[0.02] rounded-lg p-3 border border-white/5">
+                    <h3 className="text-white/80 font-one text-xs uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                      <svg
+                        className="w-3 h-3 text-tertiary-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                        />
+                      </svg>
+                      Contact
+                    </h3>
+                    <div className="space-y-2">
+                      {salon.address && (
+                        <div className="flex items-start gap-2">
+                          <div className="w-5 h-5 rounded bg-white/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <svg
+                              className="w-3 h-3 text-white/60"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                              />
+                            </svg>
+                          </div>
+                          <div>
+                            <p className="text-white/80 font-one text-xs leading-relaxed">
+                              {salon.address}
+                              {salon.city && (
+                                <>
+                                  <br />
+                                  {salon.city}
+                                </>
+                              )}
+                              {salon.postalCode && <> {salon.postalCode}</>}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                      {salon.phone && (
+                        <div className="flex items-center gap-2">
+                          <div className="w-5 h-5 rounded bg-white/10 flex items-center justify-center flex-shrink-0">
+                            <svg
+                              className="w-3 h-3 text-white/60"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                              />
+                            </svg>
+                          </div>
+                          <a
+                            href={`tel:${salon.phone}`}
+                            className="text-white/80 font-one text-xs hover:text-tertiary-400 transition-colors"
+                          >
+                            {salon.phone}
+                          </a>
+                        </div>
+                      )}
+
+                      {/* Réseaux sociaux ultra-compact */}
+                      {(salon.instagram ||
+                        salon.facebook ||
+                        salon.tiktok ||
+                        salon.website) && (
+                        <div className="pt-2 border-t border-white/5">
+                          <div className="flex gap-1">
+                            {salon.instagram && (
+                              <Link
+                                href={salon.instagram}
+                                target="_blank"
+                                className="w-6 h-6 rounded bg-gradient-to-br from-pink-500/20 to-purple-500/20 border border-pink-500/30 flex items-center justify-center hover:scale-105 transition-transform"
+                                aria-label="Instagram"
+                              >
+                                <CiInstagram className="w-3 h-3 text-pink-400" />
+                              </Link>
+                            )}
+                            {salon.facebook && (
+                              <Link
+                                href={salon.facebook}
+                                target="_blank"
+                                className="w-6 h-6 rounded bg-gradient-to-br from-blue-500/20 to-blue-600/20 border border-blue-500/30 flex items-center justify-center hover:scale-105 transition-transform"
+                                aria-label="Facebook"
+                              >
+                                <CiFacebook className="w-3 h-3 text-blue-400" />
+                              </Link>
+                            )}
+                            {salon.tiktok && (
+                              <Link
+                                href={salon.tiktok}
+                                target="_blank"
+                                className="w-6 h-6 rounded bg-gradient-to-br from-gray-500/20 to-gray-600/20 border border-gray-500/30 flex items-center justify-center hover:scale-105 transition-transform"
+                                aria-label="TikTok"
+                              >
+                                <PiTiktokLogoThin className="w-3 h-3 text-gray-400" />
+                              </Link>
+                            )}
+                            {salon.website && (
+                              <Link
+                                href={salon.website}
+                                target="_blank"
+                                className="w-6 h-6 rounded bg-gradient-to-br from-emerald-500/20 to-emerald-600/20 border border-emerald-500/30 flex items-center justify-center hover:scale-105 transition-transform"
+                                aria-label="Site web"
+                              >
+                                <TfiWorld className="w-3 h-3 text-emerald-400" />
+                              </Link>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                )}
-              </div>
-              {/* Horaires */}
-              <div className="mt-4">
-                <HoursBadge
-                  hours={hoursLines}
-                  todayLabel={todayFR}
-                  className="pt-1"
-                />
+
+                  {/* Horaires ultra-compact */}
+                  <div className="bg-white/[0.02] rounded-lg p-3 border border-white/5 col-span-2">
+                    <h3 className="text-white/80 font-one text-xs uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                      <svg
+                        className="w-3 h-3 text-tertiary-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                      Horaires
+                    </h3>
+
+                    {/* Status aujourd'hui compact */}
+                    {openNow.today && (
+                      <div className="mb-2 p-2 rounded bg-gradient-to-r from-tertiary-500/15 to-tertiary-600/10 border border-tertiary-500/25">
+                        <div className="flex items-center justify-between">
+                          <span className="text-white font-one text-xs font-semibold">
+                            Aujourd&apos;hui
+                          </span>
+                          <div className="flex items-center gap-1">
+                            <span
+                              className={`h-1 w-1 rounded-full ${
+                                openNow.open ? "bg-emerald-400" : "bg-red-400"
+                              }`}
+                            />
+                            <span
+                              className={`text-xs font-one ${
+                                openNow.open
+                                  ? "text-emerald-300"
+                                  : "text-red-300"
+                              }`}
+                            >
+                              {openNow.open ? "Ouvert" : "Fermé"}
+                            </span>
+                          </div>
+                        </div>
+                        <p className="text-white/80 font-one text-xs">
+                          {openNow.today.start}–{openNow.today.end}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Horaires condensés - Affichage en 2 colonnes */}
+                    <div className="grid sm:grid-cols-2 gap-x-4 gap-y-1">
+                      {hoursLines.map((h) => {
+                        const isToday = h.day.toLowerCase() === todayFR;
+                        return (
+                          <div
+                            key={h.day}
+                            className={`flex justify-between text-xs ${
+                              isToday ? "text-tertiary-300" : "text-white/70"
+                            }`}
+                          >
+                            <span className="font-one capitalize">{h.day}</span>
+                            <span className="font-one">{h.value}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Flow de réservation (scopé au salon) */}
+          {/* Flow de réservation */}
           <BookingFlow
             salon={salonSummary}
             apiBase={process.env.NEXT_PUBLIC_BACK_URL}

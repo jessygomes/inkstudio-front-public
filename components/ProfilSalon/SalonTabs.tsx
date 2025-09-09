@@ -131,7 +131,7 @@ export default function SalonTabs({
   };
 
   const Empty = ({ children }: { children: React.ReactNode }) => (
-    <div className="text-white/65 text-sm font-var(--font-one) flex items-center gap-2">
+    <div className="text-white/65 text-sm font-one flex items-center gap-2">
       <span className="inline-block h-1.5 w-1.5 rounded-full bg-white/30" />
       {children}
     </div>
@@ -148,7 +148,7 @@ export default function SalonTabs({
   }) =>
     total > 1 ? (
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-4">
-        <span className="text-white/60 text-xs font-var(--font-one)">
+        <span className="text-white/60 text-xs font-one">
           Page {current} / {total}
         </span>
         <div className="flex items-center gap-2">
@@ -160,7 +160,7 @@ export default function SalonTabs({
               }
             }}
             disabled={current === 1}
-            className="cursor-pointer px-3 py-1.5 rounded-lg text-xs font-var(--font-one) bg-white/10 hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed text-white border border-white/15 transition"
+            className="cursor-pointer px-3 py-1.5 rounded-lg text-xs font-one bg-white/10 hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed text-white border border-white/15 transition"
           >
             Précédent
           </button>
@@ -178,7 +178,7 @@ export default function SalonTabs({
                     onChange(p);
                     scrollToTop();
                   }}
-                  className={`cursor-pointer w-8 h-8 rounded-lg text-xs font-var(--font-one) transition-all ${
+                  className={`cursor-pointer w-8 h-8 rounded-lg text-xs font-one transition-all ${
                     current === p
                       ? "bg-gradient-to-r from-tertiary-400 to-tertiary-500 text-white"
                       : "bg-white/10 text-white/70 hover:bg-white/20 hover:text-white"
@@ -197,7 +197,7 @@ export default function SalonTabs({
               }
             }}
             disabled={current === total}
-            className="cursor-pointer px-3 py-1.5 rounded-lg text-xs font-var(--font-one) bg-white/10 hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed text-white border border-white/15 transition"
+            className="cursor-pointer px-3 py-1.5 rounded-lg text-xs font-one bg-white/10 hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed text-white border border-white/15 transition"
           >
             Suivant
           </button>
@@ -207,13 +207,13 @@ export default function SalonTabs({
 
   return (
     <section ref={sectionRef}>
-      <div className="rounded-xl border border-white/10 bg-white/[0.06] p-5">
+      <div className="bg-noir-600 rounded-2xl p-8 border border-white/10">
         {/* Segmented tabs */}
-        <div className="flex items-center justify-between gap-4 mb-5">
+        <div className="flex items-center justify-between gap-4 mb-6">
           <div
             role="tablist"
             aria-label="Contenus du salon"
-            className="flex rounded-xl bg-white/10 p-1 border border-white/20"
+            className="flex rounded-xl bg-noir-700 p-1 border border-white/10"
           >
             {(
               [
@@ -233,9 +233,9 @@ export default function SalonTabs({
                   role="tab"
                   aria-selected={selected}
                   onClick={() => setTab(t.key)}
-                  className={`cursor-pointer px-4 py-2 text-xs font-var(--font-one) font-medium rounded-xl transition-all ${
+                  className={`cursor-pointer px-4 py-2.5 text-sm font-one font-medium rounded-lg transition-all ${
                     selected
-                      ? "bg-gradient-to-r from-tertiary-400 to-tertiary-500 text-white shadow"
+                      ? "bg-tertiary-400 text-white shadow-lg"
                       : "text-white/70 hover:text-white hover:bg-white/10"
                   }`}
                 >
@@ -249,7 +249,7 @@ export default function SalonTabs({
             activeImages.length > 0 && (
               <button
                 onClick={() => openLightbox(0)}
-                className="cursor-pointer inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-var(--font-one) bg-white/8 hover:bg-white/12 border border-white/15 text-white/90 transition"
+                className="cursor-pointer inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-one bg-white/10 hover:bg-white/20 border border-white/20 text-white/90 transition"
                 aria-label="Tout agrandir"
                 title="Tout agrandir"
               >
@@ -268,6 +268,7 @@ export default function SalonTabs({
                     fill="none"
                   />
                 </svg>
+                Agrandir
               </button>
             )}
         </div>
@@ -327,7 +328,7 @@ export default function SalonTabs({
                         <div className="absolute inset-0 bg-black/0 hover:bg-black/10 transition" />
                       </button>
                       <div className="p-3">
-                        <p className="text-white/95 font-var(--font-one) text-sm">
+                        <p className="text-white/95 font-one text-sm">
                           {item.title}
                         </p>
                         {item.description && (
@@ -370,15 +371,13 @@ export default function SalonTabs({
                       />
                     </div>
                     <div className="p-3 space-y-1">
-                      <p className="text-white/95 font-var(--font-one) text-sm">
-                        {p.name}
-                      </p>
+                      <p className="text-white/95 font-one text-sm">{p.name}</p>
                       {p.description && (
                         <p className="text-white/60 text-xs line-clamp-2">
                           {p.description}
                         </p>
                       )}
-                      <p className="text-tertiary-300 text-xs font-var(--font-one) mt-1">
+                      <p className="text-tertiary-300 text-xs font-one mt-1">
                         {formatPrice(p.price)}
                       </p>
                     </div>
@@ -445,7 +444,7 @@ export default function SalonTabs({
                 >
                   ›
                 </button>
-                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 text-[11px] text-white/80 font-var(--font-one) bg-black/30 px-2 py-1 rounded">
+                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 text-[11px] text-white/80 font-one bg-black/30 px-2 py-1 rounded">
                   {lightboxIndex + 1} / {activeImages.length}
                 </div>
               </>
