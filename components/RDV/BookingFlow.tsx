@@ -19,6 +19,7 @@ type Tatoueur = {
   name: string;
   img?: string | null;
   instagram?: string | null;
+  rdvBookingEnabled: boolean;
 };
 
 type SalonSummary = {
@@ -41,12 +42,6 @@ type Props = {
 // --- Utils
 const classNames = (...c: (string | false | null | undefined)[]) =>
   c.filter(Boolean).join(" ");
-
-const frFmt = (d: Date, opts: Intl.DateTimeFormatOptions) =>
-  new Intl.DateTimeFormat("fr-FR", {
-    timeZone: "Europe/Paris",
-    ...opts,
-  }).format(d);
 
 type AppointmentRequestForm = z.infer<typeof appointmentRequestSchema>;
 
@@ -123,7 +118,11 @@ export default function BookingFlow({
   const [confirmDisabled, setConfirmDisabled] = useState(false);
 
   const prestation = watch("prestation");
-  const artists = useMemo(() => salon.tatoueurs ?? [], [salon.tatoueurs]);
+  const artists = useMemo(
+    () =>
+      (salon.tatoueurs ?? []).filter((tatoueur) => tatoueur.rdvBookingEnabled),
+    [salon.tatoueurs]
+  );
 
   useEffect(() => {
     if (defaultTatoueurId) setValue("tatoueurId", defaultTatoueurId);
@@ -595,277 +594,324 @@ export default function BookingFlow({
         {/* Étape 2 : Choix tatoueur + créneaux */}
         {step === 2 && (
           <Section title="Choisir le tatoueur et les créneaux">
-            {/* Sélection du tatoueur */}
-            <div className="mb-8">
-              <label className="text-sm text-white/90 font-one mb-3 block font-semibold">
-                Tatoueur souhaité
-              </label>
-              <select
-                className="w-full max-w-md p-3 bg-gradient-to-br from-white/[0.08] to-white/[0.02] border border-white/20 rounded-xl text-white text-sm focus:outline-none focus:border-tertiary-400 focus:ring-2 focus:ring-tertiary-400/20 transition-all duration-300 backdrop-blur-sm"
-                value={selectedTatoueur || ""}
-                onChange={(e) => {
-                  setSelectedTatoueur(e.target.value);
-                  setValue("tatoueurId", e.target.value);
-                  setSelectedSlots([]);
-                }}
-              >
-                <option value="" className="bg-noir-500">
-                  -- Choisissez un tatoueur --
-                </option>
-                {artists.map((tatoueur) => (
-                  <option
-                    key={tatoueur.id}
-                    value={tatoueur.id}
-                    className="bg-noir-500"
+            {/* Vérification si des tatoueurs sont disponibles */}
+            {artists.length === 0 ? (
+              <div className="bg-gradient-to-br from-orange-500/10 to-orange-600/5 border border-orange-500/30 rounded-2xl p-6 text-center">
+                <div className="w-12 h-12 bg-orange-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg
+                    className="w-6 h-6 text-orange-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
                   >
-                    {tatoueur.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Sélection de date */}
-            {selectedTatoueur && (
-              <div className="mb-8">
-                <label className="text-sm text-white/90 font-one mb-3 block font-semibold">
-                  Date souhaitée
-                </label>
-                <input
-                  type="date"
-                  value={selectedDate}
-                  onChange={(e) => {
-                    setSelectedDate(e.target.value);
-                    setSelectedSlots([]);
-                  }}
-                  min={new Date().toISOString().split("T")[0]}
-                  className="w-full max-w-xs p-3 bg-gradient-to-br from-white/[0.08] to-white/[0.02] border border-white/20 rounded-xl text-white text-sm focus:outline-none focus:border-tertiary-400 focus:ring-2 focus:ring-tertiary-400/20 transition-all duration-300 backdrop-blur-sm"
-                />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"
+                    />
+                  </svg>
+                </div>
+                <h3 className="text-orange-300 text-lg font-one font-semibold mb-2">
+                  Aucun tatoueur disponible
+                </h3>
+                <p className="text-orange-300/80 text-sm font-one">
+                  Les réservations en ligne ne sont pas activées pour ce salon
+                  actuellement. Contactez directement le salon pour prendre
+                  rendez-vous.
+                </p>
               </div>
-            )}
-
-            {/* Créneaux disponibles */}
-            {selectedDate && selectedTatoueur && (
-              <div className="space-y-6">
-                <div>
-                  <h3 className="text-white font-one font-semibold text-lg mb-2">
-                    Créneaux disponibles
-                  </h3>
-                  <p className="text-sm text-white/60 font-one">
-                    Sélectionnez les créneaux consécutifs que vous souhaitez
-                    réserver
-                  </p>
+            ) : (
+              <>
+                {/* Sélection du tatoueur */}
+                <div className="mb-8">
+                  <label className="text-sm text-white/90 font-one mb-3 block font-semibold">
+                    Tatoueur souhaité
+                  </label>
+                  <select
+                    className="w-full max-w-md p-3 bg-gradient-to-br from-white/[0.08] to-white/[0.02] border border-white/20 rounded-xl text-white text-sm focus:outline-none focus:border-tertiary-400 focus:ring-2 focus:ring-tertiary-400/20 transition-all duration-300 backdrop-blur-sm"
+                    value={selectedTatoueur || ""}
+                    onChange={(e) => {
+                      setSelectedTatoueur(e.target.value);
+                      setValue("tatoueurId", e.target.value);
+                      setSelectedSlots([]);
+                    }}
+                  >
+                    <option value="" className="bg-noir-500">
+                      -- Choisissez un tatoueur --
+                    </option>
+                    {artists.map((tatoueur) => (
+                      <option
+                        key={tatoueur.id}
+                        value={tatoueur.id}
+                        className="bg-noir-500"
+                      >
+                        {tatoueur.name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
-                {isLoadingSlots ? (
-                  <div className="flex flex-col items-center justify-center p-12 bg-gradient-to-br from-white/[0.05] to-transparent rounded-2xl border border-white/10">
-                    <div className="animate-spin rounded-full h-10 w-10 border-2 border-tertiary-400 border-t-transparent mb-4"></div>
-                    <span className="text-white font-one text-sm">
-                      Chargement des créneaux disponibles...
-                    </span>
+                {/* Sélection de date */}
+                {selectedTatoueur && (
+                  <div className="mb-8">
+                    <label className="text-sm text-white/90 font-one mb-3 block font-semibold">
+                      Date souhaitée
+                    </label>
+                    <input
+                      type="date"
+                      value={selectedDate}
+                      onChange={(e) => {
+                        setSelectedDate(e.target.value);
+                        setSelectedSlots([]);
+                      }}
+                      min={new Date().toISOString().split("T")[0]}
+                      className="w-full max-w-xs p-3 bg-gradient-to-br from-white/[0.08] to-white/[0.02] border border-white/20 rounded-xl text-white text-sm focus:outline-none focus:border-tertiary-400 focus:ring-2 focus:ring-tertiary-400/20 transition-all duration-300 backdrop-blur-sm"
+                    />
                   </div>
-                ) : timeSlots.length > 0 ? (
-                  <>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3">
-                      {timeSlots.map((slot) => {
-                        const slotStart = new Date(slot.start);
-                        const slotEnd = new Date(
-                          slotStart.getTime() + 30 * 60 * 1000
-                        );
-                        const startText = slotStart.toLocaleTimeString(
-                          "fr-FR",
-                          { hour: "2-digit", minute: "2-digit" }
-                        );
+                )}
 
-                        const isSelected = selectedSlots.includes(slot.start);
-
-                        const isOccupied = occupiedSlots.some((occupied) => {
-                          const oStart = new Date(occupied.start);
-                          const oEnd = new Date(occupied.end);
-                          return slotStart < oEnd && slotEnd > oStart;
-                        });
-
-                        const blocked = isSlotBlocked(slot.start, slot.end);
-                        const proposed = getProposedSlot(slot.start, slot.end);
-                        const isProposed = !!proposed;
-
-                        let className =
-                          "relative group cursor-pointer p-3 rounded-xl text-sm text-white font-one transition-all duration-300 border-2 text-center min-h-[3.5rem] flex flex-col items-center justify-center ";
-
-                        let disabled = false;
-                        let statusIcon = "";
-                        let statusColor = "";
-
-                        if (isProposed) {
-                          className +=
-                            "bg-gradient-to-br from-blue-500/20 to-blue-600/10 text-blue-300 border-blue-500/40 cursor-not-allowed";
-                          disabled = true;
-                          statusIcon = "⏳";
-                          statusColor = "text-blue-300";
-                        } else if (blocked) {
-                          className +=
-                            "bg-gradient-to-br from-red-500/20 to-red-600/10 text-red-300 border-red-500/40 cursor-not-allowed";
-                          disabled = true;
-                          statusIcon = "🚫";
-                          statusColor = "text-red-300";
-                        } else if (isOccupied) {
-                          className +=
-                            "bg-gradient-to-br from-gray-500/20 to-gray-600/10 text-gray-400 border-gray-500/40 cursor-not-allowed";
-                          disabled = true;
-                          statusIcon = "❌";
-                          statusColor = "text-gray-400";
-                        } else if (isSelected) {
-                          className +=
-                            "bg-gradient-to-br from-tertiary-500/30 to-tertiary-600/20 text-tertiary-200 border-tertiary-400/60 shadow-lg shadow-tertiary-500/25 transform scale-105";
-                          statusIcon = "✓";
-                          statusColor = "text-tertiary-200";
-                        } else {
-                          className +=
-                            "bg-gradient-to-br from-white/[0.08] to-white/[0.02] text-white/80 border-white/20 hover:border-tertiary-400/50 hover:bg-gradient-to-br hover:from-tertiary-500/10 hover:to-tertiary-600/5 hover:text-white hover:scale-105 backdrop-blur-sm";
-                        }
-
-                        return (
-                          <button
-                            key={`${slot.start}-${slot.end}`}
-                            type="button"
-                            onClick={() =>
-                              !disabled && handleSlotSelection(slot.start)
-                            }
-                            disabled={disabled}
-                            className={className}
-                          >
-                            <div className="font-semibold">{startText}</div>
-                            {statusIcon && (
-                              <div className={`text-xs mt-1 ${statusColor}`}>
-                                {statusIcon}
-                              </div>
-                            )}
-                          </button>
-                        );
-                      })}
+                {/* Créneaux disponibles */}
+                {selectedDate && selectedTatoueur && (
+                  <div className="space-y-6">
+                    <div>
+                      <h3 className="text-white font-one font-semibold text-lg mb-2">
+                        Créneaux disponibles
+                      </h3>
+                      <p className="text-sm text-white/60 font-one">
+                        Sélectionnez les créneaux consécutifs que vous souhaitez
+                        réserver
+                      </p>
                     </div>
 
-                    {/* Légende améliorée */}
-                    <div className="bg-gradient-to-br from-white/[0.05] to-transparent rounded-2xl border border-white/10 p-4">
-                      <h4 className="text-white font-one font-semibold text-sm mb-3">
-                        Légende
-                      </h4>
-                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 text-xs">
-                        <div className="flex items-center gap-2">
-                          <div className="w-4 h-4 bg-gradient-to-br from-white/[0.08] to-white/[0.02] border border-white/20 rounded" />
-                          <span className="text-white/70 font-one">
-                            Disponible
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <div className="w-4 h-4 bg-gradient-to-br from-tertiary-500/30 to-tertiary-600/20 border border-tertiary-400/60 rounded" />
-                          <span className="text-white/70 font-one">
-                            Sélectionné
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <div className="w-4 h-4 bg-gradient-to-br from-gray-500/20 to-gray-600/10 border border-gray-500/40 rounded" />
-                          <span className="text-white/70 font-one">Occupé</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <div className="w-4 h-4 bg-gradient-to-br from-red-500/20 to-red-600/10 border border-red-500/40 rounded" />
-                          <span className="text-white/70 font-one">Bloqué</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <div className="w-4 h-4 bg-gradient-to-br from-blue-500/20 to-blue-600/10 border border-blue-500/40 rounded" />
-                          <span className="text-white/70 font-one">
-                            Proposé
-                          </span>
-                        </div>
+                    {isLoadingSlots ? (
+                      <div className="flex flex-col items-center justify-center p-12 bg-gradient-to-br from-white/[0.05] to-transparent rounded-2xl border border-white/10">
+                        <div className="animate-spin rounded-full h-10 w-10 border-2 border-tertiary-400 border-t-transparent mb-4"></div>
+                        <span className="text-white font-one text-sm">
+                          Chargement des créneaux disponibles...
+                        </span>
                       </div>
-                    </div>
+                    ) : timeSlots.length > 0 ? (
+                      <>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3">
+                          {timeSlots.map((slot) => {
+                            const slotStart = new Date(slot.start);
+                            const slotEnd = new Date(
+                              slotStart.getTime() + 30 * 60 * 1000
+                            );
+                            const startText = slotStart.toLocaleTimeString(
+                              "fr-FR",
+                              { hour: "2-digit", minute: "2-digit" }
+                            );
 
-                    {/* Récapitulatif amélioré */}
-                    {selectedSlots.length > 0 && (
-                      <div className="bg-gradient-to-br from-tertiary-500/10 to-tertiary-600/5 border border-tertiary-500/30 rounded-2xl p-6 shadow-lg">
-                        <div className="flex items-start gap-4">
-                          <div className="w-10 h-10 bg-tertiary-500 rounded-full flex items-center justify-center flex-shrink-0">
-                            <svg
-                              className="w-5 h-5 text-white"
-                              fill="currentColor"
-                              viewBox="0 0 20 20"
-                            >
-                              <path
-                                fillRule="evenodd"
-                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                clipRule="evenodd"
-                              />
-                            </svg>
-                          </div>
-                          <div className="flex-1">
-                            <h4 className="text-tertiary-300 font-semibold font-one mb-2 text-lg">
-                              Créneaux sélectionnés
-                            </h4>
-                            <div className="space-y-2">
-                              <p className="text-white font-one text-sm">
-                                <span className="font-semibold">
-                                  {selectedSlots.length}
-                                </span>{" "}
-                                créneau{selectedSlots.length > 1 ? "x" : ""} •
-                                <span className="font-semibold">
-                                  {" "}
-                                  {selectedSlots.length * 30} minutes
-                                </span>
-                              </p>
-                              <p className="text-white/70 font-one text-sm">
-                                De{" "}
-                                <span className="font-semibold text-tertiary-300">
-                                  {new Date(
-                                    selectedSlots[0]
-                                  ).toLocaleTimeString("fr-FR", {
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                  })}
-                                </span>{" "}
-                                à{" "}
-                                <span className="font-semibold text-tertiary-300">
-                                  {new Date(
-                                    new Date(
-                                      selectedSlots[selectedSlots.length - 1]
-                                    ).getTime() +
-                                      30 * 60 * 1000
-                                  ).toLocaleTimeString("fr-FR", {
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                  })}
-                                </span>
-                              </p>
+                            const isSelected = selectedSlots.includes(
+                              slot.start
+                            );
+
+                            const isOccupied = occupiedSlots.some(
+                              (occupied) => {
+                                const oStart = new Date(occupied.start);
+                                const oEnd = new Date(occupied.end);
+                                return slotStart < oEnd && slotEnd > oStart;
+                              }
+                            );
+
+                            const blocked = isSlotBlocked(slot.start, slot.end);
+                            const proposed = getProposedSlot(
+                              slot.start,
+                              slot.end
+                            );
+                            const isProposed = !!proposed;
+
+                            let className =
+                              "relative group cursor-pointer p-3 rounded-xl text-sm text-white font-one transition-all duration-300 border-2 text-center min-h-[3.5rem] flex flex-col items-center justify-center ";
+
+                            let disabled = false;
+                            let statusIcon = "";
+                            let statusColor = "";
+
+                            if (isProposed) {
+                              className +=
+                                "bg-gradient-to-br from-blue-500/20 to-blue-600/10 text-blue-300 border-blue-500/40 cursor-not-allowed";
+                              disabled = true;
+                              statusIcon = "⏳";
+                              statusColor = "text-blue-300";
+                            } else if (blocked) {
+                              className +=
+                                "bg-gradient-to-br from-red-500/20 to-red-600/10 text-red-300 border-red-500/40 cursor-not-allowed";
+                              disabled = true;
+                              statusIcon = "🚫";
+                              statusColor = "text-red-300";
+                            } else if (isOccupied) {
+                              className +=
+                                "bg-gradient-to-br from-gray-500/20 to-gray-600/10 text-gray-400 border-gray-500/40 cursor-not-allowed";
+                              disabled = true;
+                              statusIcon = "❌";
+                              statusColor = "text-gray-400";
+                            } else if (isSelected) {
+                              className +=
+                                "bg-gradient-to-br from-tertiary-500/30 to-tertiary-600/20 text-tertiary-200 border-tertiary-400/60 shadow-lg shadow-tertiary-500/25 transform scale-105";
+                              statusIcon = "✓";
+                              statusColor = "text-tertiary-200";
+                            } else {
+                              className +=
+                                "bg-gradient-to-br from-white/[0.08] to-white/[0.02] text-white/80 border-white/20 hover:border-tertiary-400/50 hover:bg-gradient-to-br hover:from-tertiary-500/10 hover:to-tertiary-600/5 hover:text-white hover:scale-105 backdrop-blur-sm";
+                            }
+
+                            return (
+                              <button
+                                key={`${slot.start}-${slot.end}`}
+                                type="button"
+                                onClick={() =>
+                                  !disabled && handleSlotSelection(slot.start)
+                                }
+                                disabled={disabled}
+                                className={className}
+                              >
+                                <div className="font-semibold">{startText}</div>
+                                {statusIcon && (
+                                  <div
+                                    className={`text-xs mt-1 ${statusColor}`}
+                                  >
+                                    {statusIcon}
+                                  </div>
+                                )}
+                              </button>
+                            );
+                          })}
+                        </div>
+
+                        {/* Légende améliorée */}
+                        <div className="bg-gradient-to-br from-white/[0.05] to-transparent rounded-2xl border border-white/10 p-4">
+                          <h4 className="text-white font-one font-semibold text-sm mb-3">
+                            Légende
+                          </h4>
+                          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 text-xs">
+                            <div className="flex items-center gap-2">
+                              <div className="w-4 h-4 bg-gradient-to-br from-white/[0.08] to-white/[0.02] border border-white/20 rounded" />
+                              <span className="text-white/70 font-one">
+                                Disponible
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <div className="w-4 h-4 bg-gradient-to-br from-tertiary-500/30 to-tertiary-600/20 border border-tertiary-400/60 rounded" />
+                              <span className="text-white/70 font-one">
+                                Sélectionné
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <div className="w-4 h-4 bg-gradient-to-br from-gray-500/20 to-gray-600/10 border border-gray-500/40 rounded" />
+                              <span className="text-white/70 font-one">
+                                Occupé
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <div className="w-4 h-4 bg-gradient-to-br from-red-500/20 to-red-600/10 border border-red-500/40 rounded" />
+                              <span className="text-white/70 font-one">
+                                Bloqué
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <div className="w-4 h-4 bg-gradient-to-br from-blue-500/20 to-blue-600/10 border border-blue-500/40 rounded" />
+                              <span className="text-white/70 font-one">
+                                Proposé
+                              </span>
                             </div>
                           </div>
                         </div>
+
+                        {/* Récapitulatif amélioré */}
+                        {selectedSlots.length > 0 && (
+                          <div className="bg-gradient-to-br from-tertiary-500/10 to-tertiary-600/5 border border-tertiary-500/30 rounded-2xl p-6 shadow-lg">
+                            <div className="flex items-start gap-4">
+                              <div className="w-10 h-10 bg-tertiary-500 rounded-full flex items-center justify-center flex-shrink-0">
+                                <svg
+                                  className="w-5 h-5 text-white"
+                                  fill="currentColor"
+                                  viewBox="0 0 20 20"
+                                >
+                                  <path
+                                    fillRule="evenodd"
+                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                    clipRule="evenodd"
+                                  />
+                                </svg>
+                              </div>
+                              <div className="flex-1">
+                                <h4 className="text-tertiary-300 font-semibold font-one mb-2 text-lg">
+                                  Créneaux sélectionnés
+                                </h4>
+                                <div className="space-y-2">
+                                  <p className="text-white font-one text-sm">
+                                    <span className="font-semibold">
+                                      {selectedSlots.length}
+                                    </span>{" "}
+                                    créneau{selectedSlots.length > 1 ? "x" : ""}{" "}
+                                    •
+                                    <span className="font-semibold">
+                                      {" "}
+                                      {selectedSlots.length * 30} minutes
+                                    </span>
+                                  </p>
+                                  <p className="text-white/70 font-one text-sm">
+                                    De{" "}
+                                    <span className="font-semibold text-tertiary-300">
+                                      {new Date(
+                                        selectedSlots[0]
+                                      ).toLocaleTimeString("fr-FR", {
+                                        hour: "2-digit",
+                                        minute: "2-digit",
+                                      })}
+                                    </span>{" "}
+                                    à{" "}
+                                    <span className="font-semibold text-tertiary-300">
+                                      {new Date(
+                                        new Date(
+                                          selectedSlots[
+                                            selectedSlots.length - 1
+                                          ]
+                                        ).getTime() +
+                                          30 * 60 * 1000
+                                      ).toLocaleTimeString("fr-FR", {
+                                        hour: "2-digit",
+                                        minute: "2-digit",
+                                      })}
+                                    </span>
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <div className="bg-gradient-to-br from-orange-500/10 to-orange-600/5 border border-orange-500/30 rounded-2xl p-6 text-center">
+                        <div className="w-12 h-12 bg-orange-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                          <svg
+                            className="w-6 h-6 text-orange-400"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                          </svg>
+                        </div>
+                        <h3 className="text-orange-300 text-lg font-one font-semibold mb-2">
+                          Aucun créneau disponible
+                        </h3>
+                        <p className="text-orange-300/80 text-sm font-one">
+                          Essayez une autre date ou un autre tatoueur
+                        </p>
                       </div>
                     )}
-                  </>
-                ) : (
-                  <div className="bg-gradient-to-br from-orange-500/10 to-orange-600/5 border border-orange-500/30 rounded-2xl p-6 text-center">
-                    <div className="w-12 h-12 bg-orange-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <svg
-                        className="w-6 h-6 text-orange-400"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                        />
-                      </svg>
-                    </div>
-                    <h3 className="text-orange-300 text-lg font-one font-semibold mb-2">
-                      Aucun créneau disponible
-                    </h3>
-                    <p className="text-orange-300/80 text-sm font-one">
-                      Essayez une autre date ou un autre tatoueur
-                    </p>
                   </div>
                 )}
-              </div>
+              </>
             )}
           </Section>
         )}

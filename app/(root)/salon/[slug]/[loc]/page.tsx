@@ -23,8 +23,20 @@ async function getSalon(slug: string, loc: string) {
   const res = await fetch(url, { next: { revalidate: 30 } });
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(`Failed to load salon (${res.status})`);
-  const data = await res.json();
-  return data as SalonProfilProps;
+
+  // Vérifier si la réponse contient du JSON valide
+  const text = await res.text();
+  if (!text || text.trim() === "") {
+    return null; // Profil incomplet ou vide
+  }
+
+  try {
+    const data = JSON.parse(text);
+    return data as SalonProfilProps;
+  } catch (error) {
+    console.error("Invalid JSON response:", text, error);
+    return null; // JSON invalide = profil incomplet
+  }
 }
 
 //! --- SEO

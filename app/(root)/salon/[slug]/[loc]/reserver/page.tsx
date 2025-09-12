@@ -79,6 +79,7 @@ export default async function Page({ params }: PageParams) {
     phone: salon.phone ?? null,
     tatoueurs: salon.Tatoueur || [],
     prestations: salon.prestations || [],
+    appointmentBookingEnabled: salon.appointmentBookingEnabled,
   };
 
   // horaires normalisés + statut
