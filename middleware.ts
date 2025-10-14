@@ -14,8 +14,10 @@ export function middleware(req: NextRequest) {
     "/sitemap.xml",
     "/salon",
     "/en-savoir-plus",
-    "/trouver-un-salon",
     "/rdv-request",
+    "/contactez-nous",
+    "/mentions-legales",
+    "/politique-de-confidentialite",
   ];
   if (allowedPrefixes.some((p) => pathname.startsWith(p))) {
     return NextResponse.next();

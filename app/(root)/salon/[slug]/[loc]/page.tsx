@@ -372,7 +372,7 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
                 Informations
               </h3>
 
-              <div className="lg:space-y-4 flex justify-between gap-12 lg:flex-col lg:gap-0">
+              <div className="space-y-4 sm:flex sm:justify-between sm:gap-12 lg:flex-col lg:gap-0">
                 {salon.address && (
                   <div className="flex items-start gap-3">
                     <div className="w-8 h-8 rounded-lg bg-tertiary-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
