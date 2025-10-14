@@ -19,9 +19,10 @@ export default function NavbarMobile() {
   };
 
   const links = [
-    { href: "/", label: "Accueil" },
-    { href: "/solutions", label: "Solutions" },
-    { href: "/tarification", label: "Tarification" },
+    // { href: "/", label: "Accueil" },
+    // { href: "/trouver-un-salon", label: "Trouver un salon" },
+    { href: "/en-savoir-plus", label: "En savoir plus" },
+    // { href: "/je-suis-tatoueur", label: "Je suis tatoueur ?" },
   ];
 
   useEffect(() => {
@@ -39,66 +40,81 @@ export default function NavbarMobile() {
   return (
     <nav>
       <div className="flex items-center justify-between text-white">
-        <button onClick={handleOpen} className="text-2xl">
-          <MdMenu size={40} className="text-white" />
+        <button
+          onClick={handleOpen}
+          className="text-2xl p-2 rounded-xl hover:bg-white/10 transition-all duration-300 backdrop-blur-sm"
+        >
+          <MdMenu size={32} className="text-white" />
         </button>
       </div>
 
+      {/* Overlay avec blur */}
+      {isOpen && (
+        <div className="fixed inset-0 bg-noir-700/90 backdrop-blur-sm z-50 transition-opacity duration-300" />
+      )}
+
       <div
         ref={navRef}
-        className={`fixed top-0 right-0 z-50 w-64 h-full bg-gradient-to-l from-noir-700/90 to-noir-700/90 backdrop-blur-lg text-white transform flex flex-col justify-center  transition-transform duration-300 ease-in-out ${
-          isOpen ? "translate-x-0" : "translate-x-full"
-        } transition-transform duration-300 ease-in-out`}
+        className={`fixed top-0 right-0 z-50 w-80 h-screen bg-noir-700 backdrop-blur-xl text-white transform transition-all duration-500 ease-out ${
+          isOpen ? "translate-x-0 opacity-100" : "translate-x-full opacity-0"
+        } border-l border-white/10 shadow-2xl`}
       >
-        <div className=" flex items-center justify-between">
-          <div className="absolute top-4 left-4 text-lg font-bold font-two">
-            Menu
+        {/* Header moderne */}
+        <div className="flex items-center justify-between p-6 border-b border-white/10">
+          <div className="flex items-center gap-3">
+            <h2 className="text-xl font-bold font-two">InkStudio</h2>
           </div>
           <button
             onClick={handleClose}
-            className="text-2xl absolute top-4 right-4"
+            className="text-2xl p-2 rounded-xl hover:bg-white/10 transition-all duration-300"
           >
             <MdClose />
           </button>
         </div>
 
-        <ul className="flex flex-col p-4 space-y-8 font-three font-bold uppercase text-2xl tracking-widest">
-          {links.map((link, index) => {
-            const isActive =
-              pathname === link.href ||
-              (link.href === "#cestquoi" && pathname === "/");
+        {/* Navigation links modernisés */}
+        <div className="flex-1 px-6 py-8">
+          <ul className="space-y-2">
+            {links.map((link, index) => {
+              const isActive =
+                pathname === link.href ||
+                (link.href === "#cestquoi" && pathname === "/");
 
-            return (
-              <li
-                key={index}
-                className={`${
-                  isActive ? "active text-white font-bold" : "font-thin"
-                } pb-1 text-white text-base font-three pt-1 px-2 tracking-widest hover:text-white/70 transition-all duration-300`}
-              >
-                <Link
-                  href={
-                    link.href === "#cestquoi" && pathname !== "/"
-                      ? `/#cestquoi`
-                      : link.href
-                  }
-                  onClick={handleClose}
-                >
-                  {link.label}
-                </Link>
-              </li>
-            );
-          })}
-          <li>
-            <Link
-              href={"/connexion"}
-              className="text-white font-one tracking-wide text-xs font-bold bg-gradient-to-l from-tertiary-400 to-tertiary-500 px-4 py-2 rounded-[20px] transition-all duration-300"
-            >
-              Connexion
-            </Link>
-          </li>
-        </ul>
+              return (
+                <li key={index}>
+                  <Link
+                    href={
+                      link.href === "#cestquoi" && pathname !== "/"
+                        ? `/#cestquoi`
+                        : link.href
+                    }
+                    onClick={handleClose}
+                    className={`flex items-center gap-4 p-4 rounded-2xl transition-all duration-300 group ${
+                      isActive
+                        ? "bg-gradient-to-r from-tertiary-400/20 to-tertiary-500/20 border border-tertiary-400/30 text-white"
+                        : "hover:bg-white/5 text-white/80 hover:text-white"
+                    }`}
+                  >
+                    <div className="flex-1">
+                      <span className="text-lg font-medium font-one tracking-wide">
+                        {link.label}
+                      </span>
+                    </div>
+                    <div
+                      className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                        isActive
+                          ? "bg-tertiary-400"
+                          : "bg-transparent group-hover:bg-white/30"
+                      }`}
+                    />
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
 
-        <div className="px-6"></div>
+        {/* Footer avec bouton connexion modernisé */}
       </div>
     </nav>
   );

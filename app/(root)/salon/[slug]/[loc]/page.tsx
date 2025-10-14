@@ -186,12 +186,23 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
   const prestationsVisibles = prestations.slice(0, PREST_MAX);
   const prestationsRestantes = Math.max(0, prestations.length - PREST_MAX);
 
+  //! --- helper pour afficher le téléphone plus lisible
+  const formatPhone = (raw?: string | null) => {
+    if (!raw) return "";
+    const digits = String(raw).replace(/\D/g, "");
+    const groups = digits.match(/.{1,2}/g) || [];
+    return groups.join(" ");
+  };
+
+  const phoneDisplay = salon.phone ? formatPhone(salon.phone) : "";
+  const phoneHref = salon.phone ? salon.phone.replace(/\D/g, "") : "";
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-noir-700 via-noir-600 to-noir-800 pt-20">
+    <div className="min-h-screen bg-gradient-to-b from-noir-700 via-noir-500 to-noir-700 pt-20">
       {/* CONTENT */}
       <section className="relative z-10 px-4 sm:px-6 lg:px-8 xl:px-16 py-6">
         {/* Mobile Hero */}
-        <div className="mx-auto sm:hidden mb-6">
+        <div className="mx-auto lg:hidden mb-6">
           <div className="relative overflow-hidden rounded-2xl border border-white/10 shadow-xl">
             <div className="relative h-64 bg-gradient-to-br from-noir-600 to-noir-800">
               {heroSrc ? (
@@ -279,13 +290,13 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
           </div>
         </div>
 
-        <div className="mx-auto max-w-7xl grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Sidebar */}
           <aside className="lg:order-2 lg:sticky lg:top-24 h-fit space-y-5">
             {/* Quick Actions */}
             <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.08] to-white/[0.02] p-5 backdrop-blur-lg shadow-xl">
               <div className="flex gap-2.5">
-                <a
+                <Link
                   href={directionsHref}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -311,8 +322,8 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
                     />
                   </svg>
                   Itinéraire
-                </a>
-                <a
+                </Link>
+                <Link
                   href={`/salon/${params.slug}/${params.loc}/reserver`}
                   className="flex-1 group flex justify-center items-center gap-2 py-2.5 px-3 rounded-lg bg-gradient-to-br from-white/[0.08] to-white/[0.02] hover:from-white/[0.12] hover:to-white/[0.06] text-white border border-white/20 hover:border-white/30 transition-all duration-300 text-sm tracking-widest font-one backdrop-blur-sm transform hover:scale-[1.02]"
                 >
@@ -330,7 +341,7 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
                     />
                   </svg>
                   Réserver
-                </a>
+                </Link>
               </div>
             </div>
 
@@ -353,7 +364,7 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
                 Informations
               </h3>
 
-              <div className="space-y-4">
+              <div className="lg:space-y-4 flex justify-between gap-12 lg:flex-col lg:gap-0">
                 {salon.address && (
                   <div className="flex items-start gap-3">
                     <div className="w-8 h-8 rounded-lg bg-tertiary-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -404,10 +415,10 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
                       </svg>
                     </div>
                     <a
-                      href={`tel:${salon.phone}`}
+                      href={`tel:${phoneHref}`}
                       className="text-white/90 font-one text-sm hover:text-tertiary-400 transition-colors"
                     >
-                      {salon.phone}
+                      {phoneDisplay}
                     </a>
                   </div>
                 )}
@@ -418,7 +429,7 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
                   salon.tiktok ||
                   salon.website) && (
                   <div className="pt-2">
-                    <p className="text-white/70 font-one text-xs mb-3 uppercase tracking-wider">
+                    <p className="hidden lg:block text-white/70 font-one text-xs mb-3 uppercase tracking-wider">
                       Réseaux sociaux
                     </p>
                     <div className="flex flex-wrap gap-2">
@@ -529,7 +540,7 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
           {/* Main Content */}
           <div className="lg:col-span-2 lg:order-1 space-y-6">
             {/* Desktop Hero */}
-            <div className="hidden sm:block">
+            <div className="hidden lg:block">
               <div className="relative overflow-hidden rounded-2xl shadow-xl">
                 <div className="relative h-80 lg:h-96 bg-gradient-to-br from-noir-600 to-noir-800">
                   {heroSrc ? (
@@ -678,16 +689,16 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-5">
                   {salon.Tatoueur.map((t: any) => (
-                    <TeamCard
-                      key={t.id}
-                      name={t.name}
-                      img={t.img}
-                      description={t.description}
-                      instagram={t.instagram}
-                      phone={t.phone}
-                      style={t.style}
-                      skills={t.skills}
-                    />
+                    <div key={t.id}>
+                      <TeamCard
+                        name={t.name}
+                        img={t.img}
+                        description={t.description}
+                        instagram={t.instagram}
+                        style={t.style}
+                        skills={t.skills}
+                      />
+                    </div>
                   ))}
                 </div>
               </section>

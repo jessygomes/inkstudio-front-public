@@ -5,7 +5,6 @@ export function TeamCard({
   img,
   description,
   instagram,
-  phone, // compat
   skills,
   style,
 }: {
@@ -40,8 +39,25 @@ export function TeamCard({
   const styleChips = unique.slice(0, MAX);
   const remainingCount = unique.length > MAX ? unique.length - MAX : 0;
 
+  // -- Skills (chips)
+  const cleanedSkills = (skills ?? [])
+    .map((s) => (typeof s === "string" ? s.trim() : ""))
+    .filter(Boolean);
+  const seenSkills = new Set<string>();
+  const uniqueSkills: string[] = [];
+  for (const s of cleanedSkills) {
+    const key = s.toLowerCase();
+    if (!seenSkills.has(key)) {
+      seenSkills.add(key);
+      uniqueSkills.push(s);
+    }
+  }
+  const skillChips = uniqueSkills.slice(0, MAX);
+  const remainingSkillsCount =
+    uniqueSkills.length > MAX ? uniqueSkills.length - MAX : 0;
+
   return (
-    <li className="group relative rounded-xl border border-white/10 bg-white/[0.06] p-5 hover:bg-white/[0.1] transition-colors">
+    <li className="group relative rounded-xl border border-white/10 bg-white/[0.06] p-5 hover:bg-white/[0.1] transition-colors list-none">
       {/* Header */}
       <div className="flex items-center gap-5">
         {/* Avatar */}
@@ -103,29 +119,76 @@ export function TeamCard({
         </p>
       )}
 
-      {/* Styles (au-dessus de "Profil artiste") */}
-      {styleChips.length > 0 ? (
-        <div className="mt-4 flex flex-wrap gap-2">
-          {styleChips.map((s, i) => (
-            <span
-              key={`${s}-${i}`}
-              className="px-2.5 py-1 rounded-full bg-white/5 text-white/80 border border-white/10 text-[11px] font-var(--font-one)"
-              title={s}
-            >
-              {s}
-            </span>
-          ))}
-          {remainingCount > 0 && (
-            <span className="px-2.5 py-1 rounded-full bg-white/5 text-white/80 border border-white/10 text-[11px] font-var(--font-one)">
-              +{remainingCount}
-            </span>
-          )}
-        </div>
-      ) : (
-        <div className="mt-4 text-[11px] text-white/50 font-var(--font-one)">
-          Styles : non renseignés
-        </div>
-      )}
+      {/* Styles et Skills */}
+      <div className="mt-4 space-y-3">
+        {/* Styles */}
+        {styleChips.length > 0 ? (
+          <div>
+            <p className="text-[10px] text-white/60 font-var(--font-one) uppercase tracking-wider mb-2">
+              Styles
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {styleChips.map((s, i) => (
+                <span
+                  key={`style-${s}-${i}`}
+                  className="px-2.5 py-1 rounded-full bg-tertiary-500/10 text-tertiary-300 border border-tertiary-500/20 text-[11px] font-var(--font-one)"
+                  title={s}
+                >
+                  {s}
+                </span>
+              ))}
+              {remainingCount > 0 && (
+                <span className="px-2.5 py-1 rounded-full bg-tertiary-500/10 text-tertiary-300 border border-tertiary-500/20 text-[11px] font-var(--font-one)">
+                  +{remainingCount}
+                </span>
+              )}
+            </div>
+          </div>
+        ) : (
+          <div>
+            <p className="text-[10px] text-white/60 font-var(--font-one) uppercase tracking-wider mb-2">
+              Styles
+            </p>
+            <div className="text-[11px] text-white/50 font-var(--font-one)">
+              Non renseignés
+            </div>
+          </div>
+        )}
+
+        {/* Skills */}
+        {skillChips.length > 0 ? (
+          <div>
+            <p className="text-[10px] text-white/60 font-var(--font-one) uppercase tracking-wider mb-2">
+              Compétences
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {skillChips.map((s, i) => (
+                <span
+                  key={`skill-${s}-${i}`}
+                  className="px-2.5 py-1 rounded-full bg-white/5 text-white/80 border border-white/10 text-[11px] font-var(--font-one)"
+                  title={s}
+                >
+                  {s}
+                </span>
+              ))}
+              {remainingSkillsCount > 0 && (
+                <span className="px-2.5 py-1 rounded-full bg-white/5 text-white/80 border border-white/10 text-[11px] font-var(--font-one)">
+                  +{remainingSkillsCount}
+                </span>
+              )}
+            </div>
+          </div>
+        ) : (
+          <div>
+            <p className="text-[10px] text-white/60 font-var(--font-one) uppercase tracking-wider mb-2">
+              Compétences
+            </p>
+            <div className="text-[11px] text-white/50 font-var(--font-one)">
+              Non renseignées
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Footer */}
       <div className="mt-5 flex items-center justify-between border-t border-white/10 pt-3">

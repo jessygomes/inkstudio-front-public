@@ -223,12 +223,12 @@ export function SalonCard({ salon }: { salon: SalonProps }) {
         <div className="mt-5 flex items-center gap-3">
           <Link
             href={salonHref}
-            className="cursor-pointer w-[175px] flex justify-center items-center gap-2 py-2 bg-gradient-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white rounded-lg transition-all duration-300 font-medium font-var(--font-one) text-xs shadow-lg"
+            className="cursor-pointer w-[175px] mx-auto flex justify-center items-center gap-2 py-2 bg-gradient-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white rounded-lg transition-all duration-300 font-medium font-var(--font-one) text-xs shadow-lg"
           >
             Voir le salon
           </Link>
 
-          <button
+          {/* <button
             type="button"
             className="cursor-pointer px-3 py-2 rounded-lg text-xs font-var(--font-one) text-white/90 border border-white/10 hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-white/30 transition"
             onClick={() => {
@@ -236,7 +236,7 @@ export function SalonCard({ salon }: { salon: SalonProps }) {
             }}
           >
             En savoir +
-          </button>
+          </button> */}
         </div>
       </div>
 

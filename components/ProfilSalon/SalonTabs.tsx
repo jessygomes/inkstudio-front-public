@@ -268,7 +268,7 @@ export default function SalonTabs({
                     fill="none"
                   />
                 </svg>
-                Agrandir
+                <p className="hidden sm:block">Agrandir</p>
               </button>
             )}
         </div>

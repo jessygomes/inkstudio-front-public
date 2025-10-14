@@ -53,7 +53,7 @@ export const Search = () => {
         placeholder="Rechercher..."
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        className="w-full text-sm text-white bg-white/10 placeholder:text-white/30 placeholder:text-xs py-1 px-4 font-var(--font-one) border-[1px] rounded-lg border-white/20 focus:outline-none focus:border-tertiary-400 transition-colors"
+        className="w-full text-sm text-white bg-white/10 placeholder:text-white/30 placeholder:text-xs py-2 px-4 font-var(--font-one) border-[1px] rounded-lg border-white/20 focus:outline-none focus:border-tertiary-400 transition-colors"
       />
     </div>
   );

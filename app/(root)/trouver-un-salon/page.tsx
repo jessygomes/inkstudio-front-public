@@ -5,7 +5,7 @@ import { IoBusinessOutline } from "react-icons/io5";
 export default function TrouverUnSalonPage() {
   return (
     <div className="min-h-screen">
-      <section className="h-screen px-4 sm:px-20 pt-23 bg-noir-700">
+      <section className="px-4 sm:px-8 lg:px-20 pt-23 bg-noir-700">
         {/* Header */}
         <div className="mb-6 flex flex-col md:flex-row items-center justify-between bg-gradient-to-r from-noir-700/80 to-noir-500/80 p-4 rounded-xl shadow-xl border border-white/10">
           <div className="flex items-center gap-4">

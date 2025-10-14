@@ -452,6 +452,7 @@ export default function BookingFlow({
       prestation: data.prestation,
       start: startDateTime,
       end: endDateTime,
+      visio: data.visio || false,
       clientFirstname: data.client.firstName,
       clientLastname: data.client.lastName,
       clientEmail: data.client.email,
@@ -594,6 +595,34 @@ export default function BookingFlow({
         {/* Étape 2 : Choix tatoueur + créneaux */}
         {step === 2 && (
           <Section title="Choisir le tatoueur et les créneaux">
+            {/* Champ Visio pour prestation PROJET */}
+            {prestation === "PROJET" && (
+              <div className="mb-6 bg-gradient-to-br from-white/[0.08] to-white/[0.02] p-6 rounded-2xl border border-white/10 backdrop-blur-sm">
+                <h3 className="text-white font-one font-semibold text-lg mb-4">
+                  Type de rendez-vous
+                </h3>
+                <div className="space-y-4">
+                  <label className="flex items-start gap-4 cursor-pointer group">
+                    <input
+                      type="checkbox"
+                      {...methods.register("visio")}
+                      className="w-5 h-5 bg-white/10 border-2 border-white/20 rounded focus:outline-none focus:border-tertiary-400 transition-colors accent-tertiary-400 mt-0.5"
+                    />
+                    <div className="flex-1">
+                      <span className="text-sm text-white/90 font-one font-semibold block mb-1">
+                        Rendez-vous en visioconférence
+                      </span>
+                      <p className="text-xs text-white/60 font-one leading-relaxed">
+                        Cochez cette case si vous souhaitez que ce rendez-vous
+                        de projet se déroule en ligne via visioconférence
+                        (Teams, Zoom, etc.)
+                      </p>
+                    </div>
+                  </label>
+                </div>
+              </div>
+            )}
+
             {/* Vérification si des tatoueurs sont disponibles */}
             {artists.length === 0 ? (
               <div className="bg-gradient-to-br from-orange-500/10 to-orange-600/5 border border-orange-500/30 rounded-2xl p-6 text-center">
@@ -624,52 +653,53 @@ export default function BookingFlow({
             ) : (
               <>
                 {/* Sélection du tatoueur */}
-                <div className="mb-8">
-                  <label className="text-sm text-white/90 font-one mb-3 block font-semibold">
-                    Tatoueur souhaité
-                  </label>
-                  <select
-                    className="w-full max-w-md p-3 bg-gradient-to-br from-white/[0.08] to-white/[0.02] border border-white/20 rounded-xl text-white text-sm focus:outline-none focus:border-tertiary-400 focus:ring-2 focus:ring-tertiary-400/20 transition-all duration-300 backdrop-blur-sm"
-                    value={selectedTatoueur || ""}
-                    onChange={(e) => {
-                      setSelectedTatoueur(e.target.value);
-                      setValue("tatoueurId", e.target.value);
-                      setSelectedSlots([]);
-                    }}
-                  >
-                    <option value="" className="bg-noir-500">
-                      -- Choisissez un tatoueur --
-                    </option>
-                    {artists.map((tatoueur) => (
-                      <option
-                        key={tatoueur.id}
-                        value={tatoueur.id}
-                        className="bg-noir-500"
-                      >
-                        {tatoueur.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Sélection de date */}
-                {selectedTatoueur && (
-                  <div className="mb-8">
+                <div className="mb-2 flex flex-col sm:flex-row sm:items-center sm:gap-6">
+                  <div className="mb-6">
                     <label className="text-sm text-white/90 font-one mb-3 block font-semibold">
-                      Date souhaitée
+                      Tatoueur souhaité
                     </label>
-                    <input
-                      type="date"
-                      value={selectedDate}
+                    <select
+                      className="w-full max-w-md p-3 bg-gradient-to-br from-white/[0.08] to-white/[0.02] border border-white/20 rounded-xl text-white text-sm focus:outline-none focus:border-tertiary-400 focus:ring-2 focus:ring-tertiary-400/20 transition-all duration-300 backdrop-blur-sm"
+                      value={selectedTatoueur || ""}
                       onChange={(e) => {
-                        setSelectedDate(e.target.value);
+                        setSelectedTatoueur(e.target.value);
+                        setValue("tatoueurId", e.target.value);
                         setSelectedSlots([]);
                       }}
-                      min={new Date().toISOString().split("T")[0]}
-                      className="w-full max-w-xs p-3 bg-gradient-to-br from-white/[0.08] to-white/[0.02] border border-white/20 rounded-xl text-white text-sm focus:outline-none focus:border-tertiary-400 focus:ring-2 focus:ring-tertiary-400/20 transition-all duration-300 backdrop-blur-sm"
-                    />
+                    >
+                      <option value="" className="bg-noir-500">
+                        -- Choisissez un tatoueur --
+                      </option>
+                      {artists.map((tatoueur) => (
+                        <option
+                          key={tatoueur.id}
+                          value={tatoueur.id}
+                          className="bg-noir-500"
+                        >
+                          {tatoueur.name}
+                        </option>
+                      ))}
+                    </select>
                   </div>
-                )}
+                  {/* Sélection de date */}
+                  {selectedTatoueur && (
+                    <div className="mb-6">
+                      <label className="text-sm text-white/90 font-one mb-3 block font-semibold">
+                        Date souhaitée
+                      </label>
+                      <input
+                        type="date"
+                        value={selectedDate}
+                        onChange={(e) => {
+                          setSelectedDate(e.target.value);
+                          setSelectedSlots([]);
+                        }}
+                        min={new Date().toISOString().split("T")[0]}
+                        className="w-full max-w-xs p-3 bg-gradient-to-br from-white/[0.08] to-white/[0.02] border border-white/20 rounded-xl text-white text-sm focus:outline-none focus:border-tertiary-400 focus:ring-2 focus:ring-tertiary-400/20 transition-all duration-300 backdrop-blur-sm"
+                      />
+                    </div>
+                  )}
+                </div>
 
                 {/* Créneaux disponibles */}
                 {selectedDate && selectedTatoueur && (
@@ -1058,7 +1088,7 @@ export default function BookingFlow({
             onClick={goPrev}
             disabled={step === 1}
             className={classNames(
-              "group px-6 py-3 rounded-xl text-sm font-one font-semibold transition-all duration-300 border-2",
+              "cursor-pointer group px-6 py-3 rounded-xl text-sm font-one font-semibold transition-all duration-300 border-2",
               step === 1
                 ? "border-white/10 bg-white/5 text-white/40 cursor-not-allowed"
                 : "border-white/20 bg-gradient-to-br from-white/[0.08] to-white/[0.02] text-white/90 hover:border-white/30 hover:bg-white/[0.12] backdrop-blur-sm"
@@ -1086,7 +1116,7 @@ export default function BookingFlow({
             <button
               type="button"
               onClick={goNext}
-              className="group px-8 py-3 rounded-xl text-sm font-one font-semibold bg-gradient-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white transition-all duration-300 shadow-lg shadow-tertiary-500/25 hover:shadow-tertiary-500/40 transform hover:scale-105"
+              className="cursor-pointer group px-8 py-3 rounded-xl text-sm font-one font-semibold bg-gradient-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white transition-all duration-300 shadow-lg shadow-tertiary-500/25 hover:shadow-tertiary-500/40 transform hover:scale-105"
             >
               <div className="flex items-center gap-2">
                 Continuer
@@ -1109,7 +1139,7 @@ export default function BookingFlow({
             <button
               type="submit"
               disabled={isSubmitting || confirmDisabled}
-              className="group px-8 py-3 rounded-xl text-sm font-one font-semibold bg-gradient-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white transition-all duration-300 shadow-lg shadow-tertiary-500/25 hover:shadow-tertiary-500/40 transform hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none"
+              className="cursor-pointer group px-8 py-3 rounded-xl text-sm font-one font-semibold bg-gradient-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white transition-all duration-300 shadow-lg shadow-tertiary-500/25 hover:shadow-tertiary-500/40 transform hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none"
             >
               <div className="flex items-center gap-2">
                 {isSubmitting ? (

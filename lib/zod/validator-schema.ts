@@ -9,6 +9,7 @@ const hhmmToMinutes = (t: string) => {
 export const appointmentRequestSchema = z.object({
   prestation: z.enum(["TATTOO", "PROJET", "RETOUCHE", "PIERCING"]),
   tatoueurId: z.string().optional(), // préférence éventuelle
+  visio: z.boolean().optional(), // pour les projets
 
   availability: z
     .object({
