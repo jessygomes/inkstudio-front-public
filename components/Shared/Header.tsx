@@ -10,7 +10,7 @@ export default function Header() {
         <Navbar />
       </div>
 
-      <div className="lg:hidden px-4 pt-8 rounded-2xl flex justify-between items-center mx-2">
+      <div className="lg:hidden py-1 px-4 rounded-2xl flex justify-between items-center mx-2">
         <p className="text-xl font-one font-bold text-white ">InkStudio</p>
         <NavMobile />
       </div>

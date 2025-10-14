@@ -398,7 +398,7 @@ export default function SalonTabs({
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-[80] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+          className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
           onKeyDown={onLightboxKey}
           tabIndex={-1}
           onClick={closeLightbox}

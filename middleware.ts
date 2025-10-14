@@ -22,7 +22,7 @@ export function middleware(req: NextRequest) {
   }
   // Autoriser spécifiquement les chunks Next.js avec des segments dynamiques
   if (
-    pathname.includes("/_next/static/chunks/app/") &&
+    pathname.includes("/_next/static/chunks/app/(root)/") &&
     (pathname.includes("%5B") || pathname.includes("[")) &&
     pathname.endsWith(".js")
   ) {

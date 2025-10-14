@@ -8,7 +8,7 @@ export default async function RootLayout({
 }) {
   return (
     <div>
-      <div className="fixed top-0 left-0 w-full z-50 bg-transparent backdrop-blur-2xl">
+      <div className="fixed top-0 left-0 w-full z-30 bg-transparent backdrop-blur-2xl">
         <Header />
       </div>
       {children}
