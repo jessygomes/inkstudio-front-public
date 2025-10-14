@@ -22,6 +22,7 @@ async function getSalon(slug: string, loc: string) {
   const url = `${base}/users/${encodeURIComponent(slug)}/${encodeURIComponent(
     loc
   )}`;
+  console.log("Fetching salon data from:", url);
   const res = await fetch(url, { next: { revalidate: 30 } });
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(`Failed to load salon (${res.status})`);
@@ -200,6 +201,8 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
 
   const phoneDisplay = salon.phone ? formatPhone(salon.phone) : "";
   const phoneHref = salon.phone ? salon.phone.replace(/\D/g, "") : "";
+
+  console.log("Rendering salon page for:", salon);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-noir-700 via-noir-500 to-noir-700 pt-20">
