@@ -140,6 +140,7 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
   if (!slug || !loc) notFound();
 
   const salon = await getSalon(slug, loc);
+  console.log("Fetched salon data:", salon);
   if (!salon) notFound();
 
   const heroSrc = salon.image || null;
