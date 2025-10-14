@@ -14,8 +14,18 @@ export function middleware(req: NextRequest) {
     "/sitemap.xml",
     "/salon",
     "/en-savoir-plus",
+    "/trouver-un-salon",
+    "/rdv-request",
   ];
   if (allowedPrefixes.some((p) => pathname.startsWith(p))) {
+    return NextResponse.next();
+  }
+  // Autoriser spécifiquement les chunks Next.js avec des segments dynamiques
+  if (
+    pathname.includes("/_next/static/chunks/app/") &&
+    (pathname.includes("%5B") || pathname.includes("[")) &&
+    pathname.endsWith(".js")
+  ) {
     return NextResponse.next();
   }
   // Autoriser la page profil salon : /salon/:slug/:loc (avec ou sans trailing slash)
