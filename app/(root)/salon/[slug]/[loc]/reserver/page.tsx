@@ -8,7 +8,9 @@ import { PiTiktokLogoThin } from "react-icons/pi";
 import { TfiWorld } from "react-icons/tfi";
 import { parseSalonHours, hoursToLines } from "@/lib/horaireHelper";
 
-type PageParams = { params: { slug: string; loc: string } };
+type PageParams = {
+  params: Promise<{ slug: string; loc: string }>;
+};
 
 async function getSalon(slug: string, loc: string) {
   const base = process.env.NEXT_PUBLIC_BACK_URL!;
@@ -64,8 +66,11 @@ function getOpenNow(raw: any) {
   return { open, today: { start: slot.start, end: slot.end } };
 }
 
-export default async function Page({ params }: PageParams) {
-  const salon = await getSalon(params.slug, params.loc);
+export default async function ReserverPage({ params }: PageParams) {
+  const resolvedParams = await params;
+  const { slug, loc } = resolvedParams;
+
+  const salon = await getSalon(slug, loc);
   if (!salon) notFound();
 
   // résumé salon
@@ -407,4 +412,30 @@ export default async function Page({ params }: PageParams) {
       </section>
     </div>
   );
+}
+
+export async function generateMetadata({ params }: PageParams) {
+  const resolvedParams = await params;
+  const { slug, loc } = resolvedParams;
+
+  const salon = await getSalon(slug, loc);
+  if (!salon) return {};
+
+  return {
+    title: salon.salonName,
+    description: `Réservez votre séance chez ${salon.salonName}, situé à ${salon.address}, ${salon.postalCode} ${salon.city}.`,
+    openGraph: {
+      title: salon.salonName,
+      description: `Réservez votre séance chez ${salon.salonName}, situé à ${salon.address}, ${salon.postalCode} ${salon.city}.`,
+      url: `${process.env.NEXT_PUBLIC_SITE_URL}/salon/${slug}/${loc}`,
+      images: [
+        {
+          url: salon.image
+            ? salon.image
+            : `${process.env.NEXT_PUBLIC_SITE_URL}/default-salon-image.jpg`,
+          alt: salon.salonName,
+        },
+      ],
+    },
+  };
 }

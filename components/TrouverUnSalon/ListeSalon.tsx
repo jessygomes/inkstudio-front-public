@@ -360,7 +360,6 @@ export default function ListeSalon() {
                     let pageNumber: number;
 
                     if (total <= 5) pageNumber = i + 1;
-                    else if (curr <= 3) pageNumber = i + 1;
                     else if (curr >= total - 2) pageNumber = total - 4 + i;
                     else pageNumber = curr - 2 + i;
 

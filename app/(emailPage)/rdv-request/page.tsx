@@ -3,7 +3,7 @@
 "use client";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import { toast } from "sonner";
 
 import { TbClockHour4 } from "react-icons/tb";
@@ -46,7 +46,20 @@ interface TokenValidation {
   appointmentRequest?: ProposeRdvInfo;
 }
 
-export default function RdvRequestPage() {
+// Loading fallback component
+function LoadingFallback() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-noir-700 to-noir-500 flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-tertiary-400 mx-auto mb-4"></div>
+        <p className="text-white font-one">Chargement...</p>
+      </div>
+    </div>
+  );
+}
+
+// Move the main component logic to a separate component
+function RdvRequestContent() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
 
@@ -65,6 +78,69 @@ export default function RdvRequestPage() {
 
   // Ajout d'un état pour le motif de refus
   const [declineReason, setDeclineReason] = useState<string>("");
+
+  // Fonction pour accepter la proposition
+  async function handleAccept() {
+    if (!token) return;
+    if (!selectedSlotId) {
+      toast.error("Merci de choisir un créneau.");
+      return;
+    }
+
+    console.log("Accepting slot:", selectedSlotId);
+
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACK_URL}/appointments/appointment-request-response`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            token,
+            action: "accept",
+            slotId: selectedSlotId,
+          }),
+        }
+      );
+      const result = await res.json();
+      if (result.error) {
+        toast.error(result.message || "Erreur lors de l'acceptation");
+      } else {
+        toast.success("Rendez-vous confirmé !");
+        setIsSuccessful(true);
+      }
+    } catch {
+      toast.error("Erreur serveur");
+    }
+  }
+
+  // Fonction pour décliner la proposition
+  async function handleDecline() {
+    if (!token) return;
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACK_URL}/appointments/appointment-request-response`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            token,
+            action: "decline",
+            reason: declineReason,
+          }),
+        }
+      );
+      const result = await res.json();
+      if (result.error) {
+        toast.error(result.message || "Erreur lors du refus");
+      } else {
+        toast.success("Proposition déclinée !");
+        setIsSuccessful(true);
+      }
+    } catch {
+      toast.error("Erreur serveur");
+    }
+  }
 
   //! Validation du token au chargement
   useEffect(() => {
@@ -174,69 +250,6 @@ export default function RdvRequestPage() {
         </div>
       </div>
     );
-  }
-
-  // Fonction pour accepter la proposition
-  async function handleAccept() {
-    if (!token) return;
-    if (!selectedSlotId) {
-      toast.error("Merci de choisir un créneau.");
-      return;
-    }
-
-    console.log("Accepting slot:", selectedSlotId);
-
-    try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/appointments/appointment-request-response`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            token,
-            action: "accept",
-            slotId: selectedSlotId,
-          }),
-        }
-      );
-      const result = await res.json();
-      if (result.error) {
-        toast.error(result.message || "Erreur lors de l'acceptation");
-      } else {
-        toast.success("Rendez-vous confirmé !");
-        setIsSuccessful(true);
-      }
-    } catch {
-      toast.error("Erreur serveur");
-    }
-  }
-
-  // Fonction pour décliner la proposition
-  async function handleDecline() {
-    if (!token) return;
-    try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/appointments/appointment-request-response`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            token,
-            action: "decline",
-            reason: declineReason,
-          }),
-        }
-      );
-      const result = await res.json();
-      if (result.error) {
-        toast.error(result.message || "Erreur lors du refus");
-      } else {
-        toast.success("Proposition déclinée !");
-        setIsSuccessful(true);
-      }
-    } catch {
-      toast.error("Erreur serveur");
-    }
   }
 
   // Success state (affiché après acceptation ou refus)
@@ -674,5 +687,14 @@ export default function RdvRequestPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+// Main component that wraps the content in Suspense
+export default function RdvRequestPage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <RdvRequestContent />
+    </Suspense>
   );
 }

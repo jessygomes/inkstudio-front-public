@@ -1,6 +1,33 @@
 import { Search } from "@/components/Shared/Search/Search";
 import ListeSalon from "@/components/TrouverUnSalon/ListeSalon";
 import { IoBusinessOutline } from "react-icons/io5";
+import { Suspense } from "react";
+
+// Create a client component for the search functionality
+function SearchContent() {
+  return <Search />;
+}
+
+// Create a client component for the salon list
+function SalonListContent() {
+  return <ListeSalon />;
+}
+
+function SearchFallback() {
+  return (
+    <div className="flex items-center justify-center p-8">
+      <div className="text-white/60">Chargement...</div>
+    </div>
+  );
+}
+
+function SalonListFallback() {
+  return (
+    <div className="flex items-center justify-center p-8">
+      <div className="text-white/60">Chargement des salons...</div>
+    </div>
+  );
+}
 
 export default function TrouverUnSalonPage() {
   return (
@@ -26,10 +53,15 @@ export default function TrouverUnSalonPage() {
             </div>
           </div>
         </div>
-        <Search />
+
+        <Suspense fallback={<SearchFallback />}>
+          <SearchContent />
+        </Suspense>
 
         <div className="py-6">
-          <ListeSalon />
+          <Suspense fallback={<SalonListFallback />}>
+            <SalonListContent />
+          </Suspense>
         </div>
       </section>
     </div>

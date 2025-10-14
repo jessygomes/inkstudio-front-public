@@ -12,7 +12,9 @@ import { CiInstagram, CiFacebook } from "react-icons/ci";
 import { PiTiktokLogoThin } from "react-icons/pi";
 import { TfiWorld } from "react-icons/tfi";
 
-type PageParams = { params: { slug: string; loc: string } };
+type PageParams = {
+  params: Promise<{ slug: string; loc: string }>;
+};
 
 // --- data
 async function getSalon(slug: string, loc: string) {
@@ -41,7 +43,8 @@ async function getSalon(slug: string, loc: string) {
 
 //! --- SEO
 export async function generateMetadata({ params }: PageParams) {
-  const salon = await getSalon(params.slug, params.loc);
+  const resolvedParams = await params;
+  const salon = await getSalon(resolvedParams.slug, resolvedParams.loc);
   if (!salon) return { title: "Salon introuvable" };
 
   const title = `${salon.salonName} — ${salon.city ?? "Salon"}`;
@@ -131,7 +134,8 @@ const todayFR = todayLabelFR();
 
 //! PAGE
 export default async function ProfilPublicSalonPage({ params }: PageParams) {
-  const { slug, loc } = params;
+  const resolvedParams = await params;
+  const { slug, loc } = resolvedParams;
   if (!slug || !loc) notFound();
 
   const salon = await getSalon(slug, loc);
@@ -324,7 +328,7 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
                   Itinéraire
                 </Link>
                 <Link
-                  href={`/salon/${params.slug}/${params.loc}/reserver`}
+                  href={`/salon/${resolvedParams.slug}/${resolvedParams.loc}/reserver`}
                   className="flex-1 group flex justify-center items-center gap-2 py-2.5 px-3 rounded-lg bg-gradient-to-br from-white/[0.08] to-white/[0.02] hover:from-white/[0.12] hover:to-white/[0.06] text-white border border-white/20 hover:border-white/30 transition-all duration-300 text-sm tracking-widest font-one backdrop-blur-sm transform hover:scale-[1.02]"
                 >
                   <svg
