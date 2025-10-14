@@ -12,6 +12,7 @@ export function middleware(req: NextRequest) {
     "/_next/static/",
     "/robots.txt",
     "/sitemap.xml",
+    "/salon",
   ];
   if (allowedPrefixes.some((p) => pathname.startsWith(p))) {
     return NextResponse.next();
