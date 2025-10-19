@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useRef } from "react";
@@ -19,9 +20,13 @@ export default function Navbar() {
   return (
     <nav className="flex justify-between items-center py-4 mx-20">
       {" "}
-      <p className="font-two uppercase font-bold text-xl text-white">
-        InkStudio
-      </p>
+      {/* <p className="font-two font-bold text-xl text-white">TheInkEra</p> */}
+      <Image
+        src="/images/logo_inline_white.png"
+        alt="Logo"
+        width={150}
+        height={50}
+      />
       <ul ref={navRef} className="flex gap-8">
         {links.map((link, index) => {
           const isActive = pathname === link.href;
@@ -31,9 +36,9 @@ export default function Navbar() {
               key={index}
               className={`${
                 isActive
-                  ? "active font-three text-white font-bold"
-                  : "font-thin"
-              } pb-1 text-white text-sm font-three pt-1 px-2 tracking-widest hover:text-white/70 transition-all duration-300`}
+                  ? "active font-two text-white font-bold"
+                  : "font-normal"
+              } pb-1 text-white text-sm font-two pt-1 px-2 tracking-widest hover:text-white/70 transition-all duration-300`}
             >
               <Link href={link.href}>{link.label}</Link>
             </li>

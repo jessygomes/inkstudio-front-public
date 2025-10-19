@@ -1,6 +1,7 @@
 /* eslint-disable react/no-unescaped-entities */
 import { FaArrowDown } from "react-icons/fa";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function Home() {
   return (
@@ -21,27 +22,33 @@ export default function Home() {
         <div className="relative z-10 container mx-auto px-4 lg:px-8 text-center py-12">
           <div className="max-w-4xl mx-auto space-y-6">
             {/* Badge moderne */}
-            <div className="inline-flex items-center gap-2 bg-tertiary-500/20 border border-tertiary-400/30 rounded-full px-4 py-2 backdrop-blur-sm">
-              <span className="w-2 h-2 bg-tertiary-400 rounded-full animate-pulse"></span>
-              <span className="text-tertiary-400 font-one text-base lg:text-xs font-semibold">
-                INKSTUDIO
-              </span>
+            <div className="inline-flex items-center gap-2">
+              <Image
+                src="/images/Logo13.png"
+                alt="Logo"
+                width={50}
+                height={50}
+              />
+              {/* <span className="w-2 h-2 bg-tertiary-400 rounded-full animate-pulse"></span>
+              <span className="text-tertiary-400 font-one text-base lg:text-xs font-semibold tracking-widest">
+                INKERA
+              </span> */}
             </div>
 
             {/* Titre principal */}
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white uppercase font-two tracking-wide leading-tight">
               <span className="block mb-1">Trouvez votre</span>
-              <span className="block bg-gradient-to-r from-tertiary-400 to-tertiary-500 bg-clip-text text-transparent">
+              <span className="block bg-gradient-to-r from-tertiary-400 via-tertiary-500 to-cuatro-500 bg-clip-text text-transparent">
                 salon de tatouage
               </span>
               <span className="block">idéal</span>
             </h1>
 
             {/* Sous-titre */}
-            <p className="text-lg sm:text-xl text-white/80 font-one leading-relaxed max-w-2xl mx-auto">
+            <p className="text-lg sm:text-xl text-white/80 font-one leading-relaxed max-w-3xl mx-auto">
               Trouvez facilement le salon de tatouage qui vous convient proche
               de chez vous.
-              <span className="text-tertiary-400 font-semibold block mt-2">
+              <span className="text-tertiary-400 font-semibold block tracking-wider">
                 Explorez les portfolios des artistes et prenez rendez-vous en
                 ligne.
               </span>

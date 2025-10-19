@@ -14,6 +14,8 @@
   --color-tertiary-400: #ff9d00;
   --color-tertiary-500: #ff5500;
 
+  --color-cuatro-500: #ba01d3;
+
   --color-noir-500: #1a1a1a;
   --color-noir-700: #131313;
 
@@ -23,6 +25,7 @@
   --font-one: "Didact_Gothic", sans-serif;
   --font-two: "Exo_2", sans-serif;
   --font-three: "Montserrat_Alternates", sans-serif;
+  --font-cuatro: "walkway", sans-serif;
 
   /* Définition de l'animation */
   --animation-duration: 40s;
@@ -67,3 +70,20 @@ body {
   scrollbar-width: thin; /* Pour Firefox */
   scrollbar-color: #9ca3af34 transparent; /* Pour Firefox */
 }
+
+/* Custom fonts */
+/* @font-face {
+  font-family: "walkway-regular";
+  src: url("/fonts/Walkway_Bold.ttf") format("ttf");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "walkway-bold";
+  src: url("/fonts/Walkway_Black.ttf") format("ttf");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+} */

@@ -2,6 +2,7 @@
 import React from "react";
 import Link from "next/link";
 import { FaArrowDown } from "react-icons/fa";
+import Image from "next/image";
 
 export default function EnSavoirPlusPage() {
   return (
@@ -22,17 +23,19 @@ export default function EnSavoirPlusPage() {
         <div className="relative z-10 container mx-auto px-4 lg:px-8 text-center py-12">
           <div className="max-w-4xl mx-auto space-y-6">
             {/* Badge moderne */}
-            <div className="inline-flex items-center gap-2 bg-tertiary-500/20 border border-tertiary-400/30 rounded-full px-4 py-2 backdrop-blur-sm">
-              <span className="w-2 h-2 bg-tertiary-400 rounded-full animate-pulse"></span>
-              <span className="text-tertiary-400 font-one text-base lg:text-xs font-semibold">
-                INKSTUDIO
-              </span>
+            <div className="inline-flex items-center gap-2">
+              <Image
+                src="/images/Logo13.png"
+                alt="Logo"
+                width={50}
+                height={50}
+              />
             </div>
 
             {/* Titre principal */}
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white uppercase font-two tracking-wide leading-tight">
               <span className="block mb-1">En savoir plus</span>
-              <span className="block bg-gradient-to-r from-tertiary-400 to-tertiary-500 bg-clip-text text-transparent">
+              <span className="block bg-gradient-to-r from-tertiary-400 via-tertiary-500 to-cuatro-500 bg-clip-text text-transparent">
                 sur notre vision
               </span>
               <span className="block">et notre mission</span>
