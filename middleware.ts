@@ -18,6 +18,7 @@ export function middleware(req: NextRequest) {
     "/contactez-nous",
     "/mentions-legales",
     "/politique-de-confidentialite",
+    "/images/",
     // "/",
   ];
   if (allowedPrefixes.some((p) => pathname.startsWith(p))) {
@@ -36,6 +37,11 @@ export function middleware(req: NextRequest) {
   // Autoriser la page de réservation : /salon/:slug/:loc/reserver (avec ou sans trailing slash)
   const salonBookingRegex = /^\/salon\/[^\/]+\/[^\/]+\/reserver\/?$/;
   if (salonRegex.test(pathname) || salonBookingRegex.test(pathname)) {
+    return NextResponse.next();
+  }
+  // Autoriser les images par extension
+  const imageExtensions = /\.(jpg|jpeg|png|gif|svg|webp|ico)$/i;
+  if (imageExtensions.test(pathname)) {
     return NextResponse.next();
   }
   // Tout le reste → 404 (page "n'existe pas")
