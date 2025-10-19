@@ -2,6 +2,14 @@
 import React from "react";
 import Link from "next/link";
 import { FaArrowDown } from "react-icons/fa";
+import { FaPen } from "react-icons/fa";
+import { FaLightbulb } from "react-icons/fa6";
+import { LuHeartHandshake } from "react-icons/lu";
+import { HiMiniRocketLaunch } from "react-icons/hi2";
+import { PiTargetBold } from "react-icons/pi";
+import { IoIosArrowDropright } from "react-icons/io";
+import { MdDataThresholding } from "react-icons/md";
+import { TiHeartHalfOutline } from "react-icons/ti";
 import Image from "next/image";
 
 export default function EnSavoirPlusPage() {
@@ -25,7 +33,7 @@ export default function EnSavoirPlusPage() {
             {/* Badge moderne */}
             <div className="inline-flex items-center gap-2">
               <Image
-                src="/images/Logo13.png"
+                src="/images/logo13.png"
                 alt="Logo"
                 width={50}
                 height={50}
@@ -111,7 +119,9 @@ export default function EnSavoirPlusPage() {
             <div className="bg-gradient-to-br from-noir-600/50 to-noir-800/50 backdrop-blur-sm rounded-3xl p-6 border border-white/10 hover:border-tertiary-400/30 transition-all duration-300 group">
               <div className="flex flex-col items-center text-center space-y-4">
                 <div className="w-16 h-16 bg-gradient-to-br from-tertiary-500/20 to-tertiary-600/20 rounded-2xl flex items-center justify-center group-hover:from-tertiary-500/40 group-hover:to-tertiary-600/40 transition-all duration-300">
-                  <span className="text-2xl">🖋️</span>
+                  <span className="text-2xl">
+                    <FaPen className="text-tertiary-500" />
+                  </span>
                 </div>
                 <h3 className="text-lg font-bold text-white font-two group-hover:text-tertiary-400 transition-colors">
                   Pourquoi ?
@@ -127,7 +137,9 @@ export default function EnSavoirPlusPage() {
             <div className="bg-gradient-to-br from-noir-600/50 to-noir-800/50 backdrop-blur-sm rounded-3xl p-6 border border-white/10 hover:border-tertiary-400/30 transition-all duration-300 group">
               <div className="flex flex-col items-center text-center space-y-4">
                 <div className="w-16 h-16 bg-gradient-to-br from-tertiary-500/20 to-tertiary-600/20 rounded-2xl flex items-center justify-center group-hover:from-tertiary-500/40 group-hover:to-tertiary-600/40 transition-all duration-300">
-                  <span className="text-2xl">💡</span>
+                  <span className="text-2xl">
+                    <FaLightbulb className="text-tertiary-500" />
+                  </span>
                 </div>
                 <h3 className="text-lg font-bold text-white font-two group-hover:text-tertiary-400 transition-colors">
                   Le projet
@@ -142,7 +154,9 @@ export default function EnSavoirPlusPage() {
             <div className="bg-gradient-to-br from-noir-600/50 to-noir-800/50 backdrop-blur-sm rounded-3xl p-6 border border-white/10 hover:border-tertiary-400/30 transition-all duration-300 group">
               <div className="flex flex-col items-center text-center space-y-4">
                 <div className="w-16 h-16 bg-gradient-to-br from-tertiary-500/20 to-tertiary-600/20 rounded-2xl flex items-center justify-center group-hover:from-tertiary-500/40 group-hover:to-tertiary-600/40 transition-all duration-300">
-                  <span className="text-2xl">❤️</span>
+                  <span className="text-2xl">
+                    <LuHeartHandshake className="text-tertiary-500" />
+                  </span>
                 </div>
                 <h3 className="text-lg font-bold text-white font-two group-hover:text-tertiary-400 transition-colors">
                   Notre mission
@@ -157,7 +171,9 @@ export default function EnSavoirPlusPage() {
             <div className="bg-gradient-to-br from-noir-600/50 to-noir-800/50 backdrop-blur-sm rounded-3xl p-6 border border-white/10 hover:border-tertiary-400/30 transition-all duration-300 group">
               <div className="flex flex-col items-center text-center space-y-4">
                 <div className="w-16 h-16 bg-gradient-to-br from-tertiary-500/20 to-tertiary-600/20 rounded-2xl flex items-center justify-center group-hover:from-tertiary-500/40 group-hover:to-tertiary-600/40 transition-all duration-300">
-                  <span className="text-2xl">🚀</span>
+                  <span className="text-2xl">
+                    <HiMiniRocketLaunch className="text-tertiary-500" />
+                  </span>
                 </div>
                 <h3 className="text-lg font-bold text-white font-two group-hover:text-tertiary-400 transition-colors">
                   L'avenir
@@ -181,7 +197,10 @@ export default function EnSavoirPlusPage() {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 <div className="space-y-6">
                   <div className="flex items-center gap-3 mb-6">
-                    <span className="text-4xl">🖋️</span>
+                    <span className="text-4xl">
+                      {" "}
+                      <FaPen className="text-tertiary-500" />
+                    </span>
                     <h2 className="text-3xl font-bold text-white font-two">
                       Pourquoi ce site existe
                     </h2>
@@ -198,19 +217,25 @@ export default function EnSavoirPlusPage() {
                     </h3>
                     <div className="grid gap-3">
                       <div className="flex items-start gap-3">
-                        <span className="text-tertiary-400 mt-1">➡️</span>
+                        <span className="text-tertiary-400 mt-1">
+                          <IoIosArrowDropright className="text-tertiary-500" />
+                        </span>
                         <span className="text-white/90 font-one">
                           Valoriser le travail des tatoueurs
                         </span>
                       </div>
                       <div className="flex items-start gap-3">
-                        <span className="text-tertiary-400 mt-1">➡️</span>
+                        <span className="text-tertiary-400 mt-1">
+                          <IoIosArrowDropright className="text-tertiary-500" />
+                        </span>
                         <span className="text-white/90 font-one">
                           Faciliter la recherche d'un salon de confiance
                         </span>
                       </div>
                       <div className="flex items-start gap-3">
-                        <span className="text-tertiary-400 mt-1">➡️</span>
+                        <span className="text-tertiary-400 mt-1">
+                          <IoIosArrowDropright className="text-tertiary-500" />
+                        </span>
                         <span className="text-white/90 font-one">
                           Réunir la communauté autour d'un espace authentique
                         </span>
@@ -220,7 +245,9 @@ export default function EnSavoirPlusPage() {
                 </div>
                 <div className="relative">
                   <div className="bg-gradient-to-br from-white/10 to-white/5 rounded-3xl p-8 border border-white/20 backdrop-blur-sm">
-                    <div className="text-6xl text-center mb-6">🎯</div>
+                    <div className="text-6xl text-center mb-6">
+                      <PiTargetBold className="text-tertiary-500 mx-auto" />
+                    </div>
                     <h3 className="text-xl font-bold text-white font-two text-center mb-4">
                       Une solution centralisée
                     </h3>
@@ -241,7 +268,9 @@ export default function EnSavoirPlusPage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
               <div className="lg:order-2 space-y-6">
                 <div className="flex items-center gap-3 mb-6">
-                  <span className="text-4xl">💡</span>
+                  <span className="text-4xl">
+                    <FaLightbulb className="text-tertiary-500" />
+                  </span>
                   <h2 className="text-3xl font-bold text-white font-two">
                     Un projet qui grandit
                   </h2>
@@ -279,7 +308,9 @@ export default function EnSavoirPlusPage() {
               </div>
               <div className="lg:order-1 relative">
                 <div className="bg-gradient-to-br from-white/10 to-white/5 rounded-3xl p-8 border border-white/20 backdrop-blur-sm">
-                  <div className="text-6xl text-center mb-6">📈</div>
+                  <div className="text-6xl text-center mb-6">
+                    <MdDataThresholding className="text-tertiary-500 mx-auto" />
+                  </div>
                   <h3 className="text-xl font-bold text-white font-two text-center mb-4">
                     Croissance continue
                   </h3>
@@ -298,12 +329,15 @@ export default function EnSavoirPlusPage() {
           <div className="container mx-auto px-4 sm:px-8 max-w-6xl">
             <div className="text-center mb-12">
               <div className="flex items-center justify-center gap-3 mb-6">
-                <span className="text-4xl">❤️</span>
+                <span className="text-4xl">
+                  {" "}
+                  <LuHeartHandshake className="text-tertiary-500 mx-auto" />
+                </span>
                 <h2 className="text-3xl font-bold text-white font-two">
                   Une mission avant tout humaine
                 </h2>
               </div>
-              <div className="bg-gradient-to-br from-pink-500/10 to-red-500/5 border border-pink-500/30 rounded-2xl p-8 max-w-3xl mx-auto">
+              <div className="bg-gradient-to-br from-tertiary-500/20 to-cuatro-500/20 border border-pink-500/30 rounded-2xl p-8 max-w-3xl mx-auto">
                 <p className="text-2xl text-center italic text-pink-200 font-one">
                   "Offrir aux tatoueurs un outil moderne, sans leur faire perdre
                   leur âme d'artistes."
@@ -340,7 +374,9 @@ export default function EnSavoirPlusPage() {
 
               <div className="bg-gradient-to-br from-white/[0.05] to-transparent rounded-2xl border border-white/10 p-6 flex items-center">
                 <div className="text-center w-full">
-                  <div className="text-4xl mb-4">🤝</div>
+                  <div className="text-4xl mb-4">
+                    <TiHeartHalfOutline className="text-tertiary-500 mx-auto" />
+                  </div>
                   <p className="text-white/90 font-one">
                     Éthique fondée sur la{" "}
                     <strong className="text-tertiary-300">transparence</strong>,
@@ -359,7 +395,7 @@ export default function EnSavoirPlusPage() {
         <div className="container mx-auto px-4 sm:px-8 text-center">
           <div className="max-w-4xl mx-auto space-y-8">
             <div className="flex items-center justify-center gap-3 mb-6">
-              <span className="text-4xl">📬</span>
+              {/* <span className="text-4xl">📬</span> */}
               <h2 className="text-3xl sm:text-4xl font-bold text-white font-two">
                 Rejoignez l'aventure
               </h2>
@@ -374,7 +410,7 @@ export default function EnSavoirPlusPage() {
 
             <div className="bg-gradient-to-br from-tertiary-500/15 to-tertiary-600/10 border border-tertiary-500/40 rounded-3xl p-8 max-w-2xl mx-auto">
               <h3 className="text-tertiary-300 font-semibold text-xl mb-6 font-two">
-                👉 Vous êtes tatoueur et vous souhaitez rejoindre l'aventure ?
+                Vous êtes tatoueur et vous souhaitez rejoindre l'aventure ?
               </h3>
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                 <Link

@@ -36,7 +36,7 @@ export default function ContactPage() {
           <div className="text-center">
             <div className="inline-flex items-center gap-2">
               <Image
-                src="/images/Logo13.png"
+                src="/images/logo13.png"
                 alt="Logo"
                 width={50}
                 height={50}
@@ -93,7 +93,9 @@ export default function ContactPage() {
                       <h3 className="font-semibold text-white mb-2">
                         Support technique
                       </h3>
-                      <p className="text-tertiary-400">support@inkstudio.fr</p>
+                      <p className="text-tertiary-400">
+                        contact@inkera-studio.com
+                      </p>
                       <p className="text-sm text-white/60 mt-1">
                         Pour les problèmes techniques
                       </p>
@@ -109,7 +111,7 @@ export default function ContactPage() {
                         Partenariats
                       </h3>
                       <p className="text-tertiary-400">
-                        partenariat@inkstudio.fr
+                        contact@inkera-studio.com
                       </p>
                       <p className="text-sm text-white/60 mt-1">
                         Collaborations et partenariats
@@ -133,7 +135,7 @@ export default function ContactPage() {
                 <div className="space-y-6">
                   <div className="bg-white/5 rounded-2xl p-6">
                     <h3 className="font-semibold text-tertiary-300 mb-3 font-one">
-                      Comment inscrire mon salon sur InkStudio ?
+                      Comment inscrire mon salon sur Inkera ?
                     </h3>
                     <p className="text-white/80 font-one text-sm leading-relaxed">
                       Contactez-nous via le formulaire en sélectionnant
@@ -148,8 +150,8 @@ export default function ContactPage() {
                     </h3>
                     <p className="text-white/80 font-one text-sm leading-relaxed">
                       Sélectionnez "Support technique" dans le formulaire ou
-                      contactez directement support@inkstudio.fr en décrivant
-                      précisément votre problème.
+                      contactez directement contact@inkera-studio.com en
+                      décrivant précisément votre problème.
                     </p>
                   </div>
 

@@ -62,7 +62,7 @@ export default function NavbarMobile() {
         {/* Header moderne */}
         <div className="flex items-center justify-between p-6 border-b border-white/10">
           <div className="flex items-center gap-3">
-            <h2 className="text-xl font-bold font-two">InkStudio</h2>
+            <h2 className="text-xl font-bold font-two">INKERA</h2>
           </div>
           <button
             onClick={handleClose}

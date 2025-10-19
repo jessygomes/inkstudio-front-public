@@ -128,7 +128,7 @@ export default function Footer() {
       <div className="border-t border-white/10 pt-6 sm:pt-8">
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="text-white/60 font-one text-xs sm:text-sm text-center sm:text-left">
-            © {new Date().getFullYear()} InkStudio. Tous droits réservés.
+            © {new Date().getFullYear()} Inkera. Tous droits réservés.
           </p>
           <div className="flex justify-center">
             <div className="h-1 w-16 bg-gradient-to-r from-tertiary-400 to-tertiary-500 rounded-full opacity-60"></div>

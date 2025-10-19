@@ -2,6 +2,13 @@
 import { FaArrowDown } from "react-icons/fa";
 import Link from "next/link";
 import Image from "next/image";
+import { IoSearch } from "react-icons/io5";
+import { FaRegImages } from "react-icons/fa";
+import { FaRegAddressBook } from "react-icons/fa6";
+import { LuHeartHandshake } from "react-icons/lu";
+import { PiShootingStarBold } from "react-icons/pi";
+import { FaLightbulb } from "react-icons/fa6";
+import { PiStarFourFill } from "react-icons/pi";
 
 export default function Home() {
   return (
@@ -24,15 +31,11 @@ export default function Home() {
             {/* Badge moderne */}
             <div className="inline-flex items-center gap-2">
               <Image
-                src="/images/Logo13.png"
+                src="/images/logo13.png"
                 alt="Logo"
                 width={50}
                 height={50}
               />
-              {/* <span className="w-2 h-2 bg-tertiary-400 rounded-full animate-pulse"></span>
-              <span className="text-tertiary-400 font-one text-base lg:text-xs font-semibold tracking-widest">
-                INKERA
-              </span> */}
             </div>
 
             {/* Titre principal */}
@@ -114,7 +117,9 @@ export default function Home() {
             <div className="bg-gradient-to-br from-noir-600/50 to-noir-800/50 backdrop-blur-sm rounded-3xl p-6 border border-white/10 hover:border-tertiary-400/30 transition-all duration-300 group">
               <div className="flex flex-col items-center text-center space-y-4">
                 <div className="w-16 h-16 bg-gradient-to-br from-tertiary-500/20 to-tertiary-600/20 rounded-2xl flex items-center justify-center group-hover:from-tertiary-500/40 group-hover:to-tertiary-600/40 transition-all duration-300">
-                  <span className="text-2xl">🔍</span>
+                  <span className="text-2xl">
+                    <IoSearch className="text-tertiary-500" />
+                  </span>
                 </div>
                 <h3 className="text-lg font-bold text-white font-two group-hover:text-tertiary-400 transition-colors">
                   1. Recherchez
@@ -130,7 +135,9 @@ export default function Home() {
             <div className="bg-gradient-to-br from-noir-600/50 to-noir-800/50 backdrop-blur-sm rounded-3xl p-6 border border-white/10 hover:border-tertiary-400/30 transition-all duration-300 group">
               <div className="flex flex-col items-center text-center space-y-4">
                 <div className="w-16 h-16 bg-gradient-to-br from-tertiary-500/20 to-tertiary-600/20 rounded-2xl flex items-center justify-center group-hover:from-tertiary-500/40 group-hover:to-tertiary-600/40 transition-all duration-300">
-                  <span className="text-2xl">🎨</span>
+                  <span className="text-2xl">
+                    <FaRegImages className="text-tertiary-500" />
+                  </span>
                 </div>
                 <h3 className="text-lg font-bold text-white font-two group-hover:text-tertiary-400 transition-colors">
                   2. Explorez
@@ -146,7 +153,9 @@ export default function Home() {
             <div className="bg-gradient-to-br from-noir-600/50 to-noir-800/50 backdrop-blur-sm rounded-3xl p-6 border border-white/10 hover:border-tertiary-400/30 transition-all duration-300 group">
               <div className="flex flex-col items-center text-center space-y-4">
                 <div className="w-16 h-16 bg-gradient-to-br from-tertiary-500/20 to-tertiary-600/20 rounded-2xl flex items-center justify-center group-hover:from-tertiary-500/40 group-hover:to-tertiary-600/40 transition-all duration-300">
-                  <span className="text-2xl">📅</span>
+                  <span className="text-2xl">
+                    <FaRegAddressBook className="text-tertiary-500" />
+                  </span>
                 </div>
                 <h3 className="text-lg font-bold text-white font-two group-hover:text-tertiary-400 transition-colors">
                   3. Réservez
@@ -170,7 +179,9 @@ export default function Home() {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 <div className="space-y-8">
                   <div className="flex items-center gap-3 mb-6">
-                    <span className="text-4xl">🖤</span>
+                    <span className="text-4xl">
+                      <LuHeartHandshake className="text-tertiary-500" />
+                    </span>
                     <h2 className="text-3xl font-bold text-white font-two">
                       Une vitrine moderne pour les salons de tatouage
                     </h2>
@@ -185,7 +196,9 @@ export default function Home() {
 
                   <div className="bg-gradient-to-br from-tertiary-500/10 to-tertiary-600/5 border border-tertiary-500/30 rounded-2xl p-6">
                     <div className="flex items-center gap-3 mb-4">
-                      <span className="text-2xl">💡</span>
+                      <span className="text-2xl">
+                        <FaLightbulb className="text-tertiary-500" />
+                      </span>
                       <h3 className="text-tertiary-300 font-semibold font-two">
                         Ce que vous trouverez ici :
                       </h3>
@@ -216,7 +229,9 @@ export default function Home() {
 
                 <div className="relative">
                   <div className="bg-gradient-to-br from-white/10 to-white/5 rounded-3xl p-8 border border-white/20 backdrop-blur-sm">
-                    <div className="text-6xl text-center mb-6">✨</div>
+                    <div className="text-6xl text-center mb-6">
+                      <PiShootingStarBold className="text-tertiary-500 mx-auto" />
+                    </div>
                     <h3 className="text-xl font-bold text-white font-two text-center mb-4">
                       Découvrez les salons partenaires
                     </h3>
@@ -260,7 +275,9 @@ export default function Home() {
         <div className="container mx-auto px-4 sm:px-8 text-center">
           <div className="max-w-4xl mx-auto space-y-8">
             <div className="flex items-center justify-center gap-3 mb-6">
-              <span className="text-4xl">🌟</span>
+              <span className="text-4xl">
+                <PiStarFourFill className="text-tertiary-500" />
+              </span>
               <h2 className="text-3xl sm:text-4xl font-bold text-white font-two">
                 Prêt à trouver votre artiste ?
               </h2>

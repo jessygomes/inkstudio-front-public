@@ -18,7 +18,7 @@ export function middleware(req: NextRequest) {
     "/contactez-nous",
     "/mentions-legales",
     "/politique-de-confidentialite",
-    // "/",
+    "/",
   ];
   if (allowedPrefixes.some((p) => pathname.startsWith(p))) {
     return NextResponse.next();
