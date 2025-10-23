@@ -96,7 +96,13 @@ export default function BookingFlow({
         to: "15:00",
         alt: { date: "", from: "", to: "" },
       },
-      client: { firstName: "", lastName: "", email: "", phone: "" },
+      client: {
+        firstName: "",
+        lastName: "",
+        email: "",
+        phone: "",
+        birthDate: "",
+      },
       details: {},
       message: "",
     },
@@ -150,7 +156,13 @@ export default function BookingFlow({
     > = {
       1: ["prestation"],
       2: [], // Validation custom
-      3: ["client.firstName", "client.lastName", "client.email"],
+      3: [
+        "client.firstName",
+        "client.lastName",
+        "client.email",
+        "client.phone",
+        "client.birthDate",
+      ],
       4: [],
     };
 
@@ -175,8 +187,16 @@ export default function BookingFlow({
     } else {
       setStep((s) => Math.min(4, s + 1));
     }
+
+    // Remonter en haut de la page
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
-  const goPrev = () => setStep((s) => Math.max(1, s - 1));
+
+  const goPrev = () => {
+    setStep((s) => Math.max(1, s - 1));
+    // Remonter en haut de la page
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   useEffect(() => {
     if (!selectedDate || !selectedTatoueur) return;
@@ -457,6 +477,7 @@ export default function BookingFlow({
       clientLastname: data.client.lastName,
       clientEmail: data.client.email,
       clientPhone: data.client.phone || "",
+      clientBirthdate: new Date(data.client.birthDate), // Convertir en Date
       tatoueurId: selectedTatoueur,
       // Détails du tatouage pour certaines prestations
       description: (data as any).details?.description || "",
@@ -714,6 +735,37 @@ export default function BookingFlow({
                       </p>
                     </div>
 
+                    {/* Légende améliorée */}
+                    <div className="bg-gradient-to-br from-white/[0.05] to-transparent rounded-2xl border border-white/10 p-4">
+                      <h4 className="text-white font-one font-semibold text-sm mb-3">
+                        Légende
+                      </h4>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 text-xs">
+                        <div className="flex items-center gap-2">
+                          <div className="w-4 h-4 bg-gradient-to-br from-white/[0.08] to-white/[0.02] border border-white/20 rounded" />
+                          <span className="text-white/70 font-one">
+                            Disponible
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="w-4 h-4 bg-gradient-to-br from-tertiary-500/30 to-tertiary-600/20 border border-tertiary-400/60 rounded" />
+                          <span className="text-white/70 font-one">
+                            Sélectionné
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="w-4 h-4 bg-gradient-to-br from-gray-500/20 to-gray-600/10 border border-gray-500/40 rounded" />
+                          <span className="text-white/70 font-one">
+                            Occupé{" "}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="w-4 h-4 bg-gradient-to-br from-red-500/20 to-red-600/10 border border-red-500/40 rounded" />
+                          <span className="text-white/70 font-one">Bloqué</span>
+                        </div>
+                      </div>
+                    </div>
+
                     {isLoadingSlots ? (
                       <div className="flex flex-col items-center justify-center p-12 bg-gradient-to-br from-white/[0.05] to-transparent rounded-2xl border border-white/10">
                         <div className="animate-spin rounded-full h-10 w-10 border-2 border-tertiary-400 border-t-transparent mb-4"></div>
@@ -809,45 +861,6 @@ export default function BookingFlow({
                               </button>
                             );
                           })}
-                        </div>
-
-                        {/* Légende améliorée */}
-                        <div className="bg-gradient-to-br from-white/[0.05] to-transparent rounded-2xl border border-white/10 p-4">
-                          <h4 className="text-white font-one font-semibold text-sm mb-3">
-                            Légende
-                          </h4>
-                          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 text-xs">
-                            <div className="flex items-center gap-2">
-                              <div className="w-4 h-4 bg-gradient-to-br from-white/[0.08] to-white/[0.02] border border-white/20 rounded" />
-                              <span className="text-white/70 font-one">
-                                Disponible
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <div className="w-4 h-4 bg-gradient-to-br from-tertiary-500/30 to-tertiary-600/20 border border-tertiary-400/60 rounded" />
-                              <span className="text-white/70 font-one">
-                                Sélectionné
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <div className="w-4 h-4 bg-gradient-to-br from-gray-500/20 to-gray-600/10 border border-gray-500/40 rounded" />
-                              <span className="text-white/70 font-one">
-                                Occupé
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <div className="w-4 h-4 bg-gradient-to-br from-red-500/20 to-red-600/10 border border-red-500/40 rounded" />
-                              <span className="text-white/70 font-one">
-                                Bloqué
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <div className="w-4 h-4 bg-gradient-to-br from-blue-500/20 to-blue-600/10 border border-blue-500/40 rounded" />
-                              <span className="text-white/70 font-one">
-                                Proposé
-                              </span>
-                            </div>
-                          </div>
                         </div>
 
                         {/* Récapitulatif amélioré */}
@@ -950,7 +963,7 @@ export default function BookingFlow({
         {step === 3 && (
           <Section title="Vos informations">
             {/* Infos client */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
               <TextInput
                 name="client.lastName"
                 label="Nom"
@@ -971,8 +984,14 @@ export default function BookingFlow({
               />
               <TextInput
                 name="client.phone"
-                label="Téléphone (optionnel)"
+                label="Téléphone"
                 placeholder="06 12 34 56 78"
+                errors={errors}
+              />
+              <TextInput
+                name="client.birthDate"
+                label="Date de naissance"
+                type="date"
                 errors={errors}
               />
             </div>
@@ -1298,7 +1317,7 @@ function Recap({ salon }: { salon: SalonSummary }) {
           Mes informations
         </div>
         <div className="bg-gradient-to-br from-white/[0.08] to-white/[0.02] p-5 border border-white/10 rounded-xl backdrop-blur-sm">
-          <div className="text-white/90 font-one grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="text-white/90 font-one grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
               <p className="text-xs text-white/60 font-one mb-1 uppercase tracking-wider">
                 Nom complet
@@ -1317,7 +1336,17 @@ function Recap({ salon }: { salon: SalonSummary }) {
               <p className="text-xs text-white/60 font-one mb-1 uppercase tracking-wider">
                 Téléphone
               </p>
-              <p>{client.phone || "Non renseigné"}</p>
+              <p>{client.phone}</p>
+            </div>
+            <div>
+              <p className="text-xs text-white/60 font-one mb-1 uppercase tracking-wider">
+                Date de naissance
+              </p>
+              <p>
+                {client.birthDate
+                  ? new Date(client.birthDate).toLocaleDateString("fr-FR")
+                  : "Non renseignée"}
+              </p>
             </div>
           </div>
         </div>

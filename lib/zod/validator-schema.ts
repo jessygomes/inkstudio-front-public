@@ -52,7 +52,11 @@ export const appointmentRequestSchema = z.object({
     firstName: z.string().min(1, "Prénom requis"),
     lastName: z.string().min(1, "Nom requis"),
     email: z.string().email("Email invalide"),
-    phone: z.string().optional(),
+    phone: z
+      .string()
+      .min(10, "Numéro de téléphone requis")
+      .max(15, "Numéro de téléphone trop long"),
+    birthDate: z.string().min(1, "Date de naissance requise"),
   }),
 
   details: z.object({
