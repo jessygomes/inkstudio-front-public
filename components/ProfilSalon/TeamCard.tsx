@@ -1,4 +1,6 @@
+"use client";
 import Image from "next/image";
+import { useState } from "react";
 
 export function TeamCard({
   name,
@@ -16,6 +18,8 @@ export function TeamCard({
   skills?: string[] | null;
   style?: string[] | null;
 }) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
   const instaUrl = instagram
     ? instagram.startsWith("http")
       ? instagram
@@ -81,7 +85,7 @@ export function TeamCard({
           </div>
         </div>
 
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <p className="text-white/95 font-var(--font-one) text-sm leading-6">
             {name}
           </p>
@@ -110,102 +114,117 @@ export function TeamCard({
             </a>
           )}
         </div>
-      </div>
 
-      {/* Description */}
-      {description && (
-        <p className="mt-4 text-white/80 font-var(--font-one) text-xs leading-7 whitespace-pre-line">
-          {description}
-        </p>
-      )}
-
-      {/* Styles et Skills */}
-      <div className="mt-4 space-y-3">
-        {/* Styles */}
-        {styleChips.length > 0 ? (
-          <div>
-            <p className="text-[10px] text-white/60 font-var(--font-one) uppercase tracking-wider mb-2">
-              Styles
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {styleChips.map((s, i) => (
-                <span
-                  key={`style-${s}-${i}`}
-                  className="px-2.5 py-1 rounded-full bg-tertiary-500/10 text-tertiary-300 border border-tertiary-500/20 text-[11px] font-var(--font-one)"
-                  title={s}
-                >
-                  {s}
-                </span>
-              ))}
-              {remainingCount > 0 && (
-                <span className="px-2.5 py-1 rounded-full bg-tertiary-500/10 text-tertiary-300 border border-tertiary-500/20 text-[11px] font-var(--font-one)">
-                  +{remainingCount}
-                </span>
-              )}
-            </div>
-          </div>
-        ) : (
-          <div>
-            <p className="text-[10px] text-white/60 font-var(--font-one) uppercase tracking-wider mb-2">
-              Styles
-            </p>
-            <div className="text-[11px] text-white/50 font-var(--font-one)">
-              Non renseignés
-            </div>
-          </div>
-        )}
-
-        {/* Skills */}
-        {skillChips.length > 0 ? (
-          <div>
-            <p className="text-[10px] text-white/60 font-var(--font-one) uppercase tracking-wider mb-2">
-              Compétences
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {skillChips.map((s, i) => (
-                <span
-                  key={`skill-${s}-${i}`}
-                  className="px-2.5 py-1 rounded-full bg-white/5 text-white/80 border border-white/10 text-[11px] font-var(--font-one)"
-                  title={s}
-                >
-                  {s}
-                </span>
-              ))}
-              {remainingSkillsCount > 0 && (
-                <span className="px-2.5 py-1 rounded-full bg-white/5 text-white/80 border border-white/10 text-[11px] font-var(--font-one)">
-                  +{remainingSkillsCount}
-                </span>
-              )}
-            </div>
-          </div>
-        ) : (
-          <div>
-            <p className="text-[10px] text-white/60 font-var(--font-one) uppercase tracking-wider mb-2">
-              Compétences
-            </p>
-            <div className="text-[11px] text-white/50 font-var(--font-one)">
-              Non renseignées
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Footer */}
-      <div className="mt-5 flex items-center justify-between border-t border-white/10 pt-3">
-        <div className="text-xs text-white/50 font-var(--font-one)">
-          Profil artiste
-        </div>
-        {/* Bouton Instagram optionnel */}
-        {/* {instaUrl && (
-          <a
-            href={instaUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="cursor-pointer px-3 py-1.5 rounded-lg text-[11px] font-var(--font-one) bg-white/10 hover:bg-white/20 text-white border border-white/15 transition"
+        {/* Bouton d'expansion (mobile et tablette) */}
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="lg:hidden flex items-center justify-center w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 text-white/70 hover:text-white transition-all"
+          aria-label={isExpanded ? "Réduire" : "Développer"}
+        >
+          <svg
+            className={`w-4 h-4 transition-transform duration-200 ${
+              isExpanded ? "rotate-180" : ""
+            }`}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
           >
-            Voir sur Instagram
-          </a>
-        )} */}
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+        </button>
+      </div>
+
+      {/* Contenu dépliable (caché sur mobile/tablette si non étendu) */}
+      <div className={`${isExpanded ? "block" : "hidden"} lg:block`}>
+        {/* Description */}
+        {description && (
+          <p className="mt-4 text-white/80 font-var(--font-one) text-xs leading-7 whitespace-pre-line">
+            {description}
+          </p>
+        )}
+
+        {/* Styles et Skills */}
+        <div className="mt-4 space-y-3">
+          {/* Styles */}
+          {styleChips.length > 0 ? (
+            <div>
+              <p className="text-[10px] text-white/60 font-var(--font-one) uppercase tracking-wider mb-2">
+                Styles
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {styleChips.map((s, i) => (
+                  <span
+                    key={`style-${s}-${i}`}
+                    className="px-2.5 py-1 rounded-full bg-tertiary-500/10 text-tertiary-300 border border-tertiary-500/20 text-[11px] font-var(--font-one)"
+                    title={s}
+                  >
+                    {s}
+                  </span>
+                ))}
+                {remainingCount > 0 && (
+                  <span className="px-2.5 py-1 rounded-full bg-tertiary-500/10 text-tertiary-300 border border-tertiary-500/20 text-[11px] font-var(--font-one)">
+                    +{remainingCount}
+                  </span>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div>
+              <p className="text-[10px] text-white/60 font-var(--font-one) uppercase tracking-wider mb-2">
+                Styles
+              </p>
+              <div className="text-[11px] text-white/50 font-var(--font-one)">
+                Non renseignés
+              </div>
+            </div>
+          )}
+
+          {/* Skills */}
+          {skillChips.length > 0 ? (
+            <div>
+              <p className="text-[10px] text-white/60 font-var(--font-one) uppercase tracking-wider mb-2">
+                Compétences
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {skillChips.map((s, i) => (
+                  <span
+                    key={`skill-${s}-${i}`}
+                    className="px-2.5 py-1 rounded-full bg-white/5 text-white/80 border border-white/10 text-[11px] font-var(--font-one)"
+                    title={s}
+                  >
+                    {s}
+                  </span>
+                ))}
+                {remainingSkillsCount > 0 && (
+                  <span className="px-2.5 py-1 rounded-full bg-white/5 text-white/80 border border-white/10 text-[11px] font-var(--font-one)">
+                    +{remainingSkillsCount}
+                  </span>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div>
+              <p className="text-[10px] text-white/60 font-var(--font-one) uppercase tracking-wider mb-2">
+                Compétences
+              </p>
+              <div className="text-[11px] text-white/50 font-var(--font-one)">
+                Non renseignées
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="mt-5 flex items-center justify-between border-t border-white/10 pt-3">
+          <div className="text-xs text-white/50 font-var(--font-one">
+            Profil artiste
+          </div>
+        </div>
       </div>
     </li>
   );

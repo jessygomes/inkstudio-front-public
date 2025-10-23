@@ -41,10 +41,10 @@ export default function SalonTabs({
   );
 
   // Priorité d’onglet: photos > portfolio > produits
-  const [active, setActive] = useState<"photos" | "portfolio" | "products">(
+  const [active, setActive] = useState<"portfolio" | "photos" | "products">(
     () => {
-      if (counts.photos > 0) return "photos";
       if (counts.portfolio > 0) return "portfolio";
+      if (counts.photos > 0) return "photos";
       return "products";
     }
   );
@@ -83,7 +83,7 @@ export default function SalonTabs({
   const scrollToTop = () =>
     sectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
 
-  const setTab = (tab: "photos" | "portfolio" | "products") => {
+  const setTab = (tab: "portfolio" | "photos" | "products") => {
     setActive(tab);
     scrollToTop();
   };
@@ -305,7 +305,7 @@ export default function SalonTabs({
             <Empty>Aucune pièce dans le portfolio.</Empty>
           ) : (
             <>
-              <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <ul className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {portfolioPageItems.map((item, idx) => {
                   const globalIndex = portfolioStart + idx;
                   return (
@@ -322,7 +322,7 @@ export default function SalonTabs({
                           src={item.imageUrl}
                           alt={item.title}
                           fill
-                          sizes="(min-width:1024px) 33vw, (min-width:640px) 50vw, 100vw"
+                          sizes="(min-width:1024px) 33vw, (min-width:640px) 50vw, 50vw"
                           className="object-cover"
                         />
                         <div className="absolute inset-0 bg-black/0 hover:bg-black/10 transition" />
@@ -355,7 +355,7 @@ export default function SalonTabs({
             <Empty>Aucun produit en vente.</Empty>
           ) : (
             <>
-              <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <ul className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {productsPageItems.map((p) => (
                   <li
                     key={p.id}
@@ -366,7 +366,7 @@ export default function SalonTabs({
                         src={p.imageUrl}
                         alt={p.name}
                         fill
-                        sizes="(min-width:1024px) 33vw, (min-width:640px) 50vw, 100vw"
+                        sizes="(min-width:1024px) 33vw, (min-width:640px) 50vw, 50vw"
                         className="object-cover"
                       />
                     </div>

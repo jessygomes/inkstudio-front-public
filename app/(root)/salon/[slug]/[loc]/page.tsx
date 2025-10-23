@@ -11,6 +11,7 @@ import Script from "next/script";
 import { CiInstagram, CiFacebook } from "react-icons/ci";
 import { PiTiktokLogoThin } from "react-icons/pi";
 import { TfiWorld } from "react-icons/tfi";
+import HoursCard from "@/components/ProfilSalon/HoursCard";
 
 type PageParams = {
   params: Promise<{ slug: string; loc: string }>;
@@ -22,7 +23,6 @@ async function getSalon(slug: string, loc: string) {
   const url = `${base}/users/${encodeURIComponent(slug)}/${encodeURIComponent(
     loc
   )}`;
-  console.log("Fetching salon data from:", url);
   const res = await fetch(url, { next: { revalidate: 30 } });
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(`Failed to load salon (${res.status})`);
@@ -140,7 +140,6 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
   if (!slug || !loc) notFound();
 
   const salon = await getSalon(slug, loc);
-  console.log("Fetched salon data:", salon);
   if (!salon) notFound();
 
   const heroSrc = salon.image || null;
@@ -203,10 +202,25 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
   const phoneDisplay = salon.phone ? formatPhone(salon.phone) : "";
   const phoneHref = salon.phone ? salon.phone.replace(/\D/g, "") : "";
 
-  console.log("Rendering salon page for:", salon);
+  // Gestion des couleurs personnalisées
+  const useCustomColors =
+    salon.colorProfile &&
+    salon.colorProfileBis &&
+    salon.colorProfile !== "default" &&
+    salon.colorProfileBis !== "default";
+
+  const customStyle = useCustomColors
+    ? ({
+        "--color-tertiary-400": salon.colorProfile,
+        "--color-tertiary-500": salon.colorProfileBis,
+      } as React.CSSProperties)
+    : {};
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-noir-700 via-noir-500 to-noir-700 pt-20">
+    <div
+      className="min-h-screen bg-gradient-to-b from-noir-700 via-noir-500 to-noir-700 pt-20"
+      style={customStyle}
+    >
       {/* CONTENT */}
       <section className="relative z-10 px-4 sm:px-6 lg:px-8 xl:px-16 py-6">
         {/* Mobile Hero */}
@@ -484,65 +498,7 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
             </div>
 
             {/* Horaires */}
-            {hours.length > 0 && (
-              <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.08] to-white/[0.02] p-5 backdrop-blur-lg shadow-xl">
-                <h3 className="text-white/95 font-one text-sm tracking-wider uppercase mb-4 flex items-center gap-2">
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                  Horaires d&apos;ouverture
-                </h3>
-                <div className="space-y-1.5">
-                  {hours.map((h) => {
-                    const isToday = h.day.toLowerCase() === todayFR;
-                    return (
-                      <div
-                        key={h.day}
-                        className={`flex items-center justify-between p-3 rounded-lg transition-all duration-200 ${
-                          isToday
-                            ? "bg-gradient-to-r from-tertiary-500/20 to-tertiary-600/10 border border-tertiary-500/30"
-                            : "bg-white/[0.02] hover:bg-white/[0.05]"
-                        }`}
-                      >
-                        <span
-                          className={`font-one text-sm ${
-                            isToday
-                              ? "text-tertiary-300 font-semibold"
-                              : "text-white/80"
-                          }`}
-                        >
-                          {h.day}
-                          {isToday && (
-                            <span className="ml-2 text-xs text-tertiary-400">
-                              (Aujourd&apos;hui)
-                            </span>
-                          )}
-                        </span>
-                        <span
-                          className={`font-one text-sm ${
-                            isToday
-                              ? "text-white font-semibold"
-                              : "text-white/90"
-                          }`}
-                        >
-                          {h.value}
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
+            <HoursCard hours={hours} todayFR={todayFR} openNow={openNow} />
           </aside>
 
           {/* Main Content */}

@@ -87,6 +87,8 @@ export type SalonProfilProps = {
   tiktok: string;
   website: string;
   description: string;
+  colorProfile: string;
+  colorProfileBis: string;
   Portfolio: PortfolioProps[];
   ProductSalon: ProductSalonProps[];
 };
