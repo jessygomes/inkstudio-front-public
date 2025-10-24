@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -31,6 +32,7 @@ type SalonSummary = {
   postalCode?: string | null;
   tatoueurs?: Tatoueur[] | null;
   prestations: string[];
+  appointmentBookingEnabled?: boolean; // Changé de requireConfirmation à appointmentBookingEnabled
 };
 
 type Props = {
@@ -118,10 +120,11 @@ export default function BookingFlow({
 
   const router = useRouter();
 
-  // Étapes
-  const steps = ["Prestation", "Disponibilité", "Vos infos", "Récap"];
+  // Étapes (ne pas inclure l'étape 5 dans l'affichage)
+  const steps = ["Prestation", "Disponibilité", "Infos", "Récap"];
   const [step, setStep] = useState(1);
   const [confirmDisabled, setConfirmDisabled] = useState(false);
+  const [appointmentCreated, setAppointmentCreated] = useState(false);
 
   const prestation = watch("prestation");
   const artists = useMemo(
@@ -146,7 +149,6 @@ export default function BookingFlow({
   const [occupiedSlots, setOccupiedSlots] = useState<any[]>([]);
   const [isLoadingSlots, setIsLoadingSlots] = useState(false);
   const [blockedSlots, setBlockedSlots] = useState<any[]>([]);
-  const [proposeCreneau, setProposeCreneau] = useState<any[]>([]);
 
   // Navigation
   const goNext = async () => {
@@ -248,33 +250,9 @@ export default function BookingFlow({
       }
     };
 
-    const fetchProposeCreneau = async () => {
-      const startOfDay = new Date(selectedDate);
-      startOfDay.setHours(0, 0, 0, 0);
-
-      const endOfDay = new Date(selectedDate);
-      endOfDay.setHours(23, 59, 59, 999);
-
-      try {
-        const url = `${
-          process.env.NEXT_PUBLIC_BACK_URL
-        }/blocked-slots/propose-creneau?tatoueurId=${selectedTatoueur}&start=${encodeURIComponent(
-          startOfDay.toISOString()
-        )}&end=${encodeURIComponent(endOfDay.toISOString())}`;
-
-        const res = await fetch(url);
-        const data = await res.json();
-        setProposeCreneau(Array.isArray(data) ? data : []);
-      } catch (err) {
-        console.error("Erreur lors du fetch des créneaux proposés :", err);
-        setProposeCreneau([]);
-      }
-    };
-
     fetchTimeSlots();
     fetchOccupied();
     fetchBlockedSlots();
-    fetchProposeCreneau();
   }, [selectedDate, selectedTatoueur]);
 
   // Fonction pour vérifier si un créneau chevauche une période bloquée
@@ -306,20 +284,6 @@ export default function BookingFlow({
     return isBlocked;
   };
 
-  // Détecter si un créneau est déjà "proposé" (chevauchement)
-  const getProposedSlot = (slotStart: string, slotEnd?: string) => {
-    const sStart = new Date(slotStart).getTime();
-    const sEnd = slotEnd
-      ? new Date(slotEnd).getTime()
-      : sStart + 30 * 60 * 1000;
-
-    return proposeCreneau.find((proposed: any) => {
-      const from = new Date(proposed.from).getTime();
-      const to = new Date(proposed.to).getTime();
-      return sStart < to && sEnd > from; // chevauchement strict
-    });
-  };
-
   // Sélection / désélection de créneaux consécutifs + vérifs (bloqué / occupé / proposé)
   const handleSlotSelection = (slotStart: string) => {
     // Bloqué ?
@@ -340,16 +304,6 @@ export default function BookingFlow({
     };
     if (isOccupied(slotStart)) {
       toast.error("Ce créneau est déjà occupé");
-      return;
-    }
-
-    // Proposé ?
-    const proposed = getProposedSlot(
-      slotStart,
-      new Date(new Date(slotStart).getTime() + 30 * 60 * 1000).toISOString()
-    );
-    if (proposed) {
-      toast.error("Ce créneau a déjà été proposé ⏳");
       return;
     }
 
@@ -519,49 +473,52 @@ export default function BookingFlow({
         onSubmit={handleSubmit(async (data) => {
           try {
             await onSubmit(data);
+            setAppointmentCreated(true);
+            setStep(5); // Aller à l'étape de confirmation
             toast.success("Rendez-vous créé avec succès !");
-            router.push(salonHref);
           } catch (e: any) {
             toast.error(e?.message || "Erreur serveur");
           }
         })}
         className="w-full"
       >
-        {/* Header étapes */}
-        <div className="mb-8 px-4 sm:px-0">
-          <div className="flex items-center justify-between max-w-4xl mx-auto">
-            {steps.map((label, i) => (
-              <div key={label} className="flex-1 flex items-center">
-                <div className="flex flex-col items-center gap-3">
-                  <StepBadge
-                    n={i + 1}
-                    active={step === i + 1 || step > i + 1}
-                  />
-                  <span
-                    className={classNames(
-                      "text-xs font-one text-center tracking-wide transition-colors duration-300",
-                      step >= i + 1 ? "text-white/90" : "text-white/50"
-                    )}
-                  >
-                    {label}
-                  </span>
-                </div>
-                {i < steps.length - 1 && (
-                  <div className="flex-1 mx-4 sm:mx-8">
-                    <div
-                      className={classNames(
-                        "h-[2px] rounded-full transition-all duration-500",
-                        step > i + 1
-                          ? "bg-gradient-to-r from-tertiary-400 to-tertiary-500"
-                          : "bg-white/15"
-                      )}
+        {/* Header étapes - seulement si pas à l'étape 5 */}
+        {step < 5 && (
+          <div className="mb-8 px-4 sm:px-0">
+            <div className="flex items-center justify-between max-w-4xl mx-auto">
+              {steps.map((label, i) => (
+                <div key={label} className="flex-1 flex items-center">
+                  <div className="flex flex-col items-center gap-3">
+                    <StepBadge
+                      n={i + 1}
+                      active={step === i + 1 || step > i + 1}
                     />
+                    <span
+                      className={classNames(
+                        "text-xs font-one text-center tracking-wide transition-colors duration-300",
+                        step >= i + 1 ? "text-white/90" : "text-white/50"
+                      )}
+                    >
+                      {label}
+                    </span>
                   </div>
-                )}
-              </div>
-            ))}
+                  {i < steps.length - 1 && (
+                    <div className="flex-1 mx-4 sm:mx-8">
+                      <div
+                        className={classNames(
+                          "h-[2px] rounded-full transition-all duration-500",
+                          step > i + 1
+                            ? "bg-gradient-to-r from-tertiary-400 to-tertiary-500"
+                            : "bg-white/15"
+                        )}
+                      />
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Étape 1 : Prestation */}
         {step === 1 && (
@@ -667,8 +624,7 @@ export default function BookingFlow({
                 </h3>
                 <p className="text-orange-300/80 text-sm font-one">
                   Les réservations en ligne ne sont pas activées pour ce salon
-                  actuellement. Contactez directement le salon pour prendre
-                  rendez-vous.
+                  actuellement. Contactez directement le salon pour rendez-vous.
                 </p>
               </div>
             ) : (
@@ -775,92 +731,126 @@ export default function BookingFlow({
                       </div>
                     ) : timeSlots.length > 0 ? (
                       <>
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3">
-                          {timeSlots.map((slot) => {
-                            const slotStart = new Date(slot.start);
-                            const slotEnd = new Date(
-                              slotStart.getTime() + 30 * 60 * 1000
-                            );
-                            const startText = slotStart.toLocaleTimeString(
-                              "fr-FR",
-                              { hour: "2-digit", minute: "2-digit" }
-                            );
+                        <div className="space-y-2">
+                          <label className="text-xs text-white/70 font-one">
+                            Sélectionnez les créneaux (30 min chacun)
+                          </label>
+                          <p className="text-xs text-white/50 mb-3">
+                            Cliquez sur les créneaux pour les sélectionner. Ils
+                            doivent être consécutifs.
+                          </p>
+                          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
+                            {timeSlots.map((slot) => {
+                              const slotStart = new Date(slot.start);
+                              const slotEnd = new Date(slot.end);
+                              const startTime = slotStart.toLocaleTimeString(
+                                "fr-FR",
+                                { hour: "2-digit", minute: "2-digit" }
+                              );
+                              const endTime = slotEnd.toLocaleTimeString(
+                                "fr-FR",
+                                { hour: "2-digit", minute: "2-digit" }
+                              );
 
-                            const isSelected = selectedSlots.includes(
-                              slot.start
-                            );
+                              const isSelected = selectedSlots.includes(
+                                slot.start
+                              );
 
-                            const isOccupied = occupiedSlots.some(
-                              (occupied) => {
-                                const oStart = new Date(occupied.start);
-                                const oEnd = new Date(occupied.end);
-                                return slotStart < oEnd && slotEnd > oStart;
-                              }
-                            );
-
-                            const blocked = isSlotBlocked(slot.start, slot.end);
-                            const proposed = getProposedSlot(
-                              slot.start,
-                              slot.end
-                            );
-                            const isProposed = !!proposed;
-
-                            let className =
-                              "relative group cursor-pointer p-3 rounded-xl text-sm text-white font-one transition-all duration-300 border-2 text-center min-h-[3.5rem] flex flex-col items-center justify-center ";
-
-                            let disabled = false;
-                            let statusIcon = "";
-                            let statusColor = "";
-
-                            if (isProposed) {
-                              className +=
-                                "bg-gradient-to-br from-blue-500/20 to-blue-600/10 text-blue-300 border-blue-500/40 cursor-not-allowed";
-                              disabled = true;
-                              statusIcon = "⏳";
-                              statusColor = "text-blue-300";
-                            } else if (blocked) {
-                              className +=
-                                "bg-gradient-to-br from-red-500/20 to-red-600/10 text-red-300 border-red-500/40 cursor-not-allowed";
-                              disabled = true;
-                              statusIcon = "🚫";
-                              statusColor = "text-red-300";
-                            } else if (isOccupied) {
-                              className +=
-                                "bg-gradient-to-br from-gray-500/20 to-gray-600/10 text-gray-400 border-gray-500/40 cursor-not-allowed";
-                              disabled = true;
-                              statusIcon = "❌";
-                              statusColor = "text-gray-400";
-                            } else if (isSelected) {
-                              className +=
-                                "bg-gradient-to-br from-tertiary-500/30 to-tertiary-600/20 text-tertiary-200 border-tertiary-400/60 shadow-lg shadow-tertiary-500/25 transform scale-105";
-                              statusIcon = "✓";
-                              statusColor = "text-tertiary-200";
-                            } else {
-                              className +=
-                                "bg-gradient-to-br from-white/[0.08] to-white/[0.02] text-white/80 border-white/20 hover:border-tertiary-400/50 hover:bg-gradient-to-br hover:from-tertiary-500/10 hover:to-tertiary-600/5 hover:text-white hover:scale-105 backdrop-blur-sm";
-                            }
-
-                            return (
-                              <button
-                                key={`${slot.start}-${slot.end}`}
-                                type="button"
-                                onClick={() =>
-                                  !disabled && handleSlotSelection(slot.start)
+                              const isOccupied = occupiedSlots.some(
+                                (occupied) => {
+                                  const oStart = new Date(occupied.start);
+                                  const oEnd = new Date(occupied.end);
+                                  return slotStart < oEnd && slotEnd > oStart;
                                 }
-                                disabled={disabled}
-                                className={className}
-                              >
-                                <div className="font-semibold">{startText}</div>
-                                {statusIcon && (
-                                  <div
-                                    className={`text-xs mt-1 ${statusColor}`}
-                                  >
-                                    {statusIcon}
-                                  </div>
-                                )}
-                              </button>
-                            );
-                          })}
+                              );
+
+                              const blocked = isSlotBlocked(
+                                slot.start,
+                                slot.end
+                              );
+
+                              // Déterminer la couleur et l'état du bouton
+                              let buttonClass =
+                                "cursor-pointer px-2 py-2 sm:py-1 rounded text-xs text-white font-one transition-all duration-200 border text-center ";
+                              let buttonText = `${startTime}-${endTime}`;
+                              let isDisabled = false;
+                              let buttonTitle = "";
+
+                              if (blocked) {
+                                buttonClass +=
+                                  "bg-red-900/50 text-red-300 border-red-700/50 cursor-not-allowed";
+                                buttonText += " 🚫";
+                                isDisabled = true;
+                                buttonTitle = "Créneau bloqué - indisponible";
+                              } else if (isOccupied) {
+                                buttonClass +=
+                                  "bg-gray-700/50 text-gray-400 border-gray-600/50 cursor-not-allowed";
+                                buttonText += " ❌";
+                                isDisabled = true;
+                                buttonTitle = "Créneau déjà réservé";
+                              } else if (isSelected) {
+                                buttonClass +=
+                                  "bg-green-600/30 text-green-300 border-green-500/50 hover:bg-green-600/50";
+                                buttonTitle =
+                                  "Créneau sélectionné - cliquer pour désélectionner";
+                              } else {
+                                buttonClass +=
+                                  "bg-tertiary-600/20 text-tertiary-300 border-tertiary-500/30 hover:bg-tertiary-600/40 hover:text-white";
+                                buttonTitle =
+                                  "Créneau disponible - cliquer pour sélectionner";
+                              }
+
+                              return (
+                                <button
+                                  key={`${slot.start}-${slot.end}`}
+                                  type="button"
+                                  onClick={() =>
+                                    !isDisabled &&
+                                    handleSlotSelection(slot.start)
+                                  }
+                                  disabled={isDisabled}
+                                  className={buttonClass}
+                                  title={buttonTitle}
+                                >
+                                  {buttonText}
+                                </button>
+                              );
+                            })}
+                          </div>
+
+                          {/* Légende des créneaux - responsive */}
+                          <div className="mt-4 grid grid-cols-2 sm:flex sm:flex-wrap gap-2 sm:gap-4 text-xs">
+                            <div className="flex items-center gap-2">
+                              <div className="w-3 h-3 bg-tertiary-600/20 border border-tertiary-500/30 rounded"></div>
+                              <span className="text-white/70 font-one">
+                                Libre
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <div className="w-3 h-3 bg-green-600/30 border border-green-500/50 rounded"></div>
+                              <span className="text-white/70 font-one">
+                                Sélectionné
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <div className="w-3 h-3 bg-gray-700/50 border border-gray-600/50 rounded"></div>
+                              <span className="text-white/70 font-one">
+                                Occupé ❌
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <div className="w-3 h-3 bg-red-900/50 border border-red-700/50 rounded"></div>
+                              <span className="text-white/70 font-one">
+                                Bloqué 🚫
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <div className="w-3 h-3 bg-blue-900/40 border border-blue-700/50 rounded"></div>
+                              <span className="text-white/70 font-one">
+                                Proposé ⏳
+                              </span>
+                            </div>
+                          </div>
                         </div>
 
                         {/* Récapitulatif amélioré */}
@@ -1095,82 +1085,152 @@ export default function BookingFlow({
           <Section title="Récapitulatif">
             <Recap salon={salon} />
             <div className="mt-4 text-[11px] text-white/50 font-one">
-              En validant, votre rendez-vous sera créé et confirmé directement.
+              {salon.appointmentBookingEnabled
+                ? "En validant, votre demande de rendez-vous sera envoyée au salon pour confirmation."
+                : " En validant, votre rendez-vous sera créé et confirmé directement."}
             </div>
           </Section>
         )}
 
-        {/* Footer navigation */}
-        <div className="mt-8 flex items-center justify-between">
-          <button
-            type="button"
-            onClick={goPrev}
-            disabled={step === 1}
-            className={classNames(
-              "cursor-pointer group px-6 py-3 rounded-xl text-sm font-one font-semibold transition-all duration-300 border-2",
-              step === 1
-                ? "border-white/10 bg-white/5 text-white/40 cursor-not-allowed"
-                : "border-white/20 bg-gradient-to-br from-white/[0.08] to-white/[0.02] text-white/90 hover:border-white/30 hover:bg-white/[0.12] backdrop-blur-sm"
-            )}
-          >
-            <div className="flex items-center gap-2">
-              <svg
-                className="w-4 h-4 transition-transform group-hover:-translate-x-1"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 19l-7-7 7-7"
-                />
-              </svg>
-              Retour
-            </div>
-          </button>
-
-          {step < 4 ? (
-            <button
-              type="button"
-              onClick={goNext}
-              className="cursor-pointer group px-8 py-3 rounded-xl text-sm font-one font-semibold bg-gradient-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white transition-all duration-300 shadow-lg shadow-tertiary-500/25 hover:shadow-tertiary-500/40 transform hover:scale-105"
-            >
-              <div className="flex items-center gap-2">
-                Continuer
+        {/* Étape 5 : Confirmation */}
+        {step === 5 && appointmentCreated && (
+          <Section title="Rendez-vous créé">
+            <div className="text-center space-y-6">
+              {/* Icône de succès */}
+              <div className="mx-auto w-20 h-20 bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-full flex items-center justify-center shadow-lg shadow-emerald-500/25">
                 <svg
-                  className="w-4 h-4 transition-transform group-hover:translate-x-1"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+                  className="w-10 h-10 text-white"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
                 >
                   <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 5l7 7-7 7"
+                    fillRule="evenodd"
+                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                    clipRule="evenodd"
                   />
                 </svg>
               </div>
-            </button>
-          ) : (
-            <button
-              type="submit"
-              disabled={isSubmitting || confirmDisabled}
-              className="cursor-pointer group px-8 py-3 rounded-xl text-sm font-one font-semibold bg-gradient-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white transition-all duration-300 shadow-lg shadow-tertiary-500/25 hover:shadow-tertiary-500/40 transform hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none"
-            >
-              <div className="flex items-center gap-2">
-                {isSubmitting ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-                    Création en cours...
-                  </>
-                ) : confirmDisabled ? (
-                  "Veuillez patienter..."
+
+              {/* Message principal */}
+              <div className="space-y-4">
+                <h2 className="text-2xl font-one font-bold text-white">
+                  {salon.appointmentBookingEnabled
+                    ? "Demande de rendez-vous envoyée !"
+                    : "Rendez-vous confirmé !"}
+                </h2>
+
+                {salon.appointmentBookingEnabled ? (
+                  <div className="bg-gradient-to-br from-orange-500/10 to-orange-600/5 border border-orange-500/30 rounded-2xl p-6">
+                    <div className="space-y-4 text-left">
+                      <div className="flex items-start gap-4">
+                        <div className="w-8 h-8 bg-orange-500/20 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                          <svg
+                            className="w-4 h-4 text-orange-400"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                          </svg>
+                        </div>
+                        <div>
+                          <h3 className="text-orange-300 font-one font-semibold text-lg mb-2">
+                            En attente de confirmation
+                          </h3>
+                          <p className="text-orange-300/90 font-one text-sm leading-relaxed">
+                            Votre demande de rendez-vous a été transmise à{" "}
+                            <span className="font-semibold">{salon.name}</span>.
+                            Le salon va examiner votre demande et vous envoyer
+                            un email de confirmation sous 24-48h.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="bg-orange-500/10 rounded-lg p-4 border border-orange-500/20">
+                        <div className="flex items-center gap-2 mb-2">
+                          <svg
+                            className="w-4 h-4 text-orange-400"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                            />
+                          </svg>
+                          <span className="text-orange-300 font-one font-semibold text-sm">
+                            Vérifiez vos emails
+                          </span>
+                        </div>
+                        <p className="text-orange-300/80 font-one text-xs">
+                          N'oubliez pas de vérifier votre dossier spam/courriers
+                          indésirables. L'email de confirmation pourrait s'y
+                          trouver.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 ) : (
-                  <>
-                    Créer le rendez-vous
+                  <div className="bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 border border-emerald-500/30 rounded-2xl p-6">
+                    <div className="space-y-4 text-left">
+                      <div className="flex items-start gap-4">
+                        <div className="w-8 h-8 bg-emerald-500/20 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                          <svg
+                            className="w-4 h-4 text-emerald-400"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </div>
+                        <div>
+                          <h3 className="text-emerald-300 font-one font-semibold text-lg mb-2">
+                            Rendez-vous confirmé
+                          </h3>
+                          <p className="text-emerald-300/90 font-one text-sm leading-relaxed">
+                            Votre rendez-vous chez{" "}
+                            <span className="font-semibold">{salon.name}</span>{" "}
+                            est automatiquement confirmé. Vous recevrez un email
+                            de confirmation avec tous les détails.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="bg-emerald-500/10 rounded-lg p-4 border border-emerald-500/20">
+                        <p className="text-emerald-300/90 font-one text-sm">
+                          <span className="font-semibold">
+                            Prochaines étapes :
+                          </span>{" "}
+                          Préparez-vous pour votre rendez-vous et n'hésitez pas
+                          à contacter le salon si vous avez des questions.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Bouton de retour */}
+              <div className="pt-6">
+                <button
+                  type="button"
+                  onClick={() => router.push(salonHref)}
+                  className="cursor-pointer group px-8 py-4 rounded-xl text-sm font-one font-semibold bg-gradient-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white transition-all duration-300 shadow-lg shadow-tertiary-500/25 hover:shadow-tertiary-500/40 transform hover:scale-105"
+                >
+                  <div className="flex items-center gap-2">
+                    Retour au salon
                     <svg
                       className="w-4 h-4 transition-transform group-hover:translate-x-1"
                       fill="none"
@@ -1181,15 +1241,108 @@ export default function BookingFlow({
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         strokeWidth={2}
-                        d="M5 13l4 4L19 7"
+                        d="M13 7l5 5m0 0l-5 5m5-5H6"
                       />
                     </svg>
-                  </>
-                )}
+                  </div>
+                </button>
+              </div>
+            </div>
+          </Section>
+        )}
+
+        {/* Footer navigation - seulement si pas à l'étape 5 */}
+        {step < 5 && (
+          <div className="mt-8 flex items-center justify-between">
+            <button
+              type="button"
+              onClick={goPrev}
+              disabled={step === 1}
+              className={classNames(
+                "cursor-pointer group px-6 py-3 rounded-xl text-sm font-one font-semibold transition-all duration-300 border-2",
+                step === 1
+                  ? "border-white/10 bg-white/5 text-white/40 cursor-not-allowed"
+                  : "border-white/20 bg-gradient-to-br from-white/[0.08] to-white/[0.02] text-white/90 hover:border-white/30 hover:bg-white/[0.12] backdrop-blur-sm"
+              )}
+            >
+              <div className="flex items-center gap-2">
+                <svg
+                  className="w-4 h-4 transition-transform group-hover:-translate-x-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 19l-7-7 7-7"
+                  />
+                </svg>
+                Retour
               </div>
             </button>
-          )}
-        </div>
+
+            {step < 4 ? (
+              <button
+                type="button"
+                onClick={goNext}
+                className="cursor-pointer group px-8 py-3 rounded-xl text-sm font-one font-semibold bg-gradient-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white transition-all duration-300 shadow-lg shadow-tertiary-500/25 hover:shadow-tertiary-500/40 transform hover:scale-105"
+              >
+                <div className="flex items-center gap-2">
+                  Continuer
+                  <svg
+                    className="w-4 h-4 transition-transform group-hover:translate-x-1"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </div>
+              </button>
+            ) : (
+              <button
+                type="submit"
+                disabled={isSubmitting || confirmDisabled}
+                className="cursor-pointer group px-8 py-3 rounded-xl text-sm font-one font-semibold bg-gradient-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white transition-all duration-300 shadow-lg shadow-tertiary-500/25 hover:shadow-tertiary-500/40 transform hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none"
+              >
+                <div className="flex items-center gap-2">
+                  {isSubmitting ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                      Création en cours...
+                    </>
+                  ) : confirmDisabled ? (
+                    "Veuillez patienter..."
+                  ) : (
+                    <>
+                      Créer le rendez-vous
+                      <svg
+                        className="w-4 h-4 transition-transform group-hover:translate-x-1"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                    </>
+                  )}
+                </div>
+              </button>
+            )}
+          </div>
+        )}
       </form>
     </FormProvider>
   );

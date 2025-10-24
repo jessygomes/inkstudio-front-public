@@ -216,6 +216,8 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
       } as React.CSSProperties)
     : {};
 
+  console.log("SALON:", salon);
+
   return (
     <div
       className="min-h-screen bg-gradient-to-b from-noir-700 via-noir-500 to-noir-700 pt-20"
