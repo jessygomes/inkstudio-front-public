@@ -34,31 +34,25 @@ export default function ImageUploader({
   async function handleFiles(files: FileList | null) {
     if (!files?.length) return;
 
-    const file = files[0];
+    const selectedFile = files[0];
 
     // Vérifier le type de fichier
-    if (!file.type.startsWith("image/")) {
+    if (!selectedFile.type.startsWith("image/")) {
       alert("Veuillez sélectionner une image valide");
       return;
     }
 
     // Vérifier la taille du fichier (max 8MB)
     const maxSize = 8 * 1024 * 1024; // 8MB
-    if (file.size > maxSize) {
+    if (selectedFile.size > maxSize) {
       alert("L'image est trop volumineuse. Taille maximale : 8MB");
       return;
     }
 
     if (onFileSelect) {
-      onFileSelect(file);
+      onFileSelect(selectedFile);
     }
   }
-
-  const handleRemoveFile = () => {
-    if (onFileSelect) {
-      onFileSelect(null);
-    }
-  };
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -75,6 +69,12 @@ export default function ImageUploader({
     setIsDragOver(false);
     const files = e.dataTransfer.files;
     handleFiles(files);
+  };
+
+  const handleRemoveFile = () => {
+    if (onFileSelect) {
+      onFileSelect(null);
+    }
   };
 
   return (
@@ -159,18 +159,18 @@ export default function ImageUploader({
       </div>
 
       {/* Messages d'aide - adaptés au mode compact */}
-      {compact && currentImage && (
+      {compact && (previewUrl || currentImage) && (
         <div className="text-[10px] text-white/60">Image sélectionnée</div>
       )}
 
-      {!compact && currentImage && (
+      {!compact && (previewUrl || currentImage) && (
         <div className="text-xs text-white/60">
-          Aperçu : Cette image sera affichée dans votre profil
+          Aperçu : Cette image sera affichée
         </div>
       )}
 
       {/* Bouton de sélection alternatif - seulement en mode normal et sans image */}
-      {!compact && !currentImage && (
+      {!compact && !currentImage && !previewUrl && (
         <button
           type="button"
           onClick={() => {

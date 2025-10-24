@@ -424,40 +424,35 @@ export default function BookingFlow({
     let sketchUrl = "";
     let referenceUrl = "";
 
-    try {
-      if (sketchFile) {
-        const compressedSketch = await imageCompression(sketchFile, {
-          maxSizeMB: 1,
-          maxWidthOrHeight: 1920,
-          useWebWorker: true,
-          fileType: "image/webp",
-          initialQuality: 0.8,
-        });
-        const res = await uploadFiles("imageUploader", {
-          files: [compressedSketch],
-        });
-        sketchUrl = res?.[0]?.url || "";
-        // Mettre à jour le formulaire pour le récap
-        setValue("details.sketch", sketchUrl);
-      }
-      if (referenceFile) {
-        const compressedReference = await imageCompression(referenceFile, {
-          maxSizeMB: 1,
-          maxWidthOrHeight: 1920,
-          useWebWorker: true,
-          fileType: "image/webp",
-          initialQuality: 0.8,
-        });
-        const res = await uploadFiles("imageUploader", {
-          files: [compressedReference],
-        });
-        referenceUrl = res?.[0]?.url || "";
-        // Mettre à jour le formulaire pour le récap
-        setValue("details.reference", referenceUrl);
-      }
-    } catch (error) {
-      console.error("Erreur lors de l'upload des images:", error);
-      throw new Error("Erreur lors de l'upload des images. Veuillez réessayer.");
+    if (sketchFile) {
+      const compressedSketch = await imageCompression(sketchFile, {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 1920,
+        useWebWorker: true,
+        fileType: "image/webp",
+        initialQuality: 0.8,
+      });
+      const res = await uploadFiles("imageUploader", {
+        files: [compressedSketch],
+      });
+      sketchUrl = res?.[0]?.url || "";
+      // Mettre à jour le formulaire pour le récap
+      setValue("details.sketch", sketchUrl);
+    }
+    if (referenceFile) {
+      const compressedReference = await imageCompression(referenceFile, {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 1920,
+        useWebWorker: true,
+        fileType: "image/webp",
+        initialQuality: 0.8,
+      });
+      const res = await uploadFiles("imageUploader", {
+        files: [compressedReference],
+      });
+      referenceUrl = res?.[0]?.url || "";
+      // Mettre à jour le formulaire pour le récap
+      setValue("details.reference", referenceUrl);
     }
 
     // Calculer start et end en format ISO à partir des créneaux sélectionnés
@@ -672,7 +667,12 @@ export default function BookingFlow({
                 </h3>
                 <p className="text-orange-300/80 text-sm font-one">
                   Les réservations en ligne ne sont pas activées pour ce salon
-                  actuellement. Contactez directement le salon pour
+                  actuellement. Contactez directement le salon pour prendre
+                  rendez-vous.
+                </p>
+              </div>
+            ) : (
+              <>
                 {/* Sélection du tatoueur */}
                 <div className="mb-2 flex flex-col sm:flex-row sm:items-center sm:gap-6">
                   <div className="mb-6">
