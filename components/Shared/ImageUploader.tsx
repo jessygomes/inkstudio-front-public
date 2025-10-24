@@ -2,43 +2,21 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { useUploadThing } from "@/lib/utils/uploadthing";
 
 interface SalonImageUploaderProps {
   currentImage?: string;
-  // onImageUpload: (imageUrl: string) => void;
-  // onImageRemove: () => void;
   compact?: boolean;
-  onFileSelect?: (file: File) => void;
-  selectedFile?: File | null;
-  previewMode?: boolean;
-  file?: File | null; // Ajouté
+  onFileSelect?: (file: File | null) => void;
+  file?: File | null;
 }
 
 export default function ImageUploader({
   currentImage,
-  // onImageUpload,
-  // onImageRemove,
   compact = false,
   onFileSelect,
   file,
 }: SalonImageUploaderProps) {
-  const [progress, setProgress] = useState<number>(0);
   const [isDragOver, setIsDragOver] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false); // État pour le loader de suppression
-
-  const { startUpload, isUploading } = useUploadThing("imageUploader", {
-    onClientUploadComplete: (res: { url: string; key: string }[]) => {
-      // if (res && res[0]) {
-      //   onImageUpload(res[0].url);
-      // }
-      setProgress(100);
-    },
-    onUploadProgress: (p: number) => setProgress(p),
-    onUploadError: (error: Error) => {
-      console.error("Upload error:", error);
-    },
-  });
 
   // Pour l'aperçu local
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -53,81 +31,6 @@ export default function ImageUploader({
     }
   }, [file]);
 
-  // Fonction pour extraire la clé d'une URL UploadThing
-  const extractKeyFromUrl = (url: string): string | null => {
-    try {
-      const patterns = [
-        /\/f\/([^\/\?]+)/,
-        /uploadthing\.com\/([^\/\?]+)/,
-        /utfs\.io\/f\/([^\/\?]+)/,
-      ];
-
-      for (const pattern of patterns) {
-        const match = url.match(pattern);
-        if (match && match[1]) {
-          return match[1];
-        }
-      }
-
-      const urlParts = url.split("/");
-      const lastPart = urlParts[urlParts.length - 1];
-      if (lastPart && !lastPart.includes(".")) {
-        return lastPart;
-      }
-
-      return null;
-    } catch (error) {
-      console.error("Erreur lors de l'extraction de la clé:", error);
-      return null;
-    }
-  };
-
-  // Fonction pour supprimer de UploadThing
-  const deleteFromUploadThing = async (imageUrl: string): Promise<boolean> => {
-    try {
-      const key = extractKeyFromUrl(imageUrl);
-      if (!key) {
-        console.warn("⚠️ Impossible d'extraire la clé de l'URL:", imageUrl);
-        return false;
-      }
-
-      const response = await fetch("/api/uploadthing/delete", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ key }),
-      });
-
-      const result = await response.json();
-      return response.ok && result.success;
-    } catch (error) {
-      console.error("❌ Erreur lors de la suppression d'UploadThing:", error);
-      return false;
-    }
-  };
-
-  // Fonction pour gérer la suppression de l'image
-  const handleImageRemove = async () => {
-    setIsDeleting(true); // Activer le loader
-
-    try {
-      if (currentImage) {
-        const deleted = await deleteFromUploadThing(currentImage);
-        if (deleted) {
-          console.log("✅ Image supprimée d'UploadThing");
-        } else {
-          console.warn("⚠️ Impossible de supprimer l'image d'UploadThing");
-        }
-      }
-      // onImageRemove();
-    } catch (error) {
-      console.error("Erreur lors de la suppression:", error);
-    } finally {
-      setIsDeleting(false); // Désactiver le loader
-    }
-  };
-
   async function handleFiles(files: FileList | null) {
     if (!files?.length) return;
 
@@ -139,12 +42,23 @@ export default function ImageUploader({
       return;
     }
 
+    // Vérifier la taille du fichier (max 8MB)
+    const maxSize = 8 * 1024 * 1024; // 8MB
+    if (file.size > maxSize) {
+      alert("L'image est trop volumineuse. Taille maximale : 8MB");
+      return;
+    }
+
     if (onFileSelect) {
       onFileSelect(file);
     }
-
-    // Pas d'upload ici, juste l'aperçu
   }
+
+  const handleRemoveFile = () => {
+    if (onFileSelect) {
+      onFileSelect(null);
+    }
+  };
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -184,34 +98,13 @@ export default function ImageUploader({
             />
             <button
               type="button"
-              // onClick={() => {
-              //   if (onFileSelect) onFileSelect(null);
-              //   if (onImageRemove) onImageRemove();
-              // }}
-              disabled={isDeleting}
-              className={`absolute top-1 right-1 bg-red-500 hover:bg-red-600 disabled:bg-red-500/50 text-white rounded-full ${
+              onClick={handleRemoveFile}
+              className={`absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-full ${
                 compact ? "w-6 h-6 text-xs" : "w-8 h-8"
-              } flex items-center justify-center transition-colors z-10 disabled:cursor-not-allowed`}
+              } flex items-center justify-center transition-colors z-10`}
             >
-              {isDeleting ? (
-                <div
-                  className={`animate-spin rounded-full border-b-2 border-white ${
-                    compact ? "w-3 h-3" : "w-4 h-4"
-                  }`}
-                ></div>
-              ) : (
-                "✕"
-              )}
+              ✕
             </button>
-
-            {/* Badge de statut de suppression */}
-            {isDeleting && (
-              <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                <div className="bg-black/80 rounded-lg px-2 py-1">
-                  <p className="text-white text-xs font-one">Suppression...</p>
-                </div>
-              </div>
-            )}
           </div>
         )}
 
@@ -225,8 +118,6 @@ export default function ImageUploader({
             isDragOver
               ? "border-tertiary-400 bg-tertiary-400/10"
               : "border-white/30 bg-white/5"
-          } ${
-            isUploading || isDeleting ? "opacity-50 pointer-events-none" : ""
           }`}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
@@ -236,55 +127,32 @@ export default function ImageUploader({
             type="file"
             accept="image/*"
             onChange={(e) => handleFiles(e.target.files)}
-            disabled={isUploading || isDeleting}
             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
           />
 
           <div className={`space-y-${compact ? "1" : "2"}`}>
             <div className={compact ? "text-2xl" : "text-4xl"}>📸</div>
             <div className="text-white/80">
-              {isUploading ? (
-                <div>
-                  <div className={compact ? "text-xs" : "text-sm"}>
-                    Upload... {progress}%
-                  </div>
-                  <div
-                    className={`w-full bg-white/20 rounded-full ${
-                      compact ? "h-1 mt-1" : "h-2 mt-2"
-                    }`}
-                  >
-                    <div
-                      className="bg-tertiary-400 rounded-full transition-all duration-300"
-                      style={{ width: `${progress}%`, height: "100%" }}
-                    />
-                  </div>
+              <div>
+                <div
+                  className={`font-medium ${compact ? "text-xs" : "text-sm"}`}
+                >
+                  {currentImage || previewUrl
+                    ? "Remplacer"
+                    : compact
+                    ? "Glissez ou cliquez"
+                    : "Glissez une image ici ou cliquez pour sélectionner"}
                 </div>
-              ) : isDeleting ? (
-                <div className={compact ? "text-xs" : "text-sm"}>
-                  Suppression...
+                <div
+                  className={`${
+                    compact ? "text-[10px]" : "text-xs"
+                  } text-white/60 mt-1`}
+                >
+                  {compact
+                    ? "JPG, PNG, WebP"
+                    : "Formats acceptés: JPG, PNG, WebP (max 8MB)"}
                 </div>
-              ) : (
-                <div>
-                  <div
-                    className={`font-medium ${compact ? "text-xs" : "text-sm"}`}
-                  >
-                    {currentImage
-                      ? "Remplacer"
-                      : compact
-                      ? "Glissez ou cliquez"
-                      : "Glissez une image ici ou cliquez pour sélectionner"}
-                  </div>
-                  <div
-                    className={`${
-                      compact ? "text-[10px]" : "text-xs"
-                    } text-white/60 mt-1`}
-                  >
-                    {compact
-                      ? "JPG, PNG, WebP"
-                      : "Formats acceptés: JPG, PNG, WebP (max 8MB)"}
-                  </div>
-                </div>
-              )}
+              </div>
             </div>
           </div>
         </div>
@@ -302,7 +170,7 @@ export default function ImageUploader({
       )}
 
       {/* Bouton de sélection alternatif - seulement en mode normal et sans image */}
-      {!compact && !currentImage && !isUploading && (
+      {!compact && !currentImage && (
         <button
           type="button"
           onClick={() => {
