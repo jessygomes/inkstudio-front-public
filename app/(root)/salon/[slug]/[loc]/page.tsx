@@ -141,6 +141,7 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
 
   const salon = await getSalon(slug, loc);
   if (!salon) notFound();
+  const isFree = salon.saasPlan;
 
   const heroSrc = salon.image || null;
   const rawHours = parseSalonHours(salon.salonHours as any);
@@ -347,25 +348,27 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
                   </svg>
                   Itinéraire
                 </Link>
-                <Link
-                  href={`/salon/${resolvedParams.slug}/${resolvedParams.loc}/reserver`}
-                  className="flex-1 group flex justify-center items-center gap-2 py-2.5 px-3 rounded-lg bg-gradient-to-br from-white/[0.08] to-white/[0.02] hover:from-white/[0.12] hover:to-white/[0.06] text-white border border-white/20 hover:border-white/30 transition-all duration-300 text-sm tracking-widest font-one backdrop-blur-sm transform hover:scale-[1.02]"
-                >
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
+                {!isFree && (
+                  <Link
+                    href={`/salon/${resolvedParams.slug}/${resolvedParams.loc}/reserver`}
+                    className="flex-1 group flex justify-center items-center gap-2 py-2.5 px-3 rounded-lg bg-gradient-to-br from-white/[0.08] to-white/[0.02] hover:from-white/[0.12] hover:to-white/[0.06] text-white border border-white/20 hover:border-white/30 transition-all duration-300 text-sm tracking-widest font-one backdrop-blur-sm transform hover:scale-[1.02]"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                    />
-                  </svg>
-                  Réserver
-                </Link>
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                      />
+                    </svg>
+                    Réserver
+                  </Link>
+                )}
               </div>
             </div>
 
