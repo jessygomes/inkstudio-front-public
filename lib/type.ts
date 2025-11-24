@@ -89,7 +89,7 @@ export type SalonProfilProps = {
   description: string;
   colorProfile: string;
   colorProfileBis: string;
-  saasPlan: boolean;
+  saasPlan: string;
   Portfolio: PortfolioProps[];
   ProductSalon: ProductSalonProps[];
 };

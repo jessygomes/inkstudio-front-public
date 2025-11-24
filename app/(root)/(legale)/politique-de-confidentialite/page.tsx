@@ -13,13 +13,13 @@ import {
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Politique de confidentialité | InkStudio",
+  title: "Politique de confidentialité | Inkera",
   description:
-    "Consultez la politique de confidentialité d'InkStudio conforme au RGPD. Protection des données personnelles et gestion de la vie privée.",
+    "Consultez la politique de confidentialité d'Inkera conforme au RGPD. Protection des données personnelles et gestion de la vie privée.",
   keywords: [
     "politique de confidentialité",
     "RGPD",
-    "InkStudio",
+    "Inkera",
     "protection des données",
     "vie privée",
     "données personnelles",

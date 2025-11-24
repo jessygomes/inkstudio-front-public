@@ -1,6 +1,8 @@
 /* eslint-disable react/no-unescaped-entities */
 import React from "react";
 import Link from "next/link";
+import Script from "next/script";
+import { Metadata } from "next";
 import { FaArrowDown } from "react-icons/fa";
 import { FaPen } from "react-icons/fa";
 import { FaLightbulb } from "react-icons/fa6";
@@ -12,9 +14,101 @@ import { MdDataThresholding } from "react-icons/md";
 import { TiHeartHalfOutline } from "react-icons/ti";
 import Image from "next/image";
 
+export const metadata: Metadata = {
+  title: "En savoir plus - Inkera | Notre mission et vision",
+  description:
+    "Découvrez l'histoire et la philosophie derrière Inkera, plateforme dédiée aux salons de tatouage. Notre mission : valoriser le travail des tatoueurs professionnels en France.",
+  keywords: [
+    "histoire inkera",
+    "mission tatouage",
+    "plateforme tatoueurs",
+    "vision salon tatouage",
+    "communauté tatouage france",
+    "saas tatouage",
+    "vitrine professionnelle tatoueur",
+    "projet tatouage",
+  ],
+  openGraph: {
+    title: "En savoir plus - Inkera | Notre mission et vision",
+    description:
+      "Découvrez l'histoire et la philosophie derrière Inkera, plateforme dédiée aux salons de tatouage professionnels.",
+    type: "website",
+    locale: "fr_FR",
+    url: "https://theinkera.com/en-savoir-plus",
+    siteName: "Inkera",
+    images: [
+      {
+        url: "https://theinkera.com/images/og-about.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Inkera - Notre mission pour la communauté tatouage",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "En savoir plus - Inkera | Notre mission",
+    description:
+      "Découvrez l'histoire et la philosophie derrière Inkera, plateforme dédiée aux salons de tatouage.",
+    images: ["https://theinkera.com/images/og-about.jpg"],
+  },
+  alternates: {
+    canonical: "https://theinkera.com/en-savoir-plus",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+};
+
 export default function EnSavoirPlusPage() {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "AboutPage",
+    name: "En savoir plus sur Inkera",
+    description:
+      "Histoire, mission et vision de Inkera, plateforme dédiée aux salons de tatouage professionnels",
+    url: "https://theinkera.com/en-savoir-plus",
+    mainEntity: {
+      "@type": "Organization",
+      name: "Inkera",
+      description:
+        "Plateforme SaaS dédiée aux salons de tatouage et piercing en France",
+      url: "https://theinkera.com",
+      logo: {
+        "@type": "ImageObject",
+        url: "https://theinkera.com/images/logo13.png",
+      },
+      foundingDate: "2024",
+      areaServed: {
+        "@type": "Country",
+        name: "France",
+      },
+      serviceType: [
+        "Plateforme de gestion pour salons de tatouage",
+        "Vitrine professionnelle pour tatoueurs",
+        "Annuaire de salons de tatouage",
+      ],
+      mission:
+        "Valoriser le travail des tatoueurs et créer un espace professionnel centralisé pour la communauté du tatouage",
+      knowsAbout: [
+        "Gestion de salon de tatouage",
+        "Marketing pour tatoueurs",
+        "Portfolios artistiques",
+        "Réservation en ligne tatouage",
+      ],
+    },
+  };
+
   return (
     <>
+      {/* JSON-LD Script */}
+      <Script
+        id="about-jsonld"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
       {/* Hero Section */}
       <section className="min-h-[100vh] bg-noir-700 flex items-center justify-center relative overflow-hidden pt-20">
         <div

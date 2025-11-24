@@ -11,12 +11,12 @@ import {
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Mentions Légales | InkStudio",
+  title: "Mentions Légales | Inkera",
   description:
-    "Consultez les mentions légales d'InkStudio, plateforme pour salons de tatouage. Informations légales, hébergement et propriété intellectuelle.",
+    "Consultez les mentions légales d'Inkera, plateforme pour salons de tatouage. Informations légales, hébergement et propriété intellectuelle.",
   keywords: [
     "mentions légales",
-    "InkStudio",
+    "Inkera",
     "informations légales",
     "propriété intellectuelle",
     "hébergement",

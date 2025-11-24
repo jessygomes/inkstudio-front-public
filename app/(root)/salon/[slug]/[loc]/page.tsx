@@ -7,6 +7,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Script from "next/script";
+import { Metadata } from "next";
 
 import { CiInstagram, CiFacebook } from "react-icons/ci";
 import { PiTiktokLogoThin } from "react-icons/pi";
@@ -43,30 +44,75 @@ async function getSalon(slug: string, loc: string) {
 }
 
 //! --- SEO
-export async function generateMetadata({ params }: PageParams) {
+export async function generateMetadata({
+  params,
+}: PageParams): Promise<Metadata> {
   const resolvedParams = await params;
   const salon = await getSalon(resolvedParams.slug, resolvedParams.loc);
-  if (!salon) return { title: "Salon introuvable" };
 
-  const title = `${salon.salonName} — ${salon.city ?? "Salon"}`;
-  const description = [
-    salon.address ? `${salon.address}` : null,
-    salon.postalCode || salon.city
-      ? `${salon.postalCode ?? ""} ${salon.city ?? ""}`.trim()
-      : null,
-  ]
+  if (!salon) {
+    return {
+      title: "Salon introuvable - Inkera",
+      description:
+        "Ce salon de tatouage n'existe pas ou n'est plus disponible.",
+      robots: { index: false, follow: false },
+    };
+  }
+
+  const title = `${salon.salonName} - Salon de tatouage à ${
+    salon.city || "France"
+  } | Inkera`;
+  const description = `Découvrez ${salon.salonName}, salon de tatouage ${
+    salon.city ? `à ${salon.city}` : "professionnel"
+  }. ${
+    salon.description
+      ? salon.description.substring(0, 120) + "..."
+      : "Consultez les portfolios, prestations et prenez rendez-vous."
+  }`;
+
+  const address = [salon.address, salon.postalCode, salon.city]
     .filter(Boolean)
-    .join(" · ");
+    .join(", ");
 
   return {
     title,
     description,
-    openGraph: {
+    keywords: [
+      "salon tatouage",
+      salon.city ? `tatouage ${salon.city}` : "tatouage france",
+      salon.salonName,
+      "studio tatouage",
+      "portfolio tatoueur",
+      "piercing",
+      "art corporel",
+      salon.postalCode ? `tatouage ${salon.postalCode}` : "",
+      "réservation tatouage",
+    ].filter(Boolean),
+    twitter: {
+      card: "summary_large_image",
       title,
       description,
-      images: salon.image
-        ? [{ url: salon.image, width: 1200, height: 630 }]
-        : undefined,
+      images: salon.image ? [salon.image] : undefined,
+    },
+    alternates: {
+      canonical: `https://theinkera.com/salon/${resolvedParams.slug}/${resolvedParams.loc}`,
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+      },
+    },
+    other: {
+      "business:contact_data:street_address": salon.address || "",
+      "business:contact_data:locality": salon.city || "",
+      "business:contact_data:postal_code": salon.postalCode || "",
+      "business:contact_data:country_name": "France",
+      "business:contact_data:phone_number": salon.phone || "",
     },
   };
 }
@@ -141,7 +187,7 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
 
   const salon = await getSalon(slug, loc);
   if (!salon) notFound();
-  const isFree = salon.saasPlan;
+  const isFree = salon.saasPlan === "FREE";
 
   const heroSrc = salon.image || null;
   const rawHours = parseSalonHours(salon.salonHours as any);
@@ -152,22 +198,6 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
     [salon.address, salon.postalCode, salon.city].filter(Boolean).join(" ")
   );
   const directionsHref = `https://www.google.com/maps/search/?api=1&query=${mapsQuery}`;
-
-  const ld = {
-    "@context": "https://schema.org",
-    "@type": "TattooParlor",
-    name: salon.salonName,
-    image: heroSrc || undefined,
-    address: {
-      "@type": "PostalAddress",
-      streetAddress: salon.address,
-      postalCode: salon.postalCode,
-      addressLocality: salon.city,
-      addressCountry: "FR",
-    },
-    telephone: salon.phone,
-    url: salon.website,
-  };
 
   // Prestations (dédupliquées, insensibles à la casse) — compat `prestation` ou `prestations`
   const prestRaw =
@@ -191,6 +221,127 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
   const PREST_MAX = 8;
   const prestationsVisibles = prestations.slice(0, PREST_MAX);
   const prestationsRestantes = Math.max(0, prestations.length - PREST_MAX);
+
+  // Enhanced JSON-LD with more complete schema
+  const ld = {
+    "@context": "https://schema.org",
+    "@type": "TattooParlor",
+    "@id": `https://theinkera.com/salon/${slug}/${loc}`,
+    name: salon.salonName,
+    description:
+      salon.description ||
+      `Salon de tatouage professionnel ${
+        salon.city ? `à ${salon.city}` : "en France"
+      }`,
+    url: `https://theinkera.com/salon/${slug}/${loc}`,
+    image: salon.image || undefined,
+    logo: salon.image || undefined,
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: salon.address || "",
+      addressLocality: salon.city || "",
+      postalCode: salon.postalCode || "",
+      addressCountry: "FR",
+      addressRegion: "France",
+    },
+    geo: salon.city
+      ? {
+          "@type": "GeoCoordinates",
+          address: `${salon.address || ""}, ${salon.city || ""}, ${
+            salon.postalCode || ""
+          }, France`,
+        }
+      : undefined,
+    telephone: salon.phone || undefined,
+    sameAs: [salon.instagram, salon.facebook, salon.tiktok].filter(Boolean),
+    openingHoursSpecification: rawHours
+      ? Object.entries(rawHours)
+          .map(([day, hours]: [string, any]) => {
+            if (!hours?.start || !hours?.end) return null;
+
+            const dayMap: Record<string, string> = {
+              monday: "Monday",
+              tuesday: "Tuesday",
+              wednesday: "Wednesday",
+              thursday: "Thursday",
+              friday: "Friday",
+              saturday: "Saturday",
+              sunday: "Sunday",
+            };
+
+            return {
+              "@type": "OpeningHoursSpecification",
+              dayOfWeek: dayMap[day] || day,
+              opens: hours.start,
+              closes: hours.end,
+            };
+          })
+          .filter(Boolean)
+      : undefined,
+    priceRange: "$$$",
+    paymentAccepted: "Cash, Credit Card",
+    currenciesAccepted: "EUR",
+    hasOfferCatalog:
+      prestations.length > 0
+        ? {
+            "@type": "OfferCatalog",
+            name: "Services de tatouage",
+            itemListElement: prestations
+              .slice(0, 5)
+              .map((prestation, index) => ({
+                "@type": "Offer",
+                name: prestation,
+                category: "Tatouage",
+                position: index + 1,
+              })),
+          }
+        : undefined,
+    // employee:
+    //   salon.Tatoueur && salon.Tatoueur.length > 0
+    //     ? salon.Tatoueur.map((tatoueur: any) => ({
+    //         "@type": "Person",
+    //         name: tatoueur.name,
+    //         description:
+    //           tatoueur.description ||
+    //           `Tatoueur professionnel chez ${salon.salonName}`,
+    //         image: tatoueur.img || undefined,
+    //         sameAs: tatoueur.instagram ? [tatoueur.instagram] : undefined,
+    //         knowsAbout: tatoueur.style || "Tatouage",
+    //         hasOccupation: {
+    //           "@type": "Occupation",
+    //           name: "Tatoueur",
+    //           occupationLocation: {
+    //             "@type": "Place",
+    //             name: salon.salonName,
+    //           },
+    //         },
+    //       }))
+    //     : undefined,
+    // aggregateRating: salon.rating
+    //   ? {
+    //       "@type": "AggregateRating",
+    //       ratingValue: salon.rating,
+    //       ratingCount: salon.reviewCount || 1,
+    //       bestRating: 5,
+    //       worstRating: 1,
+    //     }
+    //   : undefined,
+    potentialAction: {
+      "@type": "ReserveAction",
+      target: {
+        "@type": "EntryPoint",
+        urlTemplate: `https://theinkera.com/salon/${slug}/${loc}/reserver`,
+        actionPlatform: [
+          "http://schema.org/DesktopWebPlatform",
+          "http://schema.org/MobileWebPlatform",
+        ],
+      },
+      result: {
+        "@type": "Reservation",
+        name: `Réservation chez ${salon.salonName}`,
+      },
+    },
+  };
 
   //! --- helper pour afficher le téléphone plus lisible
   const formatPhone = (raw?: string | null) => {
@@ -216,8 +367,6 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
         "--color-tertiary-500": salon.colorProfileBis,
       } as React.CSSProperties)
     : {};
-
-  console.log("SALON:", salon);
 
   return (
     <div
@@ -325,7 +474,9 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
                   href={directionsHref}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-1 group flex justify-center items-center gap-2 py-2.5 px-3 rounded-lg bg-gradient-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white transition-all duration-300 font-one text-sm tracking-widest shadow-lg shadow-tertiary-500/25 hover:shadow-tertiary-500/40 transform hover:scale-[1.02]"
+                  className={`group flex justify-center items-center gap-2 py-2.5 px-3 rounded-lg bg-gradient-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white transition-all duration-300 font-one text-sm tracking-widest shadow-lg shadow-tertiary-500/25 hover:shadow-tertiary-500/40 transform hover:scale-[1.02] ${
+                    isFree ? "flex-1" : "flex-1"
+                  }`}
                 >
                   <svg
                     className="w-4 h-4"
