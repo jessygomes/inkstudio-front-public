@@ -50,11 +50,6 @@ export default function GoogleAnalytics({
         });
       `;
       document.head.appendChild(script2);
-
-      console.log(
-        "✅ Google Analytics 4 chargé pour TheInkera:",
-        measurementId
-      );
     }
   }, [analyticsConsent, measurementId]);
 
@@ -86,7 +81,6 @@ export function useGoogleAnalytics() {
         app_name: "TheInkera",
         platform: "web",
       });
-      console.log(`📊 Événement GA4 TheInkera:`, eventName, parameters);
     }
   };
 
@@ -96,7 +90,7 @@ export function useGoogleAnalytics() {
         page_path: pagePath,
         page_title: pageTitle,
       });
-      console.log(`📊 Page vue GA4:`, pagePath);
+      // console.log(`📊 Page vue GA4:`, pagePath);
     }
   };
 
