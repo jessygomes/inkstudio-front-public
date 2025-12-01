@@ -13,8 +13,38 @@ import { toSlug } from "@/lib/utils";
 import ImageUploader from "../Shared/ImageUploader";
 import { uploadFiles } from "@/lib/utils/uploadthing";
 import imageCompression from "browser-image-compression";
+import { getPiercingPrice } from "@/lib/actions/piercingPrice.action";
+import {
+  getTimeslots,
+  getOccupiedSlots,
+  getBlockedSlots,
+} from "@/lib/actions/timeslot.action";
+import Image from "next/image";
 
 // --- Types
+type PiercingZone = {
+  id: string;
+  piercingZone: string;
+  isActive: boolean;
+  servicesCount: number;
+  services: PiercingService[];
+};
+
+type PiercingService = {
+  id: string;
+  specificZone: boolean;
+  price: number;
+  description: string | null;
+  piercingZoneOreille?: string | null;
+  piercingZoneVisage?: string | null;
+  piercingZoneBouche?: string | null;
+  piercingZoneCorps?: string | null;
+  piercingZoneMicrodermal?: string | null;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
 type Tatoueur = {
   id: string;
   name: string;
@@ -86,6 +116,7 @@ export default function BookingFlow({
 }: Props) {
   const BACK = apiBase || process.env.NEXT_PUBLIC_BACK_URL || "";
 
+  //! FORM SETUP
   const methods = useForm<AppointmentRequestForm>({
     resolver: zodResolver(appointmentRequestSchema),
     mode: "onBlur",
@@ -120,8 +151,8 @@ export default function BookingFlow({
 
   const router = useRouter();
 
-  // Étapes (ne pas inclure l'étape 5 dans l'affichage)
-  const steps = ["Prestation", "Disponibilité", "Infos", "Récap"];
+  //! Étapes (ne pas inclure l'étape 5 dans l'affichage)
+  const steps = ["Prestation", "Infos", "Disponibilité", "Récap"];
   const [step, setStep] = useState(1);
   const [confirmDisabled, setConfirmDisabled] = useState(false);
   const [appointmentCreated, setAppointmentCreated] = useState(false);
@@ -137,7 +168,7 @@ export default function BookingFlow({
     if (defaultTatoueurId) setValue("tatoueurId", defaultTatoueurId);
   }, [defaultTatoueurId, setValue]);
 
-  // États pour la gestion des créneaux
+  //! États pour la gestion des créneaux
   const [selectedTatoueur, setSelectedTatoueur] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<string>(
     new Date().toISOString().slice(0, 10)
@@ -150,25 +181,32 @@ export default function BookingFlow({
   const [isLoadingSlots, setIsLoadingSlots] = useState(false);
   const [blockedSlots, setBlockedSlots] = useState<any[]>([]);
 
-  // Navigation
+  //! États pour la gestion des zones de piercing
+  const [piercingZones, setPiercingZones] = useState<PiercingZone[]>([]);
+  const [selectedPiercingZone, setSelectedPiercingZone] = useState<string>("");
+  const [selectedPiercingService, setSelectedPiercingService] =
+    useState<string>("");
+  const [isLoadingPiercingZones, setIsLoadingPiercingZones] = useState(false);
+
+  //! Navigation
   const goNext = async () => {
     const fieldsByStep: Record<
       number,
       (keyof AppointmentRequestForm | string)[]
     > = {
       1: ["prestation"],
-      2: [], // Validation custom
-      3: [
+      2: [
         "client.firstName",
         "client.lastName",
         "client.email",
         "client.phone",
         "client.birthDate",
       ],
+      3: [], // Validation custom pour la disponibilité
       4: [],
     };
 
-    if (step === 2) {
+    if (step === 3) {
       if (!selectedTatoueur) {
         alert("Veuillez sélectionner un tatoueur");
         return;
@@ -200,59 +238,68 @@ export default function BookingFlow({
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  //! FETCH CRENEAUX quand tatoueur ou date changent
   useEffect(() => {
     if (!selectedDate || !selectedTatoueur) return;
 
-    const fetchTimeSlots = async () => {
+    const fetchAllSlotData = async () => {
       try {
         setIsLoadingSlots(true);
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_BACK_URL}/timeslots/tatoueur?date=${selectedDate}&tatoueurId=${selectedTatoueur}`
-        );
-        const data = await res.json();
-        setTimeSlots(data);
+
+        // Utiliser les server actions
+        const [timeslotsResult, occupiedResult, blockedResult] =
+          await Promise.all([
+            getTimeslots(selectedDate, selectedTatoueur),
+            getOccupiedSlots(selectedDate, selectedTatoueur),
+            getBlockedSlots(selectedTatoueur),
+          ]);
+
+        // Gérer les résultats des créneaux disponibles
+        if (timeslotsResult.ok) {
+          setTimeSlots(timeslotsResult.data);
+        } else {
+          setTimeSlots([]);
+          console.error(
+            "Erreur lors du fetch des créneaux :",
+            timeslotsResult.message
+          );
+        }
+
+        // Gérer les résultats des créneaux occupés
+        if (occupiedResult.ok) {
+          setOccupiedSlots(occupiedResult.data);
+        } else {
+          setOccupiedSlots([]);
+          console.error(
+            "Erreur lors du fetch des créneaux occupés :",
+            occupiedResult.message
+          );
+        }
+
+        // Gérer les résultats des créneaux bloqués
+        if (blockedResult.ok) {
+          setBlockedSlots(blockedResult.data);
+        } else {
+          setBlockedSlots([]);
+          console.error(
+            "Erreur lors du fetch des créneaux bloqués :",
+            blockedResult.message
+          );
+        }
       } catch (err) {
+        console.error(
+          "Erreur générale lors du fetch des données de créneaux :",
+          err
+        );
         setTimeSlots([]);
-        console.error("Erreur lors du fetch des créneaux :", err);
+        setOccupiedSlots([]);
+        setBlockedSlots([]);
       } finally {
         setIsLoadingSlots(false);
       }
     };
 
-    const fetchOccupied = async () => {
-      const startOfDay = new Date(selectedDate);
-      startOfDay.setHours(0, 0, 0, 0);
-
-      const endOfDay = new Date(selectedDate);
-      endOfDay.setHours(23, 59, 59, 999);
-
-      const res = await fetch(
-        `${
-          process.env.NEXT_PUBLIC_BACK_URL
-        }/appointments/tatoueur-range?tatoueurId=${selectedTatoueur}&start=${startOfDay.toISOString()}&end=${endOfDay.toISOString()}`
-      );
-      const data = await res.json();
-      setOccupiedSlots(data);
-    };
-
-    const fetchBlockedSlots = async () => {
-      try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_BACK_URL}/blocked-slots/tatoueur/${selectedTatoueur}`
-        );
-        const data = await res.json();
-        if (!data.error) {
-          setBlockedSlots(data.blockedSlots || []);
-        }
-      } catch (err) {
-        console.error("Erreur lors du fetch des créneaux bloqués :", err);
-        setBlockedSlots([]);
-      }
-    };
-
-    fetchTimeSlots();
-    fetchOccupied();
-    fetchBlockedSlots();
+    fetchAllSlotData();
   }, [selectedDate, selectedTatoueur]);
 
   // Fonction pour vérifier si un créneau chevauche une période bloquée
@@ -324,11 +371,26 @@ export default function BookingFlow({
       return;
     }
 
+    //! Vérification spéciale pour la prestation PROJET
+    if (prestation === "PROJET") {
+      if (selectedSlots.length >= 1) {
+        toast.error(
+          "Pour un rendez-vous projet, vous ne pouvez sélectionner qu'un seul créneau de 30 minutes."
+        );
+        return;
+      }
+      // Pour PROJET, on sélectionne directement ce créneau unique
+      setSelectedSlots([slotStart]);
+      return;
+    }
+
     const newSelection = [...selectedSlots, slotStart]
       .filter((s, i, arr) => arr.indexOf(s) === i)
       .sort(); // ISO → OK
 
-    const nums = newSelection.map((s) => new Date(s).getTime());
+    const nums = newSelection.map((s: string | number | Date) =>
+      new Date(s).getTime()
+    );
     const consecutive = nums.every(
       (t, i) => i === 0 || t - nums[i - 1] === 30 * 60 * 1000
     );
@@ -340,7 +402,7 @@ export default function BookingFlow({
     }
   };
 
-  // Submit → POST /appointment-request
+  //! Submit → POST /appointment-request
   const [sketchFile, setSketchFile] = useState<File | null>(null);
   const [referenceFile, setReferenceFile] = useState<File | null>(null);
 
@@ -374,6 +436,23 @@ export default function BookingFlow({
       throw new Error("Veuillez sélectionner au moins un créneau");
     }
 
+    // Validation supplémentaire des champs obligatoires
+    if (!data.prestation) {
+      throw new Error("Veuillez sélectionner une prestation");
+    }
+    if (!data.client.firstName || !data.client.lastName) {
+      throw new Error("Veuillez renseigner votre nom et prénom");
+    }
+    if (!data.client.email) {
+      throw new Error("Veuillez renseigner votre email");
+    }
+    if (!data.client.phone) {
+      throw new Error("Veuillez renseigner votre téléphone");
+    }
+    if (!data.client.birthDate) {
+      throw new Error("Veuillez renseigner votre date de naissance");
+    }
+
     // Upload images si fichiers présents (avec compression)
     let sketchUrl = "";
     let referenceUrl = "";
@@ -390,7 +469,6 @@ export default function BookingFlow({
         files: [compressedSketch],
       });
       sketchUrl = res?.[0]?.url || "";
-      // Mettre à jour le formulaire pour le récap
       setValue("details.sketch", sketchUrl);
     }
     if (referenceFile) {
@@ -405,7 +483,6 @@ export default function BookingFlow({
         files: [compressedReference],
       });
       referenceUrl = res?.[0]?.url || "";
-      // Mettre à jour le formulaire pour le récap
       setValue("details.reference", referenceUrl);
     }
 
@@ -420,42 +497,182 @@ export default function BookingFlow({
     const title = `${data.prestation} - ${data.client.firstName} ${data.client.lastName}`;
 
     // Construire le rdvBody selon l'interface attendue par le backend
-    const rdvBody = {
-      userId: salon.id,
-      title,
+    const rdvBody: any = {
+      title: title,
       prestation: data.prestation,
       start: startDateTime,
       end: endDateTime,
-      visio: data.visio || false,
-      clientFirstname: data.client.firstName,
-      clientLastname: data.client.lastName,
-      clientEmail: data.client.email,
-      clientPhone: data.client.phone || "",
-      clientBirthdate: new Date(data.client.birthDate), // Convertir en Date
+      clientFirstname: data.client.firstName.trim(),
+      clientLastname: data.client.lastName.trim(),
+      clientEmail: data.client.email.trim(),
+      clientPhone: data.client.phone.trim(),
+      clientBirthdate: data.client.birthDate, // Garder en string format ISO
       tatoueurId: selectedTatoueur,
-      // Détails du tatouage pour certaines prestations
-      description: (data as any).details?.description || "",
-      zone: (data as any).details?.zone || "",
-      size: (data as any).details?.size || "",
-      colorStyle: (data as any).details?.colorStyle || "",
+      visio: data.visio || false,
+      // Détails communs à toutes les prestations
+      description: (data as any).details?.description?.trim() || "",
+      zone: (data as any).details?.zone?.trim() || "",
+      size: (data as any).details?.size?.trim() || "",
+      colorStyle: (data as any).details?.colorStyle?.trim() || "",
       reference: referenceUrl || "",
       sketch: sketchUrl || "",
-      estimatedPrice: 0, // Peut être ajouté plus tard
-      price: 0, // Peut être ajouté plus tard
+      estimatedPrice: 0,
+      price: 0,
     };
 
-    // Appel à l'API de création de rendez-vous
+    // Ajouter les champs spécifiques aux piercings si c'est une prestation PIERCING
+    if (data.prestation === "PIERCING" && selectedPiercingService) {
+      const selectedService = selectedZoneServices.find(
+        (s) => s.id === selectedPiercingService
+      );
+      const selectedZone = piercingZones.find(
+        (z) => z.id === selectedPiercingZone
+      );
+
+      if (selectedService && selectedZone) {
+        // Définir le prix du piercing
+        rdvBody.estimatedPrice = selectedService.price;
+        rdvBody.price = selectedService.price;
+
+        // Ajouter la zone principale
+        rdvBody.piercingZone = selectedZone.piercingZone;
+
+        // Mapper les zones spécifiques selon la logique backend
+        const zoneLower = selectedZone.piercingZone?.toLowerCase();
+
+        // Réinitialiser tous les champs de zone à null
+        rdvBody.piercingZoneOreille = null;
+        rdvBody.piercingZoneVisage = null;
+        rdvBody.piercingZoneBouche = null;
+        rdvBody.piercingZoneCorps = null;
+        rdvBody.piercingZoneMicrodermal = null;
+
+        // Assigner le bon champ selon la zone
+        switch (zoneLower) {
+          case "oreille":
+          case "oreilles":
+            rdvBody.piercingZoneOreille = selectedService.id;
+            break;
+          case "visage":
+            rdvBody.piercingZoneVisage = selectedService.id;
+            break;
+          case "bouche":
+          case "langue":
+          case "lèvre":
+          case "lèvres":
+            rdvBody.piercingZoneBouche = selectedService.id;
+            break;
+          case "corps":
+          case "torse":
+          case "ventre":
+          case "nombril":
+            rdvBody.piercingZoneCorps = selectedService.id;
+            break;
+          case "microdermal":
+          case "micro-dermal":
+          case "implant":
+            rdvBody.piercingZoneMicrodermal = selectedService.id;
+            break;
+          default:
+            // Par défaut, considérer comme piercing corps
+            rdvBody.piercingZoneCorps = selectedService.id;
+            break;
+        }
+      }
+    }
+
+    console.log("Données envoyées au backend:", { userId: salon.id, rdvBody });
+
+    // Appel à l'API de création de rendez-vous avec le userId
     const res = await fetch(`${BACK}/appointments/by-client`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(rdvBody),
+      body: JSON.stringify({
+        userId: salon.id,
+        rdvBody: rdvBody,
+      }),
     });
 
     const json = await res.json();
+    console.log("Réponse du backend:", json);
+
     if (!res.ok || (json && json.error)) {
       throw new Error(json?.message || "Échec de la création du rendez-vous");
     }
     return json;
+  };
+
+  // Charger les zones de piercing quand la prestation PIERCING est sélectionnée
+  useEffect(() => {
+    if (prestation === "PIERCING") {
+      const fetchPiercingZones = async () => {
+        try {
+          setIsLoadingPiercingZones(true);
+          console.log("Fetching piercing zones for salon:", salon.id);
+
+          // Utiliser le server action pour récupérer toutes les configurations
+          const result = await getPiercingPrice({ salonId: salon.id });
+          console.log("Piercing zones result received:", result);
+
+          if (result.ok && result.data) {
+            // Si on a des données, les utiliser
+            const zones = Array.isArray(result.data) ? result.data : [];
+            console.log("Setting piercing zones:", zones);
+            setPiercingZones(zones);
+          } else {
+            // Gestion des erreurs
+            console.error(
+              "Erreur lors du fetch des zones de piercing:",
+              result.message || "Erreur inconnue"
+            );
+            setPiercingZones([]);
+
+            // Optionnel: afficher un toast d'erreur pour informer l'utilisateur
+            // toast.error(`Impossible de charger les zones de piercing: ${result.message}`);
+          }
+        } catch (err) {
+          console.error(
+            "Erreur catch lors du fetch des zones de piercing:",
+            err
+          );
+          setPiercingZones([]);
+
+          // Optionnel: toast d'erreur réseau
+          // toast.error("Erreur réseau lors du chargement des zones de piercing");
+        } finally {
+          setIsLoadingPiercingZones(false);
+        }
+      };
+
+      fetchPiercingZones();
+    } else {
+      // Reset quand on change de prestation
+      setPiercingZones([]);
+      setSelectedPiercingZone("");
+      setSelectedPiercingService("");
+    }
+  }, [prestation, salon.id]);
+
+  const selectedZoneServices = useMemo(() => {
+    const zone = piercingZones.find((z) => z.id === selectedPiercingZone);
+    return zone?.services || [];
+  }, [piercingZones, selectedPiercingZone]);
+
+  const selectedServicePrice = useMemo(() => {
+    const service = selectedZoneServices.find(
+      (s) => s.id === selectedPiercingService
+    );
+    return service?.price || 0;
+  }, [selectedZoneServices, selectedPiercingService]);
+
+  // Fonction pour extraire le nom détaillé de la zone selon les champs de service
+  const getServiceZoneName = (service: PiercingService): string => {
+    if (service.piercingZoneOreille) return service.piercingZoneOreille;
+    if (service.piercingZoneVisage) return service.piercingZoneVisage;
+    if (service.piercingZoneBouche) return service.piercingZoneBouche;
+    if (service.piercingZoneCorps) return service.piercingZoneCorps;
+    if (service.piercingZoneMicrodermal) return service.piercingZoneMicrodermal;
+    return service.description || "Zone non spécifiée";
   };
 
   //! Construire une URL à 2 segments lisibles et uniques
@@ -570,8 +787,281 @@ export default function BookingFlow({
           </Section>
         )}
 
-        {/* Étape 2 : Choix tatoueur + créneaux */}
+        {/* Étape 2 : Infos client & détails */}
         {step === 2 && (
+          <Section title="Vos informations">
+            {/* Infos client */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+              <TextInput
+                name="client.lastName"
+                label="Nom"
+                placeholder="Dupont"
+                errors={errors}
+              />
+              <TextInput
+                name="client.firstName"
+                label="Prénom"
+                placeholder="Marie"
+                errors={errors}
+              />
+              <TextInput
+                name="client.email"
+                label="Email"
+                placeholder="marie@email.fr"
+                errors={errors}
+              />
+              <TextInput
+                name="client.phone"
+                label="Téléphone"
+                placeholder="06 12 34 56 78"
+                errors={errors}
+              />
+              <TextInput
+                name="client.birthDate"
+                label="Date de naissance"
+                type="date"
+                errors={errors}
+              />
+            </div>
+
+            {/* Détails du projet (conditionnels) */}
+            {(prestation === "PROJET" ||
+              prestation === "TATTOO" ||
+              prestation === "RETOUCHE" ||
+              prestation === "PIERCING") && (
+              <div className="space-y-6">
+                <div className="bg-gradient-to-br from-white/[0.05] to-transparent rounded-2xl border border-white/10 p-6">
+                  <h3 className="text-white font-one font-semibold text-lg mb-4">
+                    Détails du projet
+                  </h3>
+
+                  <div className="space-y-4">
+                    <TextArea
+                      name="details.description"
+                      label="Description du projet"
+                      placeholder="Décrivez votre projet : style souhaité, inspirations, contraintes particulières..."
+                    />
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      {prestation === "PIERCING" ? (
+                        <>
+                          {/* Sélection zone de piercing */}
+                          <div className="sm:col-span-3 space-y-4">
+                            <div>
+                              <label className="text-sm text-white/90 font-one font-semibold mb-3 block">
+                                Zone de piercing
+                              </label>
+                              {isLoadingPiercingZones ? (
+                                <div className="flex items-center justify-center p-4 bg-white/5 rounded-xl border border-white/10">
+                                  <div className="animate-spin rounded-full h-6 w-6 border-2 border-tertiary-400 border-t-transparent mr-3"></div>
+                                  <span className="text-white/70 text-sm">
+                                    Chargement des zones...
+                                  </span>
+                                </div>
+                              ) : piercingZones.length > 0 ? (
+                                <select
+                                  className="w-full p-3 bg-gradient-to-br from-white/[0.08] to-white/[0.02] border border-white/20 rounded-xl text-white text-sm focus:outline-none focus:border-tertiary-400 focus:ring-2 focus:ring-tertiary-400/20 transition-all duration-300 backdrop-blur-sm"
+                                  value={selectedPiercingZone}
+                                  onChange={(e) => {
+                                    setSelectedPiercingZone(e.target.value);
+                                    setValue(
+                                      "details.piercingZone",
+                                      e.target.value
+                                    );
+                                  }}
+                                >
+                                  <option value="" className="bg-noir-500">
+                                    -- Choisissez une zone --
+                                  </option>
+                                  {piercingZones.map((zone) => (
+                                    <option
+                                      key={zone.id}
+                                      value={zone.id}
+                                      className="bg-noir-500"
+                                    >
+                                      {zone.piercingZone} ({zone.servicesCount}{" "}
+                                      option{zone.servicesCount > 1 ? "s" : ""})
+                                    </option>
+                                  ))}
+                                </select>
+                              ) : (
+                                <div className="p-4 bg-orange-500/10 border border-orange-500/30 rounded-xl">
+                                  <p className="text-orange-300 text-sm font-one">
+                                    Aucune zone de piercing configurée pour ce
+                                    salon.
+                                  </p>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Sélection du service spécifique */}
+                            {selectedPiercingZone &&
+                              selectedZoneServices.length > 0 && (
+                                <div>
+                                  <label className="text-sm text-white/90 font-one font-semibold mb-3 block">
+                                    Zone détaillée et prix
+                                  </label>
+                                  <div className="grid gap-3">
+                                    {selectedZoneServices.map((service) => (
+                                      <label
+                                        key={service.id}
+                                        className={`cursor-pointer p-4 rounded-xl border-2 transition-all duration-300 ${
+                                          selectedPiercingService === service.id
+                                            ? "border-tertiary-500/70 bg-gradient-to-br from-tertiary-500/20 to-tertiary-600/10 shadow-lg shadow-tertiary-500/25"
+                                            : "border-white/20 bg-gradient-to-br from-white/[0.08] to-white/[0.02] hover:border-white/30 hover:bg-white/[0.12] backdrop-blur-sm"
+                                        }`}
+                                      >
+                                        <div className="flex items-center gap-3">
+                                          <input
+                                            type="radio"
+                                            name="piercingService"
+                                            value={service.id}
+                                            checked={
+                                              selectedPiercingService ===
+                                              service.id
+                                            }
+                                            onChange={(e) => {
+                                              setSelectedPiercingService(
+                                                e.target.value
+                                              );
+                                              setValue(
+                                                "details.piercingServiceId",
+                                                e.target.value
+                                              );
+                                            }}
+                                            className="w-4 h-4 text-tertiary-500 focus:ring-tertiary-400 bg-transparent border-white/30"
+                                          />
+                                          <div className="flex-1">
+                                            <div className="flex items-center justify-between">
+                                              <div className="flex flex-col">
+                                                <span className="text-white font-one font-semibold">
+                                                  {getServiceZoneName(service)}
+                                                </span>
+                                                {service.description && (
+                                                  <span className="text-xs text-white/60 font-one mt-1">
+                                                    {service.description}
+                                                  </span>
+                                                )}
+                                              </div>
+                                              <span className="text-tertiary-400 font-one font-bold text-lg">
+                                                {service.price}€
+                                              </span>
+                                            </div>
+                                            {service.specificZone && (
+                                              <span className="text-xs text-white/50 font-one mt-1">
+                                                Zone spécifique
+                                              </span>
+                                            )}
+                                          </div>
+                                        </div>
+                                      </label>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+
+                            {/* Prix total affiché */}
+                            {selectedServicePrice > 0 && (
+                              <div className="bg-gradient-to-br from-tertiary-500/10 to-tertiary-600/5 border border-tertiary-500/30 rounded-2xl p-6">
+                                <div className="flex items-center justify-between">
+                                  <div>
+                                    <h4 className="text-tertiary-300 font-semibold font-one text-lg">
+                                      Prix du piercing
+                                    </h4>
+                                    <p className="text-white/70 text-sm font-one">
+                                      Prix indicatif, peut varier selon les
+                                      bijoux choisis
+                                    </p>
+                                  </div>
+                                  <div className="text-3xl font-bold text-tertiary-400 font-two">
+                                    {selectedServicePrice}€
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <TextInput
+                            name="details.zone"
+                            label="Zone du corps"
+                            placeholder="Ex: Avant-bras droit"
+                          />
+                          {(prestation === "PROJET" ||
+                            prestation === "TATTOO" ||
+                            prestation === "RETOUCHE") && (
+                            <>
+                              <TextInput
+                                name="details.size"
+                                label="Taille approximative"
+                                placeholder="Ex: 15cm x 20cm"
+                              />
+                              <TextInput
+                                name="details.colorStyle"
+                                label="Style/Couleurs"
+                                placeholder="Ex: Blackwork, réalisme"
+                              />
+                            </>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Upload d'images - seulement pour TATTOO, PROJET, RETOUCHE */}
+                {(prestation === "PROJET" ||
+                  prestation === "TATTOO" ||
+                  prestation === "RETOUCHE") && (
+                  <div className="bg-gradient-to-br from-white/[0.05] to-transparent rounded-2xl border border-white/10 p-6">
+                    <h3 className="text-white font-one font-semibold text-lg mb-4">
+                      Images de référence
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-3">
+                        <label className="text-sm text-white/90 font-one font-semibold">
+                          Image de référence principale
+                        </label>
+                        <div className="bg-gradient-to-br from-white/[0.08] to-white/[0.02] rounded-xl p-4 border border-white/20 backdrop-blur-sm">
+                          <ImageUploader
+                            file={referenceFile}
+                            onFileSelect={setReferenceFile}
+                            compact={true}
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-3">
+                        <label className="text-sm text-white/90 font-one font-semibold">
+                          Croquis ou référence secondaire
+                        </label>
+                        <div className="bg-gradient-to-br from-white/[0.08] to-white/[0.02] rounded-xl p-4 border border-white/20 backdrop-blur-sm">
+                          <ImageUploader
+                            file={sketchFile}
+                            onFileSelect={setSketchFile}
+                            compact={true}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Message optionnel */}
+            <div className="mt-6">
+              <TextArea
+                name="message"
+                label="Message complémentaire (optionnel)"
+                placeholder="Ajoutez toute information utile pour le salon : allergies, expérience précédente, questions particulières..."
+              />
+            </div>
+          </Section>
+        )}
+
+        {/* Étape 3 : Choix tatoueur + créneaux */}
+        {step === 3 && (
           <Section title="Choisir le tatoueur et les créneaux">
             {/* Champ Visio pour prestation PROJET */}
             {prestation === "PROJET" && (
@@ -735,10 +1225,17 @@ export default function BookingFlow({
                           <label className="text-xs text-white/70 font-one">
                             Sélectionnez les créneaux (30 min chacun)
                           </label>
-                          <p className="text-xs text-white/50 mb-3">
-                            Cliquez sur les créneaux pour les sélectionner. Ils
-                            doivent être consécutifs.
-                          </p>
+                          {prestation === "PROJET" ? (
+                            <p className="text-xs text-white/50 mb-3">
+                              Pour un rendez-vous projet, sélectionnez un seul
+                              créneau de 30 minutes.
+                            </p>
+                          ) : (
+                            <p className="text-xs text-white/50 mb-3">
+                              Cliquez sur les créneaux pour les sélectionner.
+                              Ils doivent être consécutifs.
+                            </p>
+                          )}
                           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
                             {timeSlots.map((slot) => {
                               const slotStart = new Date(slot.start);
@@ -872,44 +1369,89 @@ export default function BookingFlow({
                               </div>
                               <div className="flex-1">
                                 <h4 className="text-tertiary-300 font-semibold font-one mb-2 text-lg">
-                                  Créneaux sélectionnés
+                                  {prestation === "PROJET"
+                                    ? "Créneau sélectionné"
+                                    : "Créneaux sélectionnés"}
                                 </h4>
                                 <div className="space-y-2">
                                   <p className="text-white font-one text-sm">
-                                    <span className="font-semibold">
-                                      {selectedSlots.length}
-                                    </span>{" "}
-                                    créneau{selectedSlots.length > 1 ? "x" : ""}{" "}
-                                    •
-                                    <span className="font-semibold">
-                                      {" "}
-                                      {selectedSlots.length * 30} minutes
-                                    </span>
+                                    {prestation === "PROJET" ? (
+                                      <>
+                                        <span className="font-semibold">
+                                          1 créneau
+                                        </span>{" "}
+                                        •
+                                        <span className="font-semibold">
+                                          {" "}
+                                          30 minutes
+                                        </span>
+                                      </>
+                                    ) : (
+                                      <>
+                                        <span className="font-semibold">
+                                          {selectedSlots.length}
+                                        </span>{" "}
+                                        créneau
+                                        {selectedSlots.length > 1 ? "x" : ""} •
+                                        <span className="font-semibold">
+                                          {" "}
+                                          {selectedSlots.length * 30} minutes
+                                        </span>
+                                      </>
+                                    )}
                                   </p>
                                   <p className="text-white/70 font-one text-sm">
-                                    De{" "}
-                                    <span className="font-semibold text-tertiary-300">
-                                      {new Date(
-                                        selectedSlots[0]
-                                      ).toLocaleTimeString("fr-FR", {
-                                        hour: "2-digit",
-                                        minute: "2-digit",
-                                      })}
-                                    </span>{" "}
-                                    à{" "}
-                                    <span className="font-semibold text-tertiary-300">
-                                      {new Date(
-                                        new Date(
-                                          selectedSlots[
-                                            selectedSlots.length - 1
-                                          ]
-                                        ).getTime() +
-                                          30 * 60 * 1000
-                                      ).toLocaleTimeString("fr-FR", {
-                                        hour: "2-digit",
-                                        minute: "2-digit",
-                                      })}
-                                    </span>
+                                    {prestation === "PROJET" ? (
+                                      <>
+                                        Horaire:{" "}
+                                        <span className="font-semibold text-tertiary-300">
+                                          {new Date(
+                                            selectedSlots[0]
+                                          ).toLocaleTimeString("fr-FR", {
+                                            hour: "2-digit",
+                                            minute: "2-digit",
+                                          })}
+                                        </span>{" "}
+                                        -{" "}
+                                        <span className="font-semibold text-tertiary-300">
+                                          {new Date(
+                                            new Date(
+                                              selectedSlots[0]
+                                            ).getTime() +
+                                              30 * 60 * 1000
+                                          ).toLocaleTimeString("fr-FR", {
+                                            hour: "2-digit",
+                                            minute: "2-digit",
+                                          })}
+                                        </span>
+                                      </>
+                                    ) : (
+                                      <>
+                                        De{" "}
+                                        <span className="font-semibold text-tertiary-300">
+                                          {new Date(
+                                            selectedSlots[0]
+                                          ).toLocaleTimeString("fr-FR", {
+                                            hour: "2-digit",
+                                            minute: "2-digit",
+                                          })}
+                                        </span>{" "}
+                                        à{" "}
+                                        <span className="font-semibold text-tertiary-300">
+                                          {new Date(
+                                            new Date(
+                                              selectedSlots[
+                                                selectedSlots.length - 1
+                                              ]
+                                            ).getTime() +
+                                              30 * 60 * 1000
+                                          ).toLocaleTimeString("fr-FR", {
+                                            hour: "2-digit",
+                                            minute: "2-digit",
+                                          })}
+                                        </span>
+                                      </>
+                                    )}
                                   </p>
                                 </div>
                               </div>
@@ -949,141 +1491,15 @@ export default function BookingFlow({
           </Section>
         )}
 
-        {/* Étape 3 : Infos client & détails */}
-        {step === 3 && (
-          <Section title="Vos informations">
-            {/* Infos client */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-              <TextInput
-                name="client.lastName"
-                label="Nom"
-                placeholder="Dupont"
-                errors={errors}
-              />
-              <TextInput
-                name="client.firstName"
-                label="Prénom"
-                placeholder="Marie"
-                errors={errors}
-              />
-              <TextInput
-                name="client.email"
-                label="Email"
-                placeholder="marie@email.fr"
-                errors={errors}
-              />
-              <TextInput
-                name="client.phone"
-                label="Téléphone"
-                placeholder="06 12 34 56 78"
-                errors={errors}
-              />
-              <TextInput
-                name="client.birthDate"
-                label="Date de naissance"
-                type="date"
-                errors={errors}
-              />
-            </div>
-
-            {/* Détails du projet (conditionnels) */}
-            {(prestation === "PROJET" ||
-              prestation === "TATTOO" ||
-              prestation === "RETOUCHE" ||
-              prestation === "PIERCING") && (
-              <div className="space-y-6">
-                <div className="bg-gradient-to-br from-white/[0.05] to-transparent rounded-2xl border border-white/10 p-6">
-                  <h3 className="text-white font-one font-semibold text-lg mb-4">
-                    Détails du projet
-                  </h3>
-
-                  <div className="space-y-4">
-                    <TextArea
-                      name="details.description"
-                      label="Description du projet"
-                      placeholder="Décrivez votre projet : style souhaité, inspirations, contraintes particulières..."
-                    />
-
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                      <TextInput
-                        name="details.zone"
-                        label="Zone du corps"
-                        placeholder="Ex: Avant-bras droit"
-                      />
-                      {(prestation === "PROJET" ||
-                        prestation === "TATTOO" ||
-                        prestation === "RETOUCHE") && (
-                        <>
-                          <TextInput
-                            name="details.size"
-                            label="Taille approximative"
-                            placeholder="Ex: 15cm x 20cm"
-                          />
-                          <TextInput
-                            name="details.colorStyle"
-                            label="Style/Couleurs"
-                            placeholder="Ex: Blackwork, réalisme"
-                          />
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Upload d'images */}
-                {(prestation === "PROJET" ||
-                  prestation === "TATTOO" ||
-                  prestation === "RETOUCHE") && (
-                  <div className="bg-gradient-to-br from-white/[0.05] to-transparent rounded-2xl border border-white/10 p-6">
-                    <h3 className="text-white font-one font-semibold text-lg mb-4">
-                      Images de référence
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-3">
-                        <label className="text-sm text-white/90 font-one font-semibold">
-                          Image de référence principale
-                        </label>
-                        <div className="bg-gradient-to-br from-white/[0.08] to-white/[0.02] rounded-xl p-4 border border-white/20 backdrop-blur-sm">
-                          <ImageUploader
-                            file={referenceFile}
-                            onFileSelect={setReferenceFile}
-                            compact={true}
-                          />
-                        </div>
-                      </div>
-                      <div className="space-y-3">
-                        <label className="text-sm text-white/90 font-one font-semibold">
-                          Croquis ou référence secondaire
-                        </label>
-                        <div className="bg-gradient-to-br from-white/[0.08] to-white/[0.02] rounded-xl p-4 border border-white/20 backdrop-blur-sm">
-                          <ImageUploader
-                            file={sketchFile}
-                            onFileSelect={setSketchFile}
-                            compact={true}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Message optionnel */}
-            <div className="mt-6">
-              <TextArea
-                name="message"
-                label="Message complémentaire (optionnel)"
-                placeholder="Ajoutez toute information utile pour le salon : allergies, expérience précédente, questions particulières..."
-              />
-            </div>
-          </Section>
-        )}
-
         {/* Étape 4 : Récap */}
         {step === 4 && (
           <Section title="Récapitulatif">
-            <Recap salon={salon} />
+            <Recap
+              salon={salon}
+              selectedPiercingZone={selectedPiercingZone}
+              selectedPiercingService={selectedPiercingService}
+              piercingZones={piercingZones}
+            />
             <div className="mt-4 text-[11px] text-white/50 font-one">
               {salon.appointmentBookingEnabled
                 ? "En validant, votre demande de rendez-vous sera envoyée au salon pour confirmation."
@@ -1418,11 +1834,42 @@ function TextArea({
   );
 }
 
-function Recap({ salon }: { salon: SalonSummary }) {
+// Composant Recap amélioré pour les piercings
+function Recap({
+  salon,
+  selectedPiercingZone,
+  selectedPiercingService,
+  piercingZones,
+}: {
+  salon: SalonSummary;
+  selectedPiercingZone?: string;
+  selectedPiercingService?: string;
+  piercingZones?: PiercingZone[];
+}) {
   const { watch } = useFormContext<AppointmentRequestForm>();
   const prestation = watch("prestation");
   const client = watch("client");
   const details = watch("details") as any;
+
+  // Trouver la zone principale sélectionnée
+  const selectedZone = piercingZones?.find(
+    (z) => z.id === selectedPiercingZone
+  );
+
+  // Trouver la zone détaillée sélectionnée
+  const selectedService = selectedZone?.services.find(
+    (s) => s.id === selectedPiercingService
+  );
+
+  // Ta fonction pour obtenir le vrai nom de la zone détaillée
+  const getServiceZoneName = (service: PiercingService): string => {
+    if (service.piercingZoneOreille) return service.piercingZoneOreille;
+    if (service.piercingZoneVisage) return service.piercingZoneVisage;
+    if (service.piercingZoneBouche) return service.piercingZoneBouche;
+    if (service.piercingZoneCorps) return service.piercingZoneCorps;
+    if (service.piercingZoneMicrodermal) return service.piercingZoneMicrodermal;
+    return service.description || "Zone non spécifiée";
+  };
 
   // Helper pour afficher une image si présente
   const RecapImage = ({ url, label }: { url?: string; label: string }) =>
@@ -1432,8 +1879,7 @@ function Recap({ salon }: { salon: SalonSummary }) {
           {label}
         </span>
         <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-xl overflow-hidden border border-white/20 bg-white/5 backdrop-blur-sm shadow-lg">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <Image
             src={url}
             alt={label}
             className="object-cover w-full h-full hover:scale-105 transition-transform duration-300"
@@ -1469,10 +1915,10 @@ function Recap({ salon }: { salon: SalonSummary }) {
         <div className="text-xs text-white/60 font-one mb-3 uppercase tracking-wider">
           Mes informations
         </div>
-        <div className="bg-gradient-to-br from-white/[0.08] to-white/[0.02] p-5 border border-white/10 rounded-xl backdrop-blur-sm">
+        <div className="bg-gradient-to-br from-white/[0.05] to-transparent rounded-xl border border-white/10 p-5 backdrop-blur-sm">
           <div className="text-white/90 font-one grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
-              <p className="text-xs text-white/60 font-one mb-1 uppercase tracking-wider">
+              <p className="text-xs text-white/60 mb-1 uppercase tracking-wider">
                 Nom complet
               </p>
               <p className="font-semibold">
@@ -1480,19 +1926,19 @@ function Recap({ salon }: { salon: SalonSummary }) {
               </p>
             </div>
             <div>
-              <p className="text-xs text-white/60 font-one mb-1 uppercase tracking-wider">
+              <p className="text-xs text-white/60 mb-1 uppercase tracking-wider">
                 Email
               </p>
               <p>{client.email}</p>
             </div>
             <div>
-              <p className="text-xs text-white/60 font-one mb-1 uppercase tracking-wider">
+              <p className="text-xs text-white/60 mb-1 uppercase tracking-wider">
                 Téléphone
               </p>
               <p>{client.phone}</p>
             </div>
             <div>
-              <p className="text-xs text-white/60 font-one mb-1 uppercase tracking-wider">
+              <p className="text-xs text-white/60 mb-1 uppercase tracking-wider">
                 Date de naissance
               </p>
               <p>
@@ -1505,95 +1951,94 @@ function Recap({ salon }: { salon: SalonSummary }) {
         </div>
       </div>
 
-      {/* Détails projet/tatouage */}
-      {(details?.description ||
-        details?.zone ||
-        details?.size ||
-        details?.colorStyle) && (
-        <div>
-          <div className="text-xs text-white/60 font-one mb-3 uppercase tracking-wider">
-            Détails du projet
-          </div>
-          <div className="rounded-xl border border-white/10 bg-gradient-to-br from-white/[0.08] to-white/[0.02] p-5 backdrop-blur-sm">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {details?.description && (
-                <div className="sm:col-span-2">
-                  <span className="text-xs text-white/60 font-one mb-2 block uppercase tracking-wider">
-                    Description
-                  </span>
-                  <div className="text-white/90 font-one leading-relaxed bg-white/[0.03] p-3 rounded-lg border border-white/10">
-                    {details.description}
+      {/* Détails piercing / tattoo */}
+      <div>
+        <div className="text-xs text-white/60 font-one mb-3 uppercase tracking-wider">
+          Détails du projet
+        </div>
+
+        <div className="rounded-xl border border-white/10 bg-gradient-to-br from-white/[0.08] to-white/[0.02] p-5 backdrop-blur-sm">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* 🔥 Affichage piercings CORRIGÉ */}
+            {prestation === "PIERCING" && selectedService && (
+              <div className="sm:col-span-2">
+                <span className="text-xs text-white/60 font-one mb-2 block uppercase tracking-wider">
+                  Piercing sélectionné
+                </span>
+
+                <div className="bg-tertiary-500/10 border border-tertiary-500/30 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-white font-one font-semibold text-lg">
+                        {selectedZone?.piercingZone}
+                      </div>
+                      <div className="text-white/70 font-one text-sm">
+                        Zone détaillée :{" "}
+                        <span className="font-semibold text-tertiary-300">
+                          {getServiceZoneName(selectedService)}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="text-tertiary-400 font-one font-bold text-2xl">
+                      {selectedService.price}€
+                    </div>
                   </div>
                 </div>
-              )}
-              {details?.zone && (
-                <div>
-                  <span className="text-xs text-white/60 font-one mb-2 block uppercase tracking-wider">
-                    Zone du corps
-                  </span>
-                  <div className="text-white/90 font-one font-semibold">
-                    {details.zone}
-                  </div>
+              </div>
+            )}
+
+            {/* Autres détails communs */}
+            {details?.description && (
+              <div className="sm:col-span-2">
+                <span className="text-xs text-white/60 block uppercase tracking-wider">
+                  Description
+                </span>
+                <div className="text-white bg-white/[0.03] p-3 rounded-lg border border-white/10 leading-relaxed">
+                  {details.description}
                 </div>
-              )}
-              {details?.size && (
-                <div>
-                  <span className="text-xs text-white/60 font-one mb-2 block uppercase tracking-wider">
-                    Taille approximative
-                  </span>
-                  <div className="text-white/90 font-one font-semibold">
-                    {details.size}
-                  </div>
-                </div>
-              )}
-              {details?.colorStyle && (
-                <div className="sm:col-span-2">
-                  <span className="text-xs text-white/60 font-one mb-2 block uppercase tracking-wider">
-                    Style et couleurs
-                  </span>
-                  <div className="text-white/90 font-one font-semibold">
-                    {details.colorStyle}
-                  </div>
-                </div>
-              )}
-            </div>
+              </div>
+            )}
+
+            {details?.zone && (
+              <div>
+                <span className="text-xs text-white/60 block uppercase tracking-wider">
+                  Zone du corps
+                </span>
+                <div className="text-white">{details.zone}</div>
+              </div>
+            )}
+
+            {details?.size && (
+              <div>
+                <span className="text-xs text-white/60 block uppercase tracking-wider">
+                  Taille
+                </span>
+                <div className="text-white">{details.size}</div>
+              </div>
+            )}
+
+            {details?.colorStyle && (
+              <div>
+                <span className="text-xs text-white/60 block uppercase tracking-wider">
+                  Style
+                </span>
+                <div className="text-white">{details.colorStyle}</div>
+              </div>
+            )}
           </div>
         </div>
-      )}
+      </div>
 
-      {/* Images uploadées */}
-      {(details?.reference || details?.sketch) && (
+      {/* Images */}
+      {(details?.sketch || details?.reference) && (
         <div>
           <div className="text-xs text-white/60 font-one mb-3 uppercase tracking-wider">
             Images de référence
           </div>
-          <div className="rounded-xl border border-white/10 bg-gradient-to-br from-white/[0.08] to-white/[0.02] p-5 backdrop-blur-sm">
-            <div className="flex flex-wrap gap-6">
-              <RecapImage url={details?.reference} label="Image principale" />
-              <RecapImage url={details?.sketch} label="Croquis/Sketch" />
-            </div>
-            {!details?.reference && !details?.sketch && (
-              <div className="text-center py-8">
-                <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <svg
-                    className="w-6 h-6 text-white/40"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                    />
-                  </svg>
-                </div>
-                <p className="text-white/50 font-one text-sm">
-                  Aucune image uploadée
-                </p>
-              </div>
-            )}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <RecapImage url={details.reference} label="Image de référence" />
+            <RecapImage url={details.sketch} label="Croquis" />
           </div>
         </div>
       )}
@@ -1604,10 +2049,8 @@ function Recap({ salon }: { salon: SalonSummary }) {
           <div className="text-xs text-white/60 font-one mb-3 uppercase tracking-wider">
             Message complémentaire
           </div>
-          <div className="rounded-xl border border-white/10 bg-gradient-to-br from-white/[0.08] to-white/[0.02] p-5 backdrop-blur-sm">
-            <div className="text-white/90 font-one whitespace-pre-wrap leading-relaxed bg-white/[0.03] p-4 rounded-lg border border-white/10">
-              {watch("message")}
-            </div>
+          <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4 text-white">
+            {watch("message")}
           </div>
         </div>
       )}

@@ -66,6 +66,8 @@ export const appointmentRequestSchema = z.object({
     colorStyle: z.string().optional(),
     sketch: z.string().optional(),
     reference: z.string().optional(),
+    piercingZone: z.string().optional(),
+    piercingServiceId: z.string().optional(),
   }),
 
   message: z.string().optional(),
