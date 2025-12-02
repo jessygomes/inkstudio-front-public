@@ -21,7 +21,7 @@ export const updateUserInfoAction = async (payload: any) => {
 
     const data = await response.json();
 
-    console.log("Response data from updateUserInfoAction:", data);
+    // console.log("Response data from updateUserInfoAction:", data);
 
     if (!response.ok || (data && data.error)) {
       const message =
@@ -151,7 +151,7 @@ export const toggleFavoriteSalon = async (salonId: string) => {
 
     const data = await response.json();
 
-    console.log("Response data from toggleFavoriteSalon:", data);
+    // console.log("Response data from toggleFavoriteSalon:", data);
 
     if (!response.ok || (data && data.error)) {
       const message =

@@ -9,7 +9,6 @@ import GoogleAnalytics from "@/components/Analytics/GoogleAnalytics";
 import CookieBanner from "@/components/Analytics/CookieBanner";
 import { UserProvider } from "@/components/Context/UserContext";
 import { getAuthenticatedUser } from "@/lib/auth.server";
-import { FavoriteSalon } from "@/lib/type";
 
 const didact_gothic = Didact_Gothic({
   weight: ["400"],
@@ -149,7 +148,7 @@ export default async function RootLayout({
       role: userData.role,
       isAuthenticated: true,
     };
-    console.log("✅ Utilisateur dans RootLayout :", user);
+    // console.log("✅ Utilisateur dans RootLayout :", user);
   } catch (error) {
     console.error("Erreur lors de la récupération de l'utilisateur :", error);
   }
