@@ -75,9 +75,6 @@ export const Login = () => {
       setSuccess("Connexion réussie !");
       setIsPending(false);
 
-      // Créez une session pour l'utilisateur connecté
-      console.log("Infos de l'utilisateur connecté :", infos);
-
       await createSession(infos);
 
       // Changement de texte pour la redirection
