@@ -13,6 +13,7 @@ import { CiInstagram, CiFacebook } from "react-icons/ci";
 import { PiTiktokLogoThin } from "react-icons/pi";
 import { TfiWorld } from "react-icons/tfi";
 import HoursCard from "@/components/ProfilSalon/HoursCard";
+import FavoriteBtn from "@/components/Shared/FavoriteBtn";
 
 type PageParams = {
   params: Promise<{ slug: string; loc: string }>;
@@ -470,6 +471,12 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
             {/* Quick Actions */}
             <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.08] to-white/[0.02] p-5 backdrop-blur-lg shadow-xl">
               <div className="flex gap-2.5">
+                <FavoriteBtn
+                  salonId={salon.id}
+                  variant="icon-only"
+                  className="hover:scale-110"
+                />
+
                 <Link
                   href={directionsHref}
                   target="_blank"
@@ -499,6 +506,7 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
                   </svg>
                   Itinéraire
                 </Link>
+
                 {!isFree && (
                   <Link
                     href={`/salon/${resolvedParams.slug}/${resolvedParams.loc}/reserver`}

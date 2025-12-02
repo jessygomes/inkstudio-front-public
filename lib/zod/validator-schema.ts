@@ -72,3 +72,81 @@ export const appointmentRequestSchema = z.object({
 
   message: z.string().optional(),
 });
+
+export const getAuthenticatedUserSchema = z.object({
+  id: z.string(),
+  email: z.string().email(),
+  firstName: z.string(),
+  lastName: z.string(),
+  phone: z.string().nullable().optional(),
+  image: z.string().nullable().optional(),
+  role: z.enum(["client", "salon", "admin"]),
+  createdAt: z.string().optional(), // Maintenant optionnel
+  updatedAt: z.string(),
+  clientProfile: z
+    .object({
+      id: z.string(),
+      pseudo: z.string().nullable().optional(),
+      birthDate: z.string().nullable().optional(),
+      city: z.string().nullable().optional(),
+      postalCode: z.string().nullable().optional(),
+      createdAt: z.string().optional(), // Maintenant optionnel
+      updatedAt: z.string(),
+    })
+    .nullable()
+    .optional(),
+  favoriteUsers: z.array(z.any()).optional().default([]), // Maintenant optionnel avec default
+  appointmentsAsClient: z.array(z.any()).optional().default([]), // Maintenant optionnel avec default
+});
+
+// Schema de validation pour l'inscription client
+export const registerSchema = z
+  .object({
+    firstName: z
+      .string()
+      .min(2, "Le prénom doit contenir au moins 2 caractères")
+      .max(50, "Le prénom ne peut pas dépasser 50 caractères"),
+    lastName: z
+      .string()
+      .min(2, "Le nom doit contenir au moins 2 caractères")
+      .max(50, "Le nom ne peut pas dépasser 50 caractères"),
+    email: z.string().email("Veuillez entrer un email valide").toLowerCase(),
+    password: z
+      .string()
+      .min(8, "Le mot de passe doit contenir au moins 8 caractères")
+      .regex(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+        "Le mot de passe doit contenir au moins une majuscule, une minuscule et un chiffre"
+      ),
+    confirmPassword: z.string(),
+    birthDate: z.string().optional(),
+    acceptTerms: z
+      .boolean()
+      .refine(
+        (val) => val === true,
+        "Vous devez accepter les conditions d'utilisation"
+      ),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Les mots de passe ne correspondent pas",
+    path: ["confirmPassword"],
+  });
+
+export const userLoginSchema = z.object({
+  email: z.string().email("Veuillez entrer un email valide").toLowerCase(),
+  password: z
+    .string()
+    .min(8, "Le mot de passe doit contenir au moins 8 caractères"),
+});
+
+// Schema de validation pour les modifications du profil
+export const updateProfileSchema = z.object({
+  firstName: z.string().min(2, "Le prénom doit contenir au moins 2 caractères"),
+  lastName: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
+  email: z.string().email("Veuillez entrer un email valide"),
+  phone: z.string().optional(),
+  pseudo: z.string().optional(),
+  city: z.string().optional(),
+  postalCode: z.string().optional(),
+  birthDate: z.string().optional(),
+});

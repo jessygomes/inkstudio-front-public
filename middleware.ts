@@ -19,7 +19,11 @@ export function middleware(req: NextRequest) {
     "/mentions-legales",
     "/politique-de-confidentialite",
     "/images/",
-    // "/",
+    "/creer-un-compte",
+    "/se-connecter",
+    "/mot-de-passe-oublie",
+    "/verifier-email",
+    "/",
   ];
   if (allowedPrefixes.some((p) => pathname.startsWith(p))) {
     return NextResponse.next();

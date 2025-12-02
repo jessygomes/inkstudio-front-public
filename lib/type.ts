@@ -93,3 +93,43 @@ export type SalonProfilProps = {
   Portfolio: PortfolioProps[];
   ProductSalon: ProductSalonProps[];
 };
+
+export type FavoriteSalon = {
+  id: string;
+  clientId: string;
+  salonId?: string;
+};
+
+export type User = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  image: string;
+  role: string;
+  clientProfile: ClientProfile | null;
+  favoriteUsers: FavoriteSalon[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  appointmentsAsClient: any[];
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type ClientProfile = {
+  id: string;
+  pseudo: string | null;
+  birthDate: string | null;
+  city: string | null;
+  postalCode: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type UserContextType = {
+  user: User | null;
+  isAuthenticated: boolean;
+  isClient: boolean;
+  isSalon: boolean;
+  isAdmin: boolean;
+};

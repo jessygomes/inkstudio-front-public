@@ -11,10 +11,11 @@ export default function Navbar() {
   const navRef = useRef<HTMLUListElement>(null);
 
   const links = [
-    // { href: "/", label: "Accueil" },
+    { href: "/", label: "Accueil" },
     // { href: "/trouver-un-salon", label: "Trouver un salon" },
     { href: "/en-savoir-plus", label: "En savoir plus" },
     // { href: "/je-suis-tatoueur", label: "Je suis tatoueur ?" },
+    { href: "/mon-profil", label: "Mon profil" },
   ];
 
   return (

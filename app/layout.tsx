@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { Didact_Gothic, Exo_2, Montserrat_Alternates } from "next/font/google";
@@ -6,6 +7,9 @@ import "./globals.css";
 import { CookieConsentProvider } from "@/components/Analytics/CookieConsentContext";
 import GoogleAnalytics from "@/components/Analytics/GoogleAnalytics";
 import CookieBanner from "@/components/Analytics/CookieBanner";
+import { UserProvider } from "@/components/Context/UserContext";
+import { getAuthenticatedUser } from "@/lib/auth.server";
+import { FavoriteSalon } from "@/lib/type";
 
 const didact_gothic = Didact_Gothic({
   weight: ["400"],
@@ -119,11 +123,37 @@ export const metadata: Metadata = {
   category: "Business",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Layout : seulement les données essentielles pour l'auth
+  let user = {
+    id: "",
+    firstName: "",
+    lastName: "",
+    email: "",
+    role: "",
+    isAuthenticated: false,
+  };
+
+  try {
+    const userData = await getAuthenticatedUser();
+
+    user = {
+      id: userData.id,
+      firstName: userData.firstName,
+      lastName: userData.lastName,
+      email: userData.email,
+      role: userData.role,
+      isAuthenticated: true,
+    };
+    console.log("✅ Utilisateur dans RootLayout :", user);
+  } catch (error) {
+    console.error("Erreur lors de la récupération de l'utilisateur :", error);
+  }
+
   return (
     <html lang="fr">
       <body
@@ -133,7 +163,9 @@ export default function RootLayout({
           <GoogleAnalytics measurementId="G-YG3WKCC1JL" />
           <Toaster />
           <CookieBanner />
-          <main>{children}</main>
+          <main>
+            <UserProvider user={user}>{children}</UserProvider>
+          </main>
         </CookieConsentProvider>
       </body>
     </html>
