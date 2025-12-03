@@ -121,6 +121,8 @@ export const getAllRdvClient = async (options?: {
 
     const data = await response.json();
 
+    console.log("getAllRdvClient - Response data:", data);
+
     if (!response.ok || (data && data.error)) {
       const message =
         data?.message ||

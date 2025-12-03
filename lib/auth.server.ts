@@ -4,7 +4,7 @@ import { getAuthenticatedUserSchema } from "./zod/validator-schema";
 
 export const getAuthenticatedUser = async () => {
   const cookieStore = cookies();
-  const accessToken = (await cookieStore).get("access_token")?.value;
+  const accessToken = (await cookieStore).get("inkera_access_token")?.value;
 
   if (!accessToken) {
     throw new Error(
@@ -27,8 +27,8 @@ export const getAuthenticatedUser = async () => {
 
       // Supprimer les cookies expirés côté serveur
       const cookieStore = await cookies();
-      cookieStore.delete("access_token_");
-      cookieStore.delete("userId");
+      cookieStore.delete("inkera_access_token");
+      cookieStore.delete("inkera_userId");
 
       throw new Error("TOKEN_EXPIRED");
     }
@@ -78,8 +78,8 @@ export const getAuthenticatedUser = async () => {
 
 export const currentUser = async () => {
   const cookieStore = await cookies();
-  const accessToken = cookieStore.get("access_token")?.value;
-  const userId = cookieStore.get("userId")?.value;
+  const accessToken = cookieStore.get("inkera_access_token")?.value;
+  const userId = cookieStore.get("inkera_userId")?.value;
 
   if (!accessToken || !userId) return null;
 

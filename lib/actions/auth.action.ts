@@ -61,8 +61,8 @@ export async function logoutAction() {
     const cookieStore = await cookies();
 
     // Supprimer les cookies de session
-    cookieStore.delete("access_token");
-    cookieStore.delete("userId");
+    cookieStore.delete("inkera_access_token");
+    cookieStore.delete("inkera_userId");
 
     console.log("🧹 Cookies de session supprimés via server action");
 
@@ -107,8 +107,8 @@ export async function clearExpiredSession() {
     const cookieStore = await cookies();
 
     // Supprimer les cookies de session
-    cookieStore.delete("access_token");
-    cookieStore.delete("userId");
+    cookieStore.delete("inkera_access_token");
+    cookieStore.delete("inkera_userId");
 
     console.log("🧹 Cookies expirés supprimés");
   } catch (error) {

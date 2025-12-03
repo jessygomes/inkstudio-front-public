@@ -6,8 +6,9 @@
 export function clearClientSession() {
   // Supprime tous les cookies liés à la session côté client
   document.cookie =
-    "access_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-  document.cookie = "userId=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    "inkera_access_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+  document.cookie =
+    "inkera_userId=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
   console.log("🧹 Cookies de session supprimés côté client");
 }
 
@@ -19,10 +20,10 @@ export function hasSessionCookies(): boolean {
 
   const cookies = document.cookie.split(";");
   const hasAccessToken = cookies.some((cookie) =>
-    cookie.trim().startsWith("access_token=")
+    cookie.trim().startsWith("inkera_access_token=")
   );
   const hasUserId = cookies.some((cookie) =>
-    cookie.trim().startsWith("userId=")
+    cookie.trim().startsWith("inkera_userId=")
   );
 
   return hasAccessToken && hasUserId;

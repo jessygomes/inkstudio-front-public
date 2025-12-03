@@ -9,7 +9,7 @@ export async function createSession(infos: {
   const cookieStore = await cookies();
 
   // ✅ Stockez directement le token du backend (celui qui fonctionne avec votre JwtStrategy)
-  cookieStore.set("access_token", infos.access_token, {
+  cookieStore.set("inkera_access_token", infos.access_token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
@@ -18,7 +18,7 @@ export async function createSession(infos: {
   });
 
   // ✅ Stockez aussi l'userId pour un accès rapide
-  cookieStore.set("userId", infos.userId, {
+  cookieStore.set("inkera_userId", infos.userId, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
@@ -31,8 +31,8 @@ export async function createSession(infos: {
 
 export async function deleteSession() {
   const cookieStore = await cookies();
-  cookieStore.delete("access_token");
-  cookieStore.delete("userId");
+  cookieStore.delete("inkera_access_token");
+  cookieStore.delete("inkera_userId");
   console.log("🧹 Cookies de session supprimés côté serveur");
 }
 
@@ -40,7 +40,7 @@ export async function deleteSession() {
 // ✅ Fonction pour récupérer les headers d'authentification
 export const getAuthHeaders = async () => {
   const cookieStore = await cookies();
-  const accessToken = cookieStore.get("access_token")?.value;
+  const accessToken = cookieStore.get("inkera_access_token")?.value;
 
   return {
     "Content-Type": "application/json",
