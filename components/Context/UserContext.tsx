@@ -8,6 +8,8 @@ type User = {
   firstName: string;
   lastName: string;
   email: string;
+  phone: string;
+  birthDate: string;
   role: string;
   isAuthenticated: boolean;
 };

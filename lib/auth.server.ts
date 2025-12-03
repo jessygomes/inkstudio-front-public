@@ -27,7 +27,7 @@ export const getAuthenticatedUser = async () => {
 
       // Supprimer les cookies expirés côté serveur
       const cookieStore = await cookies();
-      cookieStore.delete("access_token");
+      cookieStore.delete("access_token_");
       cookieStore.delete("userId");
 
       throw new Error("TOKEN_EXPIRED");

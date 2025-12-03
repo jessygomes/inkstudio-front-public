@@ -133,6 +133,8 @@ export default async function RootLayout({
     firstName: "",
     lastName: "",
     email: "",
+    phone: "",
+    birthDate: "",
     role: "",
     isAuthenticated: false,
   };
@@ -145,6 +147,8 @@ export default async function RootLayout({
       firstName: userData.firstName,
       lastName: userData.lastName,
       email: userData.email,
+      phone: userData.phone || "",
+      birthDate: userData.clientProfile?.birthDate || "",
       role: userData.role,
       isAuthenticated: true,
     };

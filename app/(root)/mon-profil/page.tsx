@@ -74,7 +74,7 @@ export default function MonProfilPage() {
             page.
           </p>
           <Link
-            href="/connexion"
+            href="/se-connecter"
             className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white rounded-xl transition-all duration-300 font-one text-sm shadow-lg hover:scale-105"
           >
             Se connecter

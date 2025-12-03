@@ -20,6 +20,7 @@ import {
   getBlockedSlots,
 } from "@/lib/actions/timeslot.action";
 import Image from "next/image";
+import { useUser } from "@/components/Context/UserContext";
 
 // --- Types
 type PiercingZone = {
@@ -115,8 +116,9 @@ export default function BookingFlow({
   defaultTatoueurId,
 }: Props) {
   const BACK = apiBase || process.env.NEXT_PUBLIC_BACK_URL || "";
+  const { user, isAuthenticated } = useUser();
 
-  //! FORM SETUP
+  //! FORM SETUP avec préremplissage si utilisateur connecté
   const methods = useForm<AppointmentRequestForm>({
     resolver: zodResolver(appointmentRequestSchema),
     mode: "onBlur",
@@ -130,11 +132,13 @@ export default function BookingFlow({
         alt: { date: "", from: "", to: "" },
       },
       client: {
-        firstName: "",
-        lastName: "",
-        email: "",
-        phone: "",
-        birthDate: "",
+        firstName: isAuthenticated && user ? user.firstName : "",
+        lastName: isAuthenticated && user ? user.lastName : "",
+        email: isAuthenticated && user ? user.email : "",
+        phone: isAuthenticated && user ? user.phone : "",
+        birthDate: isAuthenticated && user && user.birthDate 
+          ? new Date(user.birthDate).toISOString().split('T')[0] 
+          : "",
       },
       details: {},
       message: "",
