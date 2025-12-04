@@ -24,8 +24,8 @@ import { User } from "@/lib/type";
 
 export default function MonProfilPage() {
   const { isAuthenticated, isClient } = useUser();
-  const [activeTab, setActiveTab] = useState<"infos" | "favoris" | "rdv">(
-    "infos"
+  const [activeTab, setActiveTab] = useState<"rdv" | "favoris" | "infos">(
+    "rdv"
   );
 
   // État pour les données complètes du profil avec type explicite
