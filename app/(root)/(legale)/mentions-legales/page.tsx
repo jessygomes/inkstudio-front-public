@@ -20,6 +20,10 @@ export const metadata: Metadata = {
     "informations légales",
     "propriété intellectuelle",
     "hébergement",
+    "responsabilité",
+    "contact",
+    "conditions d'utilisation",
+    "salons de tatouage",
   ],
 };
 
