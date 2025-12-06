@@ -1,3 +1,4 @@
+import { image } from "motion/react-client";
 import * as z from "zod";
 
 // compare "HH:mm"
@@ -149,4 +150,5 @@ export const updateProfileSchema = z.object({
   city: z.string().optional(),
   postalCode: z.string().optional(),
   birthDate: z.string().optional(),
+  image: z.string().optional().nullable(),
 });

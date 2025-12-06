@@ -8,7 +8,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Link from "next/link";
-import Image from "next/image";
 import {
   FaUser,
   FaEnvelope,
@@ -25,8 +24,23 @@ import {
   updateUserInfoAction,
   getClientProfile,
 } from "@/lib/actions/user.action";
+import SalonImageUploader from "@/components/Shared/ImageProfileUpload";
 
 type UpdateProfileForm = z.infer<typeof updateProfileSchema>;
+
+type ClientProfileData = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone?: string | null;
+  image?: string | null;
+  clientProfile?: {
+    pseudo?: string | null;
+    city?: string | null;
+    postalCode?: string | null;
+    birthDate?: string | null;
+  } | null;
+};
 
 export default function ModifierProfilPage() {
   const { isAuthenticated, isClient } = useUser();
@@ -34,7 +48,9 @@ export default function ModifierProfilPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // État pour les données complètes du profil
-  const [profileData, setProfileData] = useState(null);
+  const [profileData, setProfileData] = useState<ClientProfileData | null>(
+    null
+  );
   const [loading, setLoading] = useState(true);
 
   const {
@@ -42,6 +58,8 @@ export default function ModifierProfilPage() {
     handleSubmit,
     formState: { errors },
     reset,
+    setValue,
+    watch,
   } = useForm<UpdateProfileForm>({
     resolver: zodResolver(updateProfileSchema),
   });
@@ -72,6 +90,7 @@ export default function ModifierProfilPage() {
                   .toISOString()
                   .split("T")[0]
               : "",
+            image: result.data.image || "",
           });
         } else {
           console.error("Erreur récupération profil:", result.message);
@@ -91,7 +110,7 @@ export default function ModifierProfilPage() {
   // Redirection si pas authentifié ou pas client
   if (!isAuthenticated || !isClient) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-noir-700 via-noir-600 to-noir-800 pt-20 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-b from-noir-700 via-noir-500 to-noir-700 pt-20 flex items-center justify-center">
         <div className="text-center">
           <p className="text-white/60 font-one mb-4">
             Vous devez être connecté en tant que client pour accéder à cette
@@ -111,7 +130,7 @@ export default function ModifierProfilPage() {
   // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-noir-700 via-noir-600 to-noir-800 pt-20 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-b from-noir-700 via-noir-500 to-noir-700 pt-20 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-2 border-tertiary-400 border-t-transparent mx-auto mb-4"></div>
           <p className="text-white/60 font-one">Chargement des données...</p>
@@ -122,7 +141,7 @@ export default function ModifierProfilPage() {
 
   if (!profileData) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-noir-700 via-noir-600 to-noir-800 pt-20 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-b from-noir-700 via-noir-500 to-noir-700 pt-20 flex items-center justify-center">
         <div className="text-center">
           <p className="text-white/60 font-one mb-4">
             Erreur lors du chargement des données
@@ -140,9 +159,9 @@ export default function ModifierProfilPage() {
 
   const onSubmit = async (data: UpdateProfileForm) => {
     setIsSubmitting(true);
-
     try {
-      const result = await updateUserInfoAction(data);
+      const payload = { ...data, image: watch("image") || "" };
+      const result = await updateUserInfoAction(payload);
 
       if (result.ok) {
         toast.success("Profil mis à jour avec succès !");
@@ -159,7 +178,7 @@ export default function ModifierProfilPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-noir-700 via-noir-600 to-noir-800 pt-20">
+    <div className="min-h-screen bg-gradient-to-b from-noir-700 via-noir-500 to-noir-700 pt-20">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-4xl">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
@@ -183,6 +202,18 @@ export default function ModifierProfilPage() {
               <h2 className="text-white font-one font-semibold text-lg">
                 Informations personnelles
               </h2>
+            </div>
+
+            <div className="bg-white/5 rounded-xl sm:rounded-2xl p-5 sm:p-4 border border-white/10 mb-4">
+              <h3 className="text-base sm:text-sm font-semibold text-tertiary-400 mb-4 sm:mb-3 font-one uppercase tracking-wide">
+                <span className="hidden sm:inline">📸 Photo de profil</span>
+                <span className="sm:hidden">📸 Photo</span>
+              </h3>
+              <SalonImageUploader
+                currentImage={watch("image") || profileData?.image || undefined}
+                onImageUpload={(imageUrl) => setValue("image", imageUrl)}
+                onImageRemove={() => setValue("image", "")}
+              />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">

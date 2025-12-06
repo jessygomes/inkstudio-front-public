@@ -119,8 +119,8 @@ export default function ContactPage() {
       <div className="min-h-screen bg-gradient-to-b from-noir-700 via-noir-600 to-noir-700 pt-20">
         {/* Hero Section */}
         <section className="bg-gradient-to-r from-noir-700 to-noir-800 py-20 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-80 h-80 bg-tertiary-400/5 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-0 left-0 w-96 h-96 bg-tertiary-500/3 rounded-full blur-3xl"></div>
+          {/* <div className="absolute top-0 right-0 w-80 h-80 bg-tertiary-400/5 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-0 left-0 w-96 h-96 bg-tertiary-500/3 rounded-full blur-3xl"></div> */}
 
           <div className="container mx-auto px-4 sm:px-8 max-w-4xl relative z-10">
             <div className="text-center">
@@ -133,7 +133,7 @@ export default function ContactPage() {
                 />
               </div>
 
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-two uppercase text-white font-bold leading-tight mb-6">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-two uppercase text-white font-bold leading-tight tracking-widest mb-6">
                 Contactez{" "}
                 <span className="bg-gradient-to-r from-tertiary-400 via-tertiary-500 to-cuatro-500 bg-clip-text text-transparent">
                   Nous
@@ -155,11 +155,11 @@ export default function ContactPage() {
         {/* Section informations de contact */}
         <section className="py-16">
           <div className="container mx-auto px-4 sm:px-8 max-w-6xl">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            <div className="grid grid-cols-1 lg:grid-cols-1 gap-12">
               {/* Formulaire de contact */}
-              <div>
+              {/* <div>
                 <ContactForm />
-              </div>
+              </div> */}
 
               {/* Informations et FAQ */}
               <div className="space-y-8">
@@ -183,9 +183,12 @@ export default function ContactPage() {
                         <h3 className="font-semibold text-white mb-2">
                           Support technique
                         </h3>
-                        <p className="text-tertiary-400">
+                        <a
+                          href="mailto:contact@inkera-studio.com"
+                          className="text-tertiary-400 hover:text-tertiary-300 transition-colors font-semibold underline"
+                        >
                           contact@inkera-studio.com
-                        </p>
+                        </a>
                         <p className="text-sm text-white/60 mt-1">
                           Pour les problèmes techniques
                         </p>
@@ -200,9 +203,12 @@ export default function ContactPage() {
                         <h3 className="font-semibold text-white mb-2">
                           Partenariats
                         </h3>
-                        <p className="text-tertiary-400">
+                        <a
+                          href="mailto:contact@inkera-studio.com"
+                          className="text-tertiary-400 hover:text-tertiary-300 transition-colors font-semibold underline"
+                        >
                           contact@inkera-studio.com
-                        </p>
+                        </a>
                         <p className="text-sm text-white/60 mt-1">
                           Collaborations et partenariats
                         </p>

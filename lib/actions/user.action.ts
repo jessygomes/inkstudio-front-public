@@ -168,3 +168,39 @@ export const toggleFavoriteSalon = async (salonId: string) => {
     throw error;
   }
 };
+
+//! ----------------------------------------------------------------------------
+//!  VÉRIFIER SI UN SALON EST EN FAVORI
+//! ----------------------------------------------------------------------------
+export const isSalonFavorite = async (salonId: string) => {
+  try {
+    const headers = await getAuthHeaders();
+
+    // Récupérer tous les favoris et vérifier si le salon y est
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BACK_URL}/users/favorites`,
+      {
+        method: "GET",
+        headers,
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok || (data && data.error)) {
+      return { ok: false, isFavorite: false };
+    }
+
+    // Vérifier si le salonId est dans la liste des favoris
+    const favoriteSalons = data.favoriteSalons || [];
+    const isFavorite = favoriteSalons.some(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (salon: any) => salon.id === salonId
+    );
+
+    return { ok: true, isFavorite };
+  } catch (error) {
+    console.error("Erreur lors de la vérification du favori :", error);
+    return { ok: false, isFavorite: false };
+  }
+};

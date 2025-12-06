@@ -158,7 +158,6 @@ export default function FavorisTab() {
 
                 <FavoriteBtn
                   salonId={salon.id}
-                  isFavorite={true}
                   variant="icon-only"
                   className="!w-auto !h-auto px-3 py-2"
                   onToggle={(isFav) => {

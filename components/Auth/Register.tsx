@@ -11,7 +11,6 @@ import { registerAction } from "@/lib/actions/auth.action";
 
 import { FormError } from "@/components/Shared/FormError";
 import { FormSuccess } from "@/components/Shared/FormSuccess";
-import Image from "next/image";
 import { CardWrapper } from "./Wrapper/CardWrapper";
 
 // Schema de validation pour l'inscription client
@@ -372,13 +371,13 @@ export default function Register() {
             Se connecter
           </Link>
         </p>
-        <div className="h-[1px] bg-white w-[300px]"></div>
-        <Link
+        {/* <div className="h-[1px] bg-white w-[300px]"></div> */}
+        {/* <Link
           className="text-white text-xs text-center font-two mt-2 hover:text-white/70 transition-all ease-in-out duration-150"
           href="/"
         >
           Retour à l'accueil
-        </Link>
+        </Link> */}
       </div>
     </div>
   );

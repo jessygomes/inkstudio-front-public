@@ -136,9 +136,10 @@ export default function BookingFlow({
         lastName: isAuthenticated && user ? user.lastName : "",
         email: isAuthenticated && user ? user.email : "",
         phone: isAuthenticated && user ? user.phone : "",
-        birthDate: isAuthenticated && user && user.birthDate 
-          ? new Date(user.birthDate).toISOString().split('T')[0] 
-          : "",
+        birthDate:
+          isAuthenticated && user && user.birthDate
+            ? new Date(user.birthDate).toISOString().split("T")[0]
+            : "",
       },
       details: {},
       message: "",

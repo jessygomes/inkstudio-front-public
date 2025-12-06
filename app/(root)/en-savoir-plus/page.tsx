@@ -135,7 +135,7 @@ export default function EnSavoirPlusPage() {
             </div>
 
             {/* Titre principal */}
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white uppercase font-two tracking-wide leading-tight">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white uppercase font-two tracking-widest leading-tight">
               <span className="block mb-1">En savoir plus</span>
               <span className="block bg-gradient-to-r from-tertiary-400 via-tertiary-500 to-cuatro-500 bg-clip-text text-transparent">
                 sur notre vision
@@ -508,13 +508,15 @@ export default function EnSavoirPlusPage() {
               </h3>
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                 <Link
-                  href="/contactez-nous"
+                  href="https://www.inkera-studio.com/"
+                  target="_blank"
                   className="bg-gradient-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white font-one font-semibold px-8 py-4 rounded-2xl transition-all duration-300 hover:scale-105 shadow-lg"
                 >
                   Découvrez l'application complète
                 </Link>
                 <Link
                   href="/contactez-nous"
+                  target="_blank"
                   className="border border-white/20 text-white hover:bg-white/10 font-one font-semibold px-8 py-4 rounded-2xl transition-all duration-300"
                 >
                   Nous contacter

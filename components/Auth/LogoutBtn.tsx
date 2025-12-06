@@ -39,9 +39,9 @@ export const LogoutBtn = ({ children }: LogoutBtnProps) => {
   return (
     <span
       onClick={onClick}
-      className="cursor-pointer px-4 py-2 text-sm w-full flex items-center gap-2 rounded-xl hover:bg-noir-500 transition-colors"
+      className="cursor-pointer px-2 py-2 text-xs font-one w-full flex items-center gap-1 rounded-lg bg-gradient-to-br from-white/[0.08] to-white/[0.02] hover:from-white/[0.12] hover:to-white/[0.06] hover:bg-noir-500 transition-colors"
     >
-      <AiOutlineLogout size={20} className="inline-block mr-2" />
+      <AiOutlineLogout size={14} className="inline-block" />
       {children}
     </span>
   );

@@ -150,7 +150,7 @@ export default function Home() {
             </div>
 
             {/* Titre principal */}
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white uppercase font-two tracking-wide leading-tight">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white uppercase font-two tracking-widest leading-tight">
               <span className="block mb-1">Trouvez votre</span>
               <span className="block bg-gradient-to-r from-tertiary-400 via-tertiary-500 to-cuatro-500 bg-clip-text text-transparent">
                 salon de tatouage
@@ -298,11 +298,10 @@ export default function Home() {
                     </h2>
                   </div>
                   <p className="text-white/80 font-one text-lg leading-relaxed">
-                    InkStudio est un espace en ligne où les salons de tatouage
-                    et de piercing présentent leur univers, leurs artistes et
-                    leurs réalisations. Chaque page est une vitrine unique,
-                    pensée pour mettre en valeur le travail de chaque
-                    professionnel.
+                    Inkera est un espace en ligne où les salons de tatouage et
+                    de piercing présentent leur univers, leurs artistes et leurs
+                    réalisations. Chaque page est une vitrine unique, pensée
+                    pour mettre en valeur le travail de chaque professionnel.
                   </p>
 
                   <div className="bg-gradient-to-br from-tertiary-500/10 to-tertiary-600/5 border border-tertiary-500/30 rounded-2xl p-6">
@@ -394,9 +393,9 @@ export default function Home() {
               </h2>
             </div>
             <p className="text-xl text-white/80 font-one leading-relaxed">
-              Rejoignez des milliers de personnes qui ont trouvé leur salon
-              idéal sur InkStudio.
-              <span className="text-tertiary-400 font-semibold block mt-2">
+              {/* Rejoignez des milliers de personnes qui ont trouvé leur salon
+              idéal sur Inkera. */}
+              <span className="text-tertiary-400 font-semibold block mt-2 tracking-widest">
                 Votre prochain chef-d'œuvre commence ici.
               </span>
             </p>

@@ -103,12 +103,7 @@ export const Login = () => {
   return (
     <div>
       <div className="flex justify-center items-center">
-        <Image
-          src="/images/logo_white_color.png"
-          alt="Logo"
-          width={100}
-          height={100}
-        />
+        <Image src="/images/Logo22.png" alt="Logo" width={40} height={100} />
       </div>
       <CardWrapper headerLabel="Connectez-vous à votre compte Inkera">
         <form
@@ -220,7 +215,7 @@ export const Login = () => {
           Pas encore de compte ?{" "}
           <Link
             className="text-tertiary-400 hover:text-tertiary-500 transition-all ease-in-out duration-150"
-            href="/inscription"
+            href="/creer-un-compte"
           >
             Créer un compte
           </Link>
@@ -232,12 +227,12 @@ export const Login = () => {
         >
           Mot de passe oublié ?
         </Link>
-        <Link
+        {/* <Link
           className="text-white text-xs text-center font-two mt-2 hover:text-white/70 transition-all ease-in-out duration-150"
           href="/"
         >
           Retour à l'accueil
-        </Link>
+        </Link> */}
       </div>
     </div>
   );

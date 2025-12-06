@@ -9,6 +9,7 @@ type User = {
   lastName: string;
   email: string;
   phone: string;
+  image?: string;
   birthDate: string;
   role: string;
   isAuthenticated: boolean;
