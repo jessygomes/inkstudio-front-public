@@ -9,6 +9,8 @@ import Link from "next/link";
 import { MdNotificationsActive } from "react-icons/md";
 import { HiMiniRocketLaunch } from "react-icons/hi2";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Trouver un salon de tatouage - Inkera | Annuaire France",
   description:

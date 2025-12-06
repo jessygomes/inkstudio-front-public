@@ -51,6 +51,8 @@ const walkway = localFont({
   display: "swap", // bon pour les performances
 });
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_SITE_URL || "https://theinkera.com"

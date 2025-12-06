@@ -14,6 +14,8 @@ import { MdDataThresholding } from "react-icons/md";
 import { TiHeartHalfOutline } from "react-icons/ti";
 import Image from "next/image";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "En savoir plus - Inkera | Notre mission et vision",
   description:

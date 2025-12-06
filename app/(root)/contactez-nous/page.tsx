@@ -1,5 +1,4 @@
 /* eslint-disable react/no-unescaped-entities */
-import ContactForm from "@/components/Contact/ContactForm";
 import React from "react";
 import {
   FaEnvelope,
@@ -10,6 +9,8 @@ import {
 import type { Metadata } from "next";
 import Script from "next/script";
 import Image from "next/image";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Contactez-nous - Inkera | Support et assistance",

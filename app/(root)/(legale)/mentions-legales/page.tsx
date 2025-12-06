@@ -10,6 +10,8 @@ import {
 } from "react-icons/fa";
 import type { Metadata } from "next";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Mentions Légales",
   description:
