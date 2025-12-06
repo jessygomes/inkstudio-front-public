@@ -11,7 +11,7 @@ import {
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Mentions Légales | Inkera",
+  title: "Mentions Légales",
   description:
     "Consultez les mentions légales d'Inkera, plateforme pour salons de tatouage. Informations légales, hébergement et propriété intellectuelle.",
   keywords: [
@@ -48,7 +48,7 @@ export default function MentionsLegales() {
 
             <p className="text-xl text-white/70 font-one leading-relaxed max-w-3xl mx-auto">
               Informations légales et conditions d'utilisation de la plateforme{" "}
-              <span className="text-tertiary-400 font-semibold">InkStudio</span>
+              <span className="text-tertiary-400 font-semibold">Inkera</span>
             </p>
           </div>
         </div>
@@ -71,7 +71,7 @@ export default function MentionsLegales() {
 
               <div className="space-y-4 text-white/80 font-one leading-relaxed">
                 <p className="text-white mb-4">
-                  Le site InkStudio est édité par :
+                  Le site Inkera est édité par :
                 </p>
 
                 <div className="bg-white/5 rounded-2xl p-6">
@@ -97,7 +97,7 @@ export default function MentionsLegales() {
                       <strong className="text-white">
                         Directeur de la publication :
                       </strong>{" "}
-                      [Ton prénom et nom]
+                      PINTO BARRETO Jessy
                     </p>
                   </div>
                 </div>
@@ -151,10 +151,9 @@ export default function MentionsLegales() {
                 <p>
                   L'ensemble du contenu du site (textes, images, logos,
                   graphismes, vidéos, structure, code source) est protégé par le
-                  droit d'auteur et demeure la propriété exclusive de InkStudio
-                  ou de ses partenaires.
+                  droit d'auteur et demeure la propriété exclusive de Inkera ou
+                  de ses partenaires.
                 </p>
-
                 <p>
                   Toute reproduction, distribution, modification ou adaptation,
                   même partielle, est strictement interdite sans autorisation
@@ -176,9 +175,9 @@ export default function MentionsLegales() {
 
               <div className="space-y-4 text-white/80 font-one leading-relaxed">
                 <p>
-                  InkStudio s'efforce d'assurer l'exactitude et la mise à jour
-                  des informations diffusées sur le site. Cependant, la société
-                  ne saurait être tenue responsable d'éventuelles erreurs,
+                  Inkera s'efforce d'assurer l'exactitude et la mise à jour des
+                  informations diffusées sur le site. Cependant, la société ne
+                  saurait être tenue responsable d'éventuelles erreurs,
                   omissions ou indisponibilités du service.
                 </p>
 
@@ -203,10 +202,9 @@ export default function MentionsLegales() {
 
               <div className="space-y-4 text-white/80 font-one leading-relaxed">
                 <p>
-                  Le site peut contenir des liens vers des sites tiers.
-                  InkStudio ne peut être tenu responsable du contenu de ces
-                  sites externes ni des éventuels dommages résultant de leur
-                  utilisation.
+                  Le site peut contenir des liens vers des sites tiers. Inkera
+                  ne peut être tenu responsable du contenu de ces sites externes
+                  ni des éventuels dommages résultant de leur utilisation.
                 </p>
               </div>
             </div>

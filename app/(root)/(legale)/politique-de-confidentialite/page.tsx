@@ -13,7 +13,7 @@ import {
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Politique de confidentialité | Inkera",
+  title: "Politique de confidentialité",
   description:
     "Consultez la politique de confidentialité d'Inkera conforme au RGPD. Protection des données personnelles et gestion de la vie privée.",
   keywords: [
@@ -85,9 +85,9 @@ export default function PolitiqueDeConfidentialite() {
               <div className="text-white/80 font-one leading-relaxed">
                 <p>
                   La présente politique de confidentialité explique comment
-                  InkStudio collecte, utilise et protège les données
-                  personnelles des utilisateurs du site public, notamment lors
-                  de la prise de rendez-vous avec un salon.
+                  Inkera collecte, utilise et protège les données personnelles
+                  des utilisateurs du site public, notamment lors de la prise de
+                  rendez-vous avec un salon.
                 </p>
               </div>
             </div>
@@ -198,7 +198,7 @@ export default function PolitiqueDeConfidentialite() {
                 <div className="space-y-3 mt-6">
                   <div className="bg-white/5 rounded-xl p-4">
                     <h3 className="font-semibold text-tertiary-400 mb-2">
-                      L'équipe d'administration de InkStudio
+                      L'équipe d'administration de Inkera
                     </h3>
                     <p className="text-sm text-white/70">
                       (à des fins techniques et de support)
@@ -270,9 +270,9 @@ export default function PolitiqueDeConfidentialite() {
 
               <div className="space-y-4 text-white/80 font-one leading-relaxed">
                 <p>
-                  InkStudio met en œuvre toutes les mesures techniques
-                  nécessaires pour protéger vos informations contre la perte,
-                  l'accès non autorisé ou la divulgation :
+                  Inkera met en œuvre toutes les mesures techniques nécessaires
+                  pour protéger vos informations contre la perte, l'accès non
+                  autorisé ou la divulgation :
                 </p>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
