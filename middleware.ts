@@ -23,6 +23,7 @@ export function middleware(req: NextRequest) {
     "/se-connecter",
     "/mot-de-passe-oublie",
     "/verifier-email",
+    "/trouver-un-salon",
     "/",
   ];
   if (allowedPrefixes.some((p) => pathname.startsWith(p))) {
