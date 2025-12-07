@@ -8,142 +8,140 @@ import {
   FaPhone,
   FaBirthdayCake,
   FaMapMarkerAlt,
+  FaUser,
 } from "react-icons/fa";
 
 type Props = {
   user: User;
-  // appointmentsCount: number;
-  // favoritesCount: number;
 };
 
-export default function InfosTab({
-  user,
-}: // appointmentsCount,
-// favoritesCount,
-Props) {
+export default function InfosTab({ user }: Props) {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      {/* Informations personnelles */}
-      <div className="bg-gradient-to-br from-white/[0.08] to-white/[0.02] backdrop-blur-lg border border-white/10 rounded-2xl p-6 shadow-xl">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-white font-one font-semibold text-lg">
-            Informations personnelles
+    <div className="bg-gradient-to-br from-white/[0.08] to-white/[0.02] backdrop-blur-lg border border-white/10 rounded-2xl p-4 sm:p-6 shadow-xl">
+      {/* Header modernisé */}
+      <div className="flex items-center justify-between mb-6 pb-4 border-b border-white/10">
+        <div>
+          <h3 className="text-white font-one font-semibold text-lg sm:text-xl mb-1">
+            Mes informations
           </h3>
+          <p className="text-white/60 font-one text-xs">
+            Profil et coordonnées
+          </p>
         </div>
-
-        <div className="space-y-4">
-          <div className="grid grid-cols-3 gap-4">
-            <div>
-              <label className="text-white/70 font-one text-sm mb-1 block">
-                Pseudo
-              </label>
-              <p className="text-white font-one">
-                {user.clientProfile?.pseudo || "Non renseigné"}
-              </p>
-            </div>
-            <div>
-              <label className="text-white/70 font-one text-sm mb-1 block">
-                Prénom
-              </label>
-              <p className="text-white font-one">{user.firstName}</p>
-            </div>
-            <div>
-              <label className="text-white/70 font-one text-sm mb-1 block">
-                Nom
-              </label>
-              <p className="text-white font-one">{user.lastName}</p>
-            </div>
-          </div>
-
-          <div>
-            <label className="text-white/70 font-one text-sm mb-1 flex items-center gap-2">
-              <FaEnvelope className="w-3 h-3" />
-              Email
-            </label>
-            <p className="text-white font-one">{user.email}</p>
-          </div>
-
-          <div>
-            <label className="text-white/70 font-one text-sm mb-1 flex items-center gap-2">
-              <FaPhone className="w-3 h-3" />
-              Téléphone
-            </label>
-            <p className="text-white font-one">{user.phone}</p>
-          </div>
-
-          <div>
-            <label className="text-white/70 font-one text-sm mb-1 flex items-center gap-2">
-              <FaBirthdayCake className="w-3 h-3" />
-              Date de naissance
-            </label>
-            <p className="text-white font-one">
-              {user.clientProfile?.birthDate
-                ? new Date(user.clientProfile.birthDate).toLocaleDateString(
-                    "fr-FR",
-                    {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    }
-                  )
-                : "Non renseignée"}
-            </p>
-          </div>
-
-          <div>
-            <label className="text-white/70 font-one text-sm mb-1 flex items-center gap-2">
-              <FaMapMarkerAlt className="w-3 h-3" />
-              Ville
-            </label>
-            <p className="text-white font-one">
-              {user.clientProfile?.city || "Non renseignée"}
-            </p>
-          </div>
+        <div className="w-10 h-10 bg-tertiary-500/20 rounded-xl flex items-center justify-center">
+          <FaUser className="w-5 h-5 text-tertiary-400" />
         </div>
       </div>
 
-      {/* Statistiques */}
-      <div className="bg-gradient-to-br from-white/[0.08] to-white/[0.02] backdrop-blur-lg border border-white/10 rounded-2xl p-6 shadow-xl">
-        <h3 className="text-white font-one font-semibold text-lg mb-6">
-          Mes statistiques
-        </h3>
+      {/* Grille d'informations modernisée */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* Card Pseudo */}
+        <div className="group relative bg-gradient-to-br from-white/[0.08] to-white/[0.03] border border-white/10 hover:border-white/20 rounded-xl p-4 transition-all duration-300">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-6 h-6 rounded-lg bg-tertiary-500/20 flex items-center justify-center">
+              <FaUser className="w-3 h-3 text-tertiary-400" />
+            </div>
+            <label className="text-white/70 font-one text-xs uppercase tracking-wider">
+              Pseudo
+            </label>
+          </div>
+          <p className="text-white font-one text-sm">
+            {user.clientProfile?.pseudo || "Non renseigné"}
+          </p>
+        </div>
 
-        {/* <div className="grid grid-cols-2 gap-4">
-          <div className="text-center p-4 bg-white/5 rounded-xl border border-white/10">
-            <div className="text-2xl font-bold text-tertiary-400 font-two mb-1">
-              {appointmentsCount}
+        {/* Card Prénom */}
+        <div className="group relative bg-gradient-to-br from-white/[0.08] to-white/[0.03] border border-white/10 hover:border-white/20 rounded-xl p-4 transition-all duration-300">
+          <label className="text-white/70 font-one text-xs uppercase tracking-wider block mb-2">
+            Prénom
+          </label>
+          <p className="text-white font-one text-sm">{user.firstName}</p>
+        </div>
+
+        {/* Card Nom */}
+        <div className="group relative bg-gradient-to-br from-white/[0.08] to-white/[0.03] border border-white/10 hover:border-white/20 rounded-xl p-4 transition-all duration-300">
+          <label className="text-white/70 font-one text-xs uppercase tracking-wider block mb-2">
+            Nom
+          </label>
+          <p className="text-white font-one text-sm">{user.lastName}</p>
+        </div>
+
+        {/* Card Email */}
+        <div className="group relative bg-gradient-to-br from-white/[0.08] to-white/[0.03] border border-white/10 hover:border-white/20 rounded-xl p-4 transition-all duration-300">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-6 h-6 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+              <FaEnvelope className="w-3 h-3 text-emerald-400" />
             </div>
-            <div className="text-white/70 font-one text-sm">
-              Rendez-vous pris
-            </div>
+            <label className="text-white/70 font-one text-xs uppercase tracking-wider">
+              Email
+            </label>
           </div>
-          <div className="text-center p-4 bg-white/5 rounded-xl border border-white/10">
-            <div className="text-2xl font-bold text-tertiary-400 font-two mb-1">
-              {favoritesCount}
+          <p className="text-white font-one text-sm truncate">{user.email}</p>
+        </div>
+
+        {/* Card Téléphone */}
+        <div className="group relative bg-gradient-to-br from-white/[0.08] to-white/[0.03] border border-white/10 hover:border-white/20 rounded-xl p-4 transition-all duration-300">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-6 h-6 rounded-lg bg-amber-500/20 flex items-center justify-center">
+              <FaPhone className="w-3 h-3 text-amber-400" />
             </div>
-            <div className="text-white/70 font-one text-sm">Salons favoris</div>
+            <label className="text-white/70 font-one text-xs uppercase tracking-wider">
+              Téléphone
+            </label>
           </div>
-          <div className="text-center p-4 bg-white/5 rounded-xl border border-white/10">
-            <div className="text-2xl font-bold text-tertiary-400 font-two mb-1">
-              {user.clientProfile?.birthDate
-                ? new Date().getFullYear() -
-                  new Date(user.clientProfile.birthDate).getFullYear()
-                : "?"}
+          <p className="text-white font-one text-sm">{user.phone}</p>
+        </div>
+
+        {/* Card Date de naissance */}
+        <div className="group relative bg-gradient-to-br from-white/[0.08] to-white/[0.03] border border-white/10 hover:border-white/20 rounded-xl p-4 transition-all duration-300">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-6 h-6 rounded-lg bg-pink-500/20 flex items-center justify-center">
+              <FaBirthdayCake className="w-3 h-3 text-pink-400" />
             </div>
-            <div className="text-white/70 font-one text-sm">
-              Années d'ancienneté
-            </div>
+            <label className="text-white/70 font-one text-xs uppercase tracking-wider">
+              Date de naissance
+            </label>
           </div>
-          <div className="text-center p-4 bg-white/5 rounded-xl border border-white/10">
-            <div className="text-2xl font-bold text-tertiary-400 font-two mb-1">
-              {new Date().getFullYear() -
-                new Date(user.createdAt).getFullYear()}
+          <p className="text-white font-one text-sm">
+            {user.clientProfile?.birthDate
+              ? new Date(user.clientProfile.birthDate).toLocaleDateString(
+                  "fr-FR",
+                  {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  }
+                )
+              : "Non renseignée"}
+          </p>
+        </div>
+
+        {/* Card Ville */}
+        <div className="group relative bg-gradient-to-br from-white/[0.08] to-white/[0.03] border border-white/10 hover:border-white/20 rounded-xl p-4 transition-all duration-300">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-6 h-6 rounded-lg bg-purple-500/20 flex items-center justify-center">
+              <FaMapMarkerAlt className="w-3 h-3 text-purple-400" />
             </div>
-            <div className="text-white/70 font-one text-sm">
-              Années d'ancienneté
-            </div>
+            <label className="text-white/70 font-one text-xs uppercase tracking-wider">
+              Ville
+            </label>
           </div>
-        </div> */}
+          <p className="text-white font-one text-sm">
+            {user.clientProfile?.city || "Non renseignée"}
+          </p>
+        </div>
+
+        {/* Card Code postal */}
+        {user.clientProfile?.postalCode && (
+          <div className="group relative bg-gradient-to-br from-white/[0.08] to-white/[0.03] border border-white/10 hover:border-white/20 rounded-xl p-4 transition-all duration-300">
+            <label className="text-white/70 font-one text-xs uppercase tracking-wider block mb-2">
+              Code postal
+            </label>
+            <p className="text-white font-one text-sm">
+              {user.clientProfile.postalCode}
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

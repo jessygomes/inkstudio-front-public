@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -112,104 +113,107 @@ export default function MonProfilPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-noir-700 via-noir-500 to-noir-700 pt-20">
       <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-7xl">
-        {/* Header avec avatar et infos principales */}
-        <div className=" border border-white/10 rounded-xl p-6 sm:p-8 shadow-2xl mb-8">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
-            {/* Avatar */}
-            <div className="relative">
-              <div className="relative w-20 h-20 sm:w-32 sm:h-32 bg-gradient-to-br from-tertiary-400/20 to-tertiary-500/20 rounded-xl flex items-center justify-center overflow-hidden">
+        {/* Header modernisé */}
+        <div className=" backdrop-blur-lg border border-white/10 hover:border-white/20 rounded-2xl p-4 sm:p-6 lg:p-8 shadow-xl transition-all duration-300 mb-8">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
+            {/* Avatar modernisé - Plus grand sur mobile */}
+            <div className="relative flex-shrink-0">
+              <div className="relative w-32 h-32 sm:w-28 sm:h-28 lg:w-32 lg:h-32 bg-gradient-to-br from-tertiary-400/20 to-tertiary-500/20 rounded-2xl flex items-center justify-center overflow-hidden border border-tertiary-400/30 ring-4 ring-white/5">
                 {profileData.image ? (
                   <Image
                     src={profileData.image}
                     alt="Avatar"
                     fill
-                    sizes="96px"
+                    sizes="(min-width: 1024px) 128px, (min-width: 640px) 112px, 128px"
                     className="object-cover"
                     priority
                   />
                 ) : (
-                  <FaUser className="w-8 h-8 sm:w-10 sm:h-10 text-tertiary-400" />
+                  <FaUser className="w-12 h-12 sm:w-12 sm:h-12 lg:w-12 lg:h-12 text-tertiary-400" />
                 )}
               </div>
+              {/* Status indicator */}
+              <div className="absolute bottom-0 right-0 w-4 h-4 bg-emerald-500 rounded-full border-2 border-noir-700 ring-2 ring-emerald-500/30"></div>
             </div>
 
-            {/* Infos utilisateur - utiliser les vraies données */}
-            <div className="flex-1">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="">
-                  <h1 className="text-2xl sm:text-3xl font-one font-bold text-white mb-2">
+            {/* Infos utilisateur modernisées */}
+            <div className="flex-1 min-w-0 text-center sm:text-left">
+              <div className="space-y-4">
+                {/* Nom et titre */}
+                <div>
+                  <h1 className="text-2xl sm:text-3xl lg:text-4xl font-one font-bold text-white mb-1">
                     {profileData.firstName} {profileData.lastName}
                   </h1>
+                </div>
 
-                  <div className="flex flex-wrap items-center gap-4 text-white/70 text-sm font-one">
-                    <div className="flex items-center gap-2">
-                      <FaEnvelope className="w-4 h-4 text-tertiary-400" />
-                      {profileData.email}
+                {/* Infos de contact */}
+                <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-4">
+                  <div className="flex items-center gap-2 text-white/80 text-sm font-one justify-center sm:justify-start">
+                    <div className="w-6 h-6 rounded-lg bg-tertiary-500/20 flex items-center justify-center flex-shrink-0">
+                      <FaEnvelope className="w-3 h-3 text-tertiary-400" />
                     </div>
-                    <div className="flex items-center gap-2">
-                      <FaMapMarkerAlt className="w-4 h-4 text-tertiary-400" />
-                      {profileData.clientProfile?.city}
+                    <span className="truncate">{profileData.email}</span>
+                  </div>
+                  {profileData.clientProfile?.city && (
+                    <div className="flex items-center gap-2 text-white/80 text-sm font-one justify-center sm:justify-start">
+                      <div className="w-6 h-6 rounded-lg bg-tertiary-500/20 flex items-center justify-center flex-shrink-0">
+                        <FaMapMarkerAlt className="w-3 h-3 text-tertiary-400" />
+                      </div>
+                      <span>{profileData.clientProfile.city}</span>
                     </div>
-                  </div>
+                  )}
+                </div>
 
-                  <div className="flex gap-2 mt-4">
-                    <Link
-                      href="/mon-profil/modifier"
-                      className="flex items-center gap-1 px-2 bg-gradient-to-br from-white/[0.08] to-white/[0.02] hover:from-white/[0.12] hover:to-white/[0.06] text-white rounded-lg transition-all duration-300 font-one text-xs"
-                      aria-label="Modifier les informations de mon profil"
-                    >
-                      <FaEdit size={12} />
-                      Modifier
-                    </Link>
-                    <button className="cursor-pointer flex items-center gap-1 px-2 bg-gradient-to-br from-white/[0.08] to-white/[0.02] hover:from-white/[0.12] hover:to-white/[0.06] text-white rounded-lg transition-all duration-300 font-one text-xs">
-                      <FaCog size={12} />
-                      Paramètres
-                    </button>
-
-                    <LogoutBtn>Se Déconnecter</LogoutBtn>
-                  </div>
+                {/* Actions compactes - width auto et flex wrap */}
+                <div className="flex gap-2 pt-2 justify-center sm:justify-start">
+                  <Link
+                    href="/mon-profil/modifier"
+                    className="flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white rounded-lg font-one text-xs transition-all duration-300 shadow-lg shadow-tertiary-500/20 hover:shadow-tertiary-500/30 whitespace-nowrap"
+                    aria-label="Modifier les informations de mon profil"
+                  >
+                    <FaEdit className="w-3 h-3" />
+                    Modifier
+                  </Link>
+                  {/* <button className="cursor-pointer flex items-center gap-1.5 px-3 py-2 bg-white/10 hover:bg-white/15 text-white/80 hover:text-white border border-white/20 hover:border-white/30 rounded-lg font-one text-xs transition-all duration-300 whitespace-nowrap">
+                    <FaCog className="w-3 h-3" />
+                    Paramètres
+                  </button> */}
+                  <LogoutBtn>Déconnexion</LogoutBtn>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Navigation par onglets */}
+        {/* Navigation par onglets modernisée */}
         <div className="flex flex-wrap gap-2 mb-8">
           {(
             [
-              { key: "rdv", icon: FaCalendarAlt, label: "Mes rendez-vous" },
-              { key: "favoris", icon: FaHeart, label: "Salons favoris" },
-              { key: "infos", icon: FaUser, label: "Mes informations" },
-              { key: "mesavis", icon: FaEnvelope, label: "Mes avis" },
+              { key: "rdv", icon: FaCalendarAlt, label: "Rendez-vous" },
+              { key: "favoris", icon: FaHeart, label: "Favoris" },
+              { key: "infos", icon: FaUser, label: "Infos" },
+              { key: "mesavis", icon: FaEnvelope, label: "Avis" },
             ] as const
           ).map(({ key, icon: Icon, label }) => (
             <button
               key={key}
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               onClick={() => setActiveTab(key as any)}
-              className={`cursor-pointer flex items-center gap-2 px-4 sm:px-6 py-3 rounded-lg font-one text-sm transition-all duration-300 ${
+              className={`flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-lg font-one text-xs sm:text-sm font-medium transition-all duration-300 ${
                 activeTab === key
                   ? "bg-gradient-to-r from-tertiary-400 to-tertiary-500 text-white shadow-lg shadow-tertiary-500/25"
                   : "bg-gradient-to-br from-white/[0.08] to-white/[0.02] text-white/80 hover:text-white hover:from-white/[0.12] hover:to-white/[0.06] border border-white/20 hover:border-white/30"
               }`}
             >
-              <Icon className="w-4 h-4" />
-              {label}
+              <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span className="hidden sm:inline">{label}</span>
+              <span className="sm:hidden">{label.slice(0, 3)}</span>
             </button>
           ))}
         </div>
 
         {/* Contenu des onglets */}
         <div className="space-y-6">
-          {activeTab === "infos" && (
-            <InfosTab
-              user={profileData}
-              // appointmentsCount={realAppointments.length}
-              // favoritesCount={realFavorites.length}
-              // onUpdate={refreshProfile} // Callback pour rafraîchir après modification
-            />
-          )}
+          {activeTab === "infos" && <InfosTab user={profileData} />}
 
           {activeTab === "favoris" && <FavorisTab />}
 

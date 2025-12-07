@@ -85,7 +85,7 @@ type RdvResponse = {
   pagination: {
     currentPage: number;
     totalPages: number;
-    totalItems: number;
+    totalAppointments: number;
     limit: number;
   };
 };
@@ -107,9 +107,9 @@ export default function RendezVousTab() {
   const [appointmentToCancel, setAppointmentToCancel] = useState<string | null>(
     null
   );
-  const [showReviewModal, setShowReviewModal] = useState(false);
-  const [appointmentToReview, setAppointmentToReview] =
-    useState<Appointment | null>(null);
+  // const [showReviewModal, setShowReviewModal] = useState(false);
+  // const [appointmentToReview, setAppointmentToReview] =
+  //   useState<Appointment | null>(null);
   const [reviewForm, setReviewForm] = useState({
     rating: 5,
     title: "",
@@ -140,6 +140,8 @@ export default function RendezVousTab() {
       setLoading(false);
     }
   };
+
+  console.log("RendezVousTab - rdvData:", rdvData);
 
   useEffect(() => {
     fetchRdvClient(statusFilter, currentPage, limit);
@@ -289,75 +291,79 @@ export default function RendezVousTab() {
   };
 
   return (
-    <div className="bg-gradient-to-br from-white/[0.08] to-white/[0.02] backdrop-blur-lg border border-white/10 rounded-xl p-6 shadow-xl">
-      <div className="flex items-center justify-between mb-6">
-        <h3 className="text-white font-one font-semibold text-lg">
-          Mes rendez-vous
-        </h3>
-        <div className="flex items-center gap-4">
+    <div className="bg-gradient-to-br from-white/[0.08] to-white/[0.02] backdrop-blur-lg border border-white/10 rounded-2xl p-4 sm:p-6 shadow-xl">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6 pb-4 border-b border-white/10">
+        <div>
+          <h3 className="text-white font-one font-semibold text-lg sm:text-xl mb-1">
+            Mes rendez-vous
+          </h3>
           {rdvData && (
-            <span className="text-white/60 font-one text-sm">
-              {rdvData.pagination.totalItems} rendez-vous
-            </span>
+            <p className="text-white/60 font-one text-xs">
+              {rdvData.pagination.totalAppointments} rendez-vous au total
+            </p>
           )}
+        </div>
+        <div className="w-10 h-10 bg-tertiary-500/20 rounded-xl flex items-center justify-center">
+          <FaCalendarAlt className="w-5 h-5 text-tertiary-400" />
         </div>
       </div>
 
-      {/* Filtres */}
-      <div className="mb-6 flex flex-wrap items-center gap-3">
-        <div className="flex items-center gap-2">
-          <FaFilter className="w-4 h-4 text-white/60" />
-          <span className="text-white/70 font-one text-sm">
-            Filtrer par statut :
+      {/* Filtres modernisés */}
+      <div className="mb-6">
+        <div className="flex items-center gap-2 mb-3">
+          <FaFilter className="w-3.5 h-3.5 text-tertiary-400" />
+          <span className="text-white/80 font-one text-xs font-semibold uppercase tracking-wider">
+            Filtrer
           </span>
         </div>
         <div className="flex flex-wrap gap-2">
           <button
             onClick={() => handleStatusChange("")}
-            className={`px-3 py-1.5 rounded-lg font-one text-xs transition-all duration-300 ${
+            className={`px-3 py-1.5 rounded-lg font-one text-xs font-medium transition-all duration-300 ${
               statusFilter === ""
-                ? "bg-tertiary-500 text-white"
-                : "bg-white/10 text-white/80 hover:bg-white/20"
+                ? "bg-tertiary-500 text-white shadow-lg"
+                : "bg-white/5 text-white/70 hover:bg-white/10 border border-white/10"
             }`}
           >
             Tous
           </button>
           <button
             onClick={() => handleStatusChange("CONFIRMED")}
-            className={`px-3 py-1.5 rounded-lg font-one text-xs transition-all duration-300 ${
+            className={`px-3 py-1.5 rounded-lg font-one text-xs font-medium transition-all duration-300 ${
               statusFilter === "CONFIRMED"
-                ? "bg-emerald-500 text-white"
-                : "bg-white/10 text-white/80 hover:bg-white/20"
+                ? "bg-emerald-500 text-white shadow-lg"
+                : "bg-white/5 text-white/70 hover:bg-white/10 border border-white/10"
             }`}
           >
             Confirmés
           </button>
           <button
             onClick={() => handleStatusChange("PENDING")}
-            className={`px-3 py-1.5 rounded-lg font-one text-xs transition-all duration-300 ${
+            className={`px-3 py-1.5 rounded-lg font-one text-xs font-medium transition-all duration-300 ${
               statusFilter === "PENDING"
-                ? "bg-orange-500 text-white"
-                : "bg-white/10 text-white/80 hover:bg-white/20"
+                ? "bg-orange-500 text-white shadow-lg"
+                : "bg-white/5 text-white/70 hover:bg-white/10 border border-white/10"
             }`}
           >
             En attente
           </button>
           <button
             onClick={() => handleStatusChange("COMPLETED")}
-            className={`px-3 py-1.5 rounded-lg font-one text-xs transition-all duration-300 ${
+            className={`px-3 py-1.5 rounded-lg font-one text-xs font-medium transition-all duration-300 ${
               statusFilter === "COMPLETED"
-                ? "bg-blue-500 text-white"
-                : "bg-white/10 text-white/80 hover:bg-white/20"
+                ? "bg-blue-500 text-white shadow-lg"
+                : "bg-white/5 text-white/70 hover:bg-white/10 border border-white/10"
             }`}
           >
             Terminés
           </button>
           <button
             onClick={() => handleStatusChange("CANCELED")}
-            className={`px-3 py-1.5 rounded-lg font-one text-xs transition-all duration-300 ${
+            className={`px-3 py-1.5 rounded-lg font-one text-xs font-medium transition-all duration-300 ${
               statusFilter === "CANCELED"
-                ? "bg-red-500 text-white"
-                : "bg-white/10 text-white/80 hover:bg-white/20"
+                ? "bg-red-500 text-white shadow-lg"
+                : "bg-white/5 text-white/70 hover:bg-white/10 border border-white/10"
             }`}
           >
             Annulés
@@ -446,8 +452,8 @@ export default function RendezVousTab() {
         </div>
       ) : (
         <>
-          {/* Liste des rendez-vous */}
-          <div className="space-y-3 sm:space-y-4">
+          {/* Liste des rendez-vous modernisée */}
+          <div className="space-y-3">
             {rdvData.appointments.map((appointment) => {
               const isExpanded = expandedAppointments.has(appointment.id);
               const hasReview = !!appointment.review;
@@ -455,15 +461,27 @@ export default function RendezVousTab() {
               return (
                 <div
                   key={appointment.id}
-                  className="bg-white/5 hover:bg-white/8 border border-white/10 hover:border-white/20 rounded-lg sm:rounded-xl overflow-hidden transition-all duration-300"
+                  className="group relative bg-gradient-to-br from-white/[0.08] to-white/[0.03] border border-white/10 hover:border-white/20 rounded-xl overflow-hidden transition-all duration-300 hover:shadow-xl"
                 >
-                  {/* Vue compacte - toujours visible */}
-                  <div className="p-3 sm:p-4">
-                    {/* Header principal */}
-                    <div className="flex items-start justify-between gap-2 mb-3">
-                      <div className="flex items-start gap-2 sm:gap-3 flex-1 min-w-0">
-                        {/* Avatar du salon */}
-                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl overflow-hidden bg-gradient-to-br from-tertiary-400/20 to-tertiary-500/20 border border-tertiary-400/30 flex-shrink-0">
+                  {/* Accent bar */}
+                  <div
+                    className={`absolute top-0 left-0 w-1 h-full ${
+                      appointment.status === "CONFIRMED"
+                        ? "bg-emerald-500"
+                        : appointment.status === "PENDING"
+                        ? "bg-orange-500"
+                        : appointment.status === "COMPLETED"
+                        ? "bg-blue-500"
+                        : "bg-red-500"
+                    }`}
+                  />
+
+                  {/* Vue compacte */}
+                  <div className="p-4 pl-5">
+                    <div className="flex items-start gap-3">
+                      {/* Avatar salon */}
+                      <div className="relative flex-shrink-0">
+                        <div className="w-12 h-12 rounded-xl overflow-hidden bg-gradient-to-br from-tertiary-400/20 to-tertiary-500/20 border border-tertiary-400/30 ring-2 ring-white/5">
                           {appointment.salon.image ? (
                             <Image
                               src={appointment.salon.image}
@@ -473,138 +491,125 @@ export default function RendezVousTab() {
                               className="w-full h-full object-cover"
                             />
                           ) : (
-                            <div className="w-full h-full flex items-center justify-center text-tertiary-400 text-xs sm:text-sm font-bold">
+                            <div className="w-full h-full flex items-center justify-center text-tertiary-400 text-sm font-bold">
                               {appointment.salon.salonName.charAt(0)}
                             </div>
                           )}
                         </div>
+                      </div>
 
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-one font-semibold text-white text-sm sm:text-base mb-1 line-clamp-2">
-                            {appointment.prestation}
-                          </h4>
-
-                          {/* Salon et artiste */}
-                          <div className="space-y-1 mb-2">
-                            <p className="text-white/80 font-one text-xs truncate">
-                              <span className="text-white/60">Salon:</span>{" "}
-                              {appointment.salon.salonName}
-                            </p>
-                            <p className="text-white/80 font-one text-xs truncate">
-                              <span className="text-white/60">Artiste:</span>{" "}
+                      {/* Contenu principal */}
+                      <div className="flex-1 min-w-0 space-y-2">
+                        {/* En-tête avec titre et status */}
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-one font-semibold text-white text-sm mb-1 line-clamp-1">
+                              {appointment.prestation}
+                            </h4>
+                            <p className="text-white/60 font-one text-xs truncate">
+                              {appointment.salon.salonName} •{" "}
                               {appointment.tatoueur.name}
                             </p>
                           </div>
-
-                          {/* Date et heure - mise en évidence */}
-                          <div className="bg-tertiary-500/15 border border-tertiary-500/30 rounded-lg p-2 mb-2">
-                            <div className="flex items-center gap-1 text-tertiary-300 font-one text-xs mb-1">
-                              <FaCalendarAlt className="w-2.5 h-2.5" />
-                              {formatDate(appointment.start)}
-                            </div>
-                            <div className="flex items-center gap-1 text-tertiary-300 font-one text-xs">
-                              <FaClock className="w-2.5 h-2.5" />
-                              {formatTime(appointment.start)} -{" "}
-                              {formatTime(appointment.end)}
-                            </div>
-                          </div>
-
-                          {/* Prix et type */}
-                          <div className="flex flex-wrap items-center gap-2">
-                            <div className="px-2 py-0.5 bg-tertiary-500/20 text-tertiary-300 rounded text-xs font-semibold">
-                              {appointment.prestation}
-                            </div>
-                            {appointment.prestationDetails?.price &&
-                              appointment.prestationDetails.price > 1 && (
-                                <div className="px-2 py-0.5 bg-white/10 text-white rounded text-xs font-semibold">
-                                  {appointment.prestationDetails.price}€
-                                </div>
-                              )}
+                          <div className="flex-shrink-0">
+                            {getStatusBadge(appointment.status)}
                           </div>
                         </div>
-                      </div>
 
-                      {/* Status badge - collé à droite */}
-                      <div className="flex-shrink-0">
-                        {getStatusBadge(appointment.status)}
-                      </div>
-                    </div>
+                        {/* Date et heure */}
+                        <div className="flex items-center gap-3 text-xs">
+                          <div className="flex items-center gap-1.5 text-tertiary-300 font-one">
+                            <FaCalendarAlt className="w-3 h-3" />
+                            {formatDate(appointment.start)}
+                          </div>
+                          <div className="flex items-center gap-1.5 text-tertiary-300 font-one">
+                            <FaClock className="w-3 h-3" />
+                            {formatTime(appointment.start)}
+                          </div>
+                          {appointment.prestationDetails?.price &&
+                            appointment.prestationDetails.price > 1 && (
+                              <div className="ml-auto px-2 py-0.5 bg-white/10 text-white rounded text-xs font-semibold">
+                                {appointment.prestationDetails.price}€
+                              </div>
+                            )}
+                        </div>
 
-                    {/* Actions - mieux organisées sur mobile */}
-                    <div className="flex flex-col gap-2 mt-3 border-t border-white/10 pt-3">
-                      {/* Première ligne d'actions */}
-                      <div className="flex flex-wrap gap-1.5 sm:gap-2">
-                        {appointment.status === "CONFIRMED" && (
-                          <>
-                            <button className="flex-1 sm:flex-none px-2 sm:px-3 py-2 sm:py-1.5 bg-white/10 hover:bg-white/20 text-white/80 hover:text-white border border-white/20 hover:border-white/30 rounded text-xs transition-all duration-300">
-                              Modifier
-                            </button>
+                        {/* Actions compactes */}
+                        <div className="flex flex-wrap gap-1.5 pt-2">
+                          {appointment.status === "CONFIRMED" && (
+                            <>
+                              <button className="px-2.5 py-1 bg-white/10 hover:bg-white/15 text-white/80 hover:text-white border border-white/10 rounded-lg text-xs font-one transition-all">
+                                Modifier
+                              </button>
+                              <button
+                                onClick={() =>
+                                  handleCancelClick(appointment.id)
+                                }
+                                disabled={
+                                  cancelingAppointmentId === appointment.id
+                                }
+                                className="px-2.5 py-1 bg-red-500/15 hover:bg-red-500/25 text-red-300 border border-red-500/30 rounded-lg text-xs font-one transition-all disabled:opacity-50"
+                              >
+                                {cancelingAppointmentId === appointment.id
+                                  ? "..."
+                                  : "Annuler"}
+                              </button>
+                            </>
+                          )}
+
+                          {appointment.status === "COMPLETED" && (
                             <button
-                              onClick={() => handleCancelClick(appointment.id)}
-                              disabled={
-                                cancelingAppointmentId === appointment.id
-                              }
-                              className="flex-1 sm:flex-none px-2 sm:px-3 py-2 sm:py-1.5 bg-red-500/20 hover:bg-red-500/30 text-red-300 hover:text-red-200 border border-red-500/30 hover:border-red-400/50 rounded text-xs transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                              onClick={() => handleReviewClick(appointment.id)}
+                              className="px-2.5 py-1 bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 rounded-lg text-xs font-one transition-all"
                             >
-                              {cancelingAppointmentId === appointment.id
-                                ? "..."
-                                : "Annuler"}
-                            </button>
-                          </>
-                        )}
-
-                        {appointment.status === "COMPLETED" && (
-                          <button
-                            onClick={() => handleReviewClick(appointment.id)}
-                            className="flex-1 px-2 sm:px-3 py-2 sm:py-1.5 bg-tertiary-500/20 hover:bg-tertiary-500/30 text-tertiary-300 hover:text-tertiary-200 border border-tertiary-500/30 hover:border-tertiary-400/50 rounded text-xs transition-all duration-300 cursor-pointer"
-                          >
-                            ⭐ Avis
-                          </button>
-                        )}
-
-                        {appointment.visio &&
-                          appointment.status === "CONFIRMED" && (
-                            <button className="flex-1 px-2 sm:px-3 py-2 sm:py-1.5 bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 hover:text-blue-200 border border-blue-500/30 hover:border-blue-400/50 rounded text-xs transition-all duration-300">
-                              📹 Visio
+                              ⭐ {hasReview ? "Voir l'avis" : "Donner un avis"}
                             </button>
                           )}
 
-                        <Link
-                          href={`/salon/${appointment.salon.salonName
-                            .toLowerCase()
-                            .replace(
-                              /\s+/g,
-                              "-"
-                            )}/${appointment.salon.city.toLowerCase()}-${
-                            appointment.salon.postalCode
-                          }`}
-                          className="flex-1 sm:flex-none px-2 sm:px-3 py-2 sm:py-1.5 bg-tertiary-500/20 hover:bg-tertiary-500/30 text-tertiary-300 hover:text-tertiary-200 border border-tertiary-500/30 hover:border-tertiary-400/50 rounded text-xs transition-all duration-300 text-center"
-                        >
-                          Salon
-                        </Link>
-                      </div>
+                          {appointment.visio &&
+                            appointment.status === "CONFIRMED" && (
+                              <button className="px-2.5 py-1 bg-blue-500/15 hover:bg-blue-500/25 text-blue-300 border border-blue-500/30 rounded-lg text-xs font-one transition-all">
+                                📹 Visio
+                              </button>
+                            )}
 
-                      {/* Bouton déplier/replier - pleine largeur */}
-                      <button
-                        onClick={() => toggleExpand(appointment.id)}
-                        className="w-full px-2 sm:px-3 py-2 sm:py-1.5 bg-white/10 hover:bg-white/20 text-white/80 hover:text-white border border-white/20 hover:border-white/30 rounded text-xs transition-all duration-300 flex items-center justify-center gap-1 font-semibold"
-                      >
-                        {isExpanded ? (
-                          <>
-                            Réduire <FaChevronUp className="w-2.5 h-2.5" />
-                          </>
-                        ) : (
-                          <>
-                            Voir plus <FaChevronDown className="w-2.5 h-2.5" />
-                          </>
-                        )}
-                      </button>
+                          <Link
+                            href={`/salon/${appointment.salon.salonName
+                              .toLowerCase()
+                              .replace(
+                                /\s+/g,
+                                "-"
+                              )}/${appointment.salon.city.toLowerCase()}-${
+                              appointment.salon.postalCode
+                            }`}
+                            className="px-2.5 py-1 bg-tertiary-500/15 hover:bg-tertiary-500/25 text-tertiary-300 border border-tertiary-500/30 rounded-lg text-xs font-one transition-all"
+                          >
+                            Voir salon
+                          </Link>
+
+                          <button
+                            onClick={() => toggleExpand(appointment.id)}
+                            className="ml-auto px-2.5 py-1 bg-white/5 hover:bg-white/10 text-white/70 border border-white/10 rounded-lg text-xs font-one transition-all flex items-center gap-1"
+                          >
+                            {isExpanded ? (
+                              <>
+                                Réduire <FaChevronUp className="w-2.5 h-2.5" />
+                              </>
+                            ) : (
+                              <>
+                                Détails{" "}
+                                <FaChevronDown className="w-2.5 h-2.5" />
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Vue détaillée - dépliable */}
+                  {/* Vue détaillée */}
                   {isExpanded && (
-                    <div className="border-t border-white/10 bg-white/[0.02] p-3 sm:p-4 space-y-3 sm:space-y-4">
+                    <div className="border-t border-white/10 bg-black/10 p-4 space-y-3">
                       {/* Informations détaillées du rendez-vous */}
                       <div className="bg-white/5 rounded-lg p-3 sm:p-4">
                         <h5 className="text-white font-one font-semibold text-xs sm:text-sm mb-2 sm:mb-3">
@@ -839,17 +844,19 @@ export default function RendezVousTab() {
                         </div>
                       </div>
 
-                      {/* Section Avis - Uniquement si RDV terminé */}
+                      {/* Section Avis modernisée */}
                       {appointment.status === "COMPLETED" && (
-                        <div className="bg-gradient-to-br from-tertiary-500/10 to-tertiary-600/5 rounded-lg p-4 border border-tertiary-500/30 space-y-4">
-                          <div>
-                            <h5 className="text-white font-one font-semibold text-sm mb-2">
-                              ⭐ Avis
+                        <div className="bg-gradient-to-br from-amber-500/10 to-amber-600/5 rounded-xl p-4 border border-amber-500/20">
+                          <div className="flex items-center gap-2 mb-3">
+                            <div className="w-8 h-8 bg-amber-500/20 rounded-lg flex items-center justify-center">
+                              <span className="text-lg">⭐</span>
+                            </div>
+                            <h5 className="text-white font-one font-semibold text-sm">
+                              {hasReview ? "Votre avis" : "Donner votre avis"}
                             </h5>
                           </div>
 
                           {hasReview ? (
-                            // Afficher l'avis existant
                             <div className="space-y-3">
                               <div className="flex items-center gap-2">
                                 <div className="text-amber-300 text-sm">
@@ -1036,26 +1043,24 @@ export default function RendezVousTab() {
             })}
           </div>
 
-          {/* Pagination */}
+          {/* Pagination modernisée */}
           {rdvData.pagination.totalPages > 1 && (
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 mt-4 sm:mt-6 pt-4 border-t border-white/10">
-              <div className="text-white/60 font-one text-xs sm:text-sm order-2 sm:order-1">
+            <div className="flex items-center justify-between gap-4 mt-6 pt-6 border-t border-white/10">
+              <div className="text-white/60 font-one text-xs hidden sm:block">
                 Page {rdvData.pagination.currentPage} sur{" "}
                 {rdvData.pagination.totalPages}
-                {` • ${rdvData.pagination.totalItems} résultats`}
               </div>
 
-              <div className="flex items-center gap-1 sm:gap-2 order-1 sm:order-2">
+              <div className="flex items-center gap-2 mx-auto sm:mx-0">
                 <button
                   onClick={() => handlePageChange(currentPage - 1)}
                   disabled={currentPage === 1}
-                  className="flex items-center gap-0.5 sm:gap-1 px-2 sm:px-3 py-1.5 sm:py-2 bg-white/10 hover:bg-white/20 disabled:bg-white/5 text-white/80 hover:text-white disabled:text-white/40 border border-white/20 hover:border-white/30 disabled:border-white/10 rounded text-xs sm:text-xs transition-all duration-300 disabled:cursor-not-allowed"
+                  className="w-9 h-9 flex items-center justify-center bg-white/5 hover:bg-white/10 disabled:bg-white/5 text-white/80 disabled:text-white/30 border border-white/10 rounded-lg transition-all disabled:cursor-not-allowed"
                 >
-                  <FaChevronLeft className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-                  <span className="hidden sm:inline">Préc</span>
+                  <FaChevronLeft className="w-3 h-3" />
                 </button>
 
-                <div className="flex items-center gap-0.5 sm:gap-1">
+                <div className="flex items-center gap-1">
                   {Array.from(
                     { length: Math.min(5, rdvData.pagination.totalPages) },
                     (_, i) => {
@@ -1077,10 +1082,10 @@ export default function RendezVousTab() {
                         <button
                           key={pageNum}
                           onClick={() => handlePageChange(pageNum)}
-                          className={`w-7 h-7 sm:w-8 sm:h-8 rounded text-xs transition-all duration-300 ${
+                          className={`w-9 h-9 rounded-lg text-xs font-one font-medium transition-all ${
                             currentPage === pageNum
-                              ? "bg-tertiary-500 text-white"
-                              : "bg-white/10 hover:bg-white/20 text-white/80 hover:text-white"
+                              ? "bg-tertiary-500 text-white shadow-lg"
+                              : "bg-white/5 hover:bg-white/10 text-white/70"
                           }`}
                         >
                           {pageNum}
@@ -1093,11 +1098,14 @@ export default function RendezVousTab() {
                 <button
                   onClick={() => handlePageChange(currentPage + 1)}
                   disabled={currentPage === rdvData.pagination.totalPages}
-                  className="flex items-center gap-0.5 sm:gap-1 px-2 sm:px-3 py-1.5 sm:py-2 bg-white/10 hover:bg-white/20 disabled:bg-white/5 text-white/80 hover:text-white disabled:text-white/40 border border-white/20 hover:border-white/30 disabled:border-white/10 rounded text-xs transition-all duration-300 disabled:cursor-not-allowed"
+                  className="w-9 h-9 flex items-center justify-center bg-white/5 hover:bg-white/10 disabled:bg-white/5 text-white/80 disabled:text-white/30 border border-white/10 rounded-lg transition-all disabled:cursor-not-allowed"
                 >
-                  <span className="hidden sm:inline">Suiv</span>
-                  <FaChevronRight className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                  <FaChevronRight className="w-3 h-3" />
                 </button>
+              </div>
+
+              <div className="text-white/60 font-one text-xs hidden sm:block">
+                {rdvData.pagination.totalAppointments} résultats
               </div>
             </div>
           )}
