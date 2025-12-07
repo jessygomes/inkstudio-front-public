@@ -18,6 +18,8 @@ import { getAllRdvClient } from "@/lib/actions/user.action";
 import { toast } from "sonner";
 import Image from "next/image";
 import { cancelAppointmentByClient } from "@/lib/actions/appointment.action";
+import { createReview } from "@/lib/actions/review.action";
+import { FaStar } from "react-icons/fa";
 
 type Appointment = {
   id: string;
@@ -64,6 +66,18 @@ type Appointment = {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     piercingDetails?: any;
   };
+  review?: {
+    id: string;
+    rating: number;
+    title?: string | null;
+    comment?: string | null;
+    photos?: string[];
+    isVerified?: boolean;
+    isVisible?: boolean;
+    createdAt?: string;
+    salonResponse?: string | null;
+    salonRespondedAt?: string | null;
+  };
 };
 
 type RdvResponse = {
@@ -93,6 +107,16 @@ export default function RendezVousTab() {
   const [appointmentToCancel, setAppointmentToCancel] = useState<string | null>(
     null
   );
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [appointmentToReview, setAppointmentToReview] =
+    useState<Appointment | null>(null);
+  const [reviewForm, setReviewForm] = useState({
+    rating: 5,
+    title: "",
+    comment: "",
+  });
+  const [hoverRating, setHoverRating] = useState<number | null>(null);
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
 
   const fetchRdvClient = async (status?: string, page = 1, pageLimit = 10) => {
     try {
@@ -231,6 +255,36 @@ export default function RendezVousTab() {
       toast.error("Erreur lors de l'annulation du rendez-vous");
     } finally {
       setCancelingAppointmentId(null);
+    }
+  };
+
+  const handleReviewClick = (appointmentId: string) => {
+    toggleExpand(appointmentId);
+  };
+
+  const handleSubmitReview = async (appointment: Appointment) => {
+    try {
+      setReviewSubmitting(true);
+      const result = await createReview({
+        salonId: appointment.salon.id,
+        appointmentId: appointment.id,
+        rating: reviewForm.rating,
+        title: reviewForm.title || undefined,
+        comment: reviewForm.comment || undefined,
+      });
+
+      if (result.ok) {
+        toast.success("Avis publié avec succès");
+        setReviewForm({ rating: 5, title: "", comment: "" });
+        fetchRdvClient(statusFilter, currentPage, limit);
+      } else {
+        toast.error(result.message || "Erreur lors de la publication");
+      }
+    } catch (error) {
+      console.error("Erreur submission avis:", error);
+      toast.error("Erreur lors de la publication de l'avis");
+    } finally {
+      setReviewSubmitting(false);
     }
   };
 
@@ -396,6 +450,7 @@ export default function RendezVousTab() {
           <div className="space-y-3 sm:space-y-4">
             {rdvData.appointments.map((appointment) => {
               const isExpanded = expandedAppointments.has(appointment.id);
+              const hasReview = !!appointment.review;
 
               return (
                 <div
@@ -499,7 +554,10 @@ export default function RendezVousTab() {
                         )}
 
                         {appointment.status === "COMPLETED" && (
-                          <button className="flex-1 px-2 sm:px-3 py-2 sm:py-1.5 bg-tertiary-500/20 hover:bg-tertiary-500/30 text-tertiary-300 hover:text-tertiary-200 border border-tertiary-500/30 hover:border-tertiary-400/50 rounded text-xs transition-all duration-300">
+                          <button
+                            onClick={() => handleReviewClick(appointment.id)}
+                            className="flex-1 px-2 sm:px-3 py-2 sm:py-1.5 bg-tertiary-500/20 hover:bg-tertiary-500/30 text-tertiary-300 hover:text-tertiary-200 border border-tertiary-500/30 hover:border-tertiary-400/50 rounded text-xs transition-all duration-300 cursor-pointer"
+                          >
                             ⭐ Avis
                           </button>
                         )}
@@ -780,6 +838,197 @@ export default function RendezVousTab() {
                           </div>
                         </div>
                       </div>
+
+                      {/* Section Avis - Uniquement si RDV terminé */}
+                      {appointment.status === "COMPLETED" && (
+                        <div className="bg-gradient-to-br from-tertiary-500/10 to-tertiary-600/5 rounded-lg p-4 border border-tertiary-500/30 space-y-4">
+                          <div>
+                            <h5 className="text-white font-one font-semibold text-sm mb-2">
+                              ⭐ Avis
+                            </h5>
+                          </div>
+
+                          {hasReview ? (
+                            // Afficher l'avis existant
+                            <div className="space-y-3">
+                              <div className="flex items-center gap-2">
+                                <div className="text-amber-300 text-sm">
+                                  {Array.from({ length: 5 }).map((_, i) => (
+                                    <span key={i}>
+                                      {i < (appointment.review?.rating || 0)
+                                        ? "★"
+                                        : "☆"}
+                                    </span>
+                                  ))}
+                                </div>
+                                <span className="text-white/70 font-one text-xs">
+                                  {appointment.review?.rating}/5
+                                </span>
+                                {appointment.review?.isVerified && (
+                                  <span className="ml-auto px-2 py-0.5 bg-emerald-500/10 border border-emerald-400/30 text-emerald-300 rounded text-xs">
+                                    ✓ Vérifié
+                                  </span>
+                                )}
+                              </div>
+
+                              {appointment.review?.title && (
+                                <div>
+                                  <p className="text-white font-semibold text-sm">
+                                    {appointment.review.title}
+                                  </p>
+                                </div>
+                              )}
+
+                              {appointment.review?.comment && (
+                                <div>
+                                  <p className="text-white/80 text-sm leading-relaxed">
+                                    {appointment.review.comment}
+                                  </p>
+                                </div>
+                              )}
+
+                              <div className="text-white/50 text-xs pt-2 border-t border-white/10">
+                                Publié le{" "}
+                                {appointment.review?.createdAt
+                                  ? new Date(
+                                      appointment.review.createdAt
+                                    ).toLocaleDateString("fr-FR")
+                                  : ""}
+                              </div>
+
+                              {appointment.review?.salonResponse && (
+                                <div className="bg-white/5 rounded-lg p-3 mt-3 border border-white/10">
+                                  <p className="text-white/70 font-one text-xs mb-2 font-semibold">
+                                    Réponse du salon :
+                                  </p>
+                                  <p className="text-white/80 text-sm">
+                                    {appointment.review.salonResponse}
+                                  </p>
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            // Afficher le formulaire si pas d'avis
+                            <>
+                              <p className="text-white/70 font-one text-xs mb-4">
+                                Votre retour d'expérience aide les autres
+                                clients et nos artistes !
+                              </p>
+
+                              <div className="space-y-3">
+                                {/* Note - Rating Stars */}
+                                <div className="space-y-2">
+                                  <label className="text-white/90 font-one text-xs block">
+                                    Note
+                                  </label>
+                                  <div className="flex items-center gap-2">
+                                    {Array.from({ length: 5 }).map((_, i) => {
+                                      const value = i + 1;
+                                      const active =
+                                        (hoverRating ?? reviewForm.rating) >=
+                                        value;
+                                      return (
+                                        <button
+                                          key={value}
+                                          type="button"
+                                          onMouseEnter={() =>
+                                            setHoverRating(value)
+                                          }
+                                          onMouseLeave={() =>
+                                            setHoverRating(null)
+                                          }
+                                          onClick={() =>
+                                            setReviewForm((f) => ({
+                                              ...f,
+                                              rating: value,
+                                            }))
+                                          }
+                                          className="p-1"
+                                        >
+                                          <FaStar
+                                            className={`w-5 h-5 transition-all ${
+                                              active
+                                                ? "text-amber-300 drop-shadow-[0_0_4px_rgba(251,191,36,0.6)] scale-105"
+                                                : "text-white/30 hover:text-white/60"
+                                            }`}
+                                          />
+                                        </button>
+                                      );
+                                    })}
+                                    <span className="text-white/70 font-one text-xs ml-2">
+                                      {reviewForm.rating}/5
+                                    </span>
+                                  </div>
+                                </div>
+
+                                {/* Titre */}
+                                <div className="space-y-1">
+                                  <label className="text-white/90 font-one text-xs block">
+                                    Titre (optionnel)
+                                  </label>
+                                  <input
+                                    type="text"
+                                    value={reviewForm.title}
+                                    onChange={(e) => {
+                                      setReviewForm((f) => ({
+                                        ...f,
+                                        title: e.target.value,
+                                      }));
+                                    }}
+                                    placeholder="Ex: Excellent travail"
+                                    maxLength={100}
+                                    className="w-full px-2 py-1.5 bg-white/5 border border-white/20 rounded text-white text-xs focus:outline-none focus:border-tertiary-400 focus:ring-1 focus:ring-tertiary-400/20 transition-all duration-300 placeholder:text-white/40"
+                                  />
+                                  <div className="text-white/40 text-xs">
+                                    {reviewForm.title.length}/100
+                                  </div>
+                                </div>
+
+                                {/* Commentaire */}
+                                <div className="space-y-1">
+                                  <label className="text-white/90 font-one text-xs block">
+                                    Votre avis
+                                  </label>
+                                  <textarea
+                                    value={reviewForm.comment}
+                                    onChange={(e) => {
+                                      setReviewForm((f) => ({
+                                        ...f,
+                                        comment: e.target.value,
+                                      }));
+                                    }}
+                                    placeholder="Partagez votre expérience..."
+                                    maxLength={500}
+                                    rows={3}
+                                    className="w-full px-2 py-1.5 bg-white/5 border border-white/20 rounded text-white text-xs focus:outline-none focus:border-tertiary-400 focus:ring-1 focus:ring-tertiary-400/20 transition-all duration-300 placeholder:text-white/40 resize-none"
+                                  />
+                                  <div className="text-white/40 text-xs">
+                                    {reviewForm.comment.length}/500
+                                  </div>
+                                </div>
+
+                                {/* Bouton d'envoi */}
+                                <button
+                                  onClick={() =>
+                                    handleSubmitReview(appointment)
+                                  }
+                                  disabled={reviewSubmitting}
+                                  className="w-full px-3 py-2 bg-gradient-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white rounded text-xs font-one transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                >
+                                  {reviewSubmitting ? (
+                                    <>
+                                      <div className="animate-spin rounded-full h-3 w-3 border-2 border-white border-t-transparent"></div>
+                                      Publication...
+                                    </>
+                                  ) : (
+                                    "Publier l'avis"
+                                  )}
+                                </button>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>

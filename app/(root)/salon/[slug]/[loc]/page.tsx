@@ -14,6 +14,7 @@ import { PiTiktokLogoThin } from "react-icons/pi";
 import { TfiWorld } from "react-icons/tfi";
 import HoursCard from "@/components/ProfilSalon/HoursCard";
 import FavoriteBtn from "@/components/Shared/FavoriteBtn";
+import SalonReviews from "@/components/ProfilSalon/SalonReviews";
 
 type PageParams = {
   params: Promise<{ slug: string; loc: string }>;
@@ -831,6 +832,9 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
                 </div>
               </section>
             )}
+
+            {/* Avis */}
+            <SalonReviews salonId={salon.id} salonName={salon.salonName} />
           </div>
         </div>
       </section>

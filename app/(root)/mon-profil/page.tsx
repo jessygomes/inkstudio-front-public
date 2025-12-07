@@ -17,6 +17,7 @@ import {
 import InfosTab from "@/components/MonProfil/InfosTab";
 import FavorisTab from "@/components/MonProfil/FavorisTab";
 import RendezVousTab from "@/components/MonProfil/RendezVousTab";
+import MesAvisTab from "@/components/MonProfil/MesAvisTab";
 import { LogoutBtn } from "@/components/Auth/LogoutBtn";
 import Image from "next/image";
 import Link from "next/link";
@@ -24,9 +25,9 @@ import { User } from "@/lib/type";
 
 export default function MonProfilPage() {
   const { isAuthenticated, isClient } = useUser();
-  const [activeTab, setActiveTab] = useState<"rdv" | "favoris" | "infos">(
-    "rdv"
-  );
+  const [activeTab, setActiveTab] = useState<
+    "rdv" | "favoris" | "infos" | "mesavis"
+  >("rdv");
 
   // État pour les données complètes du profil avec type explicite
   const [profileData, setProfileData] = useState<User | null>(null);
@@ -180,6 +181,7 @@ export default function MonProfilPage() {
               { key: "rdv", icon: FaCalendarAlt, label: "Mes rendez-vous" },
               { key: "favoris", icon: FaHeart, label: "Salons favoris" },
               { key: "infos", icon: FaUser, label: "Mes informations" },
+              { key: "mesavis", icon: FaEnvelope, label: "Mes avis" },
             ] as const
           ).map(({ key, icon: Icon, label }) => (
             <button
@@ -212,6 +214,8 @@ export default function MonProfilPage() {
           {activeTab === "favoris" && <FavorisTab />}
 
           {activeTab === "rdv" && <RendezVousTab />}
+
+          {activeTab === "mesavis" && <MesAvisTab />}
         </div>
       </div>
     </div>
