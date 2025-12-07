@@ -16,6 +16,8 @@ type Review = {
   isVerified?: boolean;
   isVisible?: boolean;
   createdAt?: string;
+  salonResponse?: string | null;
+  salonRespondedAt?: string | null;
   salon?: {
     id: string;
     salonName: string;
@@ -214,6 +216,32 @@ export default function MesAvisTab() {
                         </span>
                       )}
                     </div>
+
+                    {/* Réponse du salon */}
+                    {review.salonResponse && (
+                      <div className="mt-3 pt-3 border-t border-white/10">
+                        <div className="bg-gradient-to-br from-tertiary-500/10 to-tertiary-600/5 rounded-lg p-3 border border-tertiary-500/20">
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="w-5 h-5 rounded-full bg-tertiary-500/20 flex items-center justify-center">
+                              <span className="text-xs">💬</span>
+                            </div>
+                            <span className="text-tertiary-300 font-one text-xs font-semibold">
+                              Réponse du salon
+                            </span>
+                            {review.salonRespondedAt && (
+                              <span className="text-white/40 text-xs ml-auto">
+                                {new Date(
+                                  review.salonRespondedAt
+                                ).toLocaleDateString("fr-FR")}
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-white/90 text-xs leading-relaxed">
+                            {review.salonResponse}
+                          </p>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* Delete Button */}

@@ -14,6 +14,8 @@ type Review = {
   author?: { name?: string; image?: string | null };
   appointment?: { prestation?: string; date?: string | null } | null;
   createdAt?: string;
+  salonResponse?: string | null;
+  salonRespondedAt?: string | null;
 };
 
 type Stats = {
@@ -88,10 +90,10 @@ export default function SalonReviews({ salonId, salonName }: Props) {
   };
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.08] to-white/[0.02] p-6 backdrop-blur-lg shadow-xl space-y-6">
+    <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.08] to-white/[0.02] p-4 sm:p-6 backdrop-blur-lg shadow-xl space-y-4">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h3 className="text-white font-one font-semibold text-lg">
+          <h3 className="text-white font-one font-semibold text-base sm:text-lg">
             Avis sur {salonName || "ce salon"}
           </h3>
           <p className="text-white/60 text-xs">
@@ -102,18 +104,13 @@ export default function SalonReviews({ salonId, salonName }: Props) {
               : "Partagez votre expérience"}
           </p>
         </div>
-        <div className="flex items-center gap-1 text-amber-300">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <span key={i}>{i < form.rating ? "★" : "☆"}</span>
-          ))}
-        </div>
       </div>
 
       {/* Formulaire */}
-      <div className="space-y-3">
-        <div className="flex items-center gap-3">
-          <span className="text-white/70 text-sm">Note :</span>
-          <div className="flex items-center gap-1">
+      <div className="space-y-2">
+        <div className="flex items-center gap-2">
+          <span className="text-white/70 text-xs">Note :</span>
+          <div className="flex items-center gap-0.5">
             {Array.from({ length: 5 }).map((_, i) => {
               const value = i + 1;
               const active = (hoverRating ?? form.rating) >= value;
@@ -124,12 +121,12 @@ export default function SalonReviews({ salonId, salonName }: Props) {
                   onMouseEnter={() => setHoverRating(value)}
                   onMouseLeave={() => setHoverRating(null)}
                   onClick={() => setForm((f) => ({ ...f, rating: value }))}
-                  className="p-1"
+                  className="p-0.5"
                 >
                   <FaStar
-                    className={`w-6 h-6 transition-all ${
+                    className={`w-5 h-5 transition-all ${
                       active
-                        ? "text-amber-300 drop-shadow-[0_0_6px_rgba(251,191,36,0.6)] scale-105"
+                        ? "text-amber-300 drop-shadow-[0_0_4px_rgba(251,191,36,0.6)] scale-105"
                         : "text-white/30 hover:text-white/60"
                     }`}
                   />
@@ -143,57 +140,59 @@ export default function SalonReviews({ salonId, salonName }: Props) {
           value={form.title}
           onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
           placeholder="Titre (optionnel)"
-          className="w-full bg-white/5 border border-white/20 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-tertiary-400"
+          className="w-full bg-white/5 border border-white/20 rounded-lg px-2.5 py-1.5 text-white text-xs focus:outline-none focus:border-tertiary-400"
         />
         <textarea
           value={form.comment}
           onChange={(e) => setForm((f) => ({ ...f, comment: e.target.value }))}
           placeholder="Votre avis..."
-          rows={3}
-          className="w-full bg-white/5 border border-white/20 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-tertiary-400 resize-none"
+          rows={2}
+          className="w-full bg-white/5 border border-white/20 rounded-lg px-2.5 py-1.5 text-white text-xs focus:outline-none focus:border-tertiary-400 resize-none"
         />
         <button
           onClick={submit}
           disabled={submitting}
-          className="w-full sm:w-auto px-4 py-2 bg-gradient-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white rounded-lg text-sm font-one transition-all duration-300 disabled:opacity-50"
+          className="w-full sm:w-auto px-3 py-1.5 bg-gradient-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white rounded-lg text-xs font-one transition-all duration-300 disabled:opacity-50"
         >
           {submitting ? "Envoi..." : "Publier l'avis"}
         </button>
       </div>
 
       {/* Liste des avis */}
-      <div className="space-y-4">
+      <div className="space-y-3">
         {loading ? (
-          <p className="text-white/60 text-sm">Chargement...</p>
+          <p className="text-white/60 text-xs py-4">Chargement...</p>
         ) : stats.totalReviews === 0 ? (
-          <p className="text-white/60 text-sm">Aucun avis pour le moment.</p>
+          <p className="text-white/60 text-xs py-4">
+            Aucun avis pour le moment.
+          </p>
         ) : (
           reviews.map((r) => (
             <div
               key={r.id}
-              className="border border-white/10 rounded-lg p-4 bg-white/5 space-y-2"
+              className="border border-white/10 rounded-lg p-3 bg-white/5 space-y-2"
             >
               <div className="flex items-center justify-between">
-                <div className="text-amber-300 text-sm">
+                <div className="text-amber-300 text-xs">
                   {Array.from({ length: 5 }).map((_, i) => (
                     <span key={i}>{i < (r.rating || 0) ? "★" : "☆"}</span>
                   ))}
                 </div>
                 {r.isVerified && (
-                  <span className="text-emerald-300 text-xs bg-emerald-500/10 border border-emerald-400/30 px-2 py-0.5 rounded-full">
-                    Vérifié
+                  <span className="text-emerald-300 text-xs bg-emerald-500/10 border border-emerald-400/30 px-1.5 py-0.5 rounded-full">
+                    ✓ Vérifié
                   </span>
                 )}
               </div>
               {r.title && (
-                <p className="text-white font-semibold text-sm">{r.title}</p>
+                <p className="text-white font-semibold text-xs">{r.title}</p>
               )}
               {r.comment && (
-                <p className="text-white/80 text-sm leading-relaxed">
+                <p className="text-white/80 text-xs leading-relaxed">
                   {r.comment}
                 </p>
               )}
-              <div className="text-white/50 text-xs flex flex-wrap gap-2">
+              <div className="text-white/50 text-xs flex flex-wrap gap-1.5">
                 {r.author?.name && <span>Par {r.author.name}</span>}
                 {r.appointment?.prestation && (
                   <span>• {r.appointment.prestation}</span>
@@ -204,27 +203,53 @@ export default function SalonReviews({ salonId, salonName }: Props) {
                   </span>
                 )}
               </div>
+
+              {/* Réponse du salon */}
+              {r.salonResponse && (
+                <div className="mt-2 pt-2 border-t border-white/10">
+                  <div className="bg-gradient-to-br from-tertiary-500/10 to-tertiary-600/5 rounded-lg p-2.5 border border-tertiary-500/20">
+                    <div className="flex items-center gap-1.5 mb-1.5">
+                      <div className="w-5 h-5 rounded-full bg-tertiary-500/20 flex items-center justify-center">
+                        <span className="text-xs">💬</span>
+                      </div>
+                      <span className="text-tertiary-300 font-one text-xs font-semibold">
+                        Réponse du salon
+                      </span>
+                      {r.salonRespondedAt && (
+                        <span className="text-white/40 text-xs ml-auto">
+                          {new Date(r.salonRespondedAt).toLocaleDateString(
+                            "fr-FR"
+                          )}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-white/90 text-xs leading-relaxed">
+                      {r.salonResponse}
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
           ))
         )}
       </div>
 
       {/* Pagination */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 pt-2">
         <button
           onClick={() => load(page - 1)}
           disabled={!hasPrev || loading}
-          className="px-3 py-2 bg-white/5 border border-white/15 text-white/80 rounded-lg text-xs disabled:opacity-40"
+          className="px-2.5 py-1.5 bg-white/5 border border-white/15 text-white/80 rounded-lg text-xs disabled:opacity-40"
         >
-          Précédent
+          Préc
         </button>
         <span className="text-white/70 text-xs">Page {page}</span>
         <button
           onClick={() => load(page + 1)}
           disabled={!hasNext || loading}
-          className="px-3 py-2 bg-white/5 border border-white/15 text-white/80 rounded-lg text-xs disabled:opacity-40"
+          className="px-2.5 py-1.5 bg-white/5 border border-white/15 text-white/80 rounded-lg text-xs disabled:opacity-40"
         >
-          Suivant
+          Suiv
         </button>
       </div>
     </div>
