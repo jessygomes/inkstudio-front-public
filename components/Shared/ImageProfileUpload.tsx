@@ -191,7 +191,7 @@ SalonImageUploaderProps) {
               type="button"
               onClick={handleImageRemove}
               disabled={isDeleting}
-              className={`absolute top-1 right-1 bg-red-500 hover:bg-red-600 disabled:bg-red-500/50 text-white rounded-full ${
+              className={`cursor-pointer absolute top-1 right-1 bg-red-500 hover:bg-red-600 disabled:bg-red-500/50 text-white rounded-full ${
                 compact ? "w-6 h-6 text-xs" : "w-7 h-7 sm:w-8 sm:h-8"
               } flex items-center justify-center transition-colors z-10 disabled:cursor-not-allowed`}
             >

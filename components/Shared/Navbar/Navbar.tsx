@@ -1,13 +1,13 @@
 /* eslint-disable react/no-unescaped-entities */
 "use client";
-import { useUser } from "@/components/Context/UserContext";
+import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useRef } from "react";
 
 export default function Navbar() {
-  const { isAuthenticated, user } = useUser();
+  const { data: session, status } = useSession();
   const pathname = usePathname();
 
   const navRef = useRef<HTMLUListElement>(null);
@@ -43,13 +43,13 @@ export default function Navbar() {
             </li>
           );
         })}
-        {isAuthenticated && user ? (
+        {status === "authenticated" && session?.user ? (
           <Link href="/mon-profil">
             <div className="relative w-10 h-10 rounded-full overflow-hidden border-1 border-white/30 transition-all duration-300 cursor-pointer hover:scale-105">
-              {user.image ? (
+              {session.user.image ? (
                 <Image
-                  src={user.image}
-                  alt={`${user.firstName} ${user.lastName}`}
+                  src={session.user.image}
+                  alt={`${session.user.firstName} ${session.user.lastName}`}
                   fill
                   sizes="40px"
                   className="object-cover"
@@ -57,8 +57,8 @@ export default function Navbar() {
               ) : (
                 <div className="w-full h-full bg-gradient-to-br from-tertiary-400/40 to-tertiary-500/40 flex items-center justify-center">
                   <span className="text-white font-bold text-sm">
-                    {user.firstName?.charAt(0)}
-                    {user.lastName?.charAt(0)}
+                    {session.user.firstName?.charAt(0)}
+                    {session.user.lastName?.charAt(0)}
                   </span>
                 </div>
               )}

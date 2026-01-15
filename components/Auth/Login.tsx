@@ -3,6 +3,7 @@
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { signIn } from "next-auth/react";
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -13,7 +14,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { CardWrapper } from "./Wrapper/CardWrapper";
 import { userLoginSchema } from "@/lib/zod/validator-schema";
-import { createSession } from "@/lib/session";
 
 export const Login = () => {
   const router = useRouter();
@@ -46,57 +46,38 @@ export const Login = () => {
     setIsPending(true);
 
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/auth/login`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            email: data.email,
-            password: data.password,
-          }),
-        }
-      );
+      const result = await signIn("credentials", {
+        email: data.email,
+        password: data.password,
+        redirect: false,
+      });
 
-      const infos = await response.json();
+      console.log("🔍 [Login] Résultat signIn:", result);
 
-      if (infos.error) {
+      // Vérifier si une erreur existe (pas seulement ok)
+      if (result?.error) {
+        console.log("❌ [Login] Authentification échouée - Pas de redirection");
         setError(
-          infos.message ||
-            infos.error ||
-            "Une erreur est survenue lors de l'inscription."
+          result.error === "CredentialsSignin"
+            ? "Email ou mot de passe incorrect"
+            : result.error || "Authentification échouée"
         );
         setIsPending(false);
         return;
       }
 
+      console.log("✅ [Login] Authentification réussie - Redirection vers /");
       setSuccess("Connexion réussie !");
-      setIsPending(false);
-
-      await createSession(infos);
-
-      // Changement de texte pour la redirection
-      setIsPending(true);
       setSuccess("Redirection vers l'app...");
 
-      // Appeler l'API pour récupérer l'utilisateur authentifié
-      // const userResponse = await fetch("/api/auth");
-
-      // if (!userResponse.ok) {
-      //   throw new Error("Impossible de récupérer l'utilisateur authentifié.");
-      // }
-
-      // const user = await userResponse.json();
-      // console.log("Utilisateur authentifié :", user);
-
-      // Redirigez l'utilisateur vers la page d'accueil
-      router.push("/");
+      // Attendre un peu avant de rediriger
+      setTimeout(() => {
+        router.push("/");
+      }, 500);
     } catch (error) {
-      console.error("Erreur lors de la connexion :", error);
+      console.error("❌ [Login] Erreur lors de la connexion :", error);
       setError("Impossible de se connecter. Veuillez réessayer plus tard.");
-      return;
+      setIsPending(false);
     }
   };
 

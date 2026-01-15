@@ -6,8 +6,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { registerAction } from "@/lib/actions/auth.action";
+import { signIn } from "next-auth/react";
 
 import { FormError } from "@/components/Shared/FormError";
 import { FormSuccess } from "@/components/Shared/FormSuccess";
@@ -49,6 +50,7 @@ const registerSchema = z
 type RegisterForm = z.infer<typeof registerSchema>;
 
 export default function Register() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isPending, setIsPending] = useState(false);
@@ -77,17 +79,52 @@ export default function Register() {
     console.log("Données du formulaire d'inscription :", data);
 
     try {
-      // Passer directement l'objet typé Zod à l'action serveur
-      await registerAction({
-        firstName: data.firstName,
-        lastName: data.lastName,
+      // Appel à l'API pour l'inscription
+      const registerResponse = await fetch(
+        `${process.env.NEXT_PUBLIC_BACK_URL}/auth/register_client`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: data.email,
+            password: data.password,
+            firstName: data.firstName,
+            lastName: data.lastName,
+            birthDate: data.birthDate || null,
+          }),
+        }
+      );
+
+      const registerData = await registerResponse.json();
+
+      if (!registerResponse.ok || registerData.error) {
+        throw new Error(
+          registerData.message || "Échec de l'inscription. Veuillez réessayer."
+        );
+      }
+
+      setSuccess("Inscription réussie ! Connexion...");
+      form.reset();
+
+      // Auto-login après inscription
+      const loginResult = await signIn("credentials", {
         email: data.email,
         password: data.password,
-        birthDate: data.birthDate,
+        redirect: false,
       });
 
-      setSuccess("Inscription réussie ! Redirection...");
-      form.reset();
+      if (!loginResult?.ok) {
+        setSuccess("Inscription réussie ! Redirection vers la connexion...");
+        setTimeout(() => {
+          router.push("/se-connecter");
+        }, 2000);
+        return;
+      }
+
+      setSuccess("Inscription réussie ! Redirection vers l'app...");
+      router.push("/");
     } catch (error) {
       console.error("Erreur inscription:", error);
       setError(

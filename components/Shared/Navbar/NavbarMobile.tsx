@@ -1,6 +1,6 @@
 /* eslint-disable react/no-unescaped-entities */
 "use client";
-import { useUser } from "@/components/Context/UserContext";
+import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -9,7 +9,7 @@ import { MdMenu, MdClose } from "react-icons/md";
 import { FaUser } from "react-icons/fa";
 
 export default function NavbarMobile() {
-  const { isAuthenticated, user } = useUser();
+  const { data: session, status } = useSession();
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const navRef = useRef<HTMLDivElement>(null);
@@ -46,13 +46,13 @@ export default function NavbarMobile() {
     <nav>
       <div className="flex gap-3 items-center justify-between text-white">
         {/* Avatar ou bouton connexion - Modernisé */}
-        {isAuthenticated && user ? (
+        {status === "authenticated" && session?.user ? (
           <Link href="/mon-profil" className="group">
             <div className="relative w-9 h-9 rounded-full overflow-hidden border-2 border-tertiary-400/50 group-hover:border-tertiary-400 transition-all duration-300 cursor-pointer group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-tertiary-400/25">
-              {user.image ? (
+              {session.user.image ? (
                 <Image
-                  src={user.image}
-                  alt={`${user.firstName} ${user.lastName}`}
+                  src={session.user.image}
+                  alt={`${session.user.firstName} ${session.user.lastName}`}
                   fill
                   sizes="36px"
                   className="object-cover"
@@ -162,17 +162,17 @@ export default function NavbarMobile() {
           <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent my-6" />
 
           {/* User Section */}
-          {isAuthenticated && user ? (
+          {status === "authenticated" && session?.user ? (
             <div className="space-y-4">
               {/* User Profile Card */}
               <Link href="/mon-profil" onClick={handleClose}>
                 <div className="bg-gradient-to-br from-white/[0.08] to-white/[0.02] border border-white/10 rounded-xl p-4 hover:from-white/[0.12] hover:to-white/[0.06] hover:border-white/20 transition-all duration-300 group cursor-pointer">
                   <div className="flex items-center gap-3">
                     <div className="relative w-10 h-10 rounded-full overflow-hidden border-2 border-tertiary-400/50 group-hover:border-tertiary-400 transition-all duration-300">
-                      {user.image ? (
+                      {session.user.image ? (
                         <Image
-                          src={user.image}
-                          alt={`${user.firstName} ${user.lastName}`}
+                          src={session.user.image}
+                          alt={`${session.user.firstName} ${session.user.lastName}`}
                           fill
                           sizes="40px"
                           className="object-cover"
@@ -185,10 +185,10 @@ export default function NavbarMobile() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-white font-one font-semibold truncate text-sm">
-                        {user.firstName} {user.lastName}
+                        {session.user.firstName} {session.user.lastName}
                       </p>
                       <p className="text-white/60 font-one text-xs truncate">
-                        {user.email}
+                        {session.user.email}
                       </p>
                     </div>
                   </div>

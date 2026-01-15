@@ -320,7 +320,7 @@ export default function RendezVousTab() {
         <div className="flex flex-wrap gap-2">
           <button
             onClick={() => handleStatusChange("")}
-            className={`px-3 py-1.5 rounded-lg font-one text-xs font-medium transition-all duration-300 ${
+            className={`cursor-pointer px-3 py-1.5 rounded-lg font-one text-xs font-medium transition-all duration-300 ${
               statusFilter === ""
                 ? "bg-tertiary-500 text-white shadow-lg"
                 : "bg-white/5 text-white/70 hover:bg-white/10 border border-white/10"
@@ -330,7 +330,7 @@ export default function RendezVousTab() {
           </button>
           <button
             onClick={() => handleStatusChange("CONFIRMED")}
-            className={`px-3 py-1.5 rounded-lg font-one text-xs font-medium transition-all duration-300 ${
+            className={`cursor-pointer px-3 py-1.5 rounded-lg font-one text-xs font-medium transition-all duration-300 ${
               statusFilter === "CONFIRMED"
                 ? "bg-emerald-500 text-white shadow-lg"
                 : "bg-white/5 text-white/70 hover:bg-white/10 border border-white/10"
@@ -340,7 +340,7 @@ export default function RendezVousTab() {
           </button>
           <button
             onClick={() => handleStatusChange("PENDING")}
-            className={`px-3 py-1.5 rounded-lg font-one text-xs font-medium transition-all duration-300 ${
+            className={`cursor-pointer px-3 py-1.5 rounded-lg font-one text-xs font-medium transition-all duration-300 ${
               statusFilter === "PENDING"
                 ? "bg-orange-500 text-white shadow-lg"
                 : "bg-white/5 text-white/70 hover:bg-white/10 border border-white/10"
@@ -350,7 +350,7 @@ export default function RendezVousTab() {
           </button>
           <button
             onClick={() => handleStatusChange("COMPLETED")}
-            className={`px-3 py-1.5 rounded-lg font-one text-xs font-medium transition-all duration-300 ${
+            className={`cursor-pointer px-3 py-1.5 rounded-lg font-one text-xs font-medium transition-all duration-300 ${
               statusFilter === "COMPLETED"
                 ? "bg-blue-500 text-white shadow-lg"
                 : "bg-white/5 text-white/70 hover:bg-white/10 border border-white/10"
@@ -360,7 +360,7 @@ export default function RendezVousTab() {
           </button>
           <button
             onClick={() => handleStatusChange("CANCELED")}
-            className={`px-3 py-1.5 rounded-lg font-one text-xs font-medium transition-all duration-300 ${
+            className={`cursor-pointer px-3 py-1.5 rounded-lg font-one text-xs font-medium transition-all duration-300 ${
               statusFilter === "CANCELED"
                 ? "bg-red-500 text-white shadow-lg"
                 : "bg-white/5 text-white/70 hover:bg-white/10 border border-white/10"
@@ -538,9 +538,9 @@ export default function RendezVousTab() {
                         <div className="flex flex-wrap gap-1.5 pt-2">
                           {appointment.status === "CONFIRMED" && (
                             <>
-                              <button className="px-2.5 py-1 bg-white/10 hover:bg-white/15 text-white/80 hover:text-white border border-white/10 rounded-lg text-xs font-one transition-all">
+                              {/* <button className="cursor-pointer px-2.5 py-1 bg-white/10 hover:bg-white/15 text-white/80 hover:text-white border border-white/10 rounded-lg text-xs font-one transition-all">
                                 Modifier
-                              </button>
+                              </button> */}
                               <button
                                 onClick={() =>
                                   handleCancelClick(appointment.id)
@@ -548,7 +548,7 @@ export default function RendezVousTab() {
                                 disabled={
                                   cancelingAppointmentId === appointment.id
                                 }
-                                className="px-2.5 py-1 bg-red-500/15 hover:bg-red-500/25 text-red-300 border border-red-500/30 rounded-lg text-xs font-one transition-all disabled:opacity-50"
+                                className="cursor-pointer px-2.5 py-1 bg-red-500/15 hover:bg-red-500/25 text-red-300 border border-red-500/30 rounded-lg text-xs font-one transition-all disabled:opacity-50"
                               >
                                 {cancelingAppointmentId === appointment.id
                                   ? "..."
@@ -589,7 +589,7 @@ export default function RendezVousTab() {
 
                           <button
                             onClick={() => toggleExpand(appointment.id)}
-                            className="ml-auto px-2.5 py-1 bg-white/5 hover:bg-white/10 text-white/70 border border-white/10 rounded-lg text-xs font-one transition-all flex items-center gap-1"
+                            className="cursor-pointer ml-auto px-2.5 py-1 bg-white/5 hover:bg-white/10 text-white/70 border border-white/10 rounded-lg text-xs font-one transition-all flex items-center gap-1"
                           >
                             {isExpanded ? (
                               <>
@@ -1055,7 +1055,7 @@ export default function RendezVousTab() {
                 <button
                   onClick={() => handlePageChange(currentPage - 1)}
                   disabled={currentPage === 1}
-                  className="w-9 h-9 flex items-center justify-center bg-white/5 hover:bg-white/10 disabled:bg-white/5 text-white/80 disabled:text-white/30 border border-white/10 rounded-lg transition-all disabled:cursor-not-allowed"
+                  className="cursor-pointer w-9 h-9 flex items-center justify-center bg-white/5 hover:bg-white/10 disabled:bg-white/5 text-white/80 disabled:text-white/30 border border-white/10 rounded-lg transition-all disabled:cursor-not-allowed"
                 >
                   <FaChevronLeft className="w-3 h-3" />
                 </button>
@@ -1082,7 +1082,7 @@ export default function RendezVousTab() {
                         <button
                           key={pageNum}
                           onClick={() => handlePageChange(pageNum)}
-                          className={`w-9 h-9 rounded-lg text-xs font-one font-medium transition-all ${
+                          className={`cursor-pointer w-9 h-9 rounded-lg text-xs font-one font-medium transition-all ${
                             currentPage === pageNum
                               ? "bg-tertiary-500 text-white shadow-lg"
                               : "bg-white/5 hover:bg-white/10 text-white/70"
@@ -1098,7 +1098,7 @@ export default function RendezVousTab() {
                 <button
                   onClick={() => handlePageChange(currentPage + 1)}
                   disabled={currentPage === rdvData.pagination.totalPages}
-                  className="w-9 h-9 flex items-center justify-center bg-white/5 hover:bg-white/10 disabled:bg-white/5 text-white/80 disabled:text-white/30 border border-white/10 rounded-lg transition-all disabled:cursor-not-allowed"
+                  className="cursor-pointer w-9 h-9 flex items-center justify-center bg-white/5 hover:bg-white/10 disabled:bg-white/5 text-white/80 disabled:text-white/30 border border-white/10 rounded-lg transition-all disabled:cursor-not-allowed"
                 >
                   <FaChevronRight className="w-3 h-3" />
                 </button>

@@ -8,7 +8,8 @@ import { CookieConsentProvider } from "@/components/Analytics/CookieConsentConte
 import GoogleAnalytics from "@/components/Analytics/GoogleAnalytics";
 import CookieBanner from "@/components/Analytics/CookieBanner";
 import { UserProvider } from "@/components/Context/UserContext";
-import { getAuthenticatedUser } from "@/lib/auth.server";
+import { AuthProvider } from "@/components/Auth/AuthProvider";
+import { auth } from "@/auth";
 
 const didact_gothic = Didact_Gothic({
   weight: ["400"],
@@ -129,6 +130,8 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await auth();
+
   // Layout : seulement les données essentielles pour l'auth
   let user = {
     id: "",
@@ -140,40 +143,41 @@ export default async function RootLayout({
     birthDate: "",
     role: "",
     isAuthenticated: false,
+    clientProfile: null,
   };
 
-  try {
-    const userData = await getAuthenticatedUser();
-
+  if (session?.user) {
     user = {
-      id: userData.id,
-      firstName: userData.firstName,
-      lastName: userData.lastName,
-      email: userData.email,
-      phone: userData.phone || "",
-      image: userData.image || "",
-      birthDate: userData.clientProfile?.birthDate || "",
-      role: userData.role,
+      id: session.user.id || "",
+      firstName: session.user.firstName || "",
+      lastName: session.user.lastName || "",
+      email: session.user.email || "",
+      phone: session.user.phone || "",
+      image: session.user.image || "",
+      birthDate: "",
+      role: session.user.role || "client",
       isAuthenticated: true,
+      clientProfile: (session.user as any).clientProfile || null,
     };
-    // console.log("✅ Utilisateur dans RootLayout :", user);
-  } catch (error) {
-    console.error("Erreur lors de la récupération de l'utilisateur :", error);
   }
+
+  console.log("🌐 [RootLayout] Utilisateur authentifié :", user);
 
   return (
     <html lang="fr">
       <body
         className={`${didact_gothic.variable} ${exo_2.variable} ${montserrat_alternates.variable} ${walkway.variable} antialiased relative`}
       >
-        <CookieConsentProvider>
-          <GoogleAnalytics measurementId="G-YG3WKCC1JL" />
-          <Toaster />
-          <CookieBanner />
-          <main>
-            <UserProvider user={user}>{children}</UserProvider>
-          </main>
-        </CookieConsentProvider>
+        <AuthProvider>
+          <CookieConsentProvider>
+            <GoogleAnalytics measurementId="G-YG3WKCC1JL" />
+            <Toaster />
+            <CookieBanner />
+            <main>
+              <UserProvider user={user}>{children}</UserProvider>
+            </main>
+          </CookieConsentProvider>
+        </AuthProvider>
       </body>
     </html>
   );

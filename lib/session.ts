@@ -1,49 +1,21 @@
 "use server";
-// import jwt from "jsonwebtoken";
-import { cookies } from "next/headers";
+import { auth } from "@/auth";
 
-export async function createSession(infos: {
-  userId: string;
-  access_token: string;
-}) {
-  const cookieStore = await cookies();
+/**
+ * Récupère les headers d'authentification avec le token NextAuth
+ * Utilisé pour les appels API vers le backend
+ * Retourne toujours un Record<string, string> valide
+ */
+export const getAuthHeaders = async (): Promise<Record<string, string>> => {
+  const session = await auth();
 
-  // ✅ Stockez directement le token du backend (celui qui fonctionne avec votre JwtStrategy)
-  cookieStore.set("inkera_access_token", infos.access_token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-    expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-  });
-
-  // ✅ Stockez aussi l'userId pour un accès rapide
-  cookieStore.set("inkera_userId", infos.userId, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-    expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-  });
-
-  console.log("✅ Token backend stocké :", infos.access_token);
-}
-
-export async function deleteSession() {
-  const cookieStore = await cookies();
-  cookieStore.delete("inkera_access_token");
-  cookieStore.delete("inkera_userId");
-  console.log("🧹 Cookies de session supprimés côté serveur");
-}
-
-// Fonction utilitaire pour récupérer le token côté serveur
-// ✅ Fonction pour récupérer les headers d'authentification
-export const getAuthHeaders = async () => {
-  const cookieStore = await cookies();
-  const accessToken = cookieStore.get("inkera_access_token")?.value;
-
-  return {
+  const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
   };
+
+  if (session?.accessToken) {
+    headers.Authorization = `Bearer ${session.accessToken}`;
+  }
+
+  return headers;
 };

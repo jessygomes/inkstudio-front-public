@@ -77,27 +77,13 @@ export const appointmentRequestSchema = z.object({
 export const getAuthenticatedUserSchema = z.object({
   id: z.string(),
   email: z.string().email(),
-  firstName: z.string(),
-  lastName: z.string(),
-  phone: z.string().nullable().optional(),
-  image: z.string().nullable().optional(),
-  role: z.enum(["client", "salon", "admin"]),
-  createdAt: z.string().optional(), // Maintenant optionnel
-  updatedAt: z.string(),
-  clientProfile: z
-    .object({
-      id: z.string(),
-      pseudo: z.string().nullable().optional(),
-      birthDate: z.string().nullable().optional(),
-      city: z.string().nullable().optional(),
-      postalCode: z.string().nullable().optional(),
-      createdAt: z.string().optional(), // Maintenant optionnel
-      updatedAt: z.string(),
-    })
-    .nullable()
-    .optional(),
-  favoriteUsers: z.array(z.any()).optional().default([]), // Maintenant optionnel avec default
-  appointmentsAsClient: z.array(z.any()).optional().default([]), // Maintenant optionnel avec default
+  firstName: z.string().nullable(),
+  lastName: z.string().nullable(),
+  phone: z.string().nullable(),
+  address: z.string().nullable(),
+  city: z.string().nullable(),
+  postalCode: z.string().nullable(),
+  role: z.enum(["user", "admin"]),
 });
 
 // Schema de validation pour l'inscription client
