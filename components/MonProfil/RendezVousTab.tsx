@@ -66,6 +66,12 @@ type Appointment = {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     piercingDetails?: any;
   };
+  conversation?: {
+    id: string;
+    lastMessageAt: string;
+    // isRead: boolean;
+    unreadCount: number;
+  };
   review?: {
     id: string;
     rating: number;
@@ -454,593 +460,624 @@ export default function RendezVousTab() {
         <>
           {/* Liste des rendez-vous modernisée */}
           <div className="space-y-3">
-            {rdvData.appointments.map((appointment) => {
-              const isExpanded = expandedAppointments.has(appointment.id);
-              const hasReview = !!appointment.review;
+            {rdvData.appointments
+              .sort((a, b) => {
+                // Trier les RDV avec messages non lus en premier
+                const aUnread = a.conversation?.unreadCount || 0;
+                const bUnread = b.conversation?.unreadCount || 0;
+                return bUnread - aUnread;
+              })
+              .map((appointment) => {
+                const isExpanded = expandedAppointments.has(appointment.id);
+                const hasReview = !!appointment.review;
 
-              return (
-                <div
-                  key={appointment.id}
-                  className="group relative bg-gradient-to-br from-white/[0.08] to-white/[0.03] border border-white/10 hover:border-white/20 rounded-xl overflow-hidden transition-all duration-300 hover:shadow-xl"
-                >
-                  {/* Accent bar */}
+                return (
                   <div
-                    className={`absolute top-0 left-0 w-1 h-full ${
-                      appointment.status === "CONFIRMED"
-                        ? "bg-emerald-500"
-                        : appointment.status === "PENDING"
-                        ? "bg-orange-500"
-                        : appointment.status === "COMPLETED"
-                        ? "bg-blue-500"
-                        : "bg-red-500"
-                    }`}
-                  />
+                    key={appointment.id}
+                    className="group relative bg-gradient-to-br from-white/[0.08] to-white/[0.03] border border-white/10 hover:border-white/20 rounded-xl overflow-hidden transition-all duration-300 hover:shadow-xl"
+                  >
+                    {/* Accent bar */}
+                    <div
+                      className={`absolute top-0 left-0 w-1 h-full ${
+                        appointment.status === "CONFIRMED"
+                          ? "bg-emerald-500"
+                          : appointment.status === "PENDING"
+                          ? "bg-orange-500"
+                          : appointment.status === "COMPLETED"
+                          ? "bg-blue-500"
+                          : "bg-red-500"
+                      }`}
+                    />
 
-                  {/* Vue compacte */}
-                  <div className="p-4 pl-5">
-                    <div className="flex items-start gap-3">
-                      {/* Avatar salon */}
-                      <div className="relative flex-shrink-0">
-                        <div className="w-12 h-12 rounded-xl overflow-hidden bg-gradient-to-br from-tertiary-400/20 to-tertiary-500/20 border border-tertiary-400/30 ring-2 ring-white/5">
-                          {appointment.salon.image ? (
-                            <Image
-                              src={appointment.salon.image}
-                              alt={appointment.salon.salonName}
-                              width={48}
-                              height={48}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-tertiary-400 text-sm font-bold">
-                              {appointment.salon.salonName.charAt(0)}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Contenu principal */}
-                      <div className="flex-1 min-w-0 space-y-2">
-                        {/* En-tête avec titre et status */}
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex-1 min-w-0">
-                            <h4 className="font-one font-semibold text-white text-sm mb-1 line-clamp-1">
-                              {appointment.prestation}
-                            </h4>
-                            <p className="text-white/60 font-one text-xs truncate">
-                              {appointment.salon.salonName} •{" "}
-                              {appointment.tatoueur.name}
-                            </p>
-                          </div>
-                          <div className="flex-shrink-0">
-                            {getStatusBadge(appointment.status)}
-                          </div>
-                        </div>
-
-                        {/* Date et heure */}
-                        <div className="flex items-center gap-3 text-xs">
-                          <div className="flex items-center gap-1.5 text-tertiary-300 font-one">
-                            <FaCalendarAlt className="w-3 h-3" />
-                            {formatDate(appointment.start)}
-                          </div>
-                          <div className="flex items-center gap-1.5 text-tertiary-300 font-one">
-                            <FaClock className="w-3 h-3" />
-                            {formatTime(appointment.start)}
-                          </div>
-                          {appointment.prestationDetails?.price &&
-                            appointment.prestationDetails.price > 1 && (
-                              <div className="ml-auto px-2 py-0.5 bg-white/10 text-white rounded text-xs font-semibold">
-                                {appointment.prestationDetails.price}€
+                    {/* Vue compacte */}
+                    <div className="p-4 pl-5">
+                      <div className="flex items-start gap-3">
+                        {/* Avatar salon */}
+                        <div className="relative flex-shrink-0">
+                          <div className="w-12 h-12 rounded-xl overflow-hidden bg-gradient-to-br from-tertiary-400/20 to-tertiary-500/20 border border-tertiary-400/30 ring-2 ring-white/5">
+                            {appointment.salon.image ? (
+                              <Image
+                                src={appointment.salon.image}
+                                alt={appointment.salon.salonName}
+                                width={48}
+                                height={48}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-tertiary-400 text-sm font-bold">
+                                {appointment.salon.salonName.charAt(0)}
                               </div>
                             )}
+                          </div>
                         </div>
 
-                        {/* Actions compactes */}
-                        <div className="flex flex-wrap gap-1.5 pt-2">
-                          {appointment.status === "CONFIRMED" && (
-                            <>
-                              {/* <button className="cursor-pointer px-2.5 py-1 bg-white/10 hover:bg-white/15 text-white/80 hover:text-white border border-white/10 rounded-lg text-xs font-one transition-all">
+                        {/* Contenu principal */}
+                        <div className="flex-1 min-w-0 space-y-2">
+                          {/* En-tête avec titre et status */}
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex-1 min-w-0">
+                              <h4 className="font-one font-semibold text-white text-sm mb-1 line-clamp-1">
+                                {appointment.prestation}
+                              </h4>
+                              <p className="text-white/60 font-one text-xs truncate">
+                                {appointment.salon.salonName} •{" "}
+                                {appointment.tatoueur.name}
+                              </p>
+                            </div>
+                            <div className="flex-shrink-0">
+                              {getStatusBadge(appointment.status)}
+                            </div>
+                          </div>
+
+                          {/* Date et heure */}
+                          <div className="flex items-center gap-3 text-xs">
+                            <div className="flex items-center gap-1.5 text-tertiary-300 font-one">
+                              <FaCalendarAlt className="w-3 h-3" />
+                              {formatDate(appointment.start)}
+                            </div>
+                            <div className="flex items-center gap-1.5 text-tertiary-300 font-one">
+                              <FaClock className="w-3 h-3" />
+                              {formatTime(appointment.start)}
+                            </div>
+                            {appointment.prestationDetails?.price &&
+                              appointment.prestationDetails.price > 1 && (
+                                <div className="ml-auto px-2 py-0.5 bg-white/10 text-white rounded text-xs font-semibold">
+                                  {appointment.prestationDetails.price}€
+                                </div>
+                              )}
+                          </div>
+
+                          {/* Actions compactes */}
+                          <div className="flex flex-wrap gap-1.5 pt-2">
+                            {appointment.status === "CONFIRMED" && (
+                              <>
+                                {/* <button className="cursor-pointer px-2.5 py-1 bg-white/10 hover:bg-white/15 text-white/80 hover:text-white border border-white/10 rounded-lg text-xs font-one transition-all">
                                 Modifier
                               </button> */}
-                              <button
-                                onClick={() =>
-                                  handleCancelClick(appointment.id)
-                                }
-                                disabled={
-                                  cancelingAppointmentId === appointment.id
-                                }
-                                className="cursor-pointer px-2.5 py-1 bg-red-500/15 hover:bg-red-500/25 text-red-300 border border-red-500/30 rounded-lg text-xs font-one transition-all disabled:opacity-50"
-                              >
-                                {cancelingAppointmentId === appointment.id
-                                  ? "..."
-                                  : "Annuler"}
-                              </button>
-                            </>
-                          )}
-
-                          {appointment.status === "COMPLETED" && (
-                            <button
-                              onClick={() => handleReviewClick(appointment.id)}
-                              className="px-2.5 py-1 bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 rounded-lg text-xs font-one transition-all"
-                            >
-                              ⭐ {hasReview ? "Voir l'avis" : "Donner un avis"}
-                            </button>
-                          )}
-
-                          {appointment.visio &&
-                            appointment.status === "CONFIRMED" && (
-                              <button className="px-2.5 py-1 bg-blue-500/15 hover:bg-blue-500/25 text-blue-300 border border-blue-500/30 rounded-lg text-xs font-one transition-all">
-                                📹 Visio
-                              </button>
-                            )}
-
-                          <Link
-                            href={`/salon/${appointment.salon.salonName
-                              .toLowerCase()
-                              .replace(
-                                /\s+/g,
-                                "-"
-                              )}/${appointment.salon.city.toLowerCase()}-${
-                              appointment.salon.postalCode
-                            }`}
-                            className="px-2.5 py-1 bg-tertiary-500/15 hover:bg-tertiary-500/25 text-tertiary-300 border border-tertiary-500/30 rounded-lg text-xs font-one transition-all"
-                          >
-                            Voir salon
-                          </Link>
-
-                          <button
-                            onClick={() => toggleExpand(appointment.id)}
-                            className="cursor-pointer ml-auto px-2.5 py-1 bg-white/5 hover:bg-white/10 text-white/70 border border-white/10 rounded-lg text-xs font-one transition-all flex items-center gap-1"
-                          >
-                            {isExpanded ? (
-                              <>
-                                Réduire <FaChevronUp className="w-2.5 h-2.5" />
-                              </>
-                            ) : (
-                              <>
-                                Détails{" "}
-                                <FaChevronDown className="w-2.5 h-2.5" />
-                              </>
-                            )}
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Vue détaillée */}
-                  {isExpanded && (
-                    <div className="border-t border-white/10 bg-black/10 p-4 space-y-3">
-                      {/* Informations détaillées du rendez-vous */}
-                      <div className="bg-white/5 rounded-lg p-3 sm:p-4">
-                        <h5 className="text-white font-one font-semibold text-xs sm:text-sm mb-2 sm:mb-3">
-                          Informations complètes
-                        </h5>
-                        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 text-xs sm:text-sm">
-                          <div>
-                            <span className="text-white/60 font-one text-xs">
-                              Adresse:
-                            </span>
-                            <p className="text-white font-one text-xs">
-                              {appointment.salon.address &&
-                                `${appointment.salon.address}, `}
-                              {appointment.salon.city}{" "}
-                              {appointment.salon.postalCode}
-                            </p>
-                          </div>
-                          <div>
-                            <span className="text-white/60 font-one text-xs">
-                              Durée:
-                            </span>
-                            <p className="text-white font-one text-xs">
-                              {appointment.duration
-                                ? `${appointment.duration} min`
-                                : "Non spécifié"}
-                            </p>
-                          </div>
-                          {appointment.prestationDetails?.price &&
-                            appointment.prestationDetails.price > 1 && (
-                              <div>
-                                <span className="text-white/60 font-one text-xs">
-                                  Prix :
-                                </span>
-                                <p className="text-white font-one text-xs">
-                                  {appointment.prestationDetails.price}€
-                                </p>
-                              </div>
-                            )}
-                        </div>
-                      </div>
-
-                      {/* Détails du projet si disponibles */}
-                      {appointment.prestationDetails && (
-                        <div className="bg-white/5 rounded-lg p-3 sm:p-4 space-y-3">
-                          <h5 className="text-white font-one font-semibold text-sm">
-                            Détails du projet
-                          </h5>
-
-                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
-                            {appointment.prestationDetails.zone && (
-                              <div>
-                                <span className="text-white/60 font-one">
-                                  Zone:
-                                </span>
-                                <p className="text-white font-one">
-                                  {appointment.prestationDetails.zone}
-                                </p>
-                              </div>
-                            )}
-
-                            {appointment.prestationDetails.size && (
-                              <div>
-                                <span className="text-white/60 font-one">
-                                  Taille:
-                                </span>
-                                <p className="text-white font-one">
-                                  {appointment.prestationDetails.size}
-                                </p>
-                              </div>
-                            )}
-
-                            {appointment.prestationDetails.colorStyle && (
-                              <div>
-                                <span className="text-white/60 font-one">
-                                  Style:
-                                </span>
-                                <p className="text-white font-one">
-                                  {appointment.prestationDetails.colorStyle}
-                                </p>
-                              </div>
-                            )}
-
-                            {appointment.prestationDetails.piercingZone && (
-                              <div>
-                                <span className="text-white/60 font-one">
-                                  Zone piercing:
-                                </span>
-                                <p className="text-white font-one">
-                                  {appointment.prestationDetails.piercingZone}
-                                </p>
-                              </div>
-                            )}
-
-                            {appointment.prestationDetails.piercingDetails && (
-                              <div>
-                                <span className="text-white/60 font-one">
-                                  Détail piercing:
-                                </span>
-                                <p className="text-white font-one">
-                                  {appointment.prestationDetails.piercingDetails
-                                    .zoneOreille ||
-                                    appointment.prestationDetails
-                                      .piercingDetails.zoneVisage ||
-                                    appointment.prestationDetails
-                                      .piercingDetails.zoneBouche ||
-                                    appointment.prestationDetails
-                                      .piercingDetails.zoneCorps ||
-                                    appointment.prestationDetails
-                                      .piercingDetails.zoneMicrodermal ||
-                                    "Non spécifié"}
-                                </p>
-                              </div>
-                            )}
-                          </div>
-
-                          {appointment.prestationDetails.description && (
-                            <div className="mt-3 pt-3 border-t border-white/10">
-                              <span className="text-white/60 font-one text-sm">
-                                Description:
-                              </span>
-                              <p className="text-white/90 font-one text-sm mt-1 leading-relaxed">
-                                {appointment.prestationDetails.description}
-                              </p>
-                            </div>
-                          )}
-
-                          {/* Images de référence */}
-                          {(appointment.prestationDetails.reference ||
-                            appointment.prestationDetails.sketch) && (
-                            <div className="mt-3 pt-3 border-t border-white/10">
-                              <span className="text-white/60 font-one text-sm block mb-2">
-                                Images de référence:
-                              </span>
-                              <div className="flex gap-3">
-                                {appointment.prestationDetails.reference && (
-                                  <div className="relative">
-                                    <Image
-                                      src={
-                                        appointment.prestationDetails.reference
-                                      }
-                                      alt="Image de référence"
-                                      width={120}
-                                      height={120}
-                                      className="w-30 h-30 object-cover rounded-lg border border-white/20"
-                                    />
-                                    <span className="absolute -bottom-1 -right-1 bg-tertiary-500 text-white text-xs px-2 py-0.5 rounded">
-                                      Référence
-                                    </span>
-                                  </div>
-                                )}
-                                {appointment.prestationDetails.sketch && (
-                                  <div className="relative">
-                                    <Image
-                                      src={appointment.prestationDetails.sketch}
-                                      alt="Croquis"
-                                      width={120}
-                                      height={120}
-                                      className="w-30 h-30 object-cover rounded-lg border border-white/20"
-                                    />
-                                    <span className="absolute -bottom-1 -right-1 bg-blue-500 text-white text-xs px-2 py-0.5 rounded">
-                                      Croquis
-                                    </span>
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      )}
-
-                      {/* Informations de contact */}
-                      <div className="bg-white/5 rounded-lg p-3 sm:p-4">
-                        <h5 className="text-white font-one font-semibold text-sm mb-3">
-                          Contacts
-                        </h5>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                          <div>
-                            <span className="text-white/60 font-one block mb-2">
-                              Salon {appointment.salon.salonName}:
-                            </span>
-                            <div className="space-y-1">
-                              {appointment.salon.phone && (
-                                <p className="text-white font-one flex items-center gap-2">
-                                  📞 {appointment.salon.phone}
-                                </p>
-                              )}
-                              {appointment.salon.website && (
-                                <a
-                                  href={appointment.salon.website}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-tertiary-400 hover:text-tertiary-300 font-one transition-colors flex items-center gap-2"
-                                >
-                                  🌐 Site web
-                                </a>
-                              )}
-                              {appointment.salon.instagram && (
-                                <a
-                                  href={appointment.salon.instagram}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-tertiary-400 hover:text-tertiary-300 font-one transition-colors flex items-center gap-2"
-                                >
-                                  📷 Instagram
-                                </a>
-                              )}
-                            </div>
-                          </div>
-
-                          <div>
-                            <span className="text-white/60 font-one block mb-2">
-                              Tatoueur {appointment.tatoueur.name}:
-                            </span>
-                            <div className="space-y-1">
-                              {appointment.tatoueur.phone && (
-                                <p className="text-white font-one flex items-center gap-2">
-                                  📞 {appointment.tatoueur.phone}
-                                </p>
-                              )}
-                              {appointment.tatoueur.instagram && (
-                                <a
-                                  href={appointment.tatoueur.instagram}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-tertiary-400 hover:text-tertiary-300 font-one transition-colors flex items-center gap-2"
-                                >
-                                  📷 Instagram
-                                </a>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Section Avis modernisée */}
-                      {appointment.status === "COMPLETED" && (
-                        <div className="bg-gradient-to-br from-amber-500/10 to-amber-600/5 rounded-xl p-4 border border-amber-500/20">
-                          <div className="flex items-center gap-2 mb-3">
-                            <div className="w-8 h-8 bg-amber-500/20 rounded-lg flex items-center justify-center">
-                              <span className="text-lg">⭐</span>
-                            </div>
-                            <h5 className="text-white font-one font-semibold text-sm">
-                              {hasReview ? "Votre avis" : "Donner votre avis"}
-                            </h5>
-                          </div>
-
-                          {hasReview ? (
-                            <div className="space-y-3">
-                              <div className="flex items-center gap-2">
-                                <div className="text-amber-300 text-sm">
-                                  {Array.from({ length: 5 }).map((_, i) => (
-                                    <span key={i}>
-                                      {i < (appointment.review?.rating || 0)
-                                        ? "★"
-                                        : "☆"}
-                                    </span>
-                                  ))}
-                                </div>
-                                <span className="text-white/70 font-one text-xs">
-                                  {appointment.review?.rating}/5
-                                </span>
-                                {appointment.review?.isVerified && (
-                                  <span className="ml-auto px-2 py-0.5 bg-emerald-500/10 border border-emerald-400/30 text-emerald-300 rounded text-xs">
-                                    ✓ Vérifié
-                                  </span>
-                                )}
-                              </div>
-
-                              {appointment.review?.title && (
-                                <div>
-                                  <p className="text-white font-semibold text-sm">
-                                    {appointment.review.title}
-                                  </p>
-                                </div>
-                              )}
-
-                              {appointment.review?.comment && (
-                                <div>
-                                  <p className="text-white/80 text-sm leading-relaxed">
-                                    {appointment.review.comment}
-                                  </p>
-                                </div>
-                              )}
-
-                              <div className="text-white/50 text-xs pt-2 border-t border-white/10">
-                                Publié le{" "}
-                                {appointment.review?.createdAt
-                                  ? new Date(
-                                      appointment.review.createdAt
-                                    ).toLocaleDateString("fr-FR")
-                                  : ""}
-                              </div>
-
-                              {appointment.review?.salonResponse && (
-                                <div className="bg-white/5 rounded-lg p-3 mt-3 border border-white/10">
-                                  <p className="text-white/70 font-one text-xs mb-2 font-semibold">
-                                    Réponse du salon :
-                                  </p>
-                                  <p className="text-white/80 text-sm">
-                                    {appointment.review.salonResponse}
-                                  </p>
-                                </div>
-                              )}
-                            </div>
-                          ) : (
-                            // Afficher le formulaire si pas d'avis
-                            <>
-                              <p className="text-white/70 font-one text-xs mb-4">
-                                Votre retour d'expérience aide les autres
-                                clients et nos artistes !
-                              </p>
-
-                              <div className="space-y-3">
-                                {/* Note - Rating Stars */}
-                                <div className="space-y-2">
-                                  <label className="text-white/90 font-one text-xs block">
-                                    Note
-                                  </label>
-                                  <div className="flex items-center gap-2">
-                                    {Array.from({ length: 5 }).map((_, i) => {
-                                      const value = i + 1;
-                                      const active =
-                                        (hoverRating ?? reviewForm.rating) >=
-                                        value;
-                                      return (
-                                        <button
-                                          key={value}
-                                          type="button"
-                                          onMouseEnter={() =>
-                                            setHoverRating(value)
-                                          }
-                                          onMouseLeave={() =>
-                                            setHoverRating(null)
-                                          }
-                                          onClick={() =>
-                                            setReviewForm((f) => ({
-                                              ...f,
-                                              rating: value,
-                                            }))
-                                          }
-                                          className="p-1"
-                                        >
-                                          <FaStar
-                                            className={`w-5 h-5 transition-all ${
-                                              active
-                                                ? "text-amber-300 drop-shadow-[0_0_4px_rgba(251,191,36,0.6)] scale-105"
-                                                : "text-white/30 hover:text-white/60"
-                                            }`}
-                                          />
-                                        </button>
-                                      );
-                                    })}
-                                    <span className="text-white/70 font-one text-xs ml-2">
-                                      {reviewForm.rating}/5
-                                    </span>
-                                  </div>
-                                </div>
-
-                                {/* Titre */}
-                                <div className="space-y-1">
-                                  <label className="text-white/90 font-one text-xs block">
-                                    Titre (optionnel)
-                                  </label>
-                                  <input
-                                    type="text"
-                                    value={reviewForm.title}
-                                    onChange={(e) => {
-                                      setReviewForm((f) => ({
-                                        ...f,
-                                        title: e.target.value,
-                                      }));
-                                    }}
-                                    placeholder="Ex: Excellent travail"
-                                    maxLength={100}
-                                    className="w-full px-2 py-1.5 bg-white/5 border border-white/20 rounded text-white text-xs focus:outline-none focus:border-tertiary-400 focus:ring-1 focus:ring-tertiary-400/20 transition-all duration-300 placeholder:text-white/40"
-                                  />
-                                  <div className="text-white/40 text-xs">
-                                    {reviewForm.title.length}/100
-                                  </div>
-                                </div>
-
-                                {/* Commentaire */}
-                                <div className="space-y-1">
-                                  <label className="text-white/90 font-one text-xs block">
-                                    Votre avis
-                                  </label>
-                                  <textarea
-                                    value={reviewForm.comment}
-                                    onChange={(e) => {
-                                      setReviewForm((f) => ({
-                                        ...f,
-                                        comment: e.target.value,
-                                      }));
-                                    }}
-                                    placeholder="Partagez votre expérience..."
-                                    maxLength={500}
-                                    rows={3}
-                                    className="w-full px-2 py-1.5 bg-white/5 border border-white/20 rounded text-white text-xs focus:outline-none focus:border-tertiary-400 focus:ring-1 focus:ring-tertiary-400/20 transition-all duration-300 placeholder:text-white/40 resize-none"
-                                  />
-                                  <div className="text-white/40 text-xs">
-                                    {reviewForm.comment.length}/500
-                                  </div>
-                                </div>
-
-                                {/* Bouton d'envoi */}
                                 <button
                                   onClick={() =>
-                                    handleSubmitReview(appointment)
+                                    handleCancelClick(appointment.id)
                                   }
-                                  disabled={reviewSubmitting}
-                                  className="w-full px-3 py-2 bg-gradient-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white rounded text-xs font-one transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                  disabled={
+                                    cancelingAppointmentId === appointment.id
+                                  }
+                                  className="cursor-pointer px-2.5 py-1 bg-red-500/15 hover:bg-red-500/25 text-red-300 border border-red-500/30 rounded-lg text-xs font-one transition-all disabled:opacity-50"
                                 >
-                                  {reviewSubmitting ? (
-                                    <>
-                                      <div className="animate-spin rounded-full h-3 w-3 border-2 border-white border-t-transparent"></div>
-                                      Publication...
-                                    </>
-                                  ) : (
-                                    "Publier l'avis"
-                                  )}
+                                  {cancelingAppointmentId === appointment.id
+                                    ? "..."
+                                    : "Annuler"}
                                 </button>
-                              </div>
-                            </>
-                          )}
+                              </>
+                            )}
+
+                            {appointment.status === "COMPLETED" && (
+                              <button
+                                onClick={() =>
+                                  handleReviewClick(appointment.id)
+                                }
+                                className="px-2.5 py-1 bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 rounded-lg text-xs font-one transition-all"
+                              >
+                                ⭐{" "}
+                                {hasReview ? "Voir l'avis" : "Donner un avis"}
+                              </button>
+                            )}
+
+                            {appointment.visio &&
+                              appointment.status === "CONFIRMED" && (
+                                <button className="px-2.5 py-1 bg-blue-500/15 hover:bg-blue-500/25 text-blue-300 border border-blue-500/30 rounded-lg text-xs font-one transition-all">
+                                  📹 Visio
+                                </button>
+                              )}
+
+                            <Link
+                              href={`/salon/${appointment.salon.salonName
+                                .toLowerCase()
+                                .replace(
+                                  /\s+/g,
+                                  "-"
+                                )}/${appointment.salon.city.toLowerCase()}-${
+                                appointment.salon.postalCode
+                              }`}
+                              className="px-2.5 py-1 bg-tertiary-500/15 hover:bg-tertiary-500/25 text-tertiary-300 border border-tertiary-500/30 rounded-lg text-xs font-one transition-all"
+                            >
+                              Voir salon
+                            </Link>
+
+                            {appointment.conversation && (
+                              <Link
+                                href={`/mon-profil/messagerie/${appointment.conversation.id}`}
+                                className="relative px-2.5 py-1 bg-tertiary-500/15 hover:bg-tertiary-500/25 text-tertiary-300 border border-tertiary-500/30 rounded-lg text-xs font-one transition-all group"
+                              >
+                                Voir la conversation
+                                {appointment.conversation.unreadCount > 0 && (
+                                  <span className="absolute -top-2 -right-2 flex items-center justify-center w-5 h-5 bg-gradient-to-r from-tertiary-500 to-tertiary-400 text-white text-[10px] font-bold rounded-full animate-pulse">
+                                    {appointment.conversation.unreadCount > 9
+                                      ? "9+"
+                                      : appointment.conversation.unreadCount}
+                                  </span>
+                                )}
+                              </Link>
+                            )}
+
+                            <button
+                              onClick={() => toggleExpand(appointment.id)}
+                              className="cursor-pointer ml-auto px-2.5 py-1 bg-white/5 hover:bg-white/10 text-white/70 border border-white/10 rounded-lg text-xs font-one transition-all flex items-center gap-1"
+                            >
+                              {isExpanded ? (
+                                <>
+                                  Réduire{" "}
+                                  <FaChevronUp className="w-2.5 h-2.5" />
+                                </>
+                              ) : (
+                                <>
+                                  Détails{" "}
+                                  <FaChevronDown className="w-2.5 h-2.5" />
+                                </>
+                              )}
+                            </button>
+                          </div>
                         </div>
-                      )}
+                      </div>
                     </div>
-                  )}
-                </div>
-              );
-            })}
+
+                    {/* Vue détaillée */}
+                    {isExpanded && (
+                      <div className="border-t border-white/10 bg-black/10 p-4 space-y-3">
+                        {/* Informations détaillées du rendez-vous */}
+                        <div className="bg-white/5 rounded-lg p-3 sm:p-4">
+                          <h5 className="text-white font-one font-semibold text-xs sm:text-sm mb-2 sm:mb-3">
+                            Informations complètes
+                          </h5>
+                          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 text-xs sm:text-sm">
+                            <div>
+                              <span className="text-white/60 font-one text-xs">
+                                Adresse:
+                              </span>
+                              <p className="text-white font-one text-xs">
+                                {appointment.salon.address &&
+                                  `${appointment.salon.address}, `}
+                                {appointment.salon.city}{" "}
+                                {appointment.salon.postalCode}
+                              </p>
+                            </div>
+                            <div>
+                              <span className="text-white/60 font-one text-xs">
+                                Durée:
+                              </span>
+                              <p className="text-white font-one text-xs">
+                                {appointment.duration
+                                  ? `${appointment.duration} min`
+                                  : "Non spécifié"}
+                              </p>
+                            </div>
+                            {appointment.prestationDetails?.price &&
+                              appointment.prestationDetails.price > 1 && (
+                                <div>
+                                  <span className="text-white/60 font-one text-xs">
+                                    Prix :
+                                  </span>
+                                  <p className="text-white font-one text-xs">
+                                    {appointment.prestationDetails.price}€
+                                  </p>
+                                </div>
+                              )}
+                          </div>
+                        </div>
+
+                        {/* Détails du projet si disponibles */}
+                        {appointment.prestationDetails && (
+                          <div className="bg-white/5 rounded-lg p-3 sm:p-4 space-y-3">
+                            <h5 className="text-white font-one font-semibold text-sm">
+                              Détails du projet
+                            </h5>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
+                              {appointment.prestationDetails.zone && (
+                                <div>
+                                  <span className="text-white/60 font-one">
+                                    Zone:
+                                  </span>
+                                  <p className="text-white font-one">
+                                    {appointment.prestationDetails.zone}
+                                  </p>
+                                </div>
+                              )}
+
+                              {appointment.prestationDetails.size && (
+                                <div>
+                                  <span className="text-white/60 font-one">
+                                    Taille:
+                                  </span>
+                                  <p className="text-white font-one">
+                                    {appointment.prestationDetails.size}
+                                  </p>
+                                </div>
+                              )}
+
+                              {appointment.prestationDetails.colorStyle && (
+                                <div>
+                                  <span className="text-white/60 font-one">
+                                    Style:
+                                  </span>
+                                  <p className="text-white font-one">
+                                    {appointment.prestationDetails.colorStyle}
+                                  </p>
+                                </div>
+                              )}
+
+                              {appointment.prestationDetails.piercingZone && (
+                                <div>
+                                  <span className="text-white/60 font-one">
+                                    Zone piercing:
+                                  </span>
+                                  <p className="text-white font-one">
+                                    {appointment.prestationDetails.piercingZone}
+                                  </p>
+                                </div>
+                              )}
+
+                              {appointment.prestationDetails
+                                .piercingDetails && (
+                                <div>
+                                  <span className="text-white/60 font-one">
+                                    Détail piercing:
+                                  </span>
+                                  <p className="text-white font-one">
+                                    {appointment.prestationDetails
+                                      .piercingDetails.zoneOreille ||
+                                      appointment.prestationDetails
+                                        .piercingDetails.zoneVisage ||
+                                      appointment.prestationDetails
+                                        .piercingDetails.zoneBouche ||
+                                      appointment.prestationDetails
+                                        .piercingDetails.zoneCorps ||
+                                      appointment.prestationDetails
+                                        .piercingDetails.zoneMicrodermal ||
+                                      "Non spécifié"}
+                                  </p>
+                                </div>
+                              )}
+                            </div>
+
+                            {appointment.prestationDetails.description && (
+                              <div className="mt-3 pt-3 border-t border-white/10">
+                                <span className="text-white/60 font-one text-sm">
+                                  Description:
+                                </span>
+                                <p className="text-white/90 font-one text-sm mt-1 leading-relaxed">
+                                  {appointment.prestationDetails.description}
+                                </p>
+                              </div>
+                            )}
+
+                            {/* Images de référence */}
+                            {(appointment.prestationDetails.reference ||
+                              appointment.prestationDetails.sketch) && (
+                              <div className="mt-3 pt-3 border-t border-white/10">
+                                <span className="text-white/60 font-one text-sm block mb-2">
+                                  Images de référence:
+                                </span>
+                                <div className="flex gap-3">
+                                  {appointment.prestationDetails.reference && (
+                                    <div className="relative">
+                                      <Image
+                                        src={
+                                          appointment.prestationDetails
+                                            .reference
+                                        }
+                                        alt="Image de référence"
+                                        width={120}
+                                        height={120}
+                                        className="w-30 h-30 object-cover rounded-lg border border-white/20"
+                                      />
+                                      <span className="absolute -bottom-1 -right-1 bg-tertiary-500 text-white text-xs px-2 py-0.5 rounded">
+                                        Référence
+                                      </span>
+                                    </div>
+                                  )}
+                                  {appointment.prestationDetails.sketch && (
+                                    <div className="relative">
+                                      <Image
+                                        src={
+                                          appointment.prestationDetails.sketch
+                                        }
+                                        alt="Croquis"
+                                        width={120}
+                                        height={120}
+                                        className="w-30 h-30 object-cover rounded-lg border border-white/20"
+                                      />
+                                      <span className="absolute -bottom-1 -right-1 bg-blue-500 text-white text-xs px-2 py-0.5 rounded">
+                                        Croquis
+                                      </span>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Informations de contact */}
+                        <div className="bg-white/5 rounded-lg p-3 sm:p-4">
+                          <h5 className="text-white font-one font-semibold text-sm mb-3">
+                            Contacts
+                          </h5>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                            <div>
+                              <span className="text-white/60 font-one block mb-2">
+                                Salon {appointment.salon.salonName}:
+                              </span>
+                              <div className="space-y-1">
+                                {appointment.salon.phone && (
+                                  <p className="text-white font-one flex items-center gap-2">
+                                    📞 {appointment.salon.phone}
+                                  </p>
+                                )}
+                                {appointment.salon.website && (
+                                  <a
+                                    href={appointment.salon.website}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-tertiary-400 hover:text-tertiary-300 font-one transition-colors flex items-center gap-2"
+                                  >
+                                    🌐 Site web
+                                  </a>
+                                )}
+                                {appointment.salon.instagram && (
+                                  <a
+                                    href={appointment.salon.instagram}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-tertiary-400 hover:text-tertiary-300 font-one transition-colors flex items-center gap-2"
+                                  >
+                                    📷 Instagram
+                                  </a>
+                                )}
+                              </div>
+                            </div>
+
+                            <div>
+                              <span className="text-white/60 font-one block mb-2">
+                                Tatoueur {appointment.tatoueur.name}:
+                              </span>
+                              <div className="space-y-1">
+                                {appointment.tatoueur.phone && (
+                                  <p className="text-white font-one flex items-center gap-2">
+                                    📞 {appointment.tatoueur.phone}
+                                  </p>
+                                )}
+                                {appointment.tatoueur.instagram && (
+                                  <a
+                                    href={appointment.tatoueur.instagram}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-tertiary-400 hover:text-tertiary-300 font-one transition-colors flex items-center gap-2"
+                                  >
+                                    📷 Instagram
+                                  </a>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Section Avis modernisée */}
+                        {appointment.status === "COMPLETED" && (
+                          <div className="bg-gradient-to-br from-amber-500/10 to-amber-600/5 rounded-xl p-4 border border-amber-500/20">
+                            <div className="flex items-center gap-2 mb-3">
+                              <div className="w-8 h-8 bg-amber-500/20 rounded-lg flex items-center justify-center">
+                                <span className="text-lg">⭐</span>
+                              </div>
+                              <h5 className="text-white font-one font-semibold text-sm">
+                                {hasReview ? "Votre avis" : "Donner votre avis"}
+                              </h5>
+                            </div>
+
+                            {hasReview ? (
+                              <div className="space-y-3">
+                                <div className="flex items-center gap-2">
+                                  <div className="text-amber-300 text-sm">
+                                    {Array.from({ length: 5 }).map((_, i) => (
+                                      <span key={i}>
+                                        {i < (appointment.review?.rating || 0)
+                                          ? "★"
+                                          : "☆"}
+                                      </span>
+                                    ))}
+                                  </div>
+                                  <span className="text-white/70 font-one text-xs">
+                                    {appointment.review?.rating}/5
+                                  </span>
+                                  {appointment.review?.isVerified && (
+                                    <span className="ml-auto px-2 py-0.5 bg-emerald-500/10 border border-emerald-400/30 text-emerald-300 rounded text-xs">
+                                      ✓ Vérifié
+                                    </span>
+                                  )}
+                                </div>
+
+                                {appointment.review?.title && (
+                                  <div>
+                                    <p className="text-white font-semibold text-sm">
+                                      {appointment.review.title}
+                                    </p>
+                                  </div>
+                                )}
+
+                                {appointment.review?.comment && (
+                                  <div>
+                                    <p className="text-white/80 text-sm leading-relaxed">
+                                      {appointment.review.comment}
+                                    </p>
+                                  </div>
+                                )}
+
+                                <div className="text-white/50 text-xs pt-2 border-t border-white/10">
+                                  Publié le{" "}
+                                  {appointment.review?.createdAt
+                                    ? new Date(
+                                        appointment.review.createdAt
+                                      ).toLocaleDateString("fr-FR")
+                                    : ""}
+                                </div>
+
+                                {appointment.review?.salonResponse && (
+                                  <div className="bg-white/5 rounded-lg p-3 mt-3 border border-white/10">
+                                    <p className="text-white/70 font-one text-xs mb-2 font-semibold">
+                                      Réponse du salon :
+                                    </p>
+                                    <p className="text-white/80 text-sm">
+                                      {appointment.review.salonResponse}
+                                    </p>
+                                  </div>
+                                )}
+                              </div>
+                            ) : (
+                              // Afficher le formulaire si pas d'avis
+                              <>
+                                <p className="text-white/70 font-one text-xs mb-4">
+                                  Votre retour d'expérience aide les autres
+                                  clients et nos artistes !
+                                </p>
+
+                                <div className="space-y-3">
+                                  {/* Note - Rating Stars */}
+                                  <div className="space-y-2">
+                                    <label className="text-white/90 font-one text-xs block">
+                                      Note
+                                    </label>
+                                    <div className="flex items-center gap-2">
+                                      {Array.from({ length: 5 }).map((_, i) => {
+                                        const value = i + 1;
+                                        const active =
+                                          (hoverRating ?? reviewForm.rating) >=
+                                          value;
+                                        return (
+                                          <button
+                                            key={value}
+                                            type="button"
+                                            onMouseEnter={() =>
+                                              setHoverRating(value)
+                                            }
+                                            onMouseLeave={() =>
+                                              setHoverRating(null)
+                                            }
+                                            onClick={() =>
+                                              setReviewForm((f) => ({
+                                                ...f,
+                                                rating: value,
+                                              }))
+                                            }
+                                            className="p-1"
+                                          >
+                                            <FaStar
+                                              className={`w-5 h-5 transition-all ${
+                                                active
+                                                  ? "text-amber-300 drop-shadow-[0_0_4px_rgba(251,191,36,0.6)] scale-105"
+                                                  : "text-white/30 hover:text-white/60"
+                                              }`}
+                                            />
+                                          </button>
+                                        );
+                                      })}
+                                      <span className="text-white/70 font-one text-xs ml-2">
+                                        {reviewForm.rating}/5
+                                      </span>
+                                    </div>
+                                  </div>
+
+                                  {/* Titre */}
+                                  <div className="space-y-1">
+                                    <label className="text-white/90 font-one text-xs block">
+                                      Titre (optionnel)
+                                    </label>
+                                    <input
+                                      type="text"
+                                      value={reviewForm.title}
+                                      onChange={(e) => {
+                                        setReviewForm((f) => ({
+                                          ...f,
+                                          title: e.target.value,
+                                        }));
+                                      }}
+                                      placeholder="Ex: Excellent travail"
+                                      maxLength={100}
+                                      className="w-full px-2 py-1.5 bg-white/5 border border-white/20 rounded text-white text-xs focus:outline-none focus:border-tertiary-400 focus:ring-1 focus:ring-tertiary-400/20 transition-all duration-300 placeholder:text-white/40"
+                                    />
+                                    <div className="text-white/40 text-xs">
+                                      {reviewForm.title.length}/100
+                                    </div>
+                                  </div>
+
+                                  {/* Commentaire */}
+                                  <div className="space-y-1">
+                                    <label className="text-white/90 font-one text-xs block">
+                                      Votre avis
+                                    </label>
+                                    <textarea
+                                      value={reviewForm.comment}
+                                      onChange={(e) => {
+                                        setReviewForm((f) => ({
+                                          ...f,
+                                          comment: e.target.value,
+                                        }));
+                                      }}
+                                      placeholder="Partagez votre expérience..."
+                                      maxLength={500}
+                                      rows={3}
+                                      className="w-full px-2 py-1.5 bg-white/5 border border-white/20 rounded text-white text-xs focus:outline-none focus:border-tertiary-400 focus:ring-1 focus:ring-tertiary-400/20 transition-all duration-300 placeholder:text-white/40 resize-none"
+                                    />
+                                    <div className="text-white/40 text-xs">
+                                      {reviewForm.comment.length}/500
+                                    </div>
+                                  </div>
+
+                                  {/* Bouton d'envoi */}
+                                  <button
+                                    onClick={() =>
+                                      handleSubmitReview(appointment)
+                                    }
+                                    disabled={reviewSubmitting}
+                                    className="w-full px-3 py-2 bg-gradient-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white rounded text-xs font-one transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                  >
+                                    {reviewSubmitting ? (
+                                      <>
+                                        <div className="animate-spin rounded-full h-3 w-3 border-2 border-white border-t-transparent"></div>
+                                        Publication...
+                                      </>
+                                    ) : (
+                                      "Publier l'avis"
+                                    )}
+                                  </button>
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
           </div>
 
           {/* Pagination modernisée */}

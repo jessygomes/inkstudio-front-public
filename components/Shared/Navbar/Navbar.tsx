@@ -5,10 +5,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useRef } from "react";
+import { useMessagingContext } from "@/components/Context/MessageProvider";
 
 export default function Navbar() {
   const { data: session, status } = useSession();
   const pathname = usePathname();
+  const { unreadCount } = useMessagingContext();
+
+  console.log("🚀 ~ file: Navbar.tsx:11 ~ Navbar ~ unreadCount:", unreadCount);
 
   const navRef = useRef<HTMLUListElement>(null);
 
@@ -44,7 +48,7 @@ export default function Navbar() {
           );
         })}
         {status === "authenticated" && session?.user ? (
-          <Link href="/mon-profil">
+          <Link href="/mon-profil" className="relative">
             <div className="relative w-10 h-10 rounded-full overflow-hidden border-1 border-white/30 transition-all duration-300 cursor-pointer hover:scale-105">
               {session.user.image ? (
                 <Image
@@ -63,6 +67,11 @@ export default function Navbar() {
                 </div>
               )}
             </div>
+            {unreadCount > 0 && (
+              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                {unreadCount > 99 ? "99+" : unreadCount}
+              </span>
+            )}
           </Link>
         ) : (
           <Link href="/se-connecter">

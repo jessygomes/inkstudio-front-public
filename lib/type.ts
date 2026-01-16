@@ -133,3 +133,83 @@ export type UserContextType = {
   isSalon: boolean;
   isAdmin: boolean;
 };
+
+export type ConversationStatus = "ACTIVE" | "ARCHIVED" | "CLOSED";
+export type MessageType = "SYSTEM" | "USER" | "CLIENT";
+
+export interface ConversationUserDto {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  image?: string | null;
+  salonName?: string;
+  role?: string;
+}
+
+export interface ConversationMessageDto {
+  id: string;
+  content: string;
+  createdAt: string;
+  conversationId: string;
+  type?: MessageType;
+  isRead: boolean;
+  attachments?: Array<{
+    id: string;
+    url: string;
+    fileUrl: string;
+    fileName: string;
+    fileSize: number;
+    fileType: string;
+  }>;
+  sender: ConversationUserDto;
+}
+
+export interface AttachmentDto {
+  id: string;
+  fileUrl: string;
+  fileName: string;
+  fileSize: number;
+  fileType: string;
+  uploadThingKey?: string;
+}
+
+export interface MessagesResponseDto {
+  data: ConversationMessageDto[];
+  hasMore: boolean;
+  limit: number;
+  page: number;
+  total: number;
+  totalPages: number;
+}
+
+export interface ConversationDto {
+  id: string;
+  salonId: string;
+  clientUserId: string;
+  status: ConversationStatus;
+  createdAt: string;
+  updatedAt: string;
+  lastMessageAt: string;
+  subject?: string;
+  appointmentId?: string;
+  unreadCount?: number;
+  lastMessage?: {
+    id: string;
+    content: string;
+    createdAt: string;
+    senderId: string;
+    type?: MessageType;
+  };
+  salon: ConversationUserDto;
+  client: ConversationUserDto;
+  messages?: MessagesResponseDto;
+}
+
+export interface PaginatedConversationsDto {
+  data: ConversationDto[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}

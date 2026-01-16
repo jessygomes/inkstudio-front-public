@@ -7,11 +7,13 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { MdMenu, MdClose } from "react-icons/md";
 import { FaUser } from "react-icons/fa";
+import { useMessagingContext } from "@/components/Context/MessageProvider";
 
 export default function NavbarMobile() {
   const { data: session, status } = useSession();
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
+  const { unreadCount } = useMessagingContext();
   const navRef = useRef<HTMLDivElement>(null);
 
   const handleOpen = () => setIsOpen(true);
@@ -47,7 +49,7 @@ export default function NavbarMobile() {
       <div className="flex gap-3 items-center justify-between text-white">
         {/* Avatar ou bouton connexion - Modernisé */}
         {status === "authenticated" && session?.user ? (
-          <Link href="/mon-profil" className="group">
+          <Link href="/mon-profil" className="group relative">
             <div className="relative w-9 h-9 rounded-full overflow-hidden border-2 border-tertiary-400/50 group-hover:border-tertiary-400 transition-all duration-300 cursor-pointer group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-tertiary-400/25">
               {session.user.image ? (
                 <Image
@@ -63,6 +65,11 @@ export default function NavbarMobile() {
                 </div>
               )}
             </div>
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-4 h-4 flex items-center justify-center text-[10px]">
+                {unreadCount > 99 ? "99+" : unreadCount}
+              </span>
+            )}
           </Link>
         ) : (
           <Link href="/se-connecter" className="group flex-1 sm:flex-none">

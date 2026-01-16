@@ -9,6 +9,7 @@ import GoogleAnalytics from "@/components/Analytics/GoogleAnalytics";
 import CookieBanner from "@/components/Analytics/CookieBanner";
 import { UserProvider } from "@/components/Context/UserContext";
 import { AuthProvider } from "@/components/Auth/AuthProvider";
+import { MessagingProvider } from "@/components/Context/MessageProvider";
 import { auth } from "@/auth";
 
 const didact_gothic = Didact_Gothic({
@@ -161,22 +162,22 @@ export default async function RootLayout({
     };
   }
 
-  console.log("🌐 [RootLayout] Utilisateur authentifié :", user);
-
   return (
     <html lang="fr">
       <body
         className={`${didact_gothic.variable} ${exo_2.variable} ${montserrat_alternates.variable} ${walkway.variable} antialiased relative`}
       >
         <AuthProvider>
-          <CookieConsentProvider>
-            <GoogleAnalytics measurementId="G-YG3WKCC1JL" />
-            <Toaster />
-            <CookieBanner />
-            <main>
-              <UserProvider user={user}>{children}</UserProvider>
-            </main>
-          </CookieConsentProvider>
+          <MessagingProvider>
+            <CookieConsentProvider>
+              <GoogleAnalytics measurementId="G-YG3WKCC1JL" />
+              <Toaster />
+              <CookieBanner />
+              <main>
+                <UserProvider user={user}>{children}</UserProvider>
+              </main>
+            </CookieConsentProvider>
+          </MessagingProvider>
         </AuthProvider>
       </body>
     </html>

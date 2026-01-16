@@ -3,6 +3,28 @@
 import { getAuthHeaders } from "../session";
 
 //! ----------------------------------------------------------------------------
+//!  RECUPERER UN RDV PAR ID
+//! ----------------------------------------------------------------------------
+export const fetchAppointmentById = async (appointmentId: string) => {
+  const headers = await getAuthHeaders();
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_BACK_URL}/appointments/${appointmentId}`,
+    {
+      method: "GET",
+      headers,
+      cache: "no-store",
+    }
+  );
+  if (!response.ok) {
+    throw new Error(
+      `Erreur lors de la récupération du rendez-vous: ${response.statusText}`
+    );
+  }
+  const data = await response.json();
+  return data;
+};
+
+//! ----------------------------------------------------------------------------
 //!  ANNULER UN RENDEZ-VOUS PAR LE CLIENT
 //! ----------------------------------------------------------------------------
 export const cancelAppointmentByClient = async (
