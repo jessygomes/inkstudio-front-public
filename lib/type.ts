@@ -213,3 +213,43 @@ export interface PaginatedConversationsDto {
   limit: number;
   totalPages: number;
 }
+
+export interface AppointmentProps {
+  id: string;
+  title: string;
+  description: string;
+  start: string; // Date au format ISO
+  end: string; // Date au format ISO
+  allDay?: boolean;
+  status:
+    | "PENDING"
+    | "CONFIRMED"
+    | "DECLINED"
+    | "CANCELLED"
+    | "COMPLETED"
+    | "NO_SHOW"
+    | "RESCHEDULING";
+  prestation: "TATTOO" | "PIERCING" | "RETOUCHE" | "PROJET";
+  zone: string;
+  size: number;
+  estimatedPrice: number;
+  tatoueurId: string;
+  userId: string;
+  clientId: string;
+  tatoueur: {
+    id: string;
+    name: string;
+    img?: string;
+  };
+  isPayed: boolean;
+  tattooDetail?: {
+    description?: string;
+    zone?: string;
+    size?: string;
+    colorStyle?: string;
+    reference?: string;
+    sketch?: string;
+    price?: number;
+    estimatedPrice?: number;
+  };
+}

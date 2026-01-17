@@ -109,7 +109,8 @@ export default function ConversationRDVDetails({
           </div>
           <div className="flex-1 min-w-0">
             <h4 className="text-lg font-bold font-one text-white tracking-wide">
-              {conversation.client.firstName} {conversation.client.lastName} -{" "}
+              {conversation.client.firstName} {conversation.client.lastName}{" "}
+              -{" "}
             </h4>
             <p className="text-white/70 text-xs font-one truncate">
               {conversation.subject}
@@ -166,16 +167,16 @@ export default function ConversationRDVDetails({
                   {appointment.status === "PENDING"
                     ? "En attente de confirmation"
                     : appointment.status === "CONFIRMED"
-                    ? "Confirmé"
-                    : appointment.status === "COMPLETED"
-                    ? "Complété"
-                    : appointment.status === "NO_SHOW"
-                    ? "Pas présenté"
-                    : appointment.status === "CANCELLED"
-                    ? "Annulé"
-                    : appointment.status === "RESCHEDULING"
-                    ? "En attente de reprogrammation"
-                    : appointment.status}
+                      ? "Confirmé"
+                      : appointment.status === "COMPLETED"
+                        ? "Complété"
+                        : appointment.status === "NO_SHOW"
+                          ? "Pas présenté"
+                          : appointment.status === "CANCELLED"
+                            ? "Annulé"
+                            : appointment.status === "RESCHEDULING"
+                              ? "En attente de reprogrammation"
+                              : appointment.status}
                 </span>
               </div>
             </div>
@@ -262,7 +263,7 @@ export default function ConversationRDVDetails({
                     {Math.round(
                       (new Date(appointment.end).getTime() -
                         new Date(appointment.start).getTime()) /
-                        (1000 * 60)
+                        (1000 * 60),
                     )}{" "}
                     min
                   </p>
@@ -348,7 +349,7 @@ export default function ConversationRDVDetails({
               Paiement
             </h5>
 
-            <div className="space-y-2">
+            {/* <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <span
                   className={`inline-block px-2 py-1 rounded text-xs font-medium ${
@@ -360,7 +361,7 @@ export default function ConversationRDVDetails({
                   {appointment.isPayed ? "✓ Payé" : "✗ Non payé"}
                 </span>
               </div>
-            </div>
+            </div> */}
           </div>
         )}
 
