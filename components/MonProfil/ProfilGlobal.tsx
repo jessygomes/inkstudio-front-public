@@ -87,7 +87,7 @@ export default function ProfilGlobal(user: User) {
 
   return (
     <div className="">
-      <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-7xl">
+      <div className="mx-auto px-4 sm:px-6 py-8 lg:px-20">
         {/* Header modernisé */}
         <div className=" backdrop-blur-lg border border-white/10 hover:border-white/20 rounded-2xl p-4 sm:p-6 lg:p-8 shadow-xl transition-all duration-300 mb-8">
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">

@@ -11,6 +11,7 @@ import { UserProvider } from "@/components/Context/UserContext";
 import { AuthProvider } from "@/components/Auth/AuthProvider";
 import { MessagingProvider } from "@/components/Context/MessageProvider";
 import { auth } from "@/auth";
+import { EditAppointmentProvider } from "@/components/Context/EditAppointmentContext";
 
 const didact_gothic = Didact_Gothic({
   weight: ["400"],
@@ -57,7 +58,7 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL || "https://theinkera.com"
+    process.env.NEXT_PUBLIC_SITE_URL || "https://theinkera.com",
   ),
   title: {
     default: "Inkera - Trouvez votre salon de tatouage idéal",
@@ -169,14 +170,16 @@ export default async function RootLayout({
       >
         <AuthProvider>
           <MessagingProvider>
-            <CookieConsentProvider>
-              <GoogleAnalytics measurementId="G-YG3WKCC1JL" />
-              <Toaster />
-              <CookieBanner />
-              <main>
-                <UserProvider user={user}>{children}</UserProvider>
-              </main>
-            </CookieConsentProvider>
+            <EditAppointmentProvider>
+              <CookieConsentProvider>
+                <GoogleAnalytics measurementId="G-YG3WKCC1JL" />
+                <Toaster />
+                <CookieBanner />
+                <main>
+                  <UserProvider user={user}>{children}</UserProvider>
+                </main>
+              </CookieConsentProvider>
+            </EditAppointmentProvider>
           </MessagingProvider>
         </AuthProvider>
       </body>

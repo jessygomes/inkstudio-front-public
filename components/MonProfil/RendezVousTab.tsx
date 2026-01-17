@@ -20,8 +20,9 @@ import Image from "next/image";
 import { cancelAppointmentByClient } from "@/lib/actions/appointment.action";
 import { createReview } from "@/lib/actions/review.action";
 import { FaStar } from "react-icons/fa";
+import { useEditAppointmentModal } from "@/components/Context/EditAppointmentContext";
 
-type Appointment = {
+export type Appointment = {
   id: string;
   title?: string;
   prestation: string;
@@ -103,7 +104,7 @@ export default function RendezVousTab() {
   const [currentPage, setCurrentPage] = useState(1);
   const [limit] = useState(10);
   const [expandedAppointments, setExpandedAppointments] = useState<Set<string>>(
-    new Set()
+    new Set(),
   );
   const [cancelingAppointmentId, setCancelingAppointmentId] = useState<
     string | null
@@ -111,8 +112,9 @@ export default function RendezVousTab() {
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
   const [appointmentToCancel, setAppointmentToCancel] = useState<string | null>(
-    null
+    null,
   );
+  const { openModal: openEditModal } = useEditAppointmentModal();
   // const [showReviewModal, setShowReviewModal] = useState(false);
   // const [appointmentToReview, setAppointmentToReview] =
   //   useState<Appointment | null>(null);
@@ -172,6 +174,12 @@ export default function RendezVousTab() {
       newExpanded.add(appointmentId);
     }
     setExpandedAppointments(newExpanded);
+  };
+
+  const handleEditClick = (appointment: Appointment) => {
+    openEditModal(appointment, () => {
+      fetchRdvClient(statusFilter, currentPage, limit);
+    });
   };
 
   const getStatusBadge = (status: Appointment["status"]) => {
@@ -245,7 +253,7 @@ export default function RendezVousTab() {
       setCancelingAppointmentId(appointmentToCancel);
       const result = await cancelAppointmentByClient(
         appointmentToCancel,
-        cancelReason || undefined
+        cancelReason || undefined,
       );
 
       if (result.ok) {
@@ -459,7 +467,7 @@ export default function RendezVousTab() {
       ) : (
         <>
           {/* Liste des rendez-vous modernisée */}
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             {rdvData.appointments
               .sort((a, b) => {
                 // Trier les RDV avec messages non lus en premier
@@ -482,16 +490,16 @@ export default function RendezVousTab() {
                         appointment.status === "CONFIRMED"
                           ? "bg-emerald-500"
                           : appointment.status === "PENDING"
-                          ? "bg-orange-500"
-                          : appointment.status === "COMPLETED"
-                          ? "bg-blue-500"
-                          : "bg-red-500"
+                            ? "bg-orange-500"
+                            : appointment.status === "COMPLETED"
+                              ? "bg-blue-500"
+                              : "bg-red-500"
                       }`}
                     />
 
                     {/* Vue compacte */}
-                    <div className="p-4 pl-5">
-                      <div className="flex items-start gap-3">
+                    <div className="p-3 sm:p-4 pl-4 sm:pl-5">
+                      <div className="flex items-center gap-3 sm:gap-4">
                         {/* Avatar salon */}
                         <div className="relative flex-shrink-0">
                           <div className="w-12 h-12 rounded-xl overflow-hidden bg-gradient-to-br from-tertiary-400/20 to-tertiary-500/20 border border-tertiary-400/30 ring-2 ring-white/5">
@@ -512,14 +520,14 @@ export default function RendezVousTab() {
                         </div>
 
                         {/* Contenu principal */}
-                        <div className="flex-1 min-w-0 space-y-2">
+                        <div className="flex-1 min-w-0 space-y-1.5">
                           {/* En-tête avec titre et status */}
                           <div className="flex items-start justify-between gap-2">
                             <div className="flex-1 min-w-0">
-                              <h4 className="font-one font-semibold text-white text-sm mb-1 line-clamp-1">
+                              <h4 className="font-one font-semibold text-white text-[13px] sm:text-sm mb-1 line-clamp-1">
                                 {appointment.prestation}
                               </h4>
-                              <p className="text-white/60 font-one text-xs truncate">
+                              <p className="text-white/60 font-one text-[11px] sm:text-xs truncate">
                                 {appointment.salon.salonName} •{" "}
                                 {appointment.tatoueur.name}
                               </p>
@@ -530,7 +538,7 @@ export default function RendezVousTab() {
                           </div>
 
                           {/* Date et heure */}
-                          <div className="flex items-center gap-3 text-xs">
+                          <div className="flex items-center gap-2 sm:gap-3 text-[11px] sm:text-xs">
                             <div className="flex items-center gap-1.5 text-tertiary-300 font-one">
                               <FaCalendarAlt className="w-3 h-3" />
                               {formatDate(appointment.start)}
@@ -541,19 +549,22 @@ export default function RendezVousTab() {
                             </div>
                             {appointment.prestationDetails?.price &&
                               appointment.prestationDetails.price > 1 && (
-                                <div className="ml-auto px-2 py-0.5 bg-white/10 text-white rounded text-xs font-semibold">
+                                <div className="ml-auto px-2 py-0.5 bg-white/10 text-white rounded text-[11px] sm:text-xs font-semibold">
                                   {appointment.prestationDetails.price}€
                                 </div>
                               )}
                           </div>
 
                           {/* Actions compactes */}
-                          <div className="flex flex-wrap gap-1.5 pt-2">
+                          <div className="flex flex-wrap sm:flex-nowrap items-center gap-1 sm:gap-1.5 pt-1">
                             {appointment.status === "CONFIRMED" && (
                               <>
-                                {/* <button className="cursor-pointer px-2.5 py-1 bg-white/10 hover:bg-white/15 text-white/80 hover:text-white border border-white/10 rounded-lg text-xs font-one transition-all">
-                                Modifier
-                              </button> */}
+                                <button
+                                  onClick={() => handleEditClick(appointment)}
+                                  className="cursor-pointer px-2.5 py-1 bg-white/10 hover:bg-white/15 text-white/80 hover:text-white border border-white/10 rounded-lg text-xs font-one transition-all"
+                                >
+                                  Modifier
+                                </button>
                                 <button
                                   onClick={() =>
                                     handleCancelClick(appointment.id)
@@ -561,7 +572,7 @@ export default function RendezVousTab() {
                                   disabled={
                                     cancelingAppointmentId === appointment.id
                                   }
-                                  className="cursor-pointer px-2.5 py-1 bg-red-500/15 hover:bg-red-500/25 text-red-300 border border-red-500/30 rounded-lg text-xs font-one transition-all disabled:opacity-50"
+                                  className="cursor-pointer px-2.5 sm:px-3 py-1 bg-red-500/15 hover:bg-red-500/25 text-red-300 border border-red-500/30 rounded-lg text-[11px] sm:text-xs font-one transition-all disabled:opacity-50"
                                 >
                                   {cancelingAppointmentId === appointment.id
                                     ? "..."
@@ -575,7 +586,7 @@ export default function RendezVousTab() {
                                 onClick={() =>
                                   handleReviewClick(appointment.id)
                                 }
-                                className="px-2.5 py-1 bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 rounded-lg text-xs font-one transition-all"
+                                className="px-2.5 sm:px-3 py-1 bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 rounded-lg text-[11px] sm:text-xs font-one transition-all"
                               >
                                 ⭐{" "}
                                 {hasReview ? "Voir l'avis" : "Donner un avis"}
@@ -584,7 +595,7 @@ export default function RendezVousTab() {
 
                             {appointment.visio &&
                               appointment.status === "CONFIRMED" && (
-                                <button className="px-2.5 py-1 bg-blue-500/15 hover:bg-blue-500/25 text-blue-300 border border-blue-500/30 rounded-lg text-xs font-one transition-all">
+                                <button className="px-2.5 sm:px-3 py-1 bg-blue-500/15 hover:bg-blue-500/25 text-blue-300 border border-blue-500/30 rounded-lg text-[11px] sm:text-xs font-one transition-all">
                                   📹 Visio
                                 </button>
                               )}
@@ -594,11 +605,11 @@ export default function RendezVousTab() {
                                 .toLowerCase()
                                 .replace(
                                   /\s+/g,
-                                  "-"
+                                  "-",
                                 )}/${appointment.salon.city.toLowerCase()}-${
                                 appointment.salon.postalCode
                               }`}
-                              className="px-2.5 py-1 bg-tertiary-500/15 hover:bg-tertiary-500/25 text-tertiary-300 border border-tertiary-500/30 rounded-lg text-xs font-one transition-all"
+                              className="px-2.5 sm:px-3 py-1 bg-tertiary-500/15 hover:bg-tertiary-500/25 text-tertiary-300 border border-tertiary-500/30 rounded-lg text-[11px] sm:text-xs font-one transition-all"
                             >
                               Voir salon
                             </Link>
@@ -606,7 +617,7 @@ export default function RendezVousTab() {
                             {appointment.conversation && (
                               <Link
                                 href={`/mon-profil/messagerie/${appointment.conversation.id}`}
-                                className="relative px-2.5 py-1 bg-tertiary-500/15 hover:bg-tertiary-500/25 text-tertiary-300 border border-tertiary-500/30 rounded-lg text-xs font-one transition-all group"
+                                className="relative px-2.5 sm:px-3 py-1 bg-tertiary-500/15 hover:bg-tertiary-500/25 text-tertiary-300 border border-tertiary-500/30 rounded-lg text-[11px] sm:text-xs font-one transition-all group"
                               >
                                 Voir la conversation
                                 {appointment.conversation.unreadCount > 0 && (
@@ -621,7 +632,7 @@ export default function RendezVousTab() {
 
                             <button
                               onClick={() => toggleExpand(appointment.id)}
-                              className="cursor-pointer ml-auto px-2.5 py-1 bg-white/5 hover:bg-white/10 text-white/70 border border-white/10 rounded-lg text-xs font-one transition-all flex items-center gap-1"
+                              className="cursor-pointer ml-auto px-2.5 sm:px-3 py-1 bg-white/5 hover:bg-white/10 text-white/70 border border-white/10 rounded-lg text-[11px] sm:text-xs font-one transition-all flex items-center gap-1"
                             >
                               {isExpanded ? (
                                 <>
@@ -935,7 +946,7 @@ export default function RendezVousTab() {
                                   Publié le{" "}
                                   {appointment.review?.createdAt
                                     ? new Date(
-                                        appointment.review.createdAt
+                                        appointment.review.createdAt,
                                       ).toLocaleDateString("fr-FR")
                                     : ""}
                                 </div>
@@ -1128,7 +1139,7 @@ export default function RendezVousTab() {
                           {pageNum}
                         </button>
                       );
-                    }
+                    },
                   )}
                 </div>
 
