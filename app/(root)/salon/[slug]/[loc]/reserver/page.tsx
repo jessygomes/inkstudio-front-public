@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import BookingFlow from "@/components/RDV/BookingFlow";
+import AuthPromptBanner from "@/components/Auth/AuthPromptBanner";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -15,7 +16,7 @@ type PageParams = {
 async function getSalon(slug: string, loc: string) {
   const base = process.env.NEXT_PUBLIC_BACK_URL!;
   const url = `${base}/users/${encodeURIComponent(slug)}/${encodeURIComponent(
-    loc
+    loc,
   )}`;
   const res = await fetch(url, { next: { revalidate: 30 } });
   if (res.status === 404) return null;
@@ -401,6 +402,9 @@ export default async function ReserverPage({ params }: PageParams) {
               </div>
             </div>
           </div>
+
+          {/* Bannière d'incitation à la création de compte */}
+          <AuthPromptBanner />
 
           {/* Flow de réservation */}
           <BookingFlow

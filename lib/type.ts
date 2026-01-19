@@ -253,3 +253,53 @@ export interface AppointmentProps {
     estimatedPrice?: number;
   };
 }
+
+// --- Types
+export type PiercingZone = {
+  id: string;
+  piercingZone: string;
+  isActive: boolean;
+  servicesCount: number;
+  services: PiercingService[];
+};
+
+export type PiercingService = {
+  id: string;
+  specificZone: boolean;
+  price: number;
+  description: string | null;
+  piercingZoneOreille?: string | null;
+  piercingZoneVisage?: string | null;
+  piercingZoneBouche?: string | null;
+  piercingZoneCorps?: string | null;
+  piercingZoneMicrodermal?: string | null;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type Tatoueur = {
+  id: string;
+  name: string;
+  img?: string | null;
+  instagram?: string | null;
+  rdvBookingEnabled: boolean;
+};
+
+export type SalonSummary = {
+  id: string; // = userId du salon
+  name: string;
+  image?: string | null;
+  address?: string | null;
+  city?: string | null;
+  postalCode?: string | null;
+  tatoueurs?: Tatoueur[] | null;
+  prestations: string[];
+  appointmentBookingEnabled?: boolean; // Changé de requireConfirmation à appointmentBookingEnabled
+};
+
+export type Props = {
+  salon: SalonSummary; // salon courant (obligatoire)
+  apiBase?: string; // override si besoin
+  defaultTatoueurId?: string | null; // préférence optionnelle
+};

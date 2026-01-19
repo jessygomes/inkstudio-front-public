@@ -20,57 +20,8 @@ import {
   getBlockedSlots,
 } from "@/lib/actions/timeslot.action";
 import Image from "next/image";
-import { useUser } from "@/components/Context/UserContext";
-
-// --- Types
-type PiercingZone = {
-  id: string;
-  piercingZone: string;
-  isActive: boolean;
-  servicesCount: number;
-  services: PiercingService[];
-};
-
-type PiercingService = {
-  id: string;
-  specificZone: boolean;
-  price: number;
-  description: string | null;
-  piercingZoneOreille?: string | null;
-  piercingZoneVisage?: string | null;
-  piercingZoneBouche?: string | null;
-  piercingZoneCorps?: string | null;
-  piercingZoneMicrodermal?: string | null;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-};
-
-type Tatoueur = {
-  id: string;
-  name: string;
-  img?: string | null;
-  instagram?: string | null;
-  rdvBookingEnabled: boolean;
-};
-
-type SalonSummary = {
-  id: string; // = userId du salon
-  name: string;
-  image?: string | null;
-  address?: string | null;
-  city?: string | null;
-  postalCode?: string | null;
-  tatoueurs?: Tatoueur[] | null;
-  prestations: string[];
-  appointmentBookingEnabled?: boolean; // Changé de requireConfirmation à appointmentBookingEnabled
-};
-
-type Props = {
-  salon: SalonSummary; // salon courant (obligatoire)
-  apiBase?: string; // override si besoin
-  defaultTatoueurId?: string | null; // préférence optionnelle
-};
+import { useSession } from "next-auth/react";
+import { PiercingService, PiercingZone, Props, SalonSummary } from "@/lib/type";
 
 // --- Utils
 const classNames = (...c: (string | false | null | undefined)[]) =>
@@ -85,7 +36,7 @@ const StepBadge = ({ n, active }: { n: number; active: boolean }) => (
       "w-8 h-8 rounded-full grid place-items-center text-xs font-one border-2 transition-all duration-300",
       active
         ? "bg-gradient-to-r from-tertiary-400 to-tertiary-500 text-white border-tertiary-400/50 shadow-lg shadow-tertiary-400/25"
-        : "bg-noir-600/50 text-white/50 border-white/20 backdrop-blur-sm"
+        : "bg-noir-600/50 text-white/50 border-white/20 backdrop-blur-sm",
     )}
   >
     {n}
@@ -116,7 +67,26 @@ export default function BookingFlow({
   defaultTatoueurId,
 }: Props) {
   const BACK = apiBase || process.env.NEXT_PUBLIC_BACK_URL || "";
-  const { user, isAuthenticated } = useUser();
+  const { data: session, status } = useSession();
+  const isAuthenticated = status === "authenticated";
+  const sessionUser = (session?.user || {}) as {
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    phone?: string;
+    birthDate?: string;
+    clientProfile?: { birthDate?: string | null };
+  };
+  const {
+    firstName: sessionFirstName,
+    lastName: sessionLastName,
+    email: sessionEmail,
+    phone: sessionPhone,
+    birthDate: sessionBirthDate,
+    clientProfile,
+  } = sessionUser;
+  const clientProfileBirthDate = clientProfile?.birthDate || undefined;
+  const effectiveBirthDate = sessionBirthDate || clientProfileBirthDate;
 
   //! FORM SETUP avec préremplissage si utilisateur connecté
   const methods = useForm<AppointmentRequestForm>({
@@ -132,19 +102,43 @@ export default function BookingFlow({
         alt: { date: "", from: "", to: "" },
       },
       client: {
-        firstName: isAuthenticated && user ? user.firstName : "",
-        lastName: isAuthenticated && user ? user.lastName : "",
-        email: isAuthenticated && user ? user.email : "",
-        phone: isAuthenticated && user ? user.phone : "",
+        firstName: isAuthenticated && sessionUser ? sessionUser.firstName : "",
+        lastName: isAuthenticated && sessionUser ? sessionUser.lastName : "",
+        email: isAuthenticated && sessionUser ? sessionUser.email : "",
+        phone: isAuthenticated && sessionUser ? sessionUser.phone : "",
         birthDate:
-          isAuthenticated && user && user.birthDate
-            ? new Date(user.birthDate).toISOString().split("T")[0]
+          isAuthenticated && effectiveBirthDate
+            ? new Date(effectiveBirthDate).toISOString().split("T")[0]
             : "",
       },
       details: {},
       message: "",
     },
   });
+
+  // Préremplir dès que la session est disponible (cas où le rendu est client-side)
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    methods.setValue("client.firstName", sessionFirstName || "");
+    methods.setValue("client.lastName", sessionLastName || "");
+    methods.setValue("client.email", sessionEmail || "");
+    methods.setValue("client.phone", sessionPhone || "");
+    methods.setValue(
+      "client.birthDate",
+      effectiveBirthDate
+        ? new Date(effectiveBirthDate).toISOString().split("T")[0]
+        : "",
+    );
+  }, [
+    isAuthenticated,
+    effectiveBirthDate,
+    sessionEmail,
+    sessionFirstName,
+    sessionLastName,
+    sessionPhone,
+    methods,
+  ]);
 
   const {
     watch,
@@ -166,7 +160,7 @@ export default function BookingFlow({
   const artists = useMemo(
     () =>
       (salon.tatoueurs ?? []).filter((tatoueur) => tatoueur.rdvBookingEnabled),
-    [salon.tatoueurs]
+    [salon.tatoueurs],
   );
 
   useEffect(() => {
@@ -176,10 +170,10 @@ export default function BookingFlow({
   //! États pour la gestion des créneaux
   const [selectedTatoueur, setSelectedTatoueur] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<string>(
-    new Date().toISOString().slice(0, 10)
+    new Date().toISOString().slice(0, 10),
   );
   const [timeSlots, setTimeSlots] = useState<{ start: string; end: string }[]>(
-    []
+    [],
   );
   const [selectedSlots, setSelectedSlots] = useState<string[]>([]);
   const [occupiedSlots, setOccupiedSlots] = useState<any[]>([]);
@@ -266,7 +260,7 @@ export default function BookingFlow({
           setTimeSlots([]);
           console.error(
             "Erreur lors du fetch des créneaux :",
-            timeslotsResult.message
+            timeslotsResult.message,
           );
         }
 
@@ -277,7 +271,7 @@ export default function BookingFlow({
           setOccupiedSlots([]);
           console.error(
             "Erreur lors du fetch des créneaux occupés :",
-            occupiedResult.message
+            occupiedResult.message,
           );
         }
 
@@ -288,13 +282,13 @@ export default function BookingFlow({
           setBlockedSlots([]);
           console.error(
             "Erreur lors du fetch des créneaux bloqués :",
-            blockedResult.message
+            blockedResult.message,
           );
         }
       } catch (err) {
         console.error(
           "Erreur générale lors du fetch des données de créneaux :",
-          err
+          err,
         );
         setTimeSlots([]);
         setOccupiedSlots([]);
@@ -366,7 +360,7 @@ export default function BookingFlow({
         .map((s) => new Date(s).getTime())
         .sort((a, b) => a - b);
       const consecutive = times.every(
-        (t, i) => i === 0 || t - times[i - 1] === 30 * 60 * 1000
+        (t, i) => i === 0 || t - times[i - 1] === 30 * 60 * 1000,
       );
       if (consecutive || newSelection.length <= 1) {
         setSelectedSlots(newSelection);
@@ -380,7 +374,7 @@ export default function BookingFlow({
     if (prestation === "PROJET") {
       if (selectedSlots.length >= 1) {
         toast.error(
-          "Pour un rendez-vous projet, vous ne pouvez sélectionner qu'un seul créneau de 30 minutes."
+          "Pour un rendez-vous projet, vous ne pouvez sélectionner qu'un seul créneau de 30 minutes.",
         );
         return;
       }
@@ -394,10 +388,10 @@ export default function BookingFlow({
       .sort(); // ISO → OK
 
     const nums = newSelection.map((s: string | number | Date) =>
-      new Date(s).getTime()
+      new Date(s).getTime(),
     );
     const consecutive = nums.every(
-      (t, i) => i === 0 || t - nums[i - 1] === 30 * 60 * 1000
+      (t, i) => i === 0 || t - nums[i - 1] === 30 * 60 * 1000,
     );
 
     if (consecutive) {
@@ -495,7 +489,7 @@ export default function BookingFlow({
     const sortedSlots = selectedSlots.sort();
     const startDateTime = new Date(sortedSlots[0]).toISOString();
     const endDateTime = new Date(
-      new Date(sortedSlots[sortedSlots.length - 1]).getTime() + 30 * 60 * 1000
+      new Date(sortedSlots[sortedSlots.length - 1]).getTime() + 30 * 60 * 1000,
     ).toISOString();
 
     // Créer le titre automatiquement
@@ -528,10 +522,10 @@ export default function BookingFlow({
     // Ajouter les champs spécifiques aux piercings si c'est une prestation PIERCING
     if (data.prestation === "PIERCING" && selectedPiercingService) {
       const selectedService = selectedZoneServices.find(
-        (s) => s.id === selectedPiercingService
+        (s) => s.id === selectedPiercingService,
       );
       const selectedZone = piercingZones.find(
-        (z) => z.id === selectedPiercingZone
+        (z) => z.id === selectedPiercingZone,
       );
 
       if (selectedService && selectedZone) {
@@ -628,7 +622,7 @@ export default function BookingFlow({
             // Gestion des erreurs
             console.error(
               "Erreur lors du fetch des zones de piercing:",
-              result.message || "Erreur inconnue"
+              result.message || "Erreur inconnue",
             );
             setPiercingZones([]);
 
@@ -638,7 +632,7 @@ export default function BookingFlow({
         } catch (err) {
           console.error(
             "Erreur catch lors du fetch des zones de piercing:",
-            err
+            err,
           );
           setPiercingZones([]);
 
@@ -665,7 +659,7 @@ export default function BookingFlow({
 
   const selectedServicePrice = useMemo(() => {
     const service = selectedZoneServices.find(
-      (s) => s.id === selectedPiercingService
+      (s) => s.id === selectedPiercingService,
     );
     return service?.price || 0;
   }, [selectedZoneServices, selectedPiercingService]);
@@ -718,7 +712,7 @@ export default function BookingFlow({
                     <span
                       className={classNames(
                         "text-xs font-one text-center tracking-wide transition-colors duration-300",
-                        step >= i + 1 ? "text-white/90" : "text-white/50"
+                        step >= i + 1 ? "text-white/90" : "text-white/50",
                       )}
                     >
                       {label}
@@ -731,7 +725,7 @@ export default function BookingFlow({
                           "h-[2px] rounded-full transition-all duration-500",
                           step > i + 1
                             ? "bg-gradient-to-r from-tertiary-400 to-tertiary-500"
-                            : "bg-white/15"
+                            : "bg-white/15",
                         )}
                       />
                     </div>
@@ -759,7 +753,7 @@ export default function BookingFlow({
                     "group relative cursor-pointer rounded-2xl border-2 px-6 py-6 text-center transition-all duration-300 transform hover:scale-105",
                     prestation === p
                       ? "border-tertiary-500/70 bg-gradient-to-br from-tertiary-500/20 to-tertiary-600/10 shadow-lg shadow-tertiary-500/25"
-                      : "border-white/20 bg-gradient-to-br from-white/[0.08] to-white/[0.02] hover:border-white/30 hover:bg-white/[0.12] backdrop-blur-sm"
+                      : "border-white/20 bg-gradient-to-br from-white/[0.08] to-white/[0.02] hover:border-white/30 hover:bg-white/[0.12] backdrop-blur-sm",
                   )}
                 >
                   <div className="text-sm font-one font-semibold text-white/90 tracking-wide">
@@ -871,7 +865,7 @@ export default function BookingFlow({
                                     setSelectedPiercingZone(e.target.value);
                                     setValue(
                                       "details.piercingZone",
-                                      e.target.value
+                                      e.target.value,
                                     );
                                   }}
                                 >
@@ -927,11 +921,11 @@ export default function BookingFlow({
                                             }
                                             onChange={(e) => {
                                               setSelectedPiercingService(
-                                                e.target.value
+                                                e.target.value,
                                               );
                                               setValue(
                                                 "details.piercingServiceId",
-                                                e.target.value
+                                                e.target.value,
                                               );
                                             }}
                                             className="w-4 h-4 text-tertiary-500 focus:ring-tertiary-400 bg-transparent border-white/30"
@@ -1247,15 +1241,15 @@ export default function BookingFlow({
                               const slotEnd = new Date(slot.end);
                               const startTime = slotStart.toLocaleTimeString(
                                 "fr-FR",
-                                { hour: "2-digit", minute: "2-digit" }
+                                { hour: "2-digit", minute: "2-digit" },
                               );
                               const endTime = slotEnd.toLocaleTimeString(
                                 "fr-FR",
-                                { hour: "2-digit", minute: "2-digit" }
+                                { hour: "2-digit", minute: "2-digit" },
                               );
 
                               const isSelected = selectedSlots.includes(
-                                slot.start
+                                slot.start,
                               );
 
                               const isOccupied = occupiedSlots.some(
@@ -1263,12 +1257,12 @@ export default function BookingFlow({
                                   const oStart = new Date(occupied.start);
                                   const oEnd = new Date(occupied.end);
                                   return slotStart < oEnd && slotEnd > oStart;
-                                }
+                                },
                               );
 
                               const blocked = isSlotBlocked(
                                 slot.start,
-                                slot.end
+                                slot.end,
                               );
 
                               // Déterminer la couleur et l'état du bouton
@@ -1411,7 +1405,7 @@ export default function BookingFlow({
                                         Horaire:{" "}
                                         <span className="font-semibold text-tertiary-300">
                                           {new Date(
-                                            selectedSlots[0]
+                                            selectedSlots[0],
                                           ).toLocaleTimeString("fr-FR", {
                                             hour: "2-digit",
                                             minute: "2-digit",
@@ -1421,9 +1415,9 @@ export default function BookingFlow({
                                         <span className="font-semibold text-tertiary-300">
                                           {new Date(
                                             new Date(
-                                              selectedSlots[0]
+                                              selectedSlots[0],
                                             ).getTime() +
-                                              30 * 60 * 1000
+                                              30 * 60 * 1000,
                                           ).toLocaleTimeString("fr-FR", {
                                             hour: "2-digit",
                                             minute: "2-digit",
@@ -1435,7 +1429,7 @@ export default function BookingFlow({
                                         De{" "}
                                         <span className="font-semibold text-tertiary-300">
                                           {new Date(
-                                            selectedSlots[0]
+                                            selectedSlots[0],
                                           ).toLocaleTimeString("fr-FR", {
                                             hour: "2-digit",
                                             minute: "2-digit",
@@ -1447,9 +1441,9 @@ export default function BookingFlow({
                                             new Date(
                                               selectedSlots[
                                                 selectedSlots.length - 1
-                                              ]
+                                              ],
                                             ).getTime() +
-                                              30 * 60 * 1000
+                                              30 * 60 * 1000,
                                           ).toLocaleTimeString("fr-FR", {
                                             hour: "2-digit",
                                             minute: "2-digit",
@@ -1683,7 +1677,7 @@ export default function BookingFlow({
                 "cursor-pointer group px-6 py-3 rounded-xl text-sm font-one font-semibold transition-all duration-300 border-2",
                 step === 1
                   ? "border-white/10 bg-white/5 text-white/40 cursor-not-allowed"
-                  : "border-white/20 bg-gradient-to-br from-white/[0.08] to-white/[0.02] text-white/90 hover:border-white/30 hover:bg-white/[0.12] backdrop-blur-sm"
+                  : "border-white/20 bg-gradient-to-br from-white/[0.08] to-white/[0.02] text-white/90 hover:border-white/30 hover:bg-white/[0.12] backdrop-blur-sm",
               )}
             >
               <div className="flex items-center gap-2">
@@ -1787,8 +1781,8 @@ function TextInput({
   errors?: any;
 }) {
   const { register } = useFormContext();
-  const rootKey = Array.isArray(name) ? name[0] : String(name).split(".")[0];
-  const err = errors?.[rootKey];
+  const pathParts = Array.isArray(name) ? name : String(name).split(".");
+  const err = pathParts.reduce((acc: any, key: string) => acc?.[key], errors);
   return (
     <div className="space-y-2">
       <label className="text-sm text-white/90 font-one font-semibold">
@@ -1802,7 +1796,7 @@ function TextInput({
           "w-full p-3 bg-gradient-to-br from-white/[0.08] to-white/[0.02] border rounded-xl text-white text-sm focus:outline-none transition-all duration-300 placeholder-white/50 backdrop-blur-sm",
           err
             ? "border-red-500/50 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
-            : "border-white/20 focus:border-tertiary-400 focus:ring-2 focus:ring-tertiary-400/20"
+            : "border-white/20 focus:border-tertiary-400 focus:ring-2 focus:ring-tertiary-400/20",
         )}
       />
       {err && (
@@ -1858,12 +1852,12 @@ function Recap({
 
   // Trouver la zone principale sélectionnée
   const selectedZone = piercingZones?.find(
-    (z) => z.id === selectedPiercingZone
+    (z) => z.id === selectedPiercingZone,
   );
 
   // Trouver la zone détaillée sélectionnée
   const selectedService = selectedZone?.services.find(
-    (s) => s.id === selectedPiercingService
+    (s) => s.id === selectedPiercingService,
   );
 
   // Ta fonction pour obtenir le vrai nom de la zone détaillée

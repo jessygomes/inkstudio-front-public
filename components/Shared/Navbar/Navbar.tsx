@@ -12,8 +12,6 @@ export default function Navbar() {
   const pathname = usePathname();
   const { unreadCount } = useMessagingContext();
 
-  console.log("🚀 ~ file: Navbar.tsx:11 ~ Navbar ~ unreadCount:", unreadCount);
-
   const navRef = useRef<HTMLUListElement>(null);
 
   const links = [

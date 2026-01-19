@@ -11,6 +11,7 @@ import { LuHeartHandshake } from "react-icons/lu";
 import { PiShootingStarBold } from "react-icons/pi";
 import { FaLightbulb } from "react-icons/fa6";
 import { PiStarFourFill } from "react-icons/pi";
+import ClientAccountPromoSection from "@/components/Auth/ClientAccountPromoSection";
 
 export const metadata: Metadata = {
   title: "Inkera - Trouvez votre salon de tatouage idéal en France",
@@ -380,10 +381,13 @@ export default function Home() {
         </div>
       </div>
 
+      {/* Section avantages compte client */}
+      <ClientAccountPromoSection />
+
       {/* Section finale CTA */}
       <section className="bg-gradient-to-t from-noir-700 to-noir-500 py-20">
-        <div className="container mx-auto px-4 sm:px-8 text-center">
-          <div className="max-w-4xl mx-auto space-y-8">
+        <div className="container mx-auto px-4 sm:px-8 max-w-6xl">
+          <div className="text-center space-y-8">
             <div className="flex items-center justify-center gap-3 mb-6">
               <span className="text-4xl">
                 <PiStarFourFill className="text-tertiary-500" />
