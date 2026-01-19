@@ -143,10 +143,10 @@ export default function Home() {
             {/* Badge moderne */}
             <div className="inline-flex items-center gap-2">
               <Image
-                src="/images/logo13.png"
+                src="/images/Logo22.png"
                 alt="Logo"
-                width={50}
-                height={50}
+                width={40}
+                height={100}
               />
             </div>
 
