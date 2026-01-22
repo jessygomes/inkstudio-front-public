@@ -24,7 +24,7 @@ export default {
         if (!validatedFields.success) {
           console.error(
             "❌ Validation des credentials échouée:",
-            validatedFields.error
+            validatedFields.error,
           );
           return null;
         }
@@ -46,7 +46,7 @@ export default {
           if (!response.ok) {
             console.error(
               "❌ Échec de l'authentification - Status:",
-              response.status
+              response.status,
             );
             const errorText = await response.text();
             console.error("❌ Message d'erreur:", errorText);
@@ -54,11 +54,6 @@ export default {
           }
 
           const data = await response.json();
-
-          console.log(
-            "🔍 [AUTH] Données reçues du backend:",
-            JSON.stringify(data, null, 2)
-          );
 
           // Vérifier si le backend retourne une erreur
           if (data.error) {
@@ -78,7 +73,7 @@ export default {
               console.error("❌ clientProfile manquant pour le client");
               console.error(
                 "Structure complète des données:",
-                JSON.stringify(data, null, 2)
+                JSON.stringify(data, null, 2),
               );
               return null;
             }
@@ -99,8 +94,6 @@ export default {
               accessToken: data.access_token,
               clientProfile: data.clientProfile,
             };
-
-            console.log("✅ Client authentifié:", userObject.email);
             return userObject;
           }
 

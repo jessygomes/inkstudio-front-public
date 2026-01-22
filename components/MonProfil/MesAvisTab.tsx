@@ -6,7 +6,8 @@ import { getClientReviews, deleteReview } from "@/lib/actions/review.action";
 import { toast } from "sonner";
 import Image from "next/image";
 import Link from "next/link";
-import { FaStar, FaTrash, FaEye, FaExclamationTriangle } from "react-icons/fa";
+import { toSlug } from "@/lib/utils";
+import { FaTrash, FaEye, FaExclamationTriangle } from "react-icons/fa";
 
 type Review = {
   id: string;
@@ -143,14 +144,9 @@ export default function MesAvisTab() {
                           )}
                         </div>
                         <Link
-                          href={`/salon/${review.salon.salonName
-                            .toLowerCase()
-                            .replace(
-                              /\s+/g,
-                              "-"
-                            )}/${review.salon.city.toLowerCase()}-${
-                            review.salon.postalCode
-                          }`}
+                          href={`/salon/${toSlug(review.salon.salonName)}/${toSlug(
+                            review.salon.city,
+                          )}-${review.salon.postalCode}`}
                           className="flex-1 min-w-0 hover:opacity-80 transition-opacity"
                         >
                           <p className="text-white font-one font-semibold text-sm truncate">
@@ -211,7 +207,7 @@ export default function MesAvisTab() {
                         <span>
                           •{" "}
                           {new Date(review.createdAt).toLocaleDateString(
-                            "fr-FR"
+                            "fr-FR",
                           )}
                         </span>
                       )}
@@ -231,7 +227,7 @@ export default function MesAvisTab() {
                             {review.salonRespondedAt && (
                               <span className="text-white/40 text-xs ml-auto">
                                 {new Date(
-                                  review.salonRespondedAt
+                                  review.salonRespondedAt,
                                 ).toLocaleDateString("fr-FR")}
                               </span>
                             )}

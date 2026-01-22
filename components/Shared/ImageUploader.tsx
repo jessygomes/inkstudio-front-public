@@ -86,7 +86,7 @@ export default function ImageUploader({
           <div
             className={`relative ${
               compact ? "w-full h-24" : "w-[250px] h-[250px]"
-            } rounded-${compact ? "lg" : "3xl"} overflow-hidden bg-white/10 ${
+            } rounded-${compact ? "md" : "md"} overflow-hidden bg-white/10 ${
               compact ? "" : "flex-shrink-0"
             }`}
           >
@@ -111,7 +111,7 @@ export default function ImageUploader({
         {/* Zone d'upload */}
         <div
           className={`relative border-2 border-dashed rounded-${
-            compact ? "lg" : "[20px]"
+            compact ? "md" : "md"
           } ${compact ? "p-3" : "p-6"} text-center transition-colors ${
             compact ? "flex-1 min-h-[80px]" : "flex-1 min-h-[192px]"
           } flex items-center justify-center ${
@@ -140,8 +140,8 @@ export default function ImageUploader({
                   {currentImage || previewUrl
                     ? "Remplacer"
                     : compact
-                    ? "Glissez ou cliquez"
-                    : "Glissez une image ici ou cliquez pour sélectionner"}
+                      ? "Glissez ou cliquez"
+                      : "Glissez une image ici ou cliquez pour sélectionner"}
                 </div>
                 <div
                   className={`${

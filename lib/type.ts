@@ -295,6 +295,7 @@ export type SalonSummary = {
   postalCode?: string | null;
   tatoueurs?: Tatoueur[] | null;
   prestations: string[];
+  addConfirmationEnabled: boolean;
   appointmentBookingEnabled?: boolean; // Changé de requireConfirmation à appointmentBookingEnabled
 };
 

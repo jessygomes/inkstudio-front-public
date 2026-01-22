@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import BookingFlow from "@/components/RDV/BookingFlow";
+import BookingFlowNew from "@/components/RDV/BookingFlowNew";
 import AuthPromptBanner from "@/components/Auth/AuthPromptBanner";
 import Image from "next/image";
 import Link from "next/link";
@@ -86,6 +86,7 @@ export default async function ReserverPage({ params }: PageParams) {
     tatoueurs: salon.Tatoueur || [],
     prestations: salon.prestations || [],
     appointmentBookingEnabled: salon.appointmentBookingEnabled,
+    addConfirmationEnabled: salon.addConfirmationEnabled,
   };
 
   // horaires normalisés + statut
@@ -407,7 +408,7 @@ export default async function ReserverPage({ params }: PageParams) {
           <AuthPromptBanner />
 
           {/* Flow de réservation */}
-          <BookingFlow
+          <BookingFlowNew
             salon={salonSummary}
             apiBase={process.env.NEXT_PUBLIC_BACK_URL}
             defaultTatoueurId={null}

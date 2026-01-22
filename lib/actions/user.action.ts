@@ -16,12 +16,10 @@ export const updateUserInfoAction = async (payload: any) => {
         method: "PATCH",
         headers,
         body: JSON.stringify(payload),
-      }
+      },
     );
 
     const data = await response.json();
-
-    // console.log("Response data from updateUserInfoAction:", data);
 
     if (!response.ok || (data && data.error)) {
       const message =
@@ -75,7 +73,7 @@ export const getFavoriteSalon = async () => {
       {
         method: "GET",
         headers,
-      }
+      },
     );
     const data = await response.json();
 
@@ -121,8 +119,6 @@ export const getAllRdvClient = async (options?: {
 
     const data = await response.json();
 
-    console.log("getAllRdvClient - Response data:", data);
-
     if (!response.ok || (data && data.error)) {
       const message =
         data?.message ||
@@ -148,12 +144,10 @@ export const toggleFavoriteSalon = async (salonId: string) => {
       {
         method: "PATCH",
         headers,
-      }
+      },
     );
 
     const data = await response.json();
-
-    // console.log("Response data from toggleFavoriteSalon:", data);
 
     if (!response.ok || (data && data.error)) {
       const message =
@@ -182,7 +176,7 @@ export const isSalonFavorite = async (salonId: string) => {
       {
         method: "GET",
         headers,
-      }
+      },
     );
 
     const data = await response.json();
@@ -195,7 +189,7 @@ export const isSalonFavorite = async (salonId: string) => {
     const favoriteSalons = data.favoriteSalons || [];
     const isFavorite = favoriteSalons.some(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (salon: any) => salon.id === salonId
+      (salon: any) => salon.id === salonId,
     );
 
     return { ok: true, isFavorite };

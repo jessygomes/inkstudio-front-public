@@ -74,7 +74,6 @@ export const modifyAppointmentByClient = async (
   payload: ModifyAppointmentPayload,
 ) => {
   try {
-    console.log("Payload modification RDV :", payload);
     const headers = await getAuthHeaders();
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_BACK_URL}/appointments/client-update/${appointmentId}`,
@@ -95,6 +94,69 @@ export const modifyAppointmentByClient = async (
     return { ok: true, error: false, status: response.status, data };
   } catch (error) {
     console.error("Erreur lors de la modification du rendez-vous :", error);
+    throw error;
+  }
+};
+
+//! ----------------------------------------------------------------------------
+//!  CRÉER UN RENDEZ-VOUS PAR LE CLIENT
+//! ----------------------------------------------------------------------------
+type RdvBody = {
+  title: string;
+  prestation: string;
+  start: string;
+  end: string;
+  clientFirstname: string;
+  clientLastname: string;
+  clientEmail: string;
+  clientPhone: string;
+  clientBirthdate: string;
+  tatoueurId: string;
+  visio?: boolean;
+  description?: string;
+  zone?: string;
+  size?: string;
+  colorStyle?: string;
+  reference?: string;
+  sketch?: string;
+  estimatedPrice?: number;
+  price?: number;
+  piercingZone?: string;
+  piercingZoneOreille?: string | null;
+  piercingZoneVisage?: string | null;
+  piercingZoneBouche?: string | null;
+  piercingZoneCorps?: string | null;
+  piercingZoneMicrodermal?: string | null;
+};
+
+export const createAppointmentByClient = async (
+  salonId: string,
+  rdvBody: RdvBody,
+) => {
+  try {
+    const headers = await getAuthHeaders();
+
+    const backUrl = process.env.NEXT_PUBLIC_BACK_URL || "";
+
+    const response = await fetch(`${backUrl}/appointments/by-client`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        userId: salonId,
+        rdvBody: rdvBody,
+      }),
+    });
+
+    const json = await response.json();
+    console.log("Réponse du backend:", json);
+
+    if (!response.ok || (json && json.error)) {
+      throw new Error(json?.message || "Échec de la création du rendez-vous");
+    }
+
+    return json;
+  } catch (error) {
+    console.error("Erreur lors de la création du rendez-vous :", error);
     throw error;
   }
 };

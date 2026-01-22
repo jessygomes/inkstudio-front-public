@@ -4,6 +4,7 @@
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { toSlug } from "@/lib/utils";
 import {
   FaHeart,
   FaMapMarkerAlt,
@@ -184,9 +185,7 @@ export default function FavorisTab() {
                 {/* Actions */}
                 <div className="flex items-center gap-2 pt-3 border-t border-white/10">
                   <Link
-                    href={`/salon/${salon.salonName
-                      .toLowerCase()
-                      .replace(/\s+/g, "-")}/${salon.city.toLowerCase()}-${
+                    href={`/salon/${toSlug(salon.salonName)}/${toSlug(salon.city)}-${
                       salon.postalCode || "00000"
                     }`}
                     className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-tertiary-500/15 hover:bg-tertiary-500/25 text-tertiary-300 border border-tertiary-500/30 rounded-lg font-one text-xs transition-all"

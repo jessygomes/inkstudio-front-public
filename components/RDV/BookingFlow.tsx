@@ -18,7 +18,11 @@ import {
   getTimeslots,
   getOccupiedSlots,
   getBlockedSlots,
+  getTimeslotBySalon,
+  getOccupiedSlotsBySalon,
+  getBlockedSlotsBySalon,
 } from "@/lib/actions/timeslot.action";
+import { createAppointmentByClient } from "@/lib/actions/appointment.action";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { PiercingService, PiercingZone, Props, SalonSummary } from "@/lib/type";
@@ -61,12 +65,7 @@ const Section = ({
 );
 
 // --- Composant principal
-export default function BookingFlow({
-  salon,
-  apiBase,
-  defaultTatoueurId,
-}: Props) {
-  const BACK = apiBase || process.env.NEXT_PUBLIC_BACK_URL || "";
+export default function BookingFlow({ salon, defaultTatoueurId }: Props) {
   const { data: session, status } = useSession();
   const isAuthenticated = status === "authenticated";
   const sessionUser = (session?.user || {}) as {
@@ -206,7 +205,8 @@ export default function BookingFlow({
     };
 
     if (step === 3) {
-      if (!selectedTatoueur) {
+      // Si appointmentBookingEnabled est true, pas besoin de sélectionner un tatoueur
+      if (!salon.appointmentBookingEnabled && !selectedTatoueur) {
         alert("Veuillez sélectionner un tatoueur");
         return;
       }
@@ -239,19 +239,33 @@ export default function BookingFlow({
 
   //! FETCH CRENEAUX quand tatoueur ou date changent
   useEffect(() => {
-    if (!selectedDate || !selectedTatoueur) return;
+    // Si appointmentBookingEnabled, on a seulement besoin de la date
+    // Sinon, on a besoin du tatoueur ET de la date
+    if (!selectedDate) return;
+    if (!salon.appointmentBookingEnabled && !selectedTatoueur) return;
 
     const fetchAllSlotData = async () => {
       try {
         setIsLoadingSlots(true);
 
-        // Utiliser les server actions
-        const [timeslotsResult, occupiedResult, blockedResult] =
-          await Promise.all([
-            getTimeslots(selectedDate, selectedTatoueur),
-            getOccupiedSlots(selectedDate, selectedTatoueur),
-            getBlockedSlots(selectedTatoueur),
+        // Choisir la bonne fonction selon le mode de réservation
+        let timeslotsResult, occupiedResult, blockedResult;
+
+        if (salon.appointmentBookingEnabled) {
+          // Mode salon : récupérer les créneaux du salon avec occupés et bloqués
+          [timeslotsResult, occupiedResult, blockedResult] = await Promise.all([
+            getTimeslotBySalon(selectedDate, salon.id),
+            getOccupiedSlotsBySalon(selectedDate, salon.id),
+            getBlockedSlotsBySalon(salon.id),
           ]);
+        } else {
+          // Mode tatoueur : récupérer les créneaux du tatoueur sélectionné
+          [timeslotsResult, occupiedResult, blockedResult] = await Promise.all([
+            getTimeslots(selectedDate, selectedTatoueur!),
+            getOccupiedSlots(selectedDate, selectedTatoueur!),
+            getBlockedSlots(selectedTatoueur!),
+          ]);
+        }
 
         // Gérer les résultats des créneaux disponibles
         if (timeslotsResult.ok) {
@@ -299,7 +313,12 @@ export default function BookingFlow({
     };
 
     fetchAllSlotData();
-  }, [selectedDate, selectedTatoueur]);
+  }, [
+    selectedDate,
+    selectedTatoueur,
+    salon.appointmentBookingEnabled,
+    salon.id,
+  ]);
 
   // Fonction pour vérifier si un créneau chevauche une période bloquée
   const isSlotBlocked = (slotStart: string, slotEnd?: string) => {
@@ -427,12 +446,14 @@ export default function BookingFlow({
   }, [referenceFile, setValue]);
 
   const onSubmit = async (data: AppointmentRequestForm) => {
-    // Vérifier que nous avons un tatoueur et des créneaux sélectionnés
-    if (!selectedTatoueur) {
-      throw new Error("Veuillez sélectionner un tatoueur");
-    }
+    // Vérifier que nous avons des créneaux sélectionnés
     if (selectedSlots.length === 0) {
       throw new Error("Veuillez sélectionner au moins un créneau");
+    }
+
+    // Vérifier que nous avons un tatoueur sélectionné (sauf si appointmentBookingEnabled)
+    if (!salon.appointmentBookingEnabled && !selectedTatoueur) {
+      throw new Error("Veuillez sélectionner un tatoueur");
     }
 
     // Validation supplémentaire des champs obligatoires
@@ -506,7 +527,7 @@ export default function BookingFlow({
       clientEmail: data.client.email.trim(),
       clientPhone: data.client.phone.trim(),
       clientBirthdate: data.client.birthDate, // Garder en string format ISO
-      tatoueurId: selectedTatoueur,
+      tatoueurId: salon.appointmentBookingEnabled ? null : selectedTatoueur,
       visio: data.visio || false,
       // Détails communs à toutes les prestations
       description: (data as any).details?.description?.trim() || "",
@@ -517,6 +538,7 @@ export default function BookingFlow({
       sketch: sketchUrl || "",
       estimatedPrice: 0,
       price: 0,
+      clientUserId: isAuthenticated ? (session?.user as any).id : null,
     };
 
     // Ajouter les champs spécifiques aux piercings si c'est une prestation PIERCING
@@ -580,24 +602,9 @@ export default function BookingFlow({
       }
     }
 
-    console.log("Données envoyées au backend:", { userId: salon.id, rdvBody });
+    // Appel à la server action pour créer le rendez-vous
+    const json = await createAppointmentByClient(salon.id, rdvBody);
 
-    // Appel à l'API de création de rendez-vous avec le userId
-    const res = await fetch(`${BACK}/appointments/by-client`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        userId: salon.id,
-        rdvBody: rdvBody,
-      }),
-    });
-
-    const json = await res.json();
-    console.log("Réponse du backend:", json);
-
-    if (!res.ok || (json && json.error)) {
-      throw new Error(json?.message || "Échec de la création du rendez-vous");
-    }
     return json;
   };
 
@@ -607,16 +614,14 @@ export default function BookingFlow({
       const fetchPiercingZones = async () => {
         try {
           setIsLoadingPiercingZones(true);
-          console.log("Fetching piercing zones for salon:", salon.id);
 
           // Utiliser le server action pour récupérer toutes les configurations
           const result = await getPiercingPrice({ salonId: salon.id });
-          console.log("Piercing zones result received:", result);
 
           if (result.ok && result.data) {
             // Si on a des données, les utiliser
             const zones = Array.isArray(result.data) ? result.data : [];
-            console.log("Setting piercing zones:", zones);
+
             setPiercingZones(zones);
           } else {
             // Gestion des erreurs
@@ -1118,37 +1123,39 @@ export default function BookingFlow({
               </div>
             ) : (
               <>
-                {/* Sélection du tatoueur */}
+                {/* Sélection du tatoueur ou date directe si appointmentBookingEnabled */}
                 <div className="mb-2 flex flex-col sm:flex-row sm:items-center sm:gap-6">
-                  <div className="mb-6">
-                    <label className="text-sm text-white/90 font-one mb-3 block font-semibold">
-                      Tatoueur souhaité
-                    </label>
-                    <select
-                      className="w-full max-w-md p-3 bg-gradient-to-br from-white/[0.08] to-white/[0.02] border border-white/20 rounded-xl text-white text-sm focus:outline-none focus:border-tertiary-400 focus:ring-2 focus:ring-tertiary-400/20 transition-all duration-300 backdrop-blur-sm"
-                      value={selectedTatoueur || ""}
-                      onChange={(e) => {
-                        setSelectedTatoueur(e.target.value);
-                        setValue("tatoueurId", e.target.value);
-                        setSelectedSlots([]);
-                      }}
-                    >
-                      <option value="" className="bg-noir-500">
-                        -- Choisissez un tatoueur --
-                      </option>
-                      {artists.map((tatoueur) => (
-                        <option
-                          key={tatoueur.id}
-                          value={tatoueur.id}
-                          className="bg-noir-500"
-                        >
-                          {tatoueur.name}
+                  {!salon.appointmentBookingEnabled && (
+                    <div className="mb-6">
+                      <label className="text-sm text-white/90 font-one mb-3 block font-semibold">
+                        Tatoueur souhaité
+                      </label>
+                      <select
+                        className="w-full max-w-md p-3 bg-gradient-to-br from-white/[0.08] to-white/[0.02] border border-white/20 rounded-xl text-white text-sm focus:outline-none focus:border-tertiary-400 focus:ring-2 focus:ring-tertiary-400/20 transition-all duration-300 backdrop-blur-sm"
+                        value={selectedTatoueur || ""}
+                        onChange={(e) => {
+                          setSelectedTatoueur(e.target.value);
+                          setValue("tatoueurId", e.target.value);
+                          setSelectedSlots([]);
+                        }}
+                      >
+                        <option value="" className="bg-noir-500">
+                          -- Choisissez un tatoueur --
                         </option>
-                      ))}
-                    </select>
-                  </div>
+                        {artists.map((tatoueur) => (
+                          <option
+                            key={tatoueur.id}
+                            value={tatoueur.id}
+                            className="bg-noir-500"
+                          >
+                            {tatoueur.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
                   {/* Sélection de date */}
-                  {selectedTatoueur && (
+                  {(salon.appointmentBookingEnabled || selectedTatoueur) && (
                     <div className="mb-6">
                       <label className="text-sm text-white/90 font-one mb-3 block font-semibold">
                         Date souhaitée
@@ -1168,323 +1175,329 @@ export default function BookingFlow({
                 </div>
 
                 {/* Créneaux disponibles */}
-                {selectedDate && selectedTatoueur && (
-                  <div className="space-y-6">
-                    <div>
-                      <h3 className="text-white font-one font-semibold text-lg mb-2">
-                        Créneaux disponibles
-                      </h3>
-                      <p className="text-sm text-white/60 font-one">
-                        Sélectionnez les créneaux consécutifs que vous souhaitez
-                        réserver
-                      </p>
-                    </div>
-
-                    {/* Légende améliorée */}
-                    <div className="bg-gradient-to-br from-white/[0.05] to-transparent rounded-2xl border border-white/10 p-4">
-                      <h4 className="text-white font-one font-semibold text-sm mb-3">
-                        Légende
-                      </h4>
-                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 text-xs">
-                        <div className="flex items-center gap-2">
-                          <div className="w-4 h-4 bg-gradient-to-br from-white/[0.08] to-white/[0.02] border border-white/20 rounded" />
-                          <span className="text-white/70 font-one">
-                            Disponible
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <div className="w-4 h-4 bg-gradient-to-br from-tertiary-500/30 to-tertiary-600/20 border border-tertiary-400/60 rounded" />
-                          <span className="text-white/70 font-one">
-                            Sélectionné
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <div className="w-4 h-4 bg-gradient-to-br from-gray-500/20 to-gray-600/10 border border-gray-500/40 rounded" />
-                          <span className="text-white/70 font-one">
-                            Occupé{" "}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <div className="w-4 h-4 bg-gradient-to-br from-red-500/20 to-red-600/10 border border-red-500/40 rounded" />
-                          <span className="text-white/70 font-one">Bloqué</span>
-                        </div>
+                {selectedDate &&
+                  (salon.appointmentBookingEnabled || selectedTatoueur) && (
+                    <div className="space-y-6">
+                      <div>
+                        <h3 className="text-white font-one font-semibold text-lg mb-2">
+                          Créneaux disponibles
+                        </h3>
+                        <p className="text-sm text-white/60 font-one">
+                          Sélectionnez les créneaux consécutifs que vous
+                          souhaitez réserver
+                        </p>
                       </div>
-                    </div>
 
-                    {isLoadingSlots ? (
-                      <div className="flex flex-col items-center justify-center p-12 bg-gradient-to-br from-white/[0.05] to-transparent rounded-2xl border border-white/10">
-                        <div className="animate-spin rounded-full h-10 w-10 border-2 border-tertiary-400 border-t-transparent mb-4"></div>
-                        <span className="text-white font-one text-sm">
-                          Chargement des créneaux disponibles...
-                        </span>
-                      </div>
-                    ) : timeSlots.length > 0 ? (
-                      <>
-                        <div className="space-y-2">
-                          <label className="text-xs text-white/70 font-one">
-                            Sélectionnez les créneaux (30 min chacun)
-                          </label>
-                          {prestation === "PROJET" ? (
-                            <p className="text-xs text-white/50 mb-3">
-                              Pour un rendez-vous projet, sélectionnez un seul
-                              créneau de 30 minutes.
-                            </p>
-                          ) : (
-                            <p className="text-xs text-white/50 mb-3">
-                              Cliquez sur les créneaux pour les sélectionner.
-                              Ils doivent être consécutifs.
-                            </p>
-                          )}
-                          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
-                            {timeSlots.map((slot) => {
-                              const slotStart = new Date(slot.start);
-                              const slotEnd = new Date(slot.end);
-                              const startTime = slotStart.toLocaleTimeString(
-                                "fr-FR",
-                                { hour: "2-digit", minute: "2-digit" },
-                              );
-                              const endTime = slotEnd.toLocaleTimeString(
-                                "fr-FR",
-                                { hour: "2-digit", minute: "2-digit" },
-                              );
-
-                              const isSelected = selectedSlots.includes(
-                                slot.start,
-                              );
-
-                              const isOccupied = occupiedSlots.some(
-                                (occupied) => {
-                                  const oStart = new Date(occupied.start);
-                                  const oEnd = new Date(occupied.end);
-                                  return slotStart < oEnd && slotEnd > oStart;
-                                },
-                              );
-
-                              const blocked = isSlotBlocked(
-                                slot.start,
-                                slot.end,
-                              );
-
-                              // Déterminer la couleur et l'état du bouton
-                              let buttonClass =
-                                "cursor-pointer px-2 py-2 sm:py-1 rounded text-xs text-white font-one transition-all duration-200 border text-center ";
-                              let buttonText = `${startTime}-${endTime}`;
-                              let isDisabled = false;
-                              let buttonTitle = "";
-
-                              if (blocked) {
-                                buttonClass +=
-                                  "bg-red-900/50 text-red-300 border-red-700/50 cursor-not-allowed";
-                                buttonText += " 🚫";
-                                isDisabled = true;
-                                buttonTitle = "Créneau bloqué - indisponible";
-                              } else if (isOccupied) {
-                                buttonClass +=
-                                  "bg-gray-700/50 text-gray-400 border-gray-600/50 cursor-not-allowed";
-                                buttonText += " ❌";
-                                isDisabled = true;
-                                buttonTitle = "Créneau déjà réservé";
-                              } else if (isSelected) {
-                                buttonClass +=
-                                  "bg-green-600/30 text-green-300 border-green-500/50 hover:bg-green-600/50";
-                                buttonTitle =
-                                  "Créneau sélectionné - cliquer pour désélectionner";
-                              } else {
-                                buttonClass +=
-                                  "bg-tertiary-600/20 text-tertiary-300 border-tertiary-500/30 hover:bg-tertiary-600/40 hover:text-white";
-                                buttonTitle =
-                                  "Créneau disponible - cliquer pour sélectionner";
-                              }
-
-                              return (
-                                <button
-                                  key={`${slot.start}-${slot.end}`}
-                                  type="button"
-                                  onClick={() =>
-                                    !isDisabled &&
-                                    handleSlotSelection(slot.start)
-                                  }
-                                  disabled={isDisabled}
-                                  className={buttonClass}
-                                  title={buttonTitle}
-                                >
-                                  {buttonText}
-                                </button>
-                              );
-                            })}
+                      {/* Légende améliorée */}
+                      <div className="bg-gradient-to-br from-white/[0.05] to-transparent rounded-2xl border border-white/10 p-4">
+                        <h4 className="text-white font-one font-semibold text-sm mb-3">
+                          Légende
+                        </h4>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 text-xs">
+                          <div className="flex items-center gap-2">
+                            <div className="w-4 h-4 bg-gradient-to-br from-white/[0.08] to-white/[0.02] border border-white/20 rounded" />
+                            <span className="text-white/70 font-one">
+                              Disponible
+                            </span>
                           </div>
-
-                          {/* Légende des créneaux - responsive */}
-                          <div className="mt-4 grid grid-cols-2 sm:flex sm:flex-wrap gap-2 sm:gap-4 text-xs">
-                            <div className="flex items-center gap-2">
-                              <div className="w-3 h-3 bg-tertiary-600/20 border border-tertiary-500/30 rounded"></div>
-                              <span className="text-white/70 font-one">
-                                Libre
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <div className="w-3 h-3 bg-green-600/30 border border-green-500/50 rounded"></div>
-                              <span className="text-white/70 font-one">
-                                Sélectionné
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <div className="w-3 h-3 bg-gray-700/50 border border-gray-600/50 rounded"></div>
-                              <span className="text-white/70 font-one">
-                                Occupé ❌
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <div className="w-3 h-3 bg-red-900/50 border border-red-700/50 rounded"></div>
-                              <span className="text-white/70 font-one">
-                                Bloqué 🚫
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <div className="w-3 h-3 bg-blue-900/40 border border-blue-700/50 rounded"></div>
-                              <span className="text-white/70 font-one">
-                                Proposé ⏳
-                              </span>
-                            </div>
+                          <div className="flex items-center gap-2">
+                            <div className="w-4 h-4 bg-gradient-to-br from-tertiary-500/30 to-tertiary-600/20 border border-tertiary-400/60 rounded" />
+                            <span className="text-white/70 font-one">
+                              Sélectionné
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="w-4 h-4 bg-gradient-to-br from-gray-500/20 to-gray-600/10 border border-gray-500/40 rounded" />
+                            <span className="text-white/70 font-one">
+                              Occupé{" "}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="w-4 h-4 bg-gradient-to-br from-red-500/20 to-red-600/10 border border-red-500/40 rounded" />
+                            <span className="text-white/70 font-one">
+                              Bloqué
+                            </span>
                           </div>
                         </div>
+                      </div>
 
-                        {/* Récapitulatif amélioré */}
-                        {selectedSlots.length > 0 && (
-                          <div className="bg-gradient-to-br from-tertiary-500/10 to-tertiary-600/5 border border-tertiary-500/30 rounded-2xl p-6 shadow-lg">
-                            <div className="flex items-start gap-4">
-                              <div className="w-10 h-10 bg-tertiary-500 rounded-full flex items-center justify-center flex-shrink-0">
-                                <svg
-                                  className="w-5 h-5 text-white"
-                                  fill="currentColor"
-                                  viewBox="0 0 20 20"
-                                >
-                                  <path
-                                    fillRule="evenodd"
-                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                    clipRule="evenodd"
-                                  />
-                                </svg>
+                      {isLoadingSlots ? (
+                        <div className="flex flex-col items-center justify-center p-12 bg-gradient-to-br from-white/[0.05] to-transparent rounded-2xl border border-white/10">
+                          <div className="animate-spin rounded-full h-10 w-10 border-2 border-tertiary-400 border-t-transparent mb-4"></div>
+                          <span className="text-white font-one text-sm">
+                            Chargement des créneaux disponibles...
+                          </span>
+                        </div>
+                      ) : timeSlots.length > 0 ? (
+                        <>
+                          <div className="space-y-2">
+                            <label className="text-xs text-white/70 font-one">
+                              Sélectionnez les créneaux (30 min chacun)
+                            </label>
+                            {prestation === "PROJET" ? (
+                              <p className="text-xs text-white/50 mb-3">
+                                Pour un rendez-vous projet, sélectionnez un seul
+                                créneau de 30 minutes.
+                              </p>
+                            ) : (
+                              <p className="text-xs text-white/50 mb-3">
+                                Cliquez sur les créneaux pour les sélectionner.
+                                Ils doivent être consécutifs.
+                              </p>
+                            )}
+                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
+                              {timeSlots.map((slot) => {
+                                const slotStart = new Date(slot.start);
+                                const slotEnd = new Date(slot.end);
+                                const startTime = slotStart.toLocaleTimeString(
+                                  "fr-FR",
+                                  { hour: "2-digit", minute: "2-digit" },
+                                );
+                                const endTime = slotEnd.toLocaleTimeString(
+                                  "fr-FR",
+                                  { hour: "2-digit", minute: "2-digit" },
+                                );
+
+                                const isSelected = selectedSlots.includes(
+                                  slot.start,
+                                );
+
+                                const isOccupied = occupiedSlots.some(
+                                  (occupied) => {
+                                    const oStart = new Date(occupied.start);
+                                    const oEnd = new Date(occupied.end);
+                                    return slotStart < oEnd && slotEnd > oStart;
+                                  },
+                                );
+
+                                const blocked = isSlotBlocked(
+                                  slot.start,
+                                  slot.end,
+                                );
+
+                                // Déterminer la couleur et l'état du bouton
+                                let buttonClass =
+                                  "cursor-pointer px-2 py-2 sm:py-1 rounded text-xs text-white font-one transition-all duration-200 border text-center ";
+                                let buttonText = `${startTime}-${endTime}`;
+                                let isDisabled = false;
+                                let buttonTitle = "";
+
+                                if (blocked) {
+                                  buttonClass +=
+                                    "bg-red-900/50 text-red-300 border-red-700/50 cursor-not-allowed";
+                                  buttonText += " 🚫";
+                                  isDisabled = true;
+                                  buttonTitle = "Créneau bloqué - indisponible";
+                                } else if (isOccupied) {
+                                  buttonClass +=
+                                    "bg-gray-700/50 text-gray-400 border-gray-600/50 cursor-not-allowed";
+                                  buttonText += " ❌";
+                                  isDisabled = true;
+                                  buttonTitle = "Créneau déjà réservé";
+                                } else if (isSelected) {
+                                  buttonClass +=
+                                    "bg-green-600/30 text-green-300 border-green-500/50 hover:bg-green-600/50";
+                                  buttonTitle =
+                                    "Créneau sélectionné - cliquer pour désélectionner";
+                                } else {
+                                  buttonClass +=
+                                    "bg-tertiary-600/20 text-tertiary-300 border-tertiary-500/30 hover:bg-tertiary-600/40 hover:text-white";
+                                  buttonTitle =
+                                    "Créneau disponible - cliquer pour sélectionner";
+                                }
+
+                                return (
+                                  <button
+                                    key={`${slot.start}-${slot.end}`}
+                                    type="button"
+                                    onClick={() =>
+                                      !isDisabled &&
+                                      handleSlotSelection(slot.start)
+                                    }
+                                    disabled={isDisabled}
+                                    className={buttonClass}
+                                    title={buttonTitle}
+                                  >
+                                    {buttonText}
+                                  </button>
+                                );
+                              })}
+                            </div>
+
+                            {/* Légende des créneaux - responsive */}
+                            <div className="mt-4 grid grid-cols-2 sm:flex sm:flex-wrap gap-2 sm:gap-4 text-xs">
+                              <div className="flex items-center gap-2">
+                                <div className="w-3 h-3 bg-tertiary-600/20 border border-tertiary-500/30 rounded"></div>
+                                <span className="text-white/70 font-one">
+                                  Libre
+                                </span>
                               </div>
-                              <div className="flex-1">
-                                <h4 className="text-tertiary-300 font-semibold font-one mb-2 text-lg">
-                                  {prestation === "PROJET"
-                                    ? "Créneau sélectionné"
-                                    : "Créneaux sélectionnés"}
-                                </h4>
-                                <div className="space-y-2">
-                                  <p className="text-white font-one text-sm">
-                                    {prestation === "PROJET" ? (
-                                      <>
-                                        <span className="font-semibold">
-                                          1 créneau
-                                        </span>{" "}
-                                        •
-                                        <span className="font-semibold">
-                                          {" "}
-                                          30 minutes
-                                        </span>
-                                      </>
-                                    ) : (
-                                      <>
-                                        <span className="font-semibold">
-                                          {selectedSlots.length}
-                                        </span>{" "}
-                                        créneau
-                                        {selectedSlots.length > 1 ? "x" : ""} •
-                                        <span className="font-semibold">
-                                          {" "}
-                                          {selectedSlots.length * 30} minutes
-                                        </span>
-                                      </>
-                                    )}
-                                  </p>
-                                  <p className="text-white/70 font-one text-sm">
-                                    {prestation === "PROJET" ? (
-                                      <>
-                                        Horaire:{" "}
-                                        <span className="font-semibold text-tertiary-300">
-                                          {new Date(
-                                            selectedSlots[0],
-                                          ).toLocaleTimeString("fr-FR", {
-                                            hour: "2-digit",
-                                            minute: "2-digit",
-                                          })}
-                                        </span>{" "}
-                                        -{" "}
-                                        <span className="font-semibold text-tertiary-300">
-                                          {new Date(
-                                            new Date(
+                              <div className="flex items-center gap-2">
+                                <div className="w-3 h-3 bg-green-600/30 border border-green-500/50 rounded"></div>
+                                <span className="text-white/70 font-one">
+                                  Sélectionné
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <div className="w-3 h-3 bg-gray-700/50 border border-gray-600/50 rounded"></div>
+                                <span className="text-white/70 font-one">
+                                  Occupé ❌
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <div className="w-3 h-3 bg-red-900/50 border border-red-700/50 rounded"></div>
+                                <span className="text-white/70 font-one">
+                                  Bloqué 🚫
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <div className="w-3 h-3 bg-blue-900/40 border border-blue-700/50 rounded"></div>
+                                <span className="text-white/70 font-one">
+                                  Proposé ⏳
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Récapitulatif amélioré */}
+                          {selectedSlots.length > 0 && (
+                            <div className="bg-gradient-to-br from-tertiary-500/10 to-tertiary-600/5 border border-tertiary-500/30 rounded-2xl p-6 shadow-lg">
+                              <div className="flex items-start gap-4">
+                                <div className="w-10 h-10 bg-tertiary-500 rounded-full flex items-center justify-center flex-shrink-0">
+                                  <svg
+                                    className="w-5 h-5 text-white"
+                                    fill="currentColor"
+                                    viewBox="0 0 20 20"
+                                  >
+                                    <path
+                                      fillRule="evenodd"
+                                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                      clipRule="evenodd"
+                                    />
+                                  </svg>
+                                </div>
+                                <div className="flex-1">
+                                  <h4 className="text-tertiary-300 font-semibold font-one mb-2 text-lg">
+                                    {prestation === "PROJET"
+                                      ? "Créneau sélectionné"
+                                      : "Créneaux sélectionnés"}
+                                  </h4>
+                                  <div className="space-y-2">
+                                    <p className="text-white font-one text-sm">
+                                      {prestation === "PROJET" ? (
+                                        <>
+                                          <span className="font-semibold">
+                                            1 créneau
+                                          </span>{" "}
+                                          •
+                                          <span className="font-semibold">
+                                            {" "}
+                                            30 minutes
+                                          </span>
+                                        </>
+                                      ) : (
+                                        <>
+                                          <span className="font-semibold">
+                                            {selectedSlots.length}
+                                          </span>{" "}
+                                          créneau
+                                          {selectedSlots.length > 1
+                                            ? "x"
+                                            : ""}{" "}
+                                          •
+                                          <span className="font-semibold">
+                                            {" "}
+                                            {selectedSlots.length * 30} minutes
+                                          </span>
+                                        </>
+                                      )}
+                                    </p>
+                                    <p className="text-white/70 font-one text-sm">
+                                      {prestation === "PROJET" ? (
+                                        <>
+                                          Horaire:{" "}
+                                          <span className="font-semibold text-tertiary-300">
+                                            {new Date(
                                               selectedSlots[0],
-                                            ).getTime() +
-                                              30 * 60 * 1000,
-                                          ).toLocaleTimeString("fr-FR", {
-                                            hour: "2-digit",
-                                            minute: "2-digit",
-                                          })}
-                                        </span>
-                                      </>
-                                    ) : (
-                                      <>
-                                        De{" "}
-                                        <span className="font-semibold text-tertiary-300">
-                                          {new Date(
-                                            selectedSlots[0],
-                                          ).toLocaleTimeString("fr-FR", {
-                                            hour: "2-digit",
-                                            minute: "2-digit",
-                                          })}
-                                        </span>{" "}
-                                        à{" "}
-                                        <span className="font-semibold text-tertiary-300">
-                                          {new Date(
-                                            new Date(
-                                              selectedSlots[
-                                                selectedSlots.length - 1
-                                              ],
-                                            ).getTime() +
-                                              30 * 60 * 1000,
-                                          ).toLocaleTimeString("fr-FR", {
-                                            hour: "2-digit",
-                                            minute: "2-digit",
-                                          })}
-                                        </span>
-                                      </>
-                                    )}
-                                  </p>
+                                            ).toLocaleTimeString("fr-FR", {
+                                              hour: "2-digit",
+                                              minute: "2-digit",
+                                            })}
+                                          </span>{" "}
+                                          -{" "}
+                                          <span className="font-semibold text-tertiary-300">
+                                            {new Date(
+                                              new Date(
+                                                selectedSlots[0],
+                                              ).getTime() +
+                                                30 * 60 * 1000,
+                                            ).toLocaleTimeString("fr-FR", {
+                                              hour: "2-digit",
+                                              minute: "2-digit",
+                                            })}
+                                          </span>
+                                        </>
+                                      ) : (
+                                        <>
+                                          De{" "}
+                                          <span className="font-semibold text-tertiary-300">
+                                            {new Date(
+                                              selectedSlots[0],
+                                            ).toLocaleTimeString("fr-FR", {
+                                              hour: "2-digit",
+                                              minute: "2-digit",
+                                            })}
+                                          </span>{" "}
+                                          à{" "}
+                                          <span className="font-semibold text-tertiary-300">
+                                            {new Date(
+                                              new Date(
+                                                selectedSlots[
+                                                  selectedSlots.length - 1
+                                                ],
+                                              ).getTime() +
+                                                30 * 60 * 1000,
+                                            ).toLocaleTimeString("fr-FR", {
+                                              hour: "2-digit",
+                                              minute: "2-digit",
+                                            })}
+                                          </span>
+                                        </>
+                                      )}
+                                    </p>
+                                  </div>
                                 </div>
                               </div>
                             </div>
+                          )}
+                        </>
+                      ) : (
+                        <div className="bg-gradient-to-br from-orange-500/10 to-orange-600/5 border border-orange-500/30 rounded-2xl p-6 text-center">
+                          <div className="w-12 h-12 bg-orange-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg
+                              className="w-6 h-6 text-orange-400"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                              />
+                            </svg>
                           </div>
-                        )}
-                      </>
-                    ) : (
-                      <div className="bg-gradient-to-br from-orange-500/10 to-orange-600/5 border border-orange-500/30 rounded-2xl p-6 text-center">
-                        <div className="w-12 h-12 bg-orange-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                          <svg
-                            className="w-6 h-6 text-orange-400"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                            />
-                          </svg>
+                          <h3 className="text-orange-300 text-lg font-one font-semibold mb-2">
+                            Aucun créneau disponible
+                          </h3>
+                          <p className="text-orange-300/80 text-sm font-one">
+                            Essayez une autre date ou un autre tatoueur
+                          </p>
                         </div>
-                        <h3 className="text-orange-300 text-lg font-one font-semibold mb-2">
-                          Aucun créneau disponible
-                        </h3>
-                        <p className="text-orange-300/80 text-sm font-one">
-                          Essayez une autre date ou un autre tatoueur
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                )}
+                      )}
+                    </div>
+                  )}
               </>
             )}
           </Section>
@@ -1500,7 +1513,7 @@ export default function BookingFlow({
               piercingZones={piercingZones}
             />
             <div className="mt-4 text-[11px] text-white/50 font-one">
-              {salon.appointmentBookingEnabled
+              {salon.addConfirmationEnabled
                 ? "En validant, votre demande de rendez-vous sera envoyée au salon pour confirmation."
                 : " En validant, votre rendez-vous sera créé et confirmé directement."}
             </div>
@@ -1529,12 +1542,12 @@ export default function BookingFlow({
               {/* Message principal */}
               <div className="space-y-4">
                 <h2 className="text-2xl font-one font-bold text-white">
-                  {salon.appointmentBookingEnabled
+                  {salon.addConfirmationEnabled
                     ? "Demande de rendez-vous envoyée !"
                     : "Rendez-vous confirmé !"}
                 </h2>
 
-                {salon.appointmentBookingEnabled ? (
+                {salon.addConfirmationEnabled ? (
                   <div className="bg-gradient-to-br from-orange-500/10 to-orange-600/5 border border-orange-500/30 rounded-2xl p-6">
                     <div className="space-y-4 text-left">
                       <div className="flex items-start gap-4">

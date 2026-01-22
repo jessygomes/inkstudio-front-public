@@ -32,7 +32,7 @@ export async function registerAction(data: RegisterClientData) {
           lastName: lastName.trim(),
           birthDate: birthDate || null,
         }),
-      }
+      },
     );
 
     const responseData = await response.json();
@@ -41,11 +41,9 @@ export async function registerAction(data: RegisterClientData) {
 
     if (!response.ok || responseData.error) {
       throw new Error(
-        responseData.message || "Échec de l'inscription. Veuillez réessayer."
+        responseData.message || "Échec de l'inscription. Veuillez réessayer.",
       );
     }
-
-    console.log("✅ Inscription client réussie :", responseData);
   } catch (error) {
     console.error("❌ Erreur lors de l'inscription client :", error);
     throw error;
@@ -63,8 +61,6 @@ export async function logoutAction() {
     // Supprimer les cookies de session
     cookieStore.delete("inkera_access_token");
     cookieStore.delete("inkera_userId");
-
-    console.log("🧹 Cookies de session supprimés via server action");
 
     // Rediriger vers la page de connexion
     redirect("/connexion?reason=token_expired");
@@ -88,7 +84,7 @@ export async function verifyToken(token: string): Promise<boolean> {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-      }
+      },
     );
 
     return response.ok;

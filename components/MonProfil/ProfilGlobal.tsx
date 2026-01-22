@@ -61,13 +61,65 @@ export default function ProfilGlobal(user: User) {
     }
   };
 
-  // Loading state
+  // Loading state - Skeleton
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-noir-700 via-noir-500 to-noir-700 pt-20 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-2 border-tertiary-400 border-t-transparent mx-auto mb-4"></div>
-          <p className="text-white/60 font-one">Chargement du profil...</p>
+      <div className="">
+        <div className="mx-auto px-4 sm:px-6 py-8 lg:px-20">
+          {/* Header skeleton */}
+          <div className="backdrop-blur-lg border border-white/10 rounded-2xl p-4 sm:p-6 lg:p-8 shadow-xl mb-8 animate-pulse">
+            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
+              {/* Avatar skeleton */}
+              <div className="relative flex-shrink-0">
+                <div className="w-32 h-32 sm:w-28 sm:h-28 lg:w-32 lg:h-32 bg-gradient-to-br from-white/10 to-white/5 rounded-2xl"></div>
+              </div>
+
+              {/* Infos skeleton */}
+              <div className="flex-1 min-w-0 text-center sm:text-left w-full">
+                <div className="space-y-4">
+                  {/* Nom skeleton */}
+                  <div className="flex flex-col gap-2">
+                    <div className="h-8 bg-white/10 rounded-lg w-48 mx-auto sm:mx-0"></div>
+                  </div>
+
+                  {/* Infos de contact skeleton */}
+                  <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-4">
+                    <div className="flex items-center gap-2 justify-center sm:justify-start">
+                      <div className="w-6 h-6 rounded-lg bg-white/10"></div>
+                      <div className="h-4 bg-white/10 rounded w-40"></div>
+                    </div>
+                    <div className="flex items-center gap-2 justify-center sm:justify-start">
+                      <div className="w-6 h-6 rounded-lg bg-white/10"></div>
+                      <div className="h-4 bg-white/10 rounded w-32"></div>
+                    </div>
+                  </div>
+
+                  {/* Actions skeleton */}
+                  <div className="flex gap-2 pt-2 justify-center sm:justify-start">
+                    <div className="h-8 bg-white/10 rounded-lg w-24"></div>
+                    <div className="h-8 bg-white/10 rounded-lg w-24"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Navigation tabs skeleton */}
+          <div className="flex flex-wrap gap-2 mb-8">
+            {[1, 2, 3, 4].map((i) => (
+              <div
+                key={i}
+                className="h-10 bg-white/10 rounded-lg w-32 animate-pulse"
+              ></div>
+            ))}
+          </div>
+
+          {/* Contenu skeleton */}
+          <div className="space-y-4 animate-pulse">
+            <div className="h-32 bg-white/5 rounded-2xl border border-white/10"></div>
+            <div className="h-32 bg-white/5 rounded-2xl border border-white/10"></div>
+            <div className="h-32 bg-white/5 rounded-2xl border border-white/10"></div>
+          </div>
         </div>
       </div>
     );

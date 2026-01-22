@@ -68,7 +68,6 @@ export const {
 
       // Support pour la mise à jour de session
       if (trigger === "update" && session) {
-        console.log("🔄 [JWT Callback] Mise à jour du token JWT via trigger");
         token = { ...token, ...session.user };
       }
 
