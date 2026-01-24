@@ -61,7 +61,7 @@ export const Login = () => {
         setError(
           result.error === "CredentialsSignin"
             ? "Email ou mot de passe incorrect"
-            : result.error || "Authentification échouée"
+            : result.error || "Authentification échouée",
         );
         setIsPending(false);
         return;
@@ -216,7 +216,9 @@ export const Login = () => {
               className="flex items-center justify-center gap-2 px-8 py-2 bg-white text-black rounded-lg transition-all duration-300 font-medium disabled:opacity-70 disabled:cursor-not-allowed font-one lg:text-xs"
               disabled={isGooglePending}
             >
-              {isGooglePending ? "Connexion Google..." : "Continuer avec Google"}
+              {isGooglePending
+                ? "Connexion Google..."
+                : "Continuer avec Google"}
             </button>
           </div>
         </form>

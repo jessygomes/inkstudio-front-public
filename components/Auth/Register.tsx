@@ -31,7 +31,7 @@ const registerSchema = z
       .min(8, "Le mot de passe doit contenir au moins 8 caractères")
       .regex(
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-        "Le mot de passe doit contenir au moins une majuscule, une minuscule et un chiffre"
+        "Le mot de passe doit contenir au moins une majuscule, une minuscule et un chiffre",
       ),
     confirmPassword: z.string(),
     birthDate: z.string().optional(),
@@ -39,7 +39,7 @@ const registerSchema = z
       .boolean()
       .refine(
         (val) => val === true,
-        "Vous devez accepter les conditions d'utilisation"
+        "Vous devez accepter les conditions d'utilisation",
       ),
   })
   .refine((data) => data.password === data.confirmPassword, {
@@ -95,14 +95,14 @@ export default function Register() {
             lastName: data.lastName,
             birthDate: data.birthDate || null,
           }),
-        }
+        },
       );
 
       const registerData = await registerResponse.json();
 
       if (!registerResponse.ok || registerData.error) {
         throw new Error(
-          registerData.message || "Échec de l'inscription. Veuillez réessayer."
+          registerData.message || "Échec de l'inscription. Veuillez réessayer.",
         );
       }
 
@@ -129,7 +129,7 @@ export default function Register() {
     } catch (error) {
       console.error("Erreur inscription:", error);
       setError(
-        error instanceof Error ? error.message : "Erreur lors de l'inscription"
+        error instanceof Error ? error.message : "Erreur lors de l'inscription",
       );
     } finally {
       setIsPending(false);

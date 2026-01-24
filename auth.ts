@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import NextAuth from "next-auth";
 import authConfig from "./auth.config";
 
@@ -71,11 +72,13 @@ export const {
             body: JSON.stringify({
               email: profile?.email ?? user?.email,
               firstName:
-                // @ts-expect-error: Google renvoie given_name/family_name dans profile
-                profile?.given_name ?? profile?.name?.split(" ")?.[0] ?? "",
+                (profile as any)?.given_name ??
+                profile?.name?.split(" ")?.[0] ??
+                "",
               lastName:
-                // @ts-expect-error: Google renvoie given_name/family_name dans profile
-                profile?.family_name ?? profile?.name?.split(" ")?.slice(1).join(" ") ?? "",
+                (profile as any)?.family_name ??
+                profile?.name?.split(" ")?.slice(1).join(" ") ??
+                "",
               avatar: profile?.picture ?? user?.image ?? null,
               googleId: account.providerAccountId,
               idToken: account.id_token,
@@ -87,7 +90,8 @@ export const {
 
           if (!response.ok || data?.error) {
             const message =
-              data?.message || "Échec de l'authentification Google côté backend";
+              data?.message ||
+              "Échec de l'authentification Google côté backend";
             throw new Error(message);
           }
 
@@ -106,15 +110,8 @@ export const {
             user?.name ||
             "";
           token.firstName =
-            data.firstName ??
-            // @ts-expect-error: Google renvoie given_name
-            profile?.given_name ??
-            "";
-          token.lastName =
-            data.lastName ??
-            // @ts-expect-error: Google renvoie family_name
-            profile?.family_name ??
-            "";
+            data.firstName ?? (profile as any)?.given_name ?? "";
+          token.lastName = data.lastName ?? (profile as any)?.family_name ?? "";
           token.phone = data.phone ?? "";
           token.image = data.image ?? profile?.picture ?? user?.image ?? null;
           token.clientProfile = data.clientProfile;
