@@ -6,6 +6,7 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "utfs.io", pathname: "/**" },
       { protocol: "https", hostname: "*.ufs.sh", pathname: "/**" },
       { protocol: "https", hostname: "theinkera.com", pathname: "/**" },
+      { protocol: "https", hostname: "lh3.googleusercontent.com", pathname: "/**" },
     ],
     formats: ["image/webp", "image/avif"],
     minimumCacheTTL: 60,

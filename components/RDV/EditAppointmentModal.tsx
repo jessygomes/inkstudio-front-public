@@ -266,7 +266,10 @@ const EditAppointmentModal: React.FC<EditAppointmentModalProps> = ({
               Modifier le rendez-vous
             </h3>
             <p className="text-white/60 text-sm font-one">
-              {appointment.salon.salonName}{appointment.tatoueur?.name ? ` • ${appointment.tatoueur.name}` : ""}
+              {appointment.salon.salonName}
+              {appointment.tatoueur?.name
+                ? ` • ${appointment.tatoueur.name}`
+                : ""}
             </p>
           </div>
           <button
