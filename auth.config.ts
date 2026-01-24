@@ -1,5 +1,6 @@
 import type { NextAuthConfig } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
+import Google from "next-auth/providers/google";
 import { userLoginSchema } from "./lib/zod/validator-schema";
 
 /**
@@ -8,6 +9,14 @@ import { userLoginSchema } from "./lib/zod/validator-schema";
  */
 export default {
   providers: [
+    Google({
+      clientId:
+        process.env.AUTH_GOOGLE_ID ?? process.env.GOOGLE_CLIENT_ID ?? "",
+      clientSecret:
+        process.env.AUTH_GOOGLE_SECRET ??
+        process.env.GOOGLE_CLIENT_SECRET ??
+        "",
+    }),
     Credentials({
       name: "Credentials",
       credentials: {

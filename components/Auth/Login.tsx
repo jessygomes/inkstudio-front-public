@@ -21,6 +21,7 @@ export const Login = () => {
 
   const [showPassword, setShowPassword] = useState(false);
   const [isPending, setIsPending] = useState(false);
+  const [isGooglePending, setIsGooglePending] = useState(false);
   const [error, setError] = useState<string | undefined>("");
   const [success, setSuccess] = useState<string | undefined>("");
 
@@ -78,6 +79,20 @@ export const Login = () => {
       console.error("❌ [Login] Erreur lors de la connexion :", error);
       setError("Impossible de se connecter. Veuillez réessayer plus tard.");
       setIsPending(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setError("");
+    setSuccess("");
+    setIsGooglePending(true);
+
+    try {
+      await signIn("google", { callbackUrl: "/" });
+    } catch (err) {
+      console.error("❌ [Login] Erreur Google:", err);
+      setError("Impossible de se connecter avec Google.");
+      setIsGooglePending(false);
     }
   };
 
@@ -187,6 +202,21 @@ export const Login = () => {
                   ? "Redirection vers l'app..."
                   : "Connexion..."
                 : "Se connecter"}
+            </button>
+
+            <div className="flex items-center gap-3 text-white/70 text-xs">
+              <span className="h-px flex-1 bg-white/30" />
+              <span>ou</span>
+              <span className="h-px flex-1 bg-white/30" />
+            </div>
+
+            <button
+              type="button"
+              onClick={handleGoogleSignIn}
+              className="flex items-center justify-center gap-2 px-8 py-2 bg-white text-black rounded-lg transition-all duration-300 font-medium disabled:opacity-70 disabled:cursor-not-allowed font-one lg:text-xs"
+              disabled={isGooglePending}
+            >
+              {isGooglePending ? "Connexion Google..." : "Continuer avec Google"}
             </button>
           </div>
         </form>

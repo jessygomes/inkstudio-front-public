@@ -13,6 +13,8 @@ declare module "next-auth" {
       phone: string;
       image?: string | null;
       role: string;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      clientProfile?: any;
     };
     accessToken: string;
   }
@@ -51,9 +53,79 @@ export const {
      * Callback JWT - Ajoute les données personnalisées au token JWT
      * Appelé quand le token est créé ou mis à jour
      */
-    async jwt({ token, user, trigger, session }) {
-      // Lors de la connexion initiale, ajouter les données utilisateur au token
-      if (user) {
+    async jwt({ token, user, trigger, session, account, profile }) {
+      // Connexion via Google -> on crée/valide l'utilisateur côté backend et on récupère le token métier
+      if (account?.provider === "google") {
+        try {
+          const backendUrl = process.env.NEXT_PUBLIC_BACK_URL;
+
+          if (!backendUrl) {
+            throw new Error("NEXT_PUBLIC_BACK_URL n'est pas configuré");
+          }
+
+          const response = await fetch(`${backendUrl}/auth/google`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              email: profile?.email ?? user?.email,
+              firstName:
+                // @ts-expect-error: Google renvoie given_name/family_name dans profile
+                profile?.given_name ?? profile?.name?.split(" ")?.[0] ?? "",
+              lastName:
+                // @ts-expect-error: Google renvoie given_name/family_name dans profile
+                profile?.family_name ?? profile?.name?.split(" ")?.slice(1).join(" ") ?? "",
+              avatar: profile?.picture ?? user?.image ?? null,
+              googleId: account.providerAccountId,
+              idToken: account.id_token,
+              accessToken: account.access_token,
+            }),
+          });
+
+          const data = await response.json();
+
+          if (!response.ok || data?.error) {
+            const message =
+              data?.message || "Échec de l'authentification Google côté backend";
+            throw new Error(message);
+          }
+
+          if (!data?.access_token || !data?.id) {
+            throw new Error("Réponse backend incomplète pour Google");
+          }
+
+          token.accessToken = data.access_token;
+          token.id = String(data.id);
+          token.role = data.role ?? "client";
+          token.email = data.email ?? profile?.email ?? user?.email ?? "";
+          token.name =
+            data.clientProfile?.pseudo ||
+            `${data.firstName ?? ""} ${data.lastName ?? ""}`.trim() ||
+            profile?.name ||
+            user?.name ||
+            "";
+          token.firstName =
+            data.firstName ??
+            // @ts-expect-error: Google renvoie given_name
+            profile?.given_name ??
+            "";
+          token.lastName =
+            data.lastName ??
+            // @ts-expect-error: Google renvoie family_name
+            profile?.family_name ??
+            "";
+          token.phone = data.phone ?? "";
+          token.image = data.image ?? profile?.picture ?? user?.image ?? null;
+          token.clientProfile = data.clientProfile;
+        } catch (error) {
+          console.error("❌ Erreur lors de l'authentification Google:", error);
+          throw error;
+        }
+      }
+
+      // Connexion classique via credentials
+      if (user && (!account || account.provider === "credentials")) {
         token.accessToken = user.accessToken;
         token.id = user.id as string;
         token.role = user.role;
