@@ -2,6 +2,30 @@
 import NextAuth from "next-auth";
 import authConfig from "./auth.config";
 
+function normalizeAuthBaseUrl(): string | undefined {
+  const candidates = [
+    process.env.AUTH_URL,
+    process.env.NEXTAUTH_URL,
+    process.env.NEXT_PUBLIC_SITE_URL,
+  ].filter(Boolean) as string[];
+
+  const clean = (url: string) => url.trim().replace(/\/$/, "");
+  const isLocalhost = (url: string) => /https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?/i.test(url);
+
+  if (process.env.NODE_ENV === "production") {
+    const nonLocal = candidates.map(clean).find((url) => !isLocalhost(url));
+    return nonLocal;
+  }
+
+  return candidates.length > 0 ? clean(candidates[0]) : undefined;
+}
+
+const resolvedAuthBaseUrl = normalizeAuthBaseUrl();
+if (resolvedAuthBaseUrl) {
+  process.env.AUTH_URL = resolvedAuthBaseUrl;
+  process.env.NEXTAUTH_URL = resolvedAuthBaseUrl;
+}
+
 // Extend la session pour inclure toutes les données client
 declare module "next-auth" {
   interface Session {
@@ -14,7 +38,6 @@ declare module "next-auth" {
       phone: string;
       image?: string | null;
       role: string;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       clientProfile?: any;
     };
     accessToken: string;
@@ -30,7 +53,6 @@ declare module "next-auth" {
     image?: string | null;
     role: string;
     accessToken: string;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     clientProfile?: any;
   }
 }
@@ -45,6 +67,7 @@ export const {
   signIn,
   signOut,
 } = NextAuth({
+  trustHost: true,
   pages: {
     signIn: "/se-connecter",
     error: "/se-connecter",
