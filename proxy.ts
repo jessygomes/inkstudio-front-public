@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { auth } from "@/auth";
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   // Routes qui nécessitent une authentification
@@ -15,7 +15,7 @@ export async function middleware(req: NextRequest) {
 
   // Vérifier si la route nécessite une authentification
   const isProtectedRoute = protectedRoutes.some((route) =>
-    pathname.startsWith(route)
+    pathname.startsWith(route),
   );
 
   if (isProtectedRoute) {
