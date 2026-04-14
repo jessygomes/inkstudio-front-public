@@ -1,9 +1,10 @@
 import React from "react";
+import Image from "next/image";
 import Section from "./Section";
 import TextInput from "./TextInput";
 import TextArea from "./TextArea";
 import ImageUploader from "../../Shared/ImageUploader";
-import { PiercingZone, PiercingService } from "@/lib/type";
+import { FlashProps, PiercingZone, PiercingService } from "@/lib/type";
 
 interface ClientInfoFormProps {
   prestation: string;
@@ -18,6 +19,9 @@ interface ClientInfoFormProps {
   onPiercingZoneChange: (zoneId: string) => void;
   onPiercingServiceChange: (serviceId: string) => void;
   isLoadingPiercingZones: boolean;
+  flashes?: FlashProps[];
+  selectedFlashId?: string;
+  onFlashChange?: (flashId: string) => void;
 }
 
 export default function ClientInfoForm({
@@ -33,6 +37,9 @@ export default function ClientInfoForm({
   onPiercingZoneChange,
   onPiercingServiceChange,
   isLoadingPiercingZones,
+  flashes = [],
+  selectedFlashId = "",
+  onFlashChange,
 }: ClientInfoFormProps) {
   const selectedZone = piercingZones.find((z) => z.id === selectedPiercingZone);
   const selectedZoneServices = selectedZone?.services || [];
@@ -49,6 +56,20 @@ export default function ClientInfoForm({
     return service.description || "Zone non spécifiée";
   };
 
+  const getFlashDimensions = (flash?: FlashProps): string => {
+    if (!flash) return "";
+
+    const raw = flash.dimension || flash.dimensions || flash.size;
+    if (typeof raw === "string" && raw.trim()) return raw.trim();
+
+    if (typeof flash.width === "number" && typeof flash.height === "number") {
+      const unit = (flash.unit || "cm").trim();
+      return `${flash.width} x ${flash.height} ${unit}`;
+    }
+
+    return "";
+  };
+
   const showProjectDetails =
     prestation === "PROJET" ||
     prestation === "TATTOO" ||
@@ -59,6 +80,10 @@ export default function ClientInfoForm({
     prestation === "PROJET" ||
     prestation === "TATTOO" ||
     prestation === "RETOUCHE";
+
+  const showFlashSelector = prestation === "TATTOO";
+  const selectedFlash = flashes.find((f) => f.id === selectedFlashId);
+  const hasSelectedFlash = showFlashSelector && !!selectedFlashId;
 
   return (
     <Section title="Vos informations">
@@ -104,11 +129,77 @@ export default function ClientInfoForm({
       {showProjectDetails && (
         <div className="space-y-4">
           <div className="space-y-3">
-            <TextArea
-              name="details.description"
-              label="Description du projet"
-              placeholder="Décrivez votre projet : style souhaité, inspirations..."
-            />
+            {showFlashSelector && (
+              <div className="space-y-3">
+                <label className="text-xs text-white/80 font-one font-semibold uppercase tracking-wide">
+                  Choix du flash (optionnel)
+                </label>
+                <select
+                  value={selectedFlashId}
+                  onChange={(e) => onFlashChange?.(e.target.value)}
+                  className="w-full p-2.5 bg-white/[0.05] border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-tertiary-400 focus:ring-1 focus:ring-tertiary-400/30 transition-all"
+                >
+                  <option value="">Aucun flash sélectionné</option>
+                  {flashes.map((flash) => {
+                    const label = flash.title || flash.name || "Flash";
+                    const price =
+                      typeof flash.price === "number"
+                        ? ` - ${flash.price}€`
+                        : "";
+                    const dimensions = getFlashDimensions(flash);
+                    const dimensionLabel = dimensions ? ` - ${dimensions}` : "";
+                    return (
+                      <option key={flash.id} value={flash.id}>
+                        {label}
+                        {dimensionLabel}
+                        {price}
+                      </option>
+                    );
+                  })}
+                </select>
+
+                {selectedFlash && selectedFlash.imageUrl && (
+                  <div className="mx-auto w-full max-w-[220px] rounded-lg overflow-hidden border border-white/10 bg-white/[0.03] text-center">
+                    <div className="relative aspect-square w-full">
+                      <Image
+                        src={selectedFlash.imageUrl}
+                        alt={
+                          selectedFlash.title ||
+                          selectedFlash.name ||
+                          "Flash sélectionné"
+                        }
+                        fill
+                        className="object-cover"
+                        sizes="220px"
+                      />
+                    </div>
+                    <div className="px-2 py-2 text-white/85 text-[11px] font-one leading-snug line-clamp-2">
+                      {selectedFlash.title || selectedFlash.name || "Flash"}
+                    </div>
+                    {getFlashDimensions(selectedFlash) && (
+                      <div className="px-2 pb-2 text-tertiary-300 text-[11px] font-one leading-snug">
+                        {getFlashDimensions(selectedFlash)}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* {hasSelectedFlash && (
+                  <p className="text-xs text-white/65 font-one bg-white/[0.04] border border-white/10 rounded-lg px-3 py-2">
+                    Un flash est sélectionné: la description du projet et les
+                    images de référence sont désactivées.
+                  </p>
+                )} */}
+              </div>
+            )}
+
+            {!hasSelectedFlash && (
+              <TextArea
+                name="details.description"
+                label="Description du projet"
+                placeholder="Décrivez votre projet : style souhaité, inspirations..."
+              />
+            )}
 
             {prestation === "PIERCING" ? (
               // Piercing: zone et service
@@ -202,7 +293,7 @@ export default function ClientInfoForm({
           </div>
 
           {/* Upload d'images */}
-          {showImageUploaders && (
+          {showImageUploaders && !hasSelectedFlash && (
             <div className="space-y-3">
               <h3 className="text-white/90 text-sm font-one font-semibold">
                 Images de référence

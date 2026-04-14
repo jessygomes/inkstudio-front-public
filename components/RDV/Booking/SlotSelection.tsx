@@ -19,6 +19,7 @@ interface SlotSelectionProps {
   timeSlots: TimeSlot[];
   selectedSlots: string[];
   onSlotSelection: (slotStart: string) => void;
+  onClearSelection: () => void;
   occupiedSlots: any[];
   blockedSlots: any[];
   isLoadingSlots: boolean;
@@ -35,6 +36,7 @@ export default function SlotSelection({
   timeSlots,
   selectedSlots,
   onSlotSelection,
+  onClearSelection,
   occupiedSlots,
   blockedSlots,
   isLoadingSlots,
@@ -76,6 +78,67 @@ export default function SlotSelection({
       return sStart < oEnd && sEnd > oStart;
     });
   };
+
+  const toDateKey = (date: Date) => {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  };
+
+  const buildSlotsFromRanges = (
+    ranges: any[],
+    startKey: "start" | "startDate",
+    endKey: "end" | "endDate",
+  ) => {
+    if (!selectedDate) return [] as string[];
+
+    const dayStart = new Date(`${selectedDate}T00:00:00`);
+    const dayEnd = new Date(`${selectedDate}T23:59:59.999`);
+    const slots: string[] = [];
+
+    ranges.forEach((range) => {
+      const rangeStart = new Date(range[startKey]);
+      const rangeEnd = new Date(range[endKey]);
+
+      const start = new Date(
+        Math.max(rangeStart.getTime(), dayStart.getTime()),
+      );
+      const end = new Date(Math.min(rangeEnd.getTime(), dayEnd.getTime()));
+
+      if (start >= end) return;
+
+      const alignedStart = new Date(start);
+      alignedStart.setSeconds(0, 0);
+      const remainder = alignedStart.getMinutes() % 30;
+      if (remainder !== 0) {
+        alignedStart.setMinutes(alignedStart.getMinutes() + (30 - remainder));
+      }
+
+      for (
+        let cursor = alignedStart;
+        cursor < end;
+        cursor = new Date(cursor.getTime() + 30 * 60 * 1000)
+      ) {
+        slots.push(cursor.toISOString());
+      }
+    });
+
+    return slots;
+  };
+
+  const displayedSlotStarts = React.useMemo(() => {
+    const available = timeSlots.map((slot) => slot.start);
+    const occupied = buildSlotsFromRanges(occupiedSlots, "start", "end");
+    const blocked = buildSlotsFromRanges(blockedSlots, "startDate", "endDate");
+    const merged = Array.from(
+      new Set([...available, ...occupied, ...blocked, ...selectedSlots]),
+    );
+
+    return merged
+      .filter((slotStart) => toDateKey(new Date(slotStart)) === selectedDate)
+      .sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
+  }, [timeSlots, occupiedSlots, blockedSlots, selectedSlots, selectedDate]);
 
   return (
     <Section title="Choisir le tatoueur et les créneaux">
@@ -178,11 +241,10 @@ export default function SlotSelection({
             (salon.appointmentBookingEnabled || selectedTatoueur) && (
               <div className="space-y-4">
                 <div>
-                  <h3 className="text-white font-one mb-1">
-                    Créneaux disponibles
-                  </h3>
+                  <h3 className="text-white font-one mb-1">Créneaux</h3>
                   <p className="text-sm text-white/60 font-one">
-                    Sélectionnez les créneaux consécutifs à réserver
+                    Les créneaux occupés et bloqués sont affichés mais non
+                    sélectionnables
                   </p>
                 </div>
 
@@ -220,24 +282,21 @@ export default function SlotSelection({
                       Chargement des créneaux...
                     </span>
                   </div>
-                ) : timeSlots.length > 0 ? (
+                ) : displayedSlotStarts.length > 0 ? (
                   <>
                     <div className="space-y-3">
-                      {prestation === "PROJET" ? (
-                        <p className="text-xs text-white/50">
-                          Pour un rendez-vous projet, sélectionnez un seul
-                          créneau de 30 minutes.
-                        </p>
-                      ) : (
-                        <p className="text-xs text-white/50">
-                          Cliquez sur les créneaux pour les sélectionner
-                          (doivent être consécutifs).
-                        </p>
-                      )}
+                      <p className="text-xs text-white/50">
+                        Cliquez sur les créneaux pour les sélectionner (doivent
+                        être consécutifs). Maximum 1h par réservation (2
+                        créneaux de 30 min). Les créneaux occupés ou bloqués
+                        restent visibles.
+                      </p>
                       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
-                        {timeSlots.map((slot) => {
-                          const slotStart = new Date(slot.start);
-                          const slotEnd = new Date(slot.end);
+                        {displayedSlotStarts.map((slotStartIso) => {
+                          const slotStart = new Date(slotStartIso);
+                          const slotEnd = new Date(
+                            slotStart.getTime() + 30 * 60 * 1000,
+                          );
                           const startTime = slotStart.toLocaleTimeString(
                             "fr-FR",
                             {
@@ -250,17 +309,22 @@ export default function SlotSelection({
                             minute: "2-digit",
                           });
 
-                          const isSelected = selectedSlots.includes(slot.start);
-                          const isOccupied = isSlotOccupied(slot.start);
-                          const isBlocked = isSlotBlocked(slot.start);
-                          const isDisabled = isOccupied || isBlocked;
+                          const isSelected =
+                            selectedSlots.includes(slotStartIso);
+                          const isOccupied = isSlotOccupied(slotStartIso);
+                          const isBlocked = isSlotBlocked(slotStartIso);
+                          const isAvailable = timeSlots.some(
+                            (slot) => slot.start === slotStartIso,
+                          );
+                          const isDisabled =
+                            !isAvailable || isOccupied || isBlocked;
 
                           return (
                             <button
-                              key={slot.start}
+                              key={slotStartIso}
                               type="button"
                               onClick={() =>
-                                !isDisabled && onSlotSelection(slot.start)
+                                !isDisabled && onSlotSelection(slotStartIso)
                               }
                               disabled={isDisabled}
                               className={classNames(
@@ -291,7 +355,7 @@ export default function SlotSelection({
                       <div className="flex flex-wrap gap-3 text-xs text-white/70">
                         <div className="flex items-center gap-1.5">
                           <span className="font-semibold">Total:</span>
-                          <span>{timeSlots.length}</span>
+                          <span>{displayedSlotStarts.length}</span>
                         </div>
                         <div className="flex items-center gap-1.5">
                           <span className="font-semibold">Sélectionnés:</span>
@@ -305,6 +369,15 @@ export default function SlotSelection({
                             {selectedSlots.length * 30} min
                           </span>
                         </div>
+                        {selectedSlots.length > 0 && (
+                          <button
+                            type="button"
+                            onClick={onClearSelection}
+                            className="ml-auto px-3 py-1 rounded-md border border-white/20 text-white/80 hover:bg-white/[0.12] transition-colors"
+                          >
+                            Tout désélectionner
+                          </button>
+                        )}
                       </div>
                     </div>
 

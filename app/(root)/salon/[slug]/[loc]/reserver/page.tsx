@@ -8,10 +8,37 @@ import { CiInstagram, CiFacebook } from "react-icons/ci";
 import { PiTiktokLogoThin } from "react-icons/pi";
 import { TfiWorld } from "react-icons/tfi";
 import { parseSalonHours, hoursToLines } from "@/lib/horaireHelper";
+import { FlashProps } from "@/lib/type";
 
 type PageParams = {
   params: Promise<{ slug: string; loc: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
+
+type PrestationType = "TATTOO" | "PIERCING" | "PROJET" | "RETOUCHE";
+
+function normalizePrestation(
+  value?: string | string[],
+): PrestationType | undefined {
+  const raw = Array.isArray(value) ? value[0] : value;
+  if (!raw) return undefined;
+  const normalized = raw.toUpperCase();
+  if (
+    normalized === "TATTOO" ||
+    normalized === "PIERCING" ||
+    normalized === "PROJET" ||
+    normalized === "RETOUCHE"
+  ) {
+    return normalized;
+  }
+  return undefined;
+}
+
+function normalizeFlashId(value?: string | string[]): string | undefined {
+  const raw = Array.isArray(value) ? value[0] : value;
+  const normalized = raw?.trim();
+  return normalized ? normalized : undefined;
+}
 
 async function getSalon(slug: string, loc: string) {
   const base = process.env.NEXT_PUBLIC_BACK_URL!;
@@ -22,6 +49,31 @@ async function getSalon(slug: string, loc: string) {
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(`Failed to load salon (${res.status})`);
   return res.json();
+}
+
+async function getAvailableFlashes(userId: string): Promise<FlashProps[]> {
+  const base = process.env.NEXT_PUBLIC_BACK_URL;
+  if (!base || !userId) return [];
+
+  try {
+    const res = await fetch(`${base}/flash/${encodeURIComponent(userId)}`, {
+      next: { revalidate: 30 },
+    });
+    if (!res.ok) return [];
+
+    const payload = await res.json();
+    const list = Array.isArray(payload)
+      ? payload
+      : Array.isArray(payload?.data)
+        ? payload.data
+        : Array.isArray(payload?.flashes)
+          ? payload.flashes
+          : [];
+
+    return list as FlashProps[];
+  } catch {
+    return [];
+  }
 }
 
 // Ouvert maintenant ? (timezone Europe/Paris)
@@ -67,12 +119,27 @@ function getOpenNow(raw: any) {
   return { open, today: { start: slot.start, end: slot.end } };
 }
 
-export default async function ReserverPage({ params }: PageParams) {
+export default async function ReserverPage({
+  params,
+  searchParams,
+}: PageParams) {
   const resolvedParams = await params;
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const { slug, loc } = resolvedParams;
+  const defaultPrestation = normalizePrestation(
+    resolvedSearchParams?.prestation,
+  );
+  const requestedFlashId = normalizeFlashId(resolvedSearchParams?.flashId);
 
   const salon = await getSalon(slug, loc);
   if (!salon) notFound();
+  const flashes = await getAvailableFlashes(salon.id);
+  const availableFlashes = flashes.filter(
+    (f) => f && (f.available === undefined || f.available || f.isAvailable),
+  );
+  const defaultFlashId = availableFlashes.some((f) => f.id === requestedFlashId)
+    ? requestedFlashId
+    : undefined;
 
   // résumé salon
   const salonSummary = {
@@ -84,7 +151,12 @@ export default async function ReserverPage({ params }: PageParams) {
     postalCode: salon.postalCode ?? null,
     phone: salon.phone ?? null,
     tatoueurs: salon.Tatoueur || [],
-    prestations: salon.prestations || [],
+    prestations: Array.from(
+      new Set([
+        ...(salon.prestations || []),
+        ...(defaultPrestation ? [defaultPrestation] : []),
+      ]),
+    ),
     appointmentBookingEnabled: salon.appointmentBookingEnabled,
     addConfirmationEnabled: salon.addConfirmationEnabled,
   };
@@ -412,6 +484,9 @@ export default async function ReserverPage({ params }: PageParams) {
             salon={salonSummary}
             apiBase={process.env.NEXT_PUBLIC_BACK_URL}
             defaultTatoueurId={null}
+            defaultPrestation={defaultPrestation}
+            flashes={availableFlashes}
+            defaultFlashId={defaultFlashId}
           />
         </div>
       </section>

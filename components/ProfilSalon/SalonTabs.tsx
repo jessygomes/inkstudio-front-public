@@ -1,15 +1,22 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useMemo, useRef, useState, useCallback, useEffect } from "react";
-import type { PortfolioProps, ProductSalonProps } from "@/lib/type";
+import { createPortal } from "react-dom";
+import type { FlashProps, PortfolioProps, ProductSalonProps } from "@/lib/type";
 
 type Props = {
   portfolio: PortfolioProps[];
   products: ProductSalonProps[];
   photos: string[];
+  flashes?: FlashProps[];
   salonName?: string;
+  bookingPath?: string;
+  canBookFlashes?: boolean;
 };
+
+type FlashSort = "default" | "price-asc" | "price-desc" | "name-asc";
 
 const PER_PAGE = 6;
 
@@ -25,65 +32,193 @@ function formatPrice(val: number) {
   }
 }
 
+function toCmDimensionLabel(
+  width: number,
+  height: number,
+  unit: string = "cm",
+): string {
+  const normalizedUnit = unit.toLowerCase();
+  let w = width;
+  let h = height;
+
+  if (normalizedUnit === "mm") {
+    w = w / 10;
+    h = h / 10;
+  } else if (normalizedUnit === "m") {
+    w = w * 100;
+    h = h * 100;
+  }
+
+  const format = (n: number) =>
+    Number.isInteger(n) ? String(n) : String(Number(n.toFixed(1)));
+
+  return `${format(w)}x${format(h)}cm`;
+}
+
+function getFlashDimensions(flash: FlashProps): string | null {
+  const raw = flash.dimension || flash.dimensions || flash.size;
+  if (typeof raw === "string" && raw.trim()) {
+    const compact = raw
+      .toLowerCase()
+      .replace(/\s+/g, "")
+      .replace(/×/g, "x")
+      .replace(/\*/g, "x")
+      .replace(/,/g, ".");
+
+    const parsed = compact.match(/^(\d+(?:\.\d+)?)x(\d+(?:\.\d+)?)(cm|mm|m)?$/);
+    if (parsed) {
+      return toCmDimensionLabel(
+        Number(parsed[1]),
+        Number(parsed[2]),
+        parsed[3] || "cm",
+      );
+    }
+
+    return raw.trim();
+  }
+
+  if (typeof flash.width === "number" && typeof flash.height === "number") {
+    return toCmDimensionLabel(flash.width, flash.height, flash.unit || "cm");
+  }
+
+  return null;
+}
+
 export default function SalonTabs({
   portfolio,
   products,
   photos,
+  flashes = [],
   salonName,
+  bookingPath,
+  canBookFlashes = true,
 }: Props) {
+  const [flashSort, setFlashSort] = useState<FlashSort>("default");
+
+  const availableFlashes = useMemo(
+    () =>
+      (flashes ?? []).filter(
+        (f) => f && (f.available === undefined || f.available || f.isAvailable),
+      ),
+    [flashes],
+  );
+
+  const sortedFlashes = useMemo(() => {
+    const list = [...availableFlashes];
+    if (flashSort === "default") return list;
+
+    if (flashSort === "price-asc") {
+      return list.sort((a, b) => {
+        const aPrice =
+          typeof a.price === "number" ? a.price : Number.POSITIVE_INFINITY;
+        const bPrice =
+          typeof b.price === "number" ? b.price : Number.POSITIVE_INFINITY;
+        return aPrice - bPrice;
+      });
+    }
+
+    if (flashSort === "price-desc") {
+      return list.sort((a, b) => {
+        const aPrice =
+          typeof a.price === "number" ? a.price : Number.NEGATIVE_INFINITY;
+        const bPrice =
+          typeof b.price === "number" ? b.price : Number.NEGATIVE_INFINITY;
+        return bPrice - aPrice;
+      });
+    }
+
+    return list.sort((a, b) => {
+      const aName = (a.title || a.name || "").toLocaleLowerCase("fr");
+      const bName = (b.title || b.name || "").toLocaleLowerCase("fr");
+      return aName.localeCompare(bName, "fr");
+    });
+  }, [availableFlashes, flashSort]);
+
   const counts = useMemo(
     () => ({
       photos: photos?.filter(Boolean).length ?? 0,
       portfolio: portfolio?.filter((p) => !!p.imageUrl).length ?? 0,
+      flashes: sortedFlashes.length,
       products: products?.length ?? 0,
     }),
-    [portfolio, products, photos]
+    [portfolio, products, photos, sortedFlashes],
   );
 
-  // Priorité d’onglet: photos > portfolio > produits
-  const [active, setActive] = useState<"portfolio" | "photos" | "products">(
-    () => {
-      if (counts.portfolio > 0) return "portfolio";
-      if (counts.photos > 0) return "photos";
-      return "products";
-    }
-  );
+  // Priorité d’onglet: photos > portfolio > flash > produits
+  const [active, setActive] = useState<
+    "portfolio" | "photos" | "flashes" | "products"
+  >(() => {
+    if (counts.portfolio > 0) return "portfolio";
+    if (counts.photos > 0) return "photos";
+    if (counts.flashes > 0) return "flashes";
+    return "products";
+  });
 
   // Pagination (6/page) pour portfolio & produits
   const [portfolioPage, setPortfolioPage] = useState(1);
+  const [flashesPage, setFlashesPage] = useState(1);
   const [productsPage, setProductsPage] = useState(1);
 
   const portfolioTotalPages = Math.max(
     1,
-    Math.ceil(counts.portfolio / PER_PAGE) || 1
+    Math.ceil(counts.portfolio / PER_PAGE) || 1,
   );
   const productsTotalPages = Math.max(
     1,
-    Math.ceil(counts.products / PER_PAGE) || 1
+    Math.ceil(counts.products / PER_PAGE) || 1,
+  );
+  const flashesTotalPages = Math.max(
+    1,
+    Math.ceil(counts.flashes / PER_PAGE) || 1,
   );
 
   const portfolioStart = (portfolioPage - 1) * PER_PAGE;
   const portfolioPageItems = portfolio.slice(
     portfolioStart,
-    portfolioStart + PER_PAGE
+    portfolioStart + PER_PAGE,
   );
 
   const productsStart = (productsPage - 1) * PER_PAGE;
   const productsPageItems = products.slice(
     productsStart,
-    productsStart + PER_PAGE
+    productsStart + PER_PAGE,
   );
+
+  const flashesStart = (flashesPage - 1) * PER_PAGE;
+  const flashesPageItems = sortedFlashes.slice(
+    flashesStart,
+    flashesStart + PER_PAGE,
+  );
+
+  const flashLightboxIndexById = useMemo(() => {
+    const map = new Map<string, number>();
+    let imageIndex = 0;
+
+    for (const flash of sortedFlashes) {
+      if (flash.imageUrl) {
+        map.set(flash.id, imageIndex);
+        imageIndex += 1;
+      }
+    }
+
+    return map;
+  }, [sortedFlashes]);
 
   useEffect(() => {
     setPortfolioPage(1);
+    setFlashesPage(1);
     setProductsPage(1);
   }, [active]);
+
+  useEffect(() => {
+    setFlashesPage(1);
+  }, [flashSort]);
 
   const sectionRef = useRef<HTMLDivElement>(null);
   const scrollToTop = () =>
     sectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
 
-  const setTab = (tab: "portfolio" | "photos" | "products") => {
+  const setTab = (tab: "portfolio" | "photos" | "flashes" | "products") => {
     setActive(tab);
     scrollToTop();
   };
@@ -93,34 +228,53 @@ export default function SalonTabs({
     if (active === "photos") return (photos ?? []).filter(Boolean);
     if (active === "portfolio")
       return (portfolio ?? []).map((p) => p.imageUrl).filter(Boolean);
+    if (active === "flashes")
+      return (sortedFlashes ?? [])
+        .map((f) => f.imageUrl)
+        .filter(Boolean) as string[];
     return [];
-  }, [active, photos, portfolio]);
+  }, [active, photos, portfolio, sortedFlashes]);
 
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isMounted || !lightboxOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [lightboxOpen, isMounted]);
 
   const openLightbox = useCallback(
     (startIndex = 0) => {
       if (activeImages.length === 0) return;
       setLightboxIndex(
-        Math.max(0, Math.min(startIndex, activeImages.length - 1))
+        Math.max(0, Math.min(startIndex, activeImages.length - 1)),
       );
       setLightboxOpen(true);
     },
-    [activeImages.length]
+    [activeImages.length],
   );
 
   const closeLightbox = useCallback(() => setLightboxOpen(false), []);
   const prev = useCallback(
     () =>
       setLightboxIndex(
-        (i) => (i - 1 + activeImages.length) % activeImages.length
+        (i) => (i - 1 + activeImages.length) % activeImages.length,
       ),
-    [activeImages.length]
+    [activeImages.length],
   );
   const next = useCallback(
     () => setLightboxIndex((i) => (i + 1) % activeImages.length),
-    [activeImages.length]
+    [activeImages.length],
   );
 
   const onLightboxKey = (e: React.KeyboardEvent<HTMLDivElement>) => {
@@ -223,6 +377,7 @@ export default function SalonTabs({
                   label: "Portfolio",
                   count: counts.portfolio,
                 },
+                { key: "flashes", label: "Flash", count: counts.flashes },
                 { key: "products", label: "Produits", count: counts.products },
               ] as const
             ).map((t) => {
@@ -245,32 +400,59 @@ export default function SalonTabs({
             })}
           </div>
 
-          {(active === "photos" || active === "portfolio") &&
-            activeImages.length > 0 && (
-              <button
-                onClick={() => openLightbox(0)}
-                className="cursor-pointer inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-one bg-white/10 hover:bg-white/20 border border-white/20 text-white/90 transition"
-                aria-label="Tout agrandir"
-                title="Tout agrandir"
+          <div className="flex items-center gap-2">
+            {active === "flashes" && counts.flashes > 0 && (
+              <select
+                value={flashSort}
+                onChange={(e) => setFlashSort(e.target.value as FlashSort)}
+                className="cursor-pointer px-3 py-2.5 rounded-lg text-sm font-one bg-white/10 hover:bg-white/20 border border-white/20 text-white/90 transition"
+                aria-label="Trier les flashs"
+                title="Trier les flashs"
               >
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  className="opacity-80"
-                >
-                  <path
-                    d="M4 14v6h6M20 10V4h-6M20 4l-7 7M4 20l7-7"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    fill="none"
-                  />
-                </svg>
-                <p className="hidden sm:block">Agrandir</p>
-              </button>
+                <option value="default" className="bg-noir-700 text-white">
+                  Tri: Défaut
+                </option>
+                <option value="price-asc" className="bg-noir-700 text-white">
+                  Prix croissant
+                </option>
+                <option value="price-desc" className="bg-noir-700 text-white">
+                  Prix décroissant
+                </option>
+                <option value="name-asc" className="bg-noir-700 text-white">
+                  Nom A → Z
+                </option>
+              </select>
             )}
+
+            {(active === "photos" ||
+              active === "portfolio" ||
+              active === "flashes") &&
+              activeImages.length > 0 && (
+                <button
+                  onClick={() => openLightbox(0)}
+                  className="cursor-pointer inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-one bg-white/10 hover:bg-white/20 border border-white/20 text-white/90 transition"
+                  aria-label="Tout agrandir"
+                  title="Tout agrandir"
+                >
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    className="opacity-80"
+                  >
+                    <path
+                      d="M4 14v6h6M20 10V4h-6M20 4l-7 7M4 20l7-7"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      fill="none"
+                    />
+                  </svg>
+                  <p className="hidden sm:block">Agrandir</p>
+                </button>
+              )}
+          </div>
         </div>
 
         {/* PHOTOS */}
@@ -349,6 +531,95 @@ export default function SalonTabs({
             </>
           ))}
 
+        {/* FLASH */}
+        {active === "flashes" &&
+          (counts.flashes === 0 ? (
+            <Empty>Aucun flash disponible pour le moment.</Empty>
+          ) : (
+            <>
+              <ul className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {flashesPageItems.map((f) => {
+                  const label = f.title || f.name || "Flash";
+                  const dimensions = getFlashDimensions(f);
+                  const imageIndex = flashLightboxIndexById.get(f.id);
+                  return (
+                    <li
+                      key={f.id}
+                      className="rounded-xl border border-white/10 bg-white/5 overflow-hidden hover:bg-white/10 transition"
+                    >
+                      <button
+                        type="button"
+                        className="relative aspect-[4/3] bg-noir-700 w-full text-left"
+                        onClick={() => {
+                          if (typeof imageIndex === "number") {
+                            openLightbox(imageIndex);
+                          }
+                        }}
+                        disabled={typeof imageIndex !== "number"}
+                        aria-label={
+                          typeof imageIndex === "number"
+                            ? `Agrandir ${label}`
+                            : `${label} sans image`
+                        }
+                      >
+                        {f.imageUrl ? (
+                          <Image
+                            src={f.imageUrl}
+                            alt={label}
+                            fill
+                            sizes="(min-width:1024px) 33vw, (min-width:640px) 50vw, 50vw"
+                            className="object-cover"
+                          />
+                        ) : (
+                          <div className="absolute inset-0 flex items-center justify-center text-white/40 text-xs font-one">
+                            Sans image
+                          </div>
+                        )}
+                        {f.imageUrl && (
+                          <div className="absolute inset-0 bg-black/0 hover:bg-black/10 transition" />
+                        )}
+                      </button>
+                      <div className="p-3 space-y-1">
+                        <p className="text-white/95 font-one text-sm">
+                          {label}
+                        </p>
+                        {f.description && (
+                          <p className="text-white/60 text-xs line-clamp-2">
+                            {f.description}
+                          </p>
+                        )}
+                        {dimensions && (
+                          <p className="text-white/75 text-xs font-one">
+                            Dimensions : {dimensions}
+                          </p>
+                        )}
+                        {typeof f.price === "number" && (
+                          <p className="text-tertiary-300 text-xs font-one mt-1">
+                            {formatPrice(f.price)}
+                          </p>
+                        )}
+
+                        {bookingPath && canBookFlashes && (
+                          <Link
+                            href={`${bookingPath}?prestation=TATTOO&flashId=${encodeURIComponent(f.id)}`}
+                            className="mt-2 inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-one bg-gradient-to-r from-tertiary-500 to-tertiary-400 text-white hover:from-tertiary-400 hover:to-tertiary-500 transition"
+                          >
+                            Réserver ce flash
+                          </Link>
+                        )}
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+              <Pagination
+                current={flashesPage}
+                total={flashesTotalPages}
+                onChange={setFlashesPage}
+              />
+            </>
+          ))}
+
         {/* PRODUITS */}
         {active === "products" &&
           (counts.products === 0 ? (
@@ -394,64 +665,67 @@ export default function SalonTabs({
       </div>
 
       {/* LIGHTBOX */}
-      {lightboxOpen && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
-          onKeyDown={onLightboxKey}
-          tabIndex={-1}
-          onClick={closeLightbox}
-        >
+      {isMounted &&
+        lightboxOpen &&
+        createPortal(
           <div
-            className="relative max-w-[92vw] max-h-[86vh] w-full h-full flex items-center justify-center rounded-xl"
-            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            className="fixed inset-0 z-[100000] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+            onKeyDown={onLightboxKey}
+            tabIndex={-1}
+            onClick={closeLightbox}
           >
-            <div className="relative w-full h-full rounded-xl">
-              <Image
-                src={activeImages[lightboxIndex]}
-                alt={`${salonName ?? "Image"} - ${lightboxIndex + 1}/${
-                  activeImages.length
-                }`}
-                fill
-                className="object-contain rounded-xl"
-                sizes="100vw"
-                priority
-              />
-            </div>
-
-            <button
-              onClick={closeLightbox}
-              aria-label="Fermer"
-              className="cursor-pointer absolute top-3 right-3 p-2 rounded-lg bg-white/10 hover:bg-white/20 text-white border border-white/20"
+            <div
+              className="relative max-w-[92vw] max-h-[86vh] w-full h-full flex items-center justify-center rounded-xl"
+              onClick={(e) => e.stopPropagation()}
             >
-              ✕
-            </button>
+              <div className="relative w-full h-full rounded-xl">
+                <Image
+                  src={activeImages[lightboxIndex]}
+                  alt={`${salonName ?? "Image"} - ${lightboxIndex + 1}/${
+                    activeImages.length
+                  }`}
+                  fill
+                  className="object-contain rounded-xl"
+                  sizes="100vw"
+                  priority
+                />
+              </div>
 
-            {activeImages.length > 1 && (
-              <>
-                <button
-                  onClick={prev}
-                  aria-label="Précédent"
-                  className="cursor-pointer absolute left-3 top-1/2 -translate-y-1/2 p-2 rounded-lg bg-white/10 hover:bg-white/20 text-white border border-white/20"
-                >
-                  ‹
-                </button>
-                <button
-                  onClick={next}
-                  aria-label="Suivant"
-                  className="cursor-pointer absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-lg bg-white/10 hover:bg-white/20 text-white border border-white/20"
-                >
-                  ›
-                </button>
-                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 text-[11px] text-white/80 font-one bg-black/30 px-2 py-1 rounded">
-                  {lightboxIndex + 1} / {activeImages.length}
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      )}
+              <button
+                onClick={closeLightbox}
+                aria-label="Fermer"
+                className="cursor-pointer absolute top-3 right-3 p-2 rounded-lg bg-white/10 hover:bg-white/20 text-white border border-white/20"
+              >
+                ✕
+              </button>
+
+              {activeImages.length > 1 && (
+                <>
+                  <button
+                    onClick={prev}
+                    aria-label="Précédent"
+                    className="cursor-pointer absolute left-3 top-1/2 -translate-y-1/2 p-2 rounded-lg bg-white/10 hover:bg-white/20 text-white border border-white/20"
+                  >
+                    ‹
+                  </button>
+                  <button
+                    onClick={next}
+                    aria-label="Suivant"
+                    className="cursor-pointer absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-lg bg-white/10 hover:bg-white/20 text-white border border-white/20"
+                  >
+                    ›
+                  </button>
+                  <div className="absolute bottom-3 left-1/2 -translate-x-1/2 text-[11px] text-white/80 font-one bg-black/30 px-2 py-1 rounded">
+                    {lightboxIndex + 1} / {activeImages.length}
+                  </div>
+                </>
+              )}
+            </div>
+          </div>,
+          document.body,
+        )}
     </section>
   );
 }

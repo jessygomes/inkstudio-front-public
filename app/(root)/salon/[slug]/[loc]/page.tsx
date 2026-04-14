@@ -2,7 +2,7 @@
 import SalonTabs from "@/components/ProfilSalon/SalonTabs";
 import { TeamCard } from "@/components/ProfilSalon/TeamCard";
 import { hoursToLines, parseSalonHours } from "@/lib/horaireHelper";
-import { SalonProfilProps } from "@/lib/type";
+import { FlashProps, SalonProfilProps } from "@/lib/type";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -24,7 +24,7 @@ type PageParams = {
 async function getSalon(slug: string, loc: string) {
   const base = process.env.NEXT_PUBLIC_BACK_URL!;
   const url = `${base}/users/${encodeURIComponent(slug)}/${encodeURIComponent(
-    loc
+    loc,
   )}`;
   const res = await fetch(url, { next: { revalidate: 30 } });
   if (res.status === 404) return null;
@@ -42,6 +42,32 @@ async function getSalon(slug: string, loc: string) {
   } catch (error) {
     console.error("Invalid JSON response:", text, error);
     return null; // JSON invalide = profil incomplet
+  }
+}
+
+async function getAvailableFlashes(userId: string): Promise<FlashProps[]> {
+  const base = process.env.NEXT_PUBLIC_BACK_URL;
+  if (!base || !userId) return [];
+
+  try {
+    const res = await fetch(`${base}/flash/${encodeURIComponent(userId)}`, {
+      next: { revalidate: 30 },
+    });
+
+    if (!res.ok) return [];
+
+    const payload = await res.json();
+    const list = Array.isArray(payload)
+      ? payload
+      : Array.isArray(payload?.data)
+        ? payload.data
+        : Array.isArray(payload?.flashes)
+          ? payload.flashes
+          : [];
+
+    return list as FlashProps[];
+  } catch {
+    return [];
   }
 }
 
@@ -189,6 +215,7 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
 
   const salon = await getSalon(slug, loc);
   if (!salon) notFound();
+  const flashes = await getAvailableFlashes(salon.id);
   const isFree = salon.saasPlan === "FREE";
 
   const heroSrc = salon.image || null;
@@ -197,7 +224,7 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
   const openNow = getOpenNow(salon.salonHours);
 
   const mapsQuery = encodeURIComponent(
-    [salon.address, salon.postalCode, salon.city].filter(Boolean).join(" ")
+    [salon.address, salon.postalCode, salon.city].filter(Boolean).join(" "),
   );
   const directionsHref = `https://www.google.com/maps/search/?api=1&query=${mapsQuery}`;
 
@@ -800,7 +827,10 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
               photos={salon.salonPhotos ?? []}
               portfolio={salon.Portfolio ?? []}
               products={salon.ProductSalon ?? []}
+              flashes={flashes}
               salonName={salon.salonName}
+              bookingPath={`/salon/${resolvedParams.slug}/${resolvedParams.loc}/reserver`}
+              canBookFlashes={!isFree}
             />
 
             {/* Équipe */}

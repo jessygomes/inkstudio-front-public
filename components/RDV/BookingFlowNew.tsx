@@ -13,7 +13,13 @@ import {
 } from "./Booking";
 import { Props } from "@/lib/type";
 
-export default function BookingFlow({ salon, defaultTatoueurId }: Props) {
+export default function BookingFlow({
+  salon,
+  defaultTatoueurId,
+  defaultPrestation,
+  flashes = [],
+  defaultFlashId,
+}: Props) {
   const {
     methods,
     watch,
@@ -42,13 +48,22 @@ export default function BookingFlow({ salon, defaultTatoueurId }: Props) {
     setSketchFile,
     referenceFile,
     setReferenceFile,
+    selectedFlashId,
+    handleFlashChange,
     goNext,
     goPrev,
     handleSlotSelection,
+    clearSelectedSlots,
     handleTatoueurChange,
     handleDateChange,
     onSubmit,
-  } = useBookingLogic({ salon, defaultTatoueurId });
+  } = useBookingLogic({
+    salon,
+    defaultTatoueurId,
+    defaultPrestation,
+    flashes,
+    defaultFlashId,
+  });
 
   const steps = ["Prestation", "Infos", "Disponibilité", "Récap"];
 
@@ -102,6 +117,9 @@ export default function BookingFlow({ salon, defaultTatoueurId }: Props) {
                 onPiercingZoneChange={setSelectedPiercingZone}
                 onPiercingServiceChange={setSelectedPiercingService}
                 isLoadingPiercingZones={isLoadingPiercingZones}
+                flashes={flashes}
+                selectedFlashId={selectedFlashId}
+                onFlashChange={handleFlashChange}
               />
             )}
 
@@ -118,6 +136,7 @@ export default function BookingFlow({ salon, defaultTatoueurId }: Props) {
                 timeSlots={timeSlots}
                 selectedSlots={selectedSlots}
                 onSlotSelection={handleSlotSelection}
+                onClearSelection={clearSelectedSlots}
                 occupiedSlots={occupiedSlots}
                 blockedSlots={blockedSlots}
                 isLoadingSlots={isLoadingSlots}

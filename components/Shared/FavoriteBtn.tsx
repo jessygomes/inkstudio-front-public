@@ -73,7 +73,7 @@ export default function FavoriteBtn({
           toast.success(
             newFavoriteState
               ? "Salon ajouté aux favoris !"
-              : "Salon retiré des favoris"
+              : "Salon retiré des favoris",
           );
         } else {
           toast.error(result.message || "Erreur lors de la mise à jour");
@@ -132,7 +132,7 @@ export default function FavoriteBtn({
     return (
       <button
         disabled
-        className={`group w-10 h-10 rounded-lg bg-white/10 border border-white/20 flex items-center justify-center transition-all duration-300 ${className}`}
+        className={`group cursor-pointer w-10 h-10 rounded-lg bg-white/10 border border-white/20 flex items-center justify-center transition-all duration-300 ${className}`}
       >
         <div className="w-4 h-4 border-2 border-white/40 border-t-transparent rounded-full animate-spin" />
       </button>
@@ -144,7 +144,7 @@ export default function FavoriteBtn({
       <button
         onClick={handleToggle}
         disabled={isPending}
-        className={`group w-10 h-10 rounded-lg transition-all duration-300 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed ${
+        className={`group cursor-pointer w-10 h-10 rounded-lg transition-all duration-300 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed ${
           favorite
             ? "bg-gradient-to-br from-pink-500/30 to-red-500/30 border border-pink-500/50 hover:from-pink-500/40 hover:to-red-500/40"
             : "bg-white/10 border border-white/20 hover:bg-white/20"
@@ -166,7 +166,7 @@ export default function FavoriteBtn({
     <button
       onClick={handleToggle}
       disabled={isPending}
-      className={`group flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-300 font-one text-sm disabled:opacity-50 disabled:cursor-not-allowed ${
+      className={`group cursor-pointer flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-300 font-one text-sm disabled:opacity-50 disabled:cursor-not-allowed ${
         favorite
           ? "bg-gradient-to-br from-pink-500/30 to-red-500/30 border border-pink-500/50 text-pink-300 hover:from-pink-500/40 hover:to-red-500/40"
           : "bg-white/10 border border-white/20 text-white/80 hover:bg-white/20 hover:text-white"

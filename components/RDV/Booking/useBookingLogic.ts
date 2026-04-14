@@ -19,19 +19,46 @@ import { getPiercingPrice } from "@/lib/actions/piercingPrice.action";
 import { createAppointmentByClient } from "@/lib/actions/appointment.action";
 import { uploadFiles } from "@/lib/utils/uploadthing";
 import imageCompression from "browser-image-compression";
-import { PiercingZone } from "@/lib/type";
+import { FlashProps, PiercingZone } from "@/lib/type";
 
 type AppointmentRequestForm = z.infer<typeof appointmentRequestSchema>;
 
 interface UseBookingLogicProps {
   salon: any;
   defaultTatoueurId?: string | null;
+  defaultPrestation?: "TATTOO" | "PIERCING" | "PROJET" | "RETOUCHE";
+  flashes?: FlashProps[];
+  defaultFlashId?: string | null;
+}
+
+function getFlashDimensions(flash?: FlashProps): string {
+  if (!flash) return "";
+
+  const raw = flash.dimension || flash.dimensions || flash.size;
+  if (typeof raw === "string" && raw.trim()) return raw.trim();
+
+  if (typeof flash.width === "number" && typeof flash.height === "number") {
+    const unit = (flash.unit || "cm").trim();
+    return `${flash.width} x ${flash.height} ${unit}`;
+  }
+
+  return "";
 }
 
 export function useBookingLogic({
   salon,
   defaultTatoueurId,
+  defaultPrestation,
+  flashes = [],
+  defaultFlashId,
 }: UseBookingLogicProps) {
+  const MAX_CLIENT_SLOTS = 2;
+  const initialPrestation =
+    defaultPrestation &&
+    ["TATTOO", "PIERCING", "PROJET", "RETOUCHE"].includes(defaultPrestation)
+      ? (defaultPrestation as "TATTOO" | "PIERCING" | "PROJET" | "RETOUCHE")
+      : undefined;
+
   const router = useRouter();
   const { data: session, status } = useSession();
   const isAuthenticated = status === "authenticated";
@@ -62,7 +89,7 @@ export function useBookingLogic({
     resolver: zodResolver(appointmentRequestSchema),
     mode: "onBlur",
     defaultValues: {
-      prestation: undefined as never,
+      prestation: (initialPrestation as never) ?? (undefined as never),
       tatoueurId: defaultTatoueurId || "",
       availability: {
         date: new Date().toISOString().slice(0, 10),
@@ -162,6 +189,40 @@ export function useBookingLogic({
   const [referenceFile, setReferenceFile] = useState<File | null>(null);
   const [existingImages, setExistingImages] = useState<string[]>([]);
   const [placementImageUrl, setPlacementImageUrl] = useState<string>("");
+  const [selectedFlashId, setSelectedFlashId] = useState<string>("");
+
+  const availableFlashes = useMemo(
+    () =>
+      (flashes ?? []).filter(
+        (f) => f && (f.available === undefined || f.available || f.isAvailable),
+      ),
+    [flashes],
+  );
+
+  useEffect(() => {
+    if (!defaultFlashId) return;
+    if (initialPrestation !== "TATTOO") return;
+    const hasFlash = availableFlashes.some((f) => f.id === defaultFlashId);
+    if (!hasFlash) return;
+
+    setSelectedFlashId(defaultFlashId);
+  }, [defaultFlashId, availableFlashes, initialPrestation]);
+
+  useEffect(() => {
+    if (prestation !== "TATTOO") return;
+
+    if (!selectedFlashId) {
+      return;
+    }
+
+    const selectedFlash = availableFlashes.find(
+      (f) => f.id === selectedFlashId,
+    );
+    const dimensions = getFlashDimensions(selectedFlash);
+    if (dimensions) {
+      setValue("details.size", dimensions, { shouldValidate: true });
+    }
+  }, [selectedFlashId, prestation, availableFlashes, setValue]);
 
   // Navigation entre étapes
   const goNext = async () => {
@@ -341,15 +402,10 @@ export function useBookingLogic({
       return;
     }
 
-    // Vérification pour prestation PROJET
-    if (prestation === "PROJET") {
-      if (selectedSlots.length >= 1) {
-        toast.error(
-          "Pour un rendez-vous projet, vous ne pouvez sélectionner qu'un seul créneau de 30 minutes.",
-        );
-        return;
-      }
-      setSelectedSlots([slotStart]);
+    if (selectedSlots.length >= MAX_CLIENT_SLOTS) {
+      toast.error(
+        "Vous pouvez sélectionner au maximum 1h (2 créneaux de 30 minutes).",
+      );
       return;
     }
 
@@ -391,6 +447,12 @@ export function useBookingLogic({
     }
   }, [referenceFile, setValue]);
 
+  useEffect(() => {
+    if (prestation !== "TATTOO" && selectedFlashId) {
+      setSelectedFlashId("");
+    }
+  }, [prestation, selectedFlashId]);
+
   // Gestion du prix du piercing
   useEffect(() => {
     if (prestation === "PIERCING" && selectedPiercingService) {
@@ -428,7 +490,7 @@ export function useBookingLogic({
         try {
           return await imageCompression(file, options);
         } catch (error) {
-          console.error("Erreur compression:", error);
+          console.error("Erreur compression image:", error);
           return file;
         }
       };
@@ -464,6 +526,20 @@ export function useBookingLogic({
       const endDateTime = finalSlots[finalSlots.length - 1].end;
 
       // Construire le payload selon le type RdvBody
+      const selectedFlash =
+        data.prestation === "TATTOO"
+          ? availableFlashes.find((f) => f.id === selectedFlashId)
+          : undefined;
+      const selectedFlashLabel = selectedFlash
+        ? selectedFlash.title ||
+          selectedFlash.name ||
+          `Flash ${selectedFlash.id}`
+        : "";
+      const flashNote = selectedFlashLabel
+        ? `\n\nFlash sélectionné: ${selectedFlashLabel}`
+        : "";
+      const baseDescription = data.details?.description || data.message || "";
+
       const payload = {
         title: `${data.prestation} - ${data.client.firstName} ${data.client.lastName}`,
         prestation: data.prestation,
@@ -480,7 +556,7 @@ export function useBookingLogic({
           ? ""
           : selectedTatoueur || "",
         visio: data.visio || false,
-        description: data.details?.description || data.message || "",
+        description: `${baseDescription}${flashNote}`.trim(),
         zone: data.details?.zone || "",
         size: data.details?.size || "",
         colorStyle: data.details?.colorStyle || "",
@@ -507,6 +583,10 @@ export function useBookingLogic({
     }
   };
 
+  const clearSelectedSlots = () => {
+    setSelectedSlots([]);
+  };
+
   // Handler pour changement de tatoueur
   const handleTatoueurChange = (tatoueurId: string) => {
     setSelectedTatoueur(tatoueurId);
@@ -524,12 +604,28 @@ export function useBookingLogic({
   const handlePrestationChange = (prestation: string) => {
     setValue("prestation", prestation as any);
     setSelectedSlots([]);
+    if (prestation !== "TATTOO") {
+      setSelectedFlashId("");
+    }
     setExistingImages([]);
     setPlacementImageUrl("");
     setSketchFile(null);
     setReferenceFile(null);
     setSelectedPiercingZone("");
     setSelectedPiercingService("");
+  };
+
+  const handleFlashChange = (flashId: string) => {
+    setSelectedFlashId(flashId);
+    const selectedFlash = availableFlashes.find((f) => f.id === flashId);
+    const dimensions = getFlashDimensions(selectedFlash);
+    setValue("details.size", dimensions, { shouldValidate: true });
+
+    if (flashId) {
+      setValue("details.description", "", { shouldValidate: true });
+      setSketchFile(null);
+      setReferenceFile(null);
+    }
   };
 
   return {
@@ -579,14 +675,18 @@ export function useBookingLogic({
     setExistingImages,
     placementImageUrl,
     setPlacementImageUrl,
+    selectedFlashId,
+    availableFlashes,
 
     // Handlers
     goNext,
     goPrev,
     handleSlotSelection,
+    clearSelectedSlots,
     handleTatoueurChange,
     handleDateChange,
     handlePrestationChange,
+    handleFlashChange,
     onSubmit,
     isSlotBlocked,
     isSlotOccupied,

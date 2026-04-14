@@ -54,6 +54,23 @@ export type ProductSalonProps = {
   salonId: string;
 };
 
+export type FlashProps = {
+  id: string;
+  title?: string;
+  name?: string;
+  description?: string | null;
+  imageUrl?: string | null;
+  price?: number | null;
+  dimension?: string | null;
+  dimensions?: string | null;
+  size?: string | null;
+  width?: number | null;
+  height?: number | null;
+  unit?: string | null;
+  isAvailable?: boolean;
+  available?: boolean;
+};
+
 export type UsersResponse = {
   error: boolean;
   users: SalonProps[];
@@ -303,4 +320,7 @@ export type Props = {
   salon: SalonSummary; // salon courant (obligatoire)
   apiBase?: string; // override si besoin
   defaultTatoueurId?: string | null; // préférence optionnelle
+  defaultPrestation?: "TATTOO" | "PIERCING" | "PROJET" | "RETOUCHE";
+  flashes?: FlashProps[];
+  defaultFlashId?: string | null;
 };
