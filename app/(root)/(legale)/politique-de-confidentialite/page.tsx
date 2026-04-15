@@ -1,5 +1,6 @@
 /* eslint-disable react/no-unescaped-entities */
 
+import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -22,7 +23,15 @@ export default function PolitiqueDeConfidentialite() {
           <h2 className="text-xl font-semibold mb-2">1. Introduction</h2>
           <p className="text-gray-300">
             Cette politique explique comment Inkera collecte, utilise et protège
-            les données personnelles des utilisateurs.
+            les données personnelles des utilisateurs. Les règles générales
+            d'accès et d'usage de la plateforme sont précisées dans les{" "}
+            <Link
+              href="/conditions-d-utilisation"
+              className="text-tertiary-400 hover:text-tertiary-300 underline underline-offset-4 transition-colors"
+            >
+              conditions d'utilisation
+            </Link>
+            .
           </p>
         </section>
 

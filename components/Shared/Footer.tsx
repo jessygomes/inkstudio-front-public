@@ -87,14 +87,14 @@ export default function Footer() {
                 Politique de confidentialité
               </Link>
             </li>
-            {/* <li>
+            <li>
               <Link
-                href={"/cgu-cgv"}
+                href={"/conditions-d-utilisation"}
                 className="hover:text-tertiary-400 duration-300 transition-colors"
               >
-                CGU / CGV
+                Conditions d'utilisation
               </Link>
-            </li> */}
+            </li>
           </ul>
         </div>
 

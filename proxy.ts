@@ -44,6 +44,7 @@ export async function proxy(req: NextRequest) {
     "/contactez-nous",
     "/mentions-legales",
     "/politique-de-confidentialite",
+    "/conditions-d-utilisation",
     "/images/",
     "/creer-un-compte",
     "/se-connecter",

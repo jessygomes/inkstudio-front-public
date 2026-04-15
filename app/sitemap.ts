@@ -50,7 +50,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.2,
     },
     {
-      url: `${baseUrl}/politique-confidentialite`,
+      url: `${baseUrl}/politique-de-confidentialite`,
+      lastModified: new Date(),
+      changeFrequency: "yearly" as const,
+      priority: 0.2,
+    },
+    {
+      url: `${baseUrl}/conditions-d-utilisation`,
       lastModified: new Date(),
       changeFrequency: "yearly" as const,
       priority: 0.2,
