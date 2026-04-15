@@ -10,6 +10,7 @@ import { useState, useEffect } from "react";
 import { FormError } from "@/components/Shared/FormError";
 import { FormSuccess } from "@/components/Shared/FormSuccess";
 import Link from "next/link";
+import { FaGoogle } from "react-icons/fa";
 
 import Image from "next/image";
 import { CardWrapper } from "./Wrapper/CardWrapper";
@@ -193,7 +194,7 @@ export const Login = () => {
             <FormSuccess message={success} />
 
             <button
-              className="cursor-pointer px-8 py-2 bg-gradient-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white rounded-lg transition-all duration-300 font-medium disabled:opacity-50 disabled:cursor-not-allowed font-one lg:text-xs"
+              className="cursor-pointer px-8 py-2 bg-linear-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white rounded-lg transition-all duration-300 font-medium disabled:opacity-50 disabled:cursor-not-allowed font-one lg:text-xs"
               type="submit"
               disabled={isPending}
             >
@@ -213,12 +214,18 @@ export const Login = () => {
             <button
               type="button"
               onClick={handleGoogleSignIn}
-              className="flex items-center justify-center gap-2 px-8 py-2 bg-white text-black rounded-lg transition-all duration-300 font-medium disabled:opacity-70 disabled:cursor-not-allowed font-one lg:text-xs"
+              className="cursor-pointer group relative flex items-center justify-center gap-3 overflow-hidden rounded-xl border border-white/15 bg-white/8 px-8 py-3 text-white shadow-lg shadow-black/20 backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:border-tertiary-400/40 hover:bg-white/12 hover:shadow-xl hover:shadow-tertiary-500/10 disabled:cursor-not-allowed disabled:opacity-70 font-one lg:text-xs"
               disabled={isGooglePending}
             >
-              {isGooglePending
-                ? "Connexion Google..."
-                : "Continuer avec Google"}
+              <span className="absolute inset-0 bg-linear-to-r from-white/8 via-transparent to-tertiary-400/8 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+              <span className="relative flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white text-[#EA4335] shadow-md shadow-black/10">
+                <FaGoogle className="text-sm" />
+              </span>
+              <span className="relative font-medium tracking-[0.02em]">
+                {isGooglePending
+                  ? "Connexion Google..."
+                  : "Continuer avec Google"}
+              </span>
             </button>
           </div>
         </form>
@@ -233,7 +240,7 @@ export const Login = () => {
             Créer un compte
           </Link>
         </p>
-        <div className="h-[1px] bg-white w-[300px]"></div>
+        <div className="h-px bg-white w-75"></div>
         <Link
           className="relative text-center text-white text-xs hover:text-white/70 transition-all ease-in-out duration-150"
           href="/motdepasseoublie"

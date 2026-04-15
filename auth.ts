@@ -10,7 +10,8 @@ function normalizeAuthBaseUrl(): string | undefined {
   ].filter(Boolean) as string[];
 
   const clean = (url: string) => url.trim().replace(/\/$/, "");
-  const isLocalhost = (url: string) => /https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?/i.test(url);
+  const isLocalhost = (url: string) =>
+    /https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?/i.test(url);
 
   if (process.env.NODE_ENV === "production") {
     const nonLocal = candidates.map(clean).find((url) => !isLocalhost(url));

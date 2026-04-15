@@ -2,7 +2,12 @@
 
 import Link from "next/link";
 import type { Metadata } from "next";
-import { FaFileContract, FaUserCheck, FaCalendarCheck, FaShieldAlt } from "react-icons/fa";
+import {
+  FaFileContract,
+  FaUserCheck,
+  FaCalendarCheck,
+  FaShieldAlt,
+} from "react-icons/fa";
 
 export const metadata: Metadata = {
   title: "Conditions d'utilisation",
@@ -31,7 +36,7 @@ export default function ConditionsDUtilisation() {
           </div>
 
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-two uppercase text-white font-bold leading-tight mb-6">
-            Conditions{' '}
+            Conditions{" "}
             <span className="bg-linear-to-r from-tertiary-400 to-tertiary-500 bg-clip-text text-transparent">
               d'utilisation
             </span>
@@ -40,7 +45,7 @@ export default function ConditionsDUtilisation() {
           <div className="w-24 h-1 bg-linear-to-r from-tertiary-400 to-tertiary-500 rounded-full mx-auto mb-8"></div>
 
           <p className="text-xl text-white/70 font-one leading-relaxed max-w-3xl mx-auto">
-            Règles applicables à l'accès et à l'utilisation de la plateforme{' '}
+            Règles applicables à l'accès et à l'utilisation de la plateforme{" "}
             <span className="text-tertiary-400 font-semibold">Inkera</span>.
           </p>
         </div>
@@ -50,9 +55,10 @@ export default function ConditionsDUtilisation() {
         <div className="container mx-auto px-4 sm:px-8 max-w-5xl space-y-8">
           <div className="bg-linear-to-br from-tertiary-500/10 to-tertiary-600/15 backdrop-blur-xl rounded-3xl p-8 border border-tertiary-400/20">
             <p className="text-white/80 font-one leading-relaxed text-lg">
-              En accédant au site ou en utilisant les services proposés par Inkera,
-              vous acceptez les présentes conditions d'utilisation. Si vous n'acceptez
-              pas ces conditions, vous ne devez pas utiliser la plateforme.
+              En accédant au site ou en utilisant les services proposés par
+              Inkera, vous acceptez les présentes conditions d'utilisation. Si
+              vous n'acceptez pas ces conditions, vous ne devez pas utiliser la
+              plateforme.
             </p>
             <p className="text-white/50 font-one text-sm mt-4">
               Dernière mise à jour : 15 avril 2026
@@ -96,10 +102,10 @@ export default function ConditionsDUtilisation() {
 
               <div className="space-y-4 text-white/80 font-one leading-relaxed">
                 <p>
-                  Les demandes de rendez-vous envoyées via Inkera sont transmises
-                  au salon concerné. La confirmation finale, les disponibilités,
-                  les tarifs et les conditions d'exécution restent sous la
-                  responsabilité du salon.
+                  Les demandes de rendez-vous envoyées via Inkera sont
+                  transmises au salon concerné. La confirmation finale, les
+                  disponibilités, les tarifs et les conditions d'exécution
+                  restent sous la responsabilité du salon.
                 </p>
                 <p>
                   L'utilisateur s'engage à fournir des informations exactes lors
@@ -115,10 +121,22 @@ export default function ConditionsDUtilisation() {
             </h2>
 
             <ul className="list-disc ml-6 space-y-3 text-white/80 font-one leading-relaxed">
-              <li>Utiliser la plateforme de manière loyale et conforme à sa finalité.</li>
-              <li>Ne pas usurper l'identité d'un tiers ni fournir de fausses informations.</li>
-              <li>Ne pas publier, transmettre ou demander de contenus illicites, injurieux ou contraires à l'ordre public.</li>
-              <li>Respecter les salons, leurs équipes, leurs horaires et leurs conditions propres de prise en charge.</li>
+              <li>
+                Utiliser la plateforme de manière loyale et conforme à sa
+                finalité.
+              </li>
+              <li>
+                Ne pas usurper l'identité d'un tiers ni fournir de fausses
+                informations.
+              </li>
+              <li>
+                Ne pas publier, transmettre ou demander de contenus illicites,
+                injurieux ou contraires à l'ordre public.
+              </li>
+              <li>
+                Respecter les salons, leurs équipes, leurs horaires et leurs
+                conditions propres de prise en charge.
+              </li>
             </ul>
           </section>
 
@@ -130,12 +148,12 @@ export default function ConditionsDUtilisation() {
             <div className="space-y-4 text-white/80 font-one leading-relaxed">
               <p>
                 Lorsque la création d'un compte est proposée, l'utilisateur est
-                responsable de la confidentialité de ses identifiants et de toute
-                activité réalisée depuis son compte.
+                responsable de la confidentialité de ses identifiants et de
+                toute activité réalisée depuis son compte.
               </p>
               <p>
-                Inkera se réserve le droit de suspendre ou supprimer un compte en
-                cas d'usage abusif, frauduleux ou contraire aux présentes
+                Inkera se réserve le droit de suspendre ou supprimer un compte
+                en cas d'usage abusif, frauduleux ou contraire aux présentes
                 conditions.
               </p>
             </div>
@@ -171,9 +189,9 @@ export default function ConditionsDUtilisation() {
             </h2>
 
             <p className="text-white/80 font-one leading-relaxed">
-              Les contenus, éléments graphiques, marques, textes et composants du
-              site demeurent protégés par le droit applicable. Toute reproduction
-              ou exploitation non autorisée est interdite.
+              Les contenus, éléments graphiques, marques, textes et composants
+              du site demeurent protégés par le droit applicable. Toute
+              reproduction ou exploitation non autorisée est interdite.
             </p>
           </section>
 
@@ -183,8 +201,8 @@ export default function ConditionsDUtilisation() {
             </h2>
 
             <p className="text-white/80 font-one leading-relaxed">
-              Les traitements de données personnelles liés à l'utilisation du site
-              sont détaillés dans la{" "}
+              Les traitements de données personnelles liés à l'utilisation du
+              site sont détaillés dans la{" "}
               <Link
                 href="/politique-de-confidentialite"
                 className="text-tertiary-400 hover:text-tertiary-300 underline underline-offset-4 transition-colors"
@@ -201,8 +219,8 @@ export default function ConditionsDUtilisation() {
             </h2>
 
             <p className="text-white/80 font-one leading-relaxed">
-              Pour toute question relative aux présentes conditions d'utilisation,
-              vous pouvez contacter Inkera à l'adresse suivante :
+              Pour toute question relative aux présentes conditions
+              d'utilisation, vous pouvez contacter Inkera à l'adresse suivante :
               <strong className="text-white"> contact@theinkera.com</strong>
             </p>
           </section>
