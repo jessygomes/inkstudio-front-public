@@ -74,7 +74,7 @@ export default function FavorisTab() {
 
   if (loading) {
     return (
-      <div className="bg-gradient-to-br from-white/[0.08] to-white/[0.02] backdrop-blur-lg border border-white/10 rounded-2xl p-4 sm:p-6 shadow-xl">
+      <div className="bg-linear-to-br from-noir-500/6 to-white/3 backdrop-blur-lg border border-white/10 rounded-2xl p-4 sm:p-6 shadow-xl">
         <div className="text-center py-12">
           <div className="animate-spin rounded-full h-8 w-8 border-2 border-tertiary-400 border-t-transparent mx-auto mb-4"></div>
           <p className="text-white/60 font-one">Chargement des favoris...</p>
@@ -84,7 +84,7 @@ export default function FavorisTab() {
   }
 
   return (
-    <div className="bg-gradient-to-br from-white/[0.08] to-white/[0.02] backdrop-blur-lg border border-white/10 rounded-2xl p-4 sm:p-6 shadow-xl">
+    <div className="bg-linear-to-br from-noir-500/6 to-white/3 backdrop-blur-lg border border-white/10 rounded-2xl p-4 sm:p-6 shadow-xl">
       {/* Header modernisé */}
       <div className="flex items-center justify-between mb-6 pb-4 border-b border-white/10">
         <div>
@@ -111,7 +111,7 @@ export default function FavorisTab() {
           </p>
           <Link
             href="/trouver-un-salon"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white rounded-xl transition-all duration-300 font-one text-sm shadow-lg hover:scale-105"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-linear-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white rounded-xl transition-all duration-300 font-one text-sm shadow-lg hover:scale-105"
           >
             Découvrir des salons
           </Link>
@@ -121,16 +121,16 @@ export default function FavorisTab() {
           {favoriteSalons.map((salon) => (
             <div
               key={salon.id}
-              className="group relative bg-gradient-to-br from-white/[0.08] to-white/[0.03] border border-white/10 hover:border-white/20 rounded-xl overflow-hidden transition-all duration-300 hover:shadow-xl"
+              className="group relative bg-linear-to-br from-noir-500/6 to-white/3 border border-white/10 hover:border-white/20 rounded-xl overflow-hidden transition-all duration-300 hover:shadow-xl"
             >
               {/* Accent bar */}
-              <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-pink-500 to-pink-600" />
+              <div className="absolute top-0 left-0 w-1 h-full bg-linear-to-b from-pink-500 to-pink-600" />
 
               <div className="p-4 pl-5">
                 {/* Header avec image et info */}
                 <div className="flex items-start gap-3 mb-3">
-                  <div className="relative flex-shrink-0">
-                    <div className="w-14 h-14 rounded-xl overflow-hidden bg-gradient-to-br from-tertiary-400/20 to-tertiary-500/20 border border-tertiary-400/30 ring-2 ring-white/5">
+                  <div className="relative shrink-0">
+                    <div className="w-14 h-14 rounded-xl overflow-hidden bg-linear-to-br from-tertiary-400/20 to-tertiary-500/20 border border-tertiary-400/30 ring-2 ring-white/5">
                       {salon.image ? (
                         <Image
                           src={salon.image}

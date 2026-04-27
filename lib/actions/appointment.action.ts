@@ -121,6 +121,7 @@ type RdvBody = {
   sketch?: string;
   estimatedPrice?: number;
   price?: number;
+  skin?: string;
   piercingZone?: string;
   piercingZoneOreille?: string | null;
   piercingZoneVisage?: string | null;

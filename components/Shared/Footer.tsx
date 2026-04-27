@@ -15,12 +15,12 @@ export default function Footer() {
       {/* Grid modernisée avec cartes */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 text-white mb-8 sm:mb-12">
         {/* Navigation */}
-        <div className="bg-gradient-to-br from-noir-500/20 to-noir-700/30 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-white/10 hover:border-tertiary-400/30 transition-colors duration-300">
+        <div className="bg-linear-to-br from-noir-500/20 to-noir-700/30 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-white/10 hover:border-tertiary-400/30 transition-colors duration-300">
           <ul className="font-two flex flex-col gap-3 sm:gap-4 text-sm">
-            <li className="bg-gradient-to-l from-tertiary-400 to-tertiary-500 bg-clip-text text-transparent uppercase font-bold text-base mb-2">
+            <li className="bg-linear-to-l from-tertiary-400 to-tertiary-500 bg-clip-text text-transparent uppercase font-bold text-base mb-2">
               Navigation
             </li>
-            {/* <li>
+            <li>
               <Link
                 href={"/"}
                 className="hover:text-tertiary-400 duration-300 transition-colors"
@@ -35,7 +35,7 @@ export default function Footer() {
               >
                 Trouver un salon
               </Link>
-            </li> */}
+            </li>
             <li>
               <Link
                 href={"/en-savoir-plus"}
@@ -48,9 +48,9 @@ export default function Footer() {
         </div>
 
         {/* Qui sommes-nous */}
-        <div className="bg-gradient-to-br from-noir-500/20 to-noir-700/30 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-white/10 hover:border-tertiary-400/30 transition-colors duration-300">
+        <div className="bg-linear-to-br from-noir-500/20 to-noir-700/30 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-white/10 hover:border-tertiary-400/30 transition-colors duration-300">
           <ul className="font-two flex flex-col gap-3 sm:gap-4 text-sm">
-            <li className="bg-gradient-to-l from-tertiary-400 to-tertiary-500 bg-clip-text text-transparent uppercase font-bold text-base mb-2">
+            <li className="bg-linear-to-l from-tertiary-400 to-tertiary-500 bg-clip-text text-transparent uppercase font-bold text-base mb-2">
               Qui sommes-nous ?
             </li>
             <li>
@@ -66,9 +66,9 @@ export default function Footer() {
         </div>
 
         {/* Légales */}
-        <div className="bg-gradient-to-br from-noir-500/20 to-noir-700/30 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-white/10 hover:border-tertiary-400/30 transition-colors duration-300">
+        <div className="bg-linear-to-br from-noir-500/20 to-noir-700/30 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-white/10 hover:border-tertiary-400/30 transition-colors duration-300">
           <ul className="font-two flex flex-col gap-3 sm:gap-4 text-sm">
-            <li className="bg-gradient-to-l from-tertiary-400 to-tertiary-500 bg-clip-text text-transparent uppercase font-bold text-base mb-2">
+            <li className="bg-linear-to-l from-tertiary-400 to-tertiary-500 bg-clip-text text-transparent uppercase font-bold text-base mb-2">
               Légales
             </li>
             <li>
@@ -99,9 +99,9 @@ export default function Footer() {
         </div>
 
         {/* Contact */}
-        <div className="bg-gradient-to-br from-noir-500/20 to-noir-700/30 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-white/10 hover:border-tertiary-400/30 transition-colors duration-300">
+        <div className="bg-linear-to-br from-noir-500/20 to-noir-700/30 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-white/10 hover:border-tertiary-400/30 transition-colors duration-300">
           <ul className="font-two flex flex-col gap-3 sm:gap-4 text-sm">
-            <li className="bg-gradient-to-l from-tertiary-400 to-tertiary-500 bg-clip-text text-transparent uppercase font-bold text-base mb-2">
+            <li className="bg-linear-to-l from-tertiary-400 to-tertiary-500 bg-clip-text text-transparent uppercase font-bold text-base mb-2">
               Contact
             </li>
             <li>
@@ -131,7 +131,7 @@ export default function Footer() {
             © {new Date().getFullYear()} Inkera. Tous droits réservés.
           </p>
           <div className="flex justify-center">
-            <div className="h-1 w-16 bg-gradient-to-r from-tertiary-400 to-tertiary-500 rounded-full opacity-60"></div>
+            <div className="h-1 w-16 bg-linear-to-r from-tertiary-400 to-tertiary-500 rounded-full opacity-60"></div>
           </div>
         </div>
       </div>

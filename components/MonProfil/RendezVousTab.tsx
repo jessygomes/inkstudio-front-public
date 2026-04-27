@@ -1,7 +1,7 @@
 /* eslint-disable react/no-unescaped-entities */
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { toSlug } from "@/lib/utils";
 import {
@@ -127,6 +127,7 @@ export default function RendezVousTab() {
   });
   const [hoverRating, setHoverRating] = useState<number | null>(null);
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
+  const listTopRef = useRef<HTMLDivElement | null>(null);
 
   //! Récupération des rendez-vous
   const fetchRdvClient = async (status?: string, page = 1, pageLimit = 10) => {
@@ -164,6 +165,10 @@ export default function RendezVousTab() {
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && rdvData && newPage <= rdvData.pagination.totalPages) {
       setCurrentPage(newPage);
+      listTopRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
     }
   };
 
@@ -313,11 +318,14 @@ export default function RendezVousTab() {
   };
 
   return (
-    <div className="bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-6 shadow-lg">
+    <div
+      ref={listTopRef}
+      className="rounded-3xl border border-white/10 bg-linear-to-br from-noir-500/6 to-white/3 p-4 shadow-xl sm:p-5"
+    >
       {/* Header */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6 pb-4 border-b border-white/10">
+      <div className="mb-5 flex flex-col gap-3 border-b border-white/10 pb-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="space-y-1">
-          <h3 className="text-white font-one font-semibold text-xl">
+          <h3 className="text-lg font-semibold text-white font-one sm:text-xl">
             Mes rendez-vous
           </h3>
           {rdvData && (
@@ -328,13 +336,13 @@ export default function RendezVousTab() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <div className="flex items-center gap-1.5 px-3 py-2 rounded-md bg-white/5 border border-white/10 text-white/70 text-xs font-one">
+          <div className="flex items-center gap-1.5 rounded-full border border-white/12 bg-white/6 px-3 py-1.5 text-xs text-white/70 font-one">
             <FaCalendarAlt className="w-3.5 h-3.5 text-tertiary-300" />
             {rdvData
               ? `Page ${rdvData.pagination.currentPage}/${rdvData.pagination.totalPages}`
               : ""}
           </div>
-          <div className="hidden sm:flex items-center gap-1 px-3 py-2 rounded-md bg-tertiary-500/10 border border-tertiary-500/30 text-tertiary-200 text-xs font-one">
+          <div className="hidden items-center gap-1 rounded-full border border-tertiary-500/35 bg-tertiary-500/10 px-3 py-1.5 text-xs text-tertiary-200 font-one sm:flex">
             <FaFilter className="w-3 h-3" />
             Filtrer par statut
           </div>
@@ -342,8 +350,8 @@ export default function RendezVousTab() {
       </div>
 
       {/* Filtres modernisés */}
-      <div className="mb-6">
-        <div className="flex flex-wrap gap-2">
+      <div className="mb-5">
+        <div className="flex flex-wrap gap-1.5 sm:gap-2">
           {[
             { label: "Tous", value: "" },
             { label: "Confirmés", value: "CONFIRMED" },
@@ -356,10 +364,10 @@ export default function RendezVousTab() {
               <button
                 key={item.value || "all"}
                 onClick={() => handleStatusChange(item.value)}
-                className={`cursor-pointer px-3.5 py-2 rounded-md text-xs font-one font-medium border transition-all duration-200 ${
+                className={`cursor-pointer rounded-full border px-3 py-1.5 text-xs font-medium transition-all duration-200 font-one ${
                   isActive
-                    ? "bg-gradient-to-r from-tertiary-400 to-tertiary-500 text-white border-transparent shadow-lg shadow-tertiary-500/30"
-                    : "bg-white/5 text-white/70 border-white/10 hover:border-white/30 hover:text-white"
+                    ? "border-transparent bg-linear-to-r from-tertiary-400 to-tertiary-500 text-white shadow-lg shadow-tertiary-500/30"
+                    : "border-white/12 bg-white/6 text-white/70 hover:border-white/25 hover:text-white"
                 }`}
               >
                 {item.label}
@@ -400,7 +408,7 @@ export default function RendezVousTab() {
           </p>
           <Link
             href="/trouver-un-salon"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white rounded-lg transition-all duration-300 font-one text-sm shadow-lg hover:-translate-y-0.5"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-linear-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white rounded-lg transition-all duration-300 font-one text-sm shadow-lg hover:-translate-y-0.5"
           >
             Prendre un rendez-vous
           </Link>
@@ -408,7 +416,7 @@ export default function RendezVousTab() {
       ) : (
         <>
           {/* Liste des rendez-vous modernisée */}
-          <div className="space-y-3">
+          <div className="space-y-2.5 grid sm:grid-cols-2 gap-3">
             {rdvData.appointments
               .sort((a, b) => {
                 const aUnread = a.conversation?.unreadCount || 0;
@@ -422,7 +430,9 @@ export default function RendezVousTab() {
                 return (
                   <div
                     key={appointment.id}
-                    className="group relative border border-white/10 bg-white/5 rounded-2xl overflow-hidden transition-all duration-300 hover:border-white/25 hover:shadow-xl"
+                    className={`group relative overflow-hidden rounded-2xl border border-white/10 bg-white/4 transition-all duration-300 hover:border-white/25 hover:bg-white/6 ${
+                      isExpanded ? "sm:col-span-2" : ""
+                    }`}
                   >
                     <div
                       className={`absolute inset-y-0 left-0 w-1 ${
@@ -436,150 +446,193 @@ export default function RendezVousTab() {
                       }`}
                     />
 
-                    <div className="p-4 sm:p-5">
-                      <div className="flex flex-col gap-4">
-                        <div className="flex flex-col gap-3 md:flex-row md:items-start md:gap-4">
-                          <div className="flex items-center gap-3 md:w-72">
-                            <div className="relative flex-shrink-0">
-                              <div className="w-12 h-12 rounded-xl overflow-hidden bg-gradient-to-br from-tertiary-400/15 to-tertiary-500/15 border border-white/10">
-                                {appointment.salon.image ? (
-                                  <Image
-                                    src={appointment.salon.image}
-                                    alt={appointment.salon.salonName}
-                                    width={48}
-                                    height={48}
-                                    className="w-full h-full object-cover"
-                                  />
-                                ) : (
-                                  <div className="w-full h-full flex items-center justify-center text-tertiary-300 text-sm font-bold">
-                                    {appointment.salon.salonName.charAt(0)}
-                                  </div>
-                                )}
-                              </div>
+                    <div className="bg-linear-to-b from-noir-700/55 to-noir-500/45 p-3 sm:p-3.5">
+                      <div className="flex flex-col gap-2.5">
+                        <div className="flex min-w-0 items-start gap-3">
+                          <div className="relative shrink-0">
+                            <div className="h-11 w-11 overflow-hidden rounded-xl border border-white/10 bg-linear-to-br from-tertiary-400/15 to-tertiary-500/15">
+                              {appointment.salon.image ? (
+                                <Image
+                                  src={appointment.salon.image}
+                                  alt={appointment.salon.salonName}
+                                  width={44}
+                                  height={44}
+                                  className="h-full w-full object-cover"
+                                />
+                              ) : (
+                                <div className="flex h-full w-full items-center justify-center text-sm font-bold text-tertiary-300">
+                                  {appointment.salon.salonName.charAt(0)}
+                                </div>
+                              )}
                             </div>
+                          </div>
 
-                            <div className="space-y-1 min-w-0">
-                              <div className="flex items-center gap-4 flex-wrap">
-                                <h4 className="font-one font-semibold text-white text-sm leading-tight line-clamp-1">
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="min-w-0">
+                                <h4 className="line-clamp-1 text-sm font-semibold leading-tight text-white font-one">
                                   {appointment.prestation}
                                 </h4>
-                                <div className="flex-shrink-0">
-                                  {getStatusBadge(appointment.status)}
-                                </div>
-                              </div>
-                              <p className="text-white/60 font-one text-xs truncate">
-                                {appointment.salon.salonName}
-                                {appointment.tatoueur && (
-                                  <> • {appointment.tatoueur.name}</>
-                                )}
-                              </p>
-                              <div className="flex items-center gap-1.5 text-[11px] text-white/60">
-                                <FaCalendarAlt className="w-3 h-3 text-tertiary-300" />
-                                {formatDate(appointment.start)}
-                                <span className="text-white/30">•</span>
-                                <FaClock className="w-3 h-3 text-tertiary-300" />
-                                {formatTime(appointment.start)}
-                                {appointment.prestationDetails &&
-                                  appointment.prestationDetails.price !==
-                                    undefined &&
-                                  (appointment.prestationDetails.price ?? 0) >
-                                    0 && (
-                                    <span className="ml-2 px-2 py-0.5 rounded-full bg-white/10 text-white text-[11px] font-semibold">
-                                      {appointment.prestationDetails.price}€
-                                    </span>
+                                <p className="mt-0.5 truncate text-xs text-white/60 font-one">
+                                  {appointment.salon.salonName}
+                                  {appointment.tatoueur && (
+                                    <> • {appointment.tatoueur.name}</>
                                   )}
+                                </p>
+                              </div>
+                              <div className="shrink-0">
+                                {getStatusBadge(appointment.status)}
                               </div>
                             </div>
-                          </div>
 
-                          <div className="flex flex-1 flex-wrap items-center gap-2 md:justify-end">
-                            {appointment.status === "CONFIRMED" && (
-                              <>
-                                <button
-                                  onClick={() => handleEditClick(appointment)}
-                                  className="cursor-pointer px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-white/80 text-xs font-one transition-all"
-                                >
-                                  Modifier
-                                </button>
-                                <button
-                                  onClick={() =>
-                                    handleCancelClick(appointment.id)
-                                  }
-                                  disabled={
-                                    cancelingAppointmentId === appointment.id
-                                  }
-                                  className="cursor-pointer px-3 py-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-200 text-xs font-one transition-all disabled:opacity-50"
-                                >
-                                  {cancelingAppointmentId === appointment.id
-                                    ? "..."
-                                    : "Annuler"}
-                                </button>
-                              </>
-                            )}
-
-                            {appointment.status === "COMPLETED" && (
-                              <button
-                                onClick={() =>
-                                  handleReviewClick(appointment.id)
-                                }
-                                className="cursor-pointer px-3 py-2 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 border border-amber-400/30 text-amber-200 text-xs font-one transition-all"
-                              >
-                                ⭐{" "}
-                                {hasReview ? "Voir l'avis" : "Donner un avis"}
-                              </button>
-                            )}
-
-                            {appointment.visio &&
-                              appointment.status === "CONFIRMED" && (
-                                <span className="px-3 py-2 rounded-lg bg-blue-500/10 border border-blue-400/30 text-blue-200 text-xs font-one">
-                                  📹 Visio
-                                </span>
-                              )}
-
-                            <Link
-                              href={`/salon/${toSlug(appointment.salon.salonName)}/${toSlug(appointment.salon.city)}-${appointment.salon.postalCode}`}
-                              className="cursor-pointer px-3 py-2 rounded-lg bg-tertiary-500/10 hover:bg-tertiary-500/20 border border-tertiary-500/30 text-tertiary-200 text-xs font-one transition-all"
-                            >
-                              Voir salon
-                            </Link>
-
-                            {appointment.conversation && (
-                              <Link
-                                href={`/mon-profil/messagerie/${appointment.conversation.id}`}
-                                className="relative cursor-pointer px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-white/80 text-xs font-one transition-all inline-flex items-center gap-2"
-                              >
-                                Messagerie
-                                {appointment.conversation.unreadCount > 0 && (
-                                  <span className="absolute -top-2 -right-2 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-tertiary-500 text-[10px] font-semibold text-white px-1">
-                                    {appointment.conversation.unreadCount > 9
-                                      ? "9+"
-                                      : appointment.conversation.unreadCount}
+                            <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[11px] text-white/70">
+                              <span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/6 px-2 py-0.5 font-one">
+                                <FaCalendarAlt className="h-3 w-3 text-tertiary-400" />
+                                {formatDate(appointment.start)}
+                              </span>
+                              <span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/6 px-2 py-0.5 font-one">
+                                <FaClock className="h-3 w-3 text-tertiary-400" />
+                                {formatTime(appointment.start)}
+                              </span>
+                              {appointment.prestationDetails &&
+                                appointment.prestationDetails.price !==
+                                  undefined &&
+                                (appointment.prestationDetails.price ?? 0) >
+                                  0 && (
+                                  <span className="inline-flex items-center rounded-full border border-white/10 bg-white/10 px-2 py-0.5 font-semibold text-white font-one">
+                                    {appointment.prestationDetails.price}€
                                   </span>
                                 )}
-                              </Link>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-1.5 border-t border-white/10 pt-2">
+                          <button
+                            onClick={() => toggleExpand(appointment.id)}
+                            className="cursor-pointer inline-flex items-center gap-1.5 rounded-lg border border-white/15 bg-white/8 px-2.5 py-1.5 text-[11px] text-white/90 transition-all hover:bg-white/12 font-one"
+                          >
+                            {isExpanded ? "Réduire" : "Détails"}
+                            {isExpanded ? (
+                              <FaChevronUp className="h-3 w-3" />
+                            ) : (
+                              <FaChevronDown className="h-3 w-3" />
+                            )}
+                          </button>
+
+                          <Link
+                            href={`/salon/${toSlug(appointment.salon.salonName)}/${toSlug(appointment.salon.city)}-${appointment.salon.postalCode}`}
+                            className="cursor-pointer rounded-lg border border-tertiary-500/35 bg-tertiary-500/10 px-2.5 py-1.5 text-[11px] text-tertiary-200 transition-all hover:bg-tertiary-500/20 font-one"
+                          >
+                            Voir salon
+                          </Link>
+
+                          {appointment.conversation && (
+                            <Link
+                              href={`/mon-profil/messagerie/${appointment.conversation.id}`}
+                              className="relative inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-white/12 bg-white/6 px-2.5 py-1.5 text-[11px] text-white/85 transition-all hover:bg-white/10 font-one"
+                            >
+                              Messagerie
+                              {appointment.conversation.unreadCount > 0 && (
+                                <span className="absolute -right-2 -top-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-tertiary-500 px-1 text-[10px] font-semibold text-white">
+                                  {appointment.conversation.unreadCount > 9
+                                    ? "9+"
+                                    : appointment.conversation.unreadCount}
+                                </span>
+                              )}
+                            </Link>
+                          )}
+
+                          {appointment.visio &&
+                            appointment.status === "CONFIRMED" && (
+                              <span className="rounded-lg border border-blue-400/30 bg-blue-500/10 px-2.5 py-1.5 text-[11px] text-blue-200 font-one">
+                                📹 Visio
+                              </span>
                             )}
 
+                          {appointment.status === "CONFIRMED" && (
+                            <>
+                              <button
+                                onClick={() => handleEditClick(appointment)}
+                                className="cursor-pointer rounded-lg border border-white/12 bg-white/6 px-2.5 py-1.5 text-[11px] text-white/85 transition-all hover:bg-white/10 font-one"
+                              >
+                                Modifier
+                              </button>
+                              <button
+                                onClick={() =>
+                                  handleCancelClick(appointment.id)
+                                }
+                                disabled={
+                                  cancelingAppointmentId === appointment.id
+                                }
+                                className="cursor-pointer rounded-lg border border-red-500/30 bg-red-500/10 px-2.5 py-1.5 text-[11px] text-red-200 transition-all hover:bg-red-500/20 disabled:opacity-50 font-one"
+                              >
+                                {cancelingAppointmentId === appointment.id
+                                  ? "..."
+                                  : "Annuler"}
+                              </button>
+                            </>
+                          )}
+
+                          {appointment.status === "COMPLETED" && (
                             <button
-                              onClick={() => toggleExpand(appointment.id)}
-                              className="cursor-pointer px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-white/80 text-xs font-one transition-all flex items-center gap-2"
+                              onClick={() =>
+                                handleReviewClick(appointment.id)
+                              }
+                              className="cursor-pointer rounded-lg border border-amber-400/30 bg-amber-500/10 px-2.5 py-1.5 text-[11px] text-amber-200 transition-all hover:bg-amber-500/20 font-one"
                             >
-                              {isExpanded ? "Réduire" : "Détails"}
-                              {isExpanded ? (
-                                <FaChevronUp className="w-3 h-3" />
-                              ) : (
-                                <FaChevronDown className="w-3 h-3" />
-                              )}
+                              ⭐ {hasReview ? "Voir l'avis" : "Donner un avis"}
                             </button>
-                          </div>
+                          )}
                         </div>
                       </div>
 
                       {isExpanded && (
-                        <div className="border-t border-white/10 bg-white/3 p-4 sm:p-5 space-y-4 mt-2">
-                          <div className="grid gap-4 md:grid-cols-3">
-                            <div className="rounded-lg border border-white/10 bg-white/5 p-3 space-y-2">
+                        <div className="mt-2 space-y-3 pt-2">
+                          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                            <div className="rounded-lg border border-white/10 bg-white/5 px-2.5 py-2">
+                              <p className="text-[10px] uppercase tracking-wide text-white/45 font-one">
+                                Date
+                              </p>
+                              <p className="mt-0.5 text-xs text-white font-one">
+                                {formatDate(appointment.start)}
+                              </p>
+                            </div>
+                            <div className="rounded-lg border border-white/10 bg-white/5 px-2.5 py-2">
+                              <p className="text-[10px] uppercase tracking-wide text-white/45 font-one">
+                                Heure
+                              </p>
+                              <p className="mt-0.5 text-xs text-white font-one">
+                                {formatTime(appointment.start)}
+                              </p>
+                            </div>
+                            <div className="rounded-lg border border-white/10 bg-white/5 px-2.5 py-2">
+                              <p className="text-[10px] uppercase tracking-wide text-white/45 font-one">
+                                Durée
+                              </p>
+                              <p className="mt-0.5 text-xs text-white font-one">
+                                {appointment.duration
+                                  ? `${appointment.duration} min`
+                                  : "Non spécifié"}
+                              </p>
+                            </div>
+                            <div className="rounded-lg border border-white/10 bg-white/5 px-2.5 py-2">
+                              <p className="text-[10px] uppercase tracking-wide text-white/45 font-one">
+                                Prix
+                              </p>
+                              <p className="mt-0.5 text-xs text-white font-one">
+                                {appointment.prestationDetails?.price &&
+                                appointment.prestationDetails.price > 0
+                                  ? `${appointment.prestationDetails.price}€`
+                                  : "Non spécifié"}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="grid gap-3 md:grid-cols-3">
+                            <div className="space-y-2 rounded-xl border border-white/10 bg-white/5 p-3">
                               <div className="flex items-center justify-between text-xs text-white/60">
-                                <span>Informations</span>
+                                <span>Infos rendez-vous</span>
                                 {getStatusBadge(appointment.status)}
                               </div>
                               <div className="space-y-1 text-sm text-white">
@@ -590,35 +643,11 @@ export default function RendezVousTab() {
                                   {appointment.salon.city}{" "}
                                   {appointment.salon.postalCode}
                                 </p>
-                                <p className="text-white/80 text-xs pt-2">
-                                  Durée
-                                </p>
-                                <p className="text-white text-xs">
-                                  {appointment.duration
-                                    ? `${appointment.duration} min`
-                                    : "Non spécifié"}
-                                </p>
-                                {appointment.prestationDetails &&
-                                  appointment.prestationDetails.price !==
-                                    undefined &&
-                                  appointment.prestationDetails.price > 0 && (
-                                    <>
-                                      <p className="text-white/80 text-xs pt-2">
-                                        Prix
-                                      </p>
-                                      <p className="text-white text-xs">
-                                        {appointment.prestationDetails.price !==
-                                        undefined
-                                          ? `${appointment.prestationDetails.price}€`
-                                          : "Non spécifié"}
-                                      </p>
-                                    </>
-                                  )}
                               </div>
                             </div>
 
                             {appointment.prestationDetails && (
-                              <div className="rounded-lg border border-white/10 bg-white/5 p-3 space-y-3 md:col-span-2">
+                              <div className="space-y-3 rounded-xl border border-white/10 bg-white/5 p-3 md:col-span-2">
                                 <div className="flex items-center justify-between text-xs text-white/60">
                                   <span>Brief</span>
                                   <span className="text-white/60">Projet</span>
@@ -696,11 +725,11 @@ export default function RendezVousTab() {
 
                                 {(appointment.prestationDetails.reference ||
                                   appointment.prestationDetails.sketch) && (
-                                  <div className="pt-2 border-t border-white/10">
+                                  <div className="border-t border-white/10 pt-2">
                                     <p className="text-white/60 text-xs mb-2">
                                       Références
                                     </p>
-                                    <div className="flex gap-3 flex-wrap">
+                                    <div className="flex flex-wrap gap-2">
                                       {appointment.prestationDetails
                                         .reference && (
                                         <div className="relative">
@@ -710,9 +739,9 @@ export default function RendezVousTab() {
                                                 .reference
                                             }
                                             alt="Image de référence"
-                                            width={120}
-                                            height={120}
-                                            className="w-30 h-30 object-cover rounded-lg border border-white/15"
+                                            width={96}
+                                            height={96}
+                                            className="h-24 w-24 rounded-lg border border-white/15 object-cover"
                                           />
                                           <span className="absolute -bottom-1 -right-1 bg-tertiary-500 text-white text-[11px] px-2 py-0.5 rounded">
                                             Référence
@@ -727,9 +756,9 @@ export default function RendezVousTab() {
                                                 .sketch
                                             }
                                             alt="Croquis"
-                                            width={120}
-                                            height={120}
-                                            className="w-30 h-30 object-cover rounded-lg border border-white/15"
+                                            width={96}
+                                            height={96}
+                                            className="h-24 w-24 rounded-lg border border-white/15 object-cover"
                                           />
                                           <span className="absolute -bottom-1 -right-1 bg-blue-500 text-white text-[11px] px-2 py-0.5 rounded">
                                             Croquis
@@ -743,8 +772,8 @@ export default function RendezVousTab() {
                             )}
                           </div>
 
-                          <div className="grid gap-4 md:grid-cols-2">
-                            <div className="rounded-lg border border-white/10 bg-white/5 p-3">
+                          <div className="grid gap-3 md:grid-cols-2">
+                            <div className="rounded-xl border border-white/10 bg-white/5 p-3">
                               <p className="text-white/60 text-xs mb-3">
                                 Contacts salon
                               </p>
@@ -783,7 +812,7 @@ export default function RendezVousTab() {
                               </div>
                             </div>
 
-                            <div className="rounded-lg border border-white/10 bg-white/5 p-3">
+                            <div className="rounded-xl border border-white/10 bg-white/5 p-3">
                               <p className="text-white/60 text-xs mb-3">
                                 Contacts tatoueur
                               </p>
@@ -819,7 +848,7 @@ export default function RendezVousTab() {
                           </div>
 
                           {appointment.status === "COMPLETED" && (
-                            <div className="rounded-lg border border-amber-400/30 bg-amber-500/5 p-4">
+                            <div className="rounded-xl border border-amber-400/30 bg-amber-500/5 p-3.5">
                               <div className="flex items-center gap-2 mb-3">
                                 <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/15 text-lg">
                                   ⭐
@@ -980,7 +1009,7 @@ export default function RendezVousTab() {
                                       handleSubmitReview(appointment)
                                     }
                                     disabled={reviewSubmitting}
-                                    className="w-full px-4 py-2.5 rounded-lg bg-gradient-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white text-xs font-one transition-all disabled:opacity-60 flex items-center justify-center gap-2"
+                                    className="w-full px-4 py-2.5 rounded-lg bg-linear-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white text-xs font-one transition-all disabled:opacity-60 flex items-center justify-center gap-2"
                                   >
                                     {reviewSubmitting ? (
                                       <>

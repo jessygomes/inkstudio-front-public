@@ -20,6 +20,7 @@ import { createAppointmentByClient } from "@/lib/actions/appointment.action";
 import { uploadFiles } from "@/lib/utils/uploadthing";
 import imageCompression from "browser-image-compression";
 import { FlashProps, PiercingZone } from "@/lib/type";
+import { SkinToneOption } from "./types";
 
 type AppointmentRequestForm = z.infer<typeof appointmentRequestSchema>;
 
@@ -163,6 +164,45 @@ export function useBookingLogic({
     if (defaultTatoueurId) setValue("tatoueurId", defaultTatoueurId);
   }, [defaultTatoueurId, setValue]);
 
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchSkinTones = async () => {
+      try {
+        setIsLoadingSkinTones(true);
+        const backUrl = process.env.NEXT_PUBLIC_BACK_URL || "";
+        const response = await fetch(`${backUrl}/appointments/skin-tones`, {
+          method: "GET",
+          cache: "no-store",
+        });
+
+        if (!response.ok) {
+          throw new Error(`Erreur lors du chargement (${response.status})`);
+        }
+
+        const data = (await response.json()) as SkinToneOption[];
+        if (isMounted) {
+          setSkinToneOptions(Array.isArray(data) ? data : []);
+        }
+      } catch (error) {
+        console.error("Erreur lors du chargement des teintes de peau:", error);
+        if (isMounted) {
+          setSkinToneOptions([]);
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoadingSkinTones(false);
+        }
+      }
+    };
+
+    fetchSkinTones();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   // États pour les créneaux
   const [selectedTatoueur, setSelectedTatoueur] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<string>(
@@ -183,6 +223,8 @@ export function useBookingLogic({
     useState<string>("");
   const [isLoadingPiercingZones, setIsLoadingPiercingZones] = useState(false);
   const [piercingPrice, setPiercingPrice] = useState<number | null>(null);
+  const [skinToneOptions, setSkinToneOptions] = useState<SkinToneOption[]>([]);
+  const [isLoadingSkinTones, setIsLoadingSkinTones] = useState(false);
 
   // États pour les images
   const [sketchFile, setSketchFile] = useState<File | null>(null);
@@ -237,6 +279,7 @@ export function useBookingLogic({
         "client.email",
         "client.phone",
         "client.birthDate",
+        "details.skin",
       ],
       3: [],
       4: [],
@@ -453,6 +496,12 @@ export function useBookingLogic({
     }
   }, [prestation, selectedFlashId]);
 
+  useEffect(() => {
+    if (prestation === "PIERCING") {
+      setValue("details.skin", undefined, { shouldValidate: true });
+    }
+  }, [prestation, setValue]);
+
   // Gestion du prix du piercing
   useEffect(() => {
     if (prestation === "PIERCING" && selectedPiercingService) {
@@ -539,6 +588,9 @@ export function useBookingLogic({
         ? `\n\nFlash sélectionné: ${selectedFlashLabel}`
         : "";
       const baseDescription = data.details?.description || data.message || "";
+      const shouldSendSkin = ["TATTOO", "PROJET", "RETOUCHE"].includes(
+        data.prestation,
+      );
 
       const payload = {
         title: `${data.prestation} - ${data.client.firstName} ${data.client.lastName}`,
@@ -560,6 +612,7 @@ export function useBookingLogic({
         zone: data.details?.zone || "",
         size: data.details?.size || "",
         colorStyle: data.details?.colorStyle || "",
+        skin: shouldSendSkin ? data.details?.skin || undefined : undefined,
         reference: uploadedFileUrls.reference || data.details?.reference || "",
         sketch: uploadedFileUrls.sketch || data.details?.sketch || "",
         piercingZone: selectedPiercingZone || undefined,
@@ -665,6 +718,8 @@ export function useBookingLogic({
     isLoadingPiercingZones,
     setIsLoadingPiercingZones,
     piercingPrice,
+    skinToneOptions,
+    isLoadingSkinTones,
 
     // Images
     sketchFile,

@@ -44,6 +44,8 @@ export default function BookingFlow({
     setSelectedPiercingService,
     isLoadingPiercingZones,
     piercingPrice,
+    skinToneOptions,
+    isLoadingSkinTones,
     sketchFile,
     setSketchFile,
     referenceFile,
@@ -79,7 +81,7 @@ export default function BookingFlow({
 
   return (
     <FormProvider {...methods}>
-      <div className="min-h-screen bg-gradient-to-b from-noir-500 via-noir-600 to-noir-700 py-8 sm:py-12 px-2 sm:px-4 rounded-xl flex items-center justify-center">
+      <div className="min-h-screen bg-linear-to-b from-noir-500 via-noir-600 to-noir-700 py-8 sm:py-12 px-2 sm:px-4 rounded-xl flex items-center justify-center">
         <div className="w-full max-w-5xl">
           {/* Header avec indicateur de progression */}
           <div className="mb-8 sm:mb-12">
@@ -120,6 +122,8 @@ export default function BookingFlow({
                 flashes={flashes}
                 selectedFlashId={selectedFlashId}
                 onFlashChange={handleFlashChange}
+                skinToneOptions={skinToneOptions}
+                isLoadingSkinTones={isLoadingSkinTones}
               />
             )}
 
@@ -158,6 +162,7 @@ export default function BookingFlow({
                 salon={salon}
                 referenceFile={referenceFile}
                 sketchFile={sketchFile}
+                skinToneOptions={skinToneOptions}
               />
             )}
 
@@ -168,7 +173,7 @@ export default function BookingFlow({
                   type="button"
                   onClick={goPrev}
                   disabled={isSubmitting}
-                  className="cursor-pointer inline-flex items-center justify-center gap-2 px-8 py-2 border border-white/20 text-white rounded-md font-one hover:bg-white/[0.12] transition-all duration-300 backdrop-blur-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="cursor-pointer inline-flex items-center justify-center gap-2 px-8 py-2 border border-white/20 text-white rounded-md font-one hover:bg-white/12 transition-all duration-300 backdrop-blur-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <svg
                     className="w-5 h-5"
@@ -192,7 +197,7 @@ export default function BookingFlow({
                   type="button"
                   onClick={goNext}
                   disabled={isSubmitting}
-                  className="cursor-pointer inline-flex items-center justify-center gap-2 px-8 py-2 bg-gradient-to-r from-tertiary-500 to-tertiary-400 text-white rounded-md font-one transition-all duration-300 transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed ml-auto"
+                  className="cursor-pointer inline-flex items-center justify-center gap-2 px-8 py-2 bg-linear-to-r from-tertiary-500 to-tertiary-400 text-white rounded-md font-one transition-all duration-300 transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed ml-auto"
                 >
                   Suivant
                   <svg
@@ -213,7 +218,7 @@ export default function BookingFlow({
                 <button
                   type="submit"
                   disabled={isSubmitting || confirmDisabled}
-                  className="cursor-pointer inline-flex items-center justify-center gap-2 px-8 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white text-xs sm:text-base rounded-md font-one hover:from-green-600 hover:to-green-700 transition-all duration-300 transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed ml-auto"
+                  className="cursor-pointer inline-flex items-center justify-center gap-2 px-8 py-2 bg-linear-to-r from-green-500 to-green-600 text-white text-xs sm:text-base rounded-md font-one hover:from-green-600 hover:to-green-700 transition-all duration-300 transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed ml-auto"
                 >
                   {isSubmitting ? (
                     <>

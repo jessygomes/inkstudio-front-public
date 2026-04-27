@@ -3,8 +3,10 @@ import Image from "next/image";
 import Section from "./Section";
 import TextInput from "./TextInput";
 import TextArea from "./TextArea";
+import SkinToneSelect from "./SkinToneSelect";
 import ImageUploader from "../../Shared/ImageUploader";
 import { FlashProps, PiercingZone, PiercingService } from "@/lib/type";
+import { SkinToneOption } from "./types";
 
 interface ClientInfoFormProps {
   prestation: string;
@@ -22,6 +24,8 @@ interface ClientInfoFormProps {
   flashes?: FlashProps[];
   selectedFlashId?: string;
   onFlashChange?: (flashId: string) => void;
+  skinToneOptions?: SkinToneOption[];
+  isLoadingSkinTones?: boolean;
 }
 
 export default function ClientInfoForm({
@@ -40,6 +44,8 @@ export default function ClientInfoForm({
   flashes = [],
   selectedFlashId = "",
   onFlashChange,
+  skinToneOptions = [],
+  isLoadingSkinTones = false,
 }: ClientInfoFormProps) {
   const selectedZone = piercingZones.find((z) => z.id === selectedPiercingZone);
   const selectedZoneServices = selectedZone?.services || [];
@@ -82,6 +88,10 @@ export default function ClientInfoForm({
     prestation === "RETOUCHE";
 
   const showFlashSelector = prestation === "TATTOO";
+  const showSkinToneField =
+    prestation === "PROJET" ||
+    prestation === "TATTOO" ||
+    prestation === "RETOUCHE";
   const selectedFlash = flashes.find((f) => f.id === selectedFlashId);
   const hasSelectedFlash = showFlashSelector && !!selectedFlashId;
 
@@ -137,7 +147,7 @@ export default function ClientInfoForm({
                 <select
                   value={selectedFlashId}
                   onChange={(e) => onFlashChange?.(e.target.value)}
-                  className="w-full p-2.5 bg-white/[0.05] border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-tertiary-400 focus:ring-1 focus:ring-tertiary-400/30 transition-all"
+                  className="w-full p-2.5 bg-white/5 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-tertiary-400 focus:ring-1 focus:ring-tertiary-400/30 transition-all"
                 >
                   <option value="">Aucun flash sélectionné</option>
                   {flashes.map((flash) => {
@@ -159,7 +169,7 @@ export default function ClientInfoForm({
                 </select>
 
                 {selectedFlash && selectedFlash.imageUrl && (
-                  <div className="mx-auto w-full max-w-[220px] rounded-lg overflow-hidden border border-white/10 bg-white/[0.03] text-center">
+                  <div className="mx-auto w-full max-w-55 rounded-lg overflow-hidden border border-white/10 bg-white/3 text-center">
                     <div className="relative aspect-square w-full">
                       <Image
                         src={selectedFlash.imageUrl}
@@ -201,6 +211,17 @@ export default function ClientInfoForm({
               />
             )}
 
+            {showSkinToneField && (
+              <SkinToneSelect
+                name="details.skin"
+                label="Teinte de peau"
+                options={skinToneOptions}
+                errors={errors}
+                loading={isLoadingSkinTones}
+                helperText="Requis pour les prestations tatouage, retouche et projet."
+              />
+            )}
+
             {prestation === "PIERCING" ? (
               // Piercing: zone et service
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -209,7 +230,7 @@ export default function ClientInfoForm({
                     Zone du piercing
                   </label>
                   {isLoadingPiercingZones ? (
-                    <div className="w-full p-2.5 bg-white/[0.05] border border-white/10 rounded-lg text-white/50 text-sm">
+                    <div className="w-full p-2.5 bg-white/5 border border-white/10 rounded-lg text-white/50 text-sm">
                       Chargement...
                     </div>
                   ) : piercingZones.length === 0 ? (
@@ -223,7 +244,7 @@ export default function ClientInfoForm({
                         onPiercingZoneChange(e.target.value);
                         onPiercingServiceChange("");
                       }}
-                      className="w-full p-2.5 bg-white/[0.05] border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-tertiary-400 focus:ring-1 focus:ring-tertiary-400/30 transition-all"
+                      className="w-full p-2.5 bg-white/5 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-tertiary-400 focus:ring-1 focus:ring-tertiary-400/30 transition-all"
                     >
                       <option value="">Sélectionnez une zone</option>
                       {piercingZones.map((zone) => (
@@ -243,7 +264,7 @@ export default function ClientInfoForm({
                     <select
                       value={selectedPiercingService}
                       onChange={(e) => onPiercingServiceChange(e.target.value)}
-                      className="w-full p-2.5 bg-white/[0.05] border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-tertiary-400 focus:ring-1 focus:ring-tertiary-400/30 transition-all"
+                      className="w-full p-2.5 bg-white/5 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-tertiary-400 focus:ring-1 focus:ring-tertiary-400/30 transition-all"
                     >
                       <option value="">Sélectionnez un type</option>
                       {selectedZoneServices.map((service: PiercingService) => (
@@ -303,7 +324,7 @@ export default function ClientInfoForm({
                   <label className="text-xs text-white/70 font-one">
                     Référence principale
                   </label>
-                  <div className="bg-white/[0.02] rounded-lg p-3 border border-white/10">
+                  <div className="bg-white/2 rounded-lg p-3 border border-white/10">
                     <ImageUploader
                       file={referenceFile}
                       onFileSelect={onReferenceChange}
@@ -315,7 +336,7 @@ export default function ClientInfoForm({
                   <label className="text-xs text-white/70 font-one">
                     Croquis / Référence secondaire
                   </label>
-                  <div className="bg-white/[0.02] rounded-lg p-3 border border-white/10">
+                  <div className="bg-white/2 rounded-lg p-3 border border-white/10">
                     <ImageUploader
                       file={sketchFile}
                       onFileSelect={onSketchChange}

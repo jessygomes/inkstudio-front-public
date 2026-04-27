@@ -3,6 +3,7 @@ export { default as StepBadge } from "./StepBadge";
 export { default as Section } from "./Section";
 export { default as TextInput } from "./TextInput";
 export { default as TextArea } from "./TextArea";
+export { default as SkinToneSelect } from "./SkinToneSelect";
 export { default as StepIndicator } from "./StepIndicator";
 
 // Composants d'étapes

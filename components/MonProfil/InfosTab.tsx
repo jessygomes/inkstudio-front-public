@@ -16,132 +16,102 @@ type Props = {
 };
 
 export default function InfosTab({ user }: Props) {
+  const infoItems = [
+    {
+      label: "Pseudo",
+      value: user.clientProfile?.pseudo || "Non renseigné",
+      icon: <FaUser className="h-3 w-3 text-tertiary-400" />,
+      iconClassName: "bg-tertiary-500/15",
+    },
+    {
+      label: "Prénom",
+      value: user.firstName || "Non renseigné",
+      icon: <FaUser className="h-3 w-3 text-white/70" />,
+      iconClassName: "bg-white/10",
+    },
+    {
+      label: "Nom",
+      value: user.lastName || "Non renseigné",
+      icon: <FaUser className="h-3 w-3 text-white/70" />,
+      iconClassName: "bg-white/10",
+    },
+    {
+      label: "Email",
+      value: user.email || "Non renseigné",
+      icon: <FaEnvelope className="h-3 w-3 text-emerald-400" />,
+      iconClassName: "bg-emerald-500/15",
+    },
+    {
+      label: "Téléphone",
+      value: user.phone || "Non renseigné",
+      icon: <FaPhone className="h-3 w-3 text-amber-400" />,
+      iconClassName: "bg-amber-500/15",
+    },
+    {
+      label: "Date de naissance",
+      value: user.clientProfile?.birthDate
+        ? new Date(user.clientProfile.birthDate).toLocaleDateString("fr-FR", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          })
+        : "Non renseignée",
+      icon: <FaBirthdayCake className="h-3 w-3 text-pink-400" />,
+      iconClassName: "bg-pink-500/15",
+    },
+    {
+      label: "Ville",
+      value: user.clientProfile?.city || "Non renseignée",
+      icon: <FaMapMarkerAlt className="h-3 w-3 text-purple-400" />,
+      iconClassName: "bg-purple-500/15",
+    },
+    {
+      label: "Code postal",
+      value: user.clientProfile?.postalCode || "Non renseigné",
+      icon: <FaMapMarkerAlt className="h-3 w-3 text-white/70" />,
+      iconClassName: "bg-white/10",
+    },
+  ];
+
   return (
-    <div className="bg-gradient-to-br from-white/[0.08] to-white/[0.02] backdrop-blur-lg border border-white/10 rounded-2xl p-4 sm:p-6 shadow-xl">
-      {/* Header modernisé */}
-      <div className="flex items-center justify-between mb-6 pb-4 border-b border-white/10">
+    <div className="rounded-3xl border border-white/10 bg-linear-to-br from-noir-500/6 to-white/3 p-4 shadow-xl backdrop-blur-lg sm:p-5">
+      <div className="mb-5 flex items-center justify-between border-b border-white/10 pb-4">
         <div>
-          <h3 className="text-white font-one font-semibold text-lg sm:text-xl mb-1">
+          <h3 className="mb-1 text-lg font-semibold text-white font-one sm:text-xl">
             Mes informations
           </h3>
           <p className="text-white/60 font-one text-xs">
             Profil et coordonnées
           </p>
         </div>
-        <div className="w-10 h-10 bg-tertiary-500/20 rounded-xl flex items-center justify-center">
-          <FaUser className="w-5 h-5 text-tertiary-400" />
+        <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-tertiary-500/15 border border-tertiary-500/25">
+          <FaUser className="h-4 w-4 text-tertiary-400" />
         </div>
       </div>
 
-      {/* Grille d'informations modernisée */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {/* Card Pseudo */}
-        <div className="group relative bg-gradient-to-br from-white/[0.08] to-white/[0.03] border border-white/10 hover:border-white/20 rounded-xl p-4 transition-all duration-300">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-6 h-6 rounded-lg bg-tertiary-500/20 flex items-center justify-center">
-              <FaUser className="w-3 h-3 text-tertiary-400" />
+      <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 xl:grid-cols-3">
+        {infoItems.map((item) => (
+          <div
+            key={item.label}
+            className="group rounded-2xl border border-white/10 bg-white/4 px-3.5 py-3 transition-all duration-300 hover:border-white/20 hover:bg-white/6"
+          >
+            <div className="flex items-start gap-3">
+              <div
+                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-white/10 ${item.iconClassName}`}
+              >
+                {item.icon}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-[10px] uppercase tracking-[0.18em] text-white/45 font-one">
+                  {item.label}
+                </p>
+                <p className="mt-1 line-clamp-2 wrap-break-word text-sm text-white font-one">
+                  {item.value}
+                </p>
+              </div>
             </div>
-            <label className="text-white/70 font-one text-xs uppercase tracking-wider">
-              Pseudo
-            </label>
           </div>
-          <p className="text-white font-one text-sm">
-            {user.clientProfile?.pseudo || "Non renseigné"}
-          </p>
-        </div>
-
-        {/* Card Prénom */}
-        <div className="group relative bg-gradient-to-br from-white/[0.08] to-white/[0.03] border border-white/10 hover:border-white/20 rounded-xl p-4 transition-all duration-300">
-          <label className="text-white/70 font-one text-xs uppercase tracking-wider block mb-2">
-            Prénom
-          </label>
-          <p className="text-white font-one text-sm">{user.firstName}</p>
-        </div>
-
-        {/* Card Nom */}
-        <div className="group relative bg-gradient-to-br from-white/[0.08] to-white/[0.03] border border-white/10 hover:border-white/20 rounded-xl p-4 transition-all duration-300">
-          <label className="text-white/70 font-one text-xs uppercase tracking-wider block mb-2">
-            Nom
-          </label>
-          <p className="text-white font-one text-sm">{user.lastName}</p>
-        </div>
-
-        {/* Card Email */}
-        <div className="group relative bg-gradient-to-br from-white/[0.08] to-white/[0.03] border border-white/10 hover:border-white/20 rounded-xl p-4 transition-all duration-300">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-6 h-6 rounded-lg bg-emerald-500/20 flex items-center justify-center">
-              <FaEnvelope className="w-3 h-3 text-emerald-400" />
-            </div>
-            <label className="text-white/70 font-one text-xs uppercase tracking-wider">
-              Email
-            </label>
-          </div>
-          <p className="text-white font-one text-sm truncate">{user.email}</p>
-        </div>
-
-        {/* Card Téléphone */}
-        <div className="group relative bg-gradient-to-br from-white/[0.08] to-white/[0.03] border border-white/10 hover:border-white/20 rounded-xl p-4 transition-all duration-300">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-6 h-6 rounded-lg bg-amber-500/20 flex items-center justify-center">
-              <FaPhone className="w-3 h-3 text-amber-400" />
-            </div>
-            <label className="text-white/70 font-one text-xs uppercase tracking-wider">
-              Téléphone
-            </label>
-          </div>
-          <p className="text-white font-one text-sm">{user.phone}</p>
-        </div>
-
-        {/* Card Date de naissance */}
-        <div className="group relative bg-gradient-to-br from-white/[0.08] to-white/[0.03] border border-white/10 hover:border-white/20 rounded-xl p-4 transition-all duration-300">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-6 h-6 rounded-lg bg-pink-500/20 flex items-center justify-center">
-              <FaBirthdayCake className="w-3 h-3 text-pink-400" />
-            </div>
-            <label className="text-white/70 font-one text-xs uppercase tracking-wider">
-              Date de naissance
-            </label>
-          </div>
-          <p className="text-white font-one text-sm">
-            {user.clientProfile?.birthDate
-              ? new Date(user.clientProfile.birthDate).toLocaleDateString(
-                  "fr-FR",
-                  {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  }
-                )
-              : "Non renseignée"}
-          </p>
-        </div>
-
-        {/* Card Ville */}
-        <div className="group relative bg-gradient-to-br from-white/[0.08] to-white/[0.03] border border-white/10 hover:border-white/20 rounded-xl p-4 transition-all duration-300">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-6 h-6 rounded-lg bg-purple-500/20 flex items-center justify-center">
-              <FaMapMarkerAlt className="w-3 h-3 text-purple-400" />
-            </div>
-            <label className="text-white/70 font-one text-xs uppercase tracking-wider">
-              Ville
-            </label>
-          </div>
-          <p className="text-white font-one text-sm">
-            {user.clientProfile?.city || "Non renseignée"}
-          </p>
-        </div>
-
-        {/* Card Code postal */}
-        {user.clientProfile?.postalCode && (
-          <div className="group relative bg-gradient-to-br from-white/[0.08] to-white/[0.03] border border-white/10 hover:border-white/20 rounded-xl p-4 transition-all duration-300">
-            <label className="text-white/70 font-one text-xs uppercase tracking-wider block mb-2">
-              Code postal
-            </label>
-            <p className="text-white font-one text-sm">
-              {user.clientProfile.postalCode}
-            </p>
-          </div>
-        )}
+        ))}
       </div>
     </div>
   );

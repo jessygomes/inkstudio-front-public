@@ -15,6 +15,20 @@ export interface PiercingZone {
   services: PiercingService[];
 }
 
+export type SkinToneValue =
+  | "tres_claire"
+  | "claire"
+  | "claire_moyenne"
+  | "mate"
+  | "foncee"
+  | "tres_foncee";
+
+export interface SkinToneOption {
+  value: SkinToneValue;
+  label: string;
+  previewHex: string;
+}
+
 export interface TimeSlot {
   start: string;
   end: string;

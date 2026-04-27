@@ -2,6 +2,7 @@
 import React from "react";
 import Section from "./Section";
 import ReferenceImages from "./ReferenceImages";
+import { SkinToneOption } from "./types";
 
 interface RecapStepProps {
   prestation: string;
@@ -16,6 +17,7 @@ interface RecapStepProps {
   salon: any;
   referenceFile?: File | null;
   sketchFile?: File | null;
+  skinToneOptions?: SkinToneOption[];
 }
 
 export default function RecapStep({
@@ -31,12 +33,16 @@ export default function RecapStep({
   salon,
   referenceFile,
   sketchFile,
+  skinToneOptions = [],
 }: RecapStepProps) {
   // Trouver le nom du tatoueur
   const tatoueur = artists.find((a) => a.id === selectedTatoueur);
 
   // Trouver la zone de piercing
   const piercingZone = piercingZones.find((pz) => pz.id === pierc);
+  const selectedSkinTone = skinToneOptions.find(
+    (option) => option.value === formData?.details?.skin,
+  );
 
   return (
     <Section title="Récapitulatif de votre demande">
@@ -100,7 +106,7 @@ export default function RecapStep({
         </div>
 
         {/* Informations prestation */}
-        <div className="bg-white/[0.03] p-4 rounded-md border border-white/10">
+        <div className="bg-white/3 p-4 rounded-md border border-white/10">
           <h3 className="text-white font-one mb-3 flex items-center gap-2">
             <svg
               className="w-4 h-4 text-tertiary-400"
@@ -184,6 +190,22 @@ export default function RecapStep({
                     <p className="text-white font-one">
                       {formData.details.colorStyle}
                     </p>
+                  </div>
+                )}
+                {selectedSkinTone && (
+                  <div>
+                    <p className="text-white/60 font-one text-xs mb-0.5">
+                      Teinte de peau
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <span
+                        className="h-4 w-4 rounded-full border border-white/15"
+                        style={{ backgroundColor: selectedSkinTone.previewHex }}
+                      />
+                      <p className="text-white font-one">
+                        {selectedSkinTone.label}
+                      </p>
+                    </div>
                   </div>
                 )}
                 {formData?.details?.description && (
@@ -309,7 +331,7 @@ export default function RecapStep({
         {/* Avertissement */}
         <div className="bg-orange-500/10 border border-orange-500/30 rounded-md p-4">
           <div className="flex items-start gap-3">
-            <div className="flex-shrink-0 w-8 h-8 bg-orange-500/20 rounded-full flex items-center justify-center">
+            <div className="shrink-0 w-8 h-8 bg-orange-500/20 rounded-full flex items-center justify-center">
               <svg
                 className="w-4 h-4 text-orange-400"
                 fill="none"

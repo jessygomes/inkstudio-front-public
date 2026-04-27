@@ -89,8 +89,8 @@ export default function MesAvisTab() {
 
   return (
     <>
-      <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.08] to-white/[0.02] p-6 backdrop-blur-lg shadow-xl">
-        <div className="flex items-center justify-between mb-6">
+      <div className="rounded-2xl border border-white/10 bg-linear-to-br from-noir-500/6 to-white/3 p-5 backdrop-blur-lg shadow-xl sm:p-6">
+        <div className="mb-5 flex items-center justify-between border-b border-white/10 pb-4">
           <h3 className="text-white font-one font-semibold text-lg">
             Mes avis
           </h3>
@@ -111,24 +111,24 @@ export default function MesAvisTab() {
             </p>
             <Link
               href="/trouver-un-salon"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white rounded-xl transition-all duration-300 font-one text-sm shadow-lg hover:scale-105"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-linear-to-br from-noir-500/6 to-white/3 hover:from-tertiary-500 hover:to-tertiary-600 text-white rounded-xl transition-all duration-300 font-one text-sm shadow-lg hover:scale-105"
             >
               Découvrir des salons
             </Link>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {reviews.map((review) => (
               <div
                 key={review.id}
-                className="border border-white/10 rounded-lg p-4 bg-white/5 hover:bg-white/8 transition-all duration-300 space-y-3"
+                className="rounded-2xl border border-white/10 bg-linear-to-br from-noir-500/6 to-white/3 p-3.5 sm:p-4"
               >
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1 min-w-0">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0 flex-1">
                     {/* Salon Info */}
                     {review.salon && (
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className="w-10 h-10 rounded-lg overflow-hidden bg-gradient-to-br from-tertiary-400/20 to-tertiary-500/20 border border-tertiary-400/30 flex-shrink-0">
+                      <div className="mb-3 flex items-center gap-3">
+                        <div className="h-10 w-10 shrink-0 overflow-hidden rounded-xl border border-tertiary-400/30 bg-linear-to-br from-tertiary-400/20 to-tertiary-500/20">
                           {review.salon.image ? (
                             <Image
                               src={review.salon.image}
@@ -147,110 +147,110 @@ export default function MesAvisTab() {
                           href={`/salon/${toSlug(review.salon.salonName)}/${toSlug(
                             review.salon.city,
                           )}-${review.salon.postalCode}`}
-                          className="flex-1 min-w-0 hover:opacity-80 transition-opacity"
+                          className="min-w-0 flex-1 transition-opacity hover:opacity-80"
                         >
-                          <p className="text-white font-one font-semibold text-sm truncate">
+                          <p className="truncate text-sm font-semibold text-white font-one">
                             {review.salon.salonName}
                           </p>
-                          <p className="text-white/60 font-one text-xs truncate">
+                          <p className="truncate text-xs text-white/60 font-one">
                             {review.salon.city} ({review.salon.postalCode})
                           </p>
                         </Link>
                       </div>
                     )}
 
-                    {/* Rating */}
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="text-amber-300 text-sm">
-                        {Array.from({ length: 5 }).map((_, i) => (
-                          <span key={i}>
-                            {i < (review.rating || 0) ? "★" : "☆"}
-                          </span>
-                        ))}
-                      </div>
-                      <span className="text-white/70 font-one text-xs">
-                        {review.rating}/5
-                      </span>
-                    </div>
-
-                    {/* Title */}
-                    {review.title && (
-                      <p className="text-white font-semibold text-sm mb-2">
-                        {review.title}
-                      </p>
-                    )}
-
-                    {/* Comment */}
-                    {review.comment && (
-                      <p className="text-white/80 text-sm leading-relaxed line-clamp-3 mb-2">
-                        {review.comment}
-                      </p>
-                    )}
-
-                    {/* Metadata */}
-                    <div className="flex flex-wrap items-center gap-2 text-white/50 text-xs">
-                      {review.isVerified && (
-                        <span className="px-2 py-0.5 bg-emerald-500/10 border border-emerald-400/30 text-emerald-300 rounded-full">
-                          ✓ Vérifié
-                        </span>
-                      )}
-                      {review.isVisible === false && (
-                        <span className="px-2 py-0.5 bg-orange-500/10 border border-orange-400/30 text-orange-300 rounded-full flex items-center gap-1">
-                          <FaEye className="w-2.5 h-2.5" />
-                          Caché
-                        </span>
-                      )}
-                      {review.appointment?.prestation && (
-                        <span>• {review.appointment.prestation}</span>
-                      )}
-                      {review.createdAt && (
-                        <span>
-                          •{" "}
-                          {new Date(review.createdAt).toLocaleDateString(
-                            "fr-FR",
-                          )}
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Réponse du salon */}
-                    {review.salonResponse && (
-                      <div className="mt-3 pt-3 border-t border-white/10">
-                        <div className="bg-gradient-to-br from-tertiary-500/10 to-tertiary-600/5 rounded-lg p-3 border border-tertiary-500/20">
-                          <div className="flex items-center gap-2 mb-2">
-                            <div className="w-5 h-5 rounded-full bg-tertiary-500/20 flex items-center justify-center">
-                              <span className="text-xs">💬</span>
-                            </div>
-                            <span className="text-tertiary-300 font-one text-xs font-semibold">
-                              Réponse du salon
+                    <div className="space-y-2.5">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <div className="text-sm text-amber-300">
+                          {Array.from({ length: 5 }).map((_, i) => (
+                            <span key={i}>
+                              {i < (review.rating || 0) ? "★" : "☆"}
                             </span>
-                            {review.salonRespondedAt && (
-                              <span className="text-white/40 text-xs ml-auto">
-                                {new Date(
-                                  review.salonRespondedAt,
-                                ).toLocaleDateString("fr-FR")}
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-white/90 text-xs leading-relaxed">
-                            {review.salonResponse}
-                          </p>
+                          ))}
+                        </div>
+                        <span className="text-xs text-white/70 font-one">
+                          {review.rating}/5
+                        </span>
+
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          {review.isVerified && (
+                            <span className="rounded-full border border-emerald-400/30 bg-emerald-500/10 px-2 py-0.5 text-[11px] text-emerald-300 font-one">
+                              ✓ Vérifié
+                            </span>
+                          )}
+                          {review.isVisible === false && (
+                            <span className="flex items-center gap-1 rounded-full border border-orange-400/30 bg-orange-500/10 px-2 py-0.5 text-[11px] text-orange-300 font-one">
+                              <FaEye className="h-2.5 w-2.5" />
+                              Caché
+                            </span>
+                          )}
                         </div>
                       </div>
-                    )}
+
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-white/45 font-one">
+                        {review.appointment?.prestation && (
+                          <span>{review.appointment.prestation}</span>
+                        )}
+                        {review.createdAt && (
+                          <span>
+                            {new Date(review.createdAt).toLocaleDateString(
+                              "fr-FR",
+                            )}
+                          </span>
+                        )}
+                      </div>
+
+                      {review.title && (
+                        <p className="text-sm font-semibold text-white font-one">
+                          {review.title}
+                        </p>
+                      )}
+
+                      {review.comment && (
+                        <p className="line-clamp-3 text-sm leading-relaxed text-white/80 font-one">
+                          {review.comment}
+                        </p>
+                      )}
+
+                      {/* Réponse du salon */}
+                      {review.salonResponse && (
+                        <div className="border-t border-white/10 pt-3">
+                          <div className="rounded-xl border border-tertiary-500/20 bg-linear-to-br from-tertiary-500/10 to-tertiary-600/5 p-3">
+                            <div className="mb-2 flex items-center gap-2">
+                              <div className="flex h-5 w-5 items-center justify-center rounded-full bg-tertiary-500/20">
+                                <span className="text-xs">💬</span>
+                              </div>
+                              <span className="text-xs font-semibold text-tertiary-300 font-one">
+                                Réponse du salon
+                              </span>
+                              {review.salonRespondedAt && (
+                                <span className="ml-auto text-[11px] text-white/40 font-one">
+                                  {new Date(
+                                    review.salonRespondedAt,
+                                  ).toLocaleDateString("fr-FR")}
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-xs leading-relaxed text-white/90 font-one">
+                              {review.salonResponse}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   {/* Delete Button */}
                   <button
                     onClick={() => handleDeleteClick(review)}
                     disabled={deletingId === review.id}
-                    className="cursor-pointer flex-shrink-0 w-10 h-10 rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-300 hover:text-red-200 border border-red-500/30 hover:border-red-400/50 flex items-center justify-center transition-all duration-300 disabled:opacity-50"
+                    className="flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-red-500/30 bg-red-500/15 text-red-300 transition-all duration-300 hover:border-red-400/50 hover:bg-red-500/25 hover:text-red-200 disabled:opacity-50"
                     title="Supprimer cet avis"
                   >
                     {deletingId === review.id ? (
-                      <div className="w-4 h-4 border-2 border-red-300 border-t-transparent rounded-full animate-spin" />
+                      <div className="w-3 h-3 border-2 border-red-300 border-t-transparent rounded-full animate-spin" />
                     ) : (
-                      <FaTrash className="w-4 h-4" />
+                      <FaTrash className="w-3 h-3" />
                     )}
                   </button>
                 </div>
@@ -284,9 +284,9 @@ export default function MesAvisTab() {
       {/* Modal de confirmation */}
       {showDeleteModal && (
         <div className="fixed inset-0 bg-noir-700/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-gradient-to-br from-white/[0.12] to-white/[0.06] backdrop-blur-xl border border-white/20 rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4">
+          <div className="bg-linear-to-br from-noir-500/6 to-white/3 backdrop-blur-xl border border-white/20 rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center flex-shrink-0">
+              <div className="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center shrink-0">
                 <FaExclamationTriangle className="w-6 h-6 text-red-400" />
               </div>
               <h3 className="text-white font-one font-semibold text-lg">

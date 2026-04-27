@@ -8,8 +8,6 @@ import { IoSearch } from "react-icons/io5";
 import { FaRegImages } from "react-icons/fa";
 import { FaRegAddressBook } from "react-icons/fa6";
 import { LuHeartHandshake } from "react-icons/lu";
-import { PiShootingStarBold } from "react-icons/pi";
-import { FaLightbulb } from "react-icons/fa6";
 import { PiStarFourFill } from "react-icons/pi";
 import ClientAccountPromoSection from "@/components/Auth/ClientAccountPromoSection";
 
@@ -126,7 +124,7 @@ export default function Home() {
       />
 
       {/* Hero Section */}
-      <section className="min-h-[100vh] bg-noir-700 flex items-center justify-center relative overflow-hidden pt-20">
+      <section className="min-h-screen bg-noir-700 flex items-center justify-center relative overflow-hidden pt-20">
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{
@@ -136,7 +134,7 @@ export default function Home() {
         ></div>
 
         {/* Overlay moderne */}
-        <div className="absolute inset-0 bg-gradient-to-b from-noir-700/60 via-noir-700/40 to-noir-700/80"></div>
+        <div className="absolute inset-0 bg-linear-to-b from-noir-700/60 via-noir-700/40 to-noir-700/80"></div>
 
         <div className="relative z-10 container mx-auto px-4 lg:px-8 text-center py-12">
           <div className="max-w-4xl mx-auto space-y-6">
@@ -153,7 +151,7 @@ export default function Home() {
             {/* Titre principal */}
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white uppercase font-two tracking-widest leading-tight">
               <span className="block mb-1">Trouvez votre</span>
-              <span className="block bg-gradient-to-r from-tertiary-400 via-tertiary-500 to-cuatro-500 bg-clip-text text-transparent">
+              <span className="block bg-linear-to-r from-tertiary-400 via-tertiary-500 to-cuatro-500 bg-clip-text text-transparent">
                 salon de tatouage
               </span>
               <span className="block">idéal</span>
@@ -204,7 +202,7 @@ export default function Home() {
               </div>
               <FaArrowDown
                 size={24}
-                className="text-tertiary-400 animate-bounce"
+                className="text-tertiary-400 animate-bounce mt-8"
               />
             </div>
           </div>
@@ -212,214 +210,194 @@ export default function Home() {
       </section>
 
       {/* Navigation des features */}
-      <section className="bg-gradient-to-b from-noir-700 to-noir-700 py-16">
-        <div className="container mx-auto px-4 sm:px-8 max-w-6xl">
-          <div className="text-center mb-12">
-            <h2 className="text-2xl sm:text-3xl font-bold text-white font-two mb-4">
+      <section className="relative isolate overflow-hidden bg-noir-700 py-20 sm:pt-20 sm:pb-10">
+        <div className="relative container mx-auto max-w-6xl px-4 sm:px-8">
+          <div className="mx-auto mb-14 max-w-3xl text-center">
+            <span className="inline-flex items-center rounded-full border border-tertiary-400/40 bg-tertiary-500/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-tertiary-300 font-one">
+              Parcours simple
+            </span>
+            <h2 className="mt-5 text-3xl font-bold text-white font-two sm:text-4xl">
               Comment ça marche ?
             </h2>
-            <p className="text-white/70 font-one text-lg max-w-2xl mx-auto">
-              Trouvez votre salon idéal en quelques clics grâce à notre
-              plateforme intuitive
+            <p className="mt-4 text-lg leading-relaxed text-white/75 font-one">
+              Trois étapes claires pour trouver un salon, comparer les styles et
+              réserver avec confiance.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* Card Recherche */}
-            <div className="bg-gradient-to-br from-noir-600/50 to-noir-800/50 backdrop-blur-sm rounded-3xl p-6 border border-white/10 hover:border-tertiary-400/30 transition-all duration-300 group">
-              <div className="flex flex-col items-center text-center space-y-4">
-                <div className="w-16 h-16 bg-gradient-to-br from-tertiary-500/20 to-tertiary-600/20 rounded-2xl flex items-center justify-center group-hover:from-tertiary-500/40 group-hover:to-tertiary-600/40 transition-all duration-300">
-                  <span className="text-2xl">
-                    <IoSearch className="text-tertiary-500" />
-                  </span>
-                </div>
-                <h3 className="text-lg font-bold text-white font-two group-hover:text-tertiary-400 transition-colors">
-                  1. Recherchez
-                </h3>
-                <p className="text-white/70 font-one text-sm leading-relaxed">
-                  Parcourez les salons près de chez vous et filtrez par style de
-                  tatouage
-                </p>
-              </div>
-            </div>
+          <div className="relative grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 lg:gap-8">
+            <div className="pointer-events-none absolute left-1/2 top-14 hidden h-px w-[74%] -translate-x-1/2 bg-linear-to-r from-transparent via-tertiary-400/30 to-transparent lg:block"></div>
 
-            {/* Card Découverte */}
-            <div className="bg-gradient-to-br from-noir-600/50 to-noir-800/50 backdrop-blur-sm rounded-3xl p-6 border border-white/10 hover:border-tertiary-400/30 transition-all duration-300 group">
-              <div className="flex flex-col items-center text-center space-y-4">
-                <div className="w-16 h-16 bg-gradient-to-br from-tertiary-500/20 to-tertiary-600/20 rounded-2xl flex items-center justify-center group-hover:from-tertiary-500/40 group-hover:to-tertiary-600/40 transition-all duration-300">
-                  <span className="text-2xl">
-                    <FaRegImages className="text-tertiary-500" />
-                  </span>
-                </div>
-                <h3 className="text-lg font-bold text-white font-two group-hover:text-tertiary-400 transition-colors">
-                  2. Explorez
-                </h3>
-                <p className="text-white/70 font-one text-sm leading-relaxed">
-                  Découvrez les portfolios des artistes et leurs créations
-                  uniques
-                </p>
+            <article className="group relative overflow-hidden rounded-3xl border border-white/10 bg-linear-to-br from-noir-600/70 via-noir-700/60 to-noir-800/80 p-7 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-tertiary-400/40">
+              <span className="absolute right-5 top-5 rounded-full border border-white/20 bg-white/5 px-3 py-1 text-xs font-semibold text-white/80 font-one">
+                Étape 1
+              </span>
+              <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-tertiary-500/20 text-2xl transition-colors duration-300 group-hover:bg-tertiary-500/35">
+                <IoSearch className="text-tertiary-400" />
               </div>
-            </div>
+              <h3 className="text-xl font-bold text-white font-two">Recherchez</h3>
+              <p className="mt-3 text-sm leading-relaxed text-white/70 font-one">
+                Affinez par ville et style pour trouver rapidement les studios
+                qui correspondent à votre projet.
+              </p>
+            </article>
 
-            {/* Card Réservation */}
-            <div className="bg-gradient-to-br from-noir-600/50 to-noir-800/50 backdrop-blur-sm rounded-3xl p-6 border border-white/10 hover:border-tertiary-400/30 transition-all duration-300 group">
-              <div className="flex flex-col items-center text-center space-y-4">
-                <div className="w-16 h-16 bg-gradient-to-br from-tertiary-500/20 to-tertiary-600/20 rounded-2xl flex items-center justify-center group-hover:from-tertiary-500/40 group-hover:to-tertiary-600/40 transition-all duration-300">
-                  <span className="text-2xl">
-                    <FaRegAddressBook className="text-tertiary-500" />
-                  </span>
-                </div>
-                <h3 className="text-lg font-bold text-white font-two group-hover:text-tertiary-400 transition-colors">
-                  3. Réservez
-                </h3>
-                <p className="text-white/70 font-one text-sm leading-relaxed">
-                  Prenez rendez-vous directement en ligne avec l'artiste de
-                  votre choix
-                </p>
+            <article className="group relative overflow-hidden rounded-3xl border border-white/10 bg-linear-to-br from-noir-600/70 via-noir-700/60 to-noir-800/80 p-7 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-tertiary-400/40">
+              <span className="absolute right-5 top-5 rounded-full border border-white/20 bg-white/5 px-3 py-1 text-xs font-semibold text-white/80 font-one">
+                Étape 2
+              </span>
+              <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-tertiary-500/20 text-2xl transition-colors duration-300 group-hover:bg-tertiary-500/35">
+                <FaRegImages className="text-tertiary-400" />
               </div>
-            </div>
+              <h3 className="text-xl font-bold text-white font-two">Explorez</h3>
+              <p className="mt-3 text-sm leading-relaxed text-white/70 font-one">
+                Analysez les portfolios, l'univers visuel et la spécialité des
+                artistes avant de faire votre choix.
+              </p>
+            </article>
+
+            <article className="group relative overflow-hidden rounded-3xl border border-white/10 bg-linear-to-br from-noir-600/70 via-noir-700/60 to-noir-800/80 p-7 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-tertiary-400/40">
+              <span className="absolute right-5 top-5 rounded-full border border-white/20 bg-white/5 px-3 py-1 text-xs font-semibold text-white/80 font-one">
+                Étape 3
+              </span>
+              <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-tertiary-500/20 text-2xl transition-colors duration-300 group-hover:bg-tertiary-500/35">
+                <FaRegAddressBook className="text-tertiary-400" />
+              </div>
+              <h3 className="text-xl font-bold text-white font-two">Réservez</h3>
+              <p className="mt-3 text-sm leading-relaxed text-white/70 font-one">
+                Contactez votre salon préféré et prenez rendez-vous en ligne,
+                simplement et sans perte de temps.
+              </p>
+            </article>
           </div>
         </div>
       </section>
 
       {/* Section détaillée */}
-      <div className="bg-gradient-to-b from-noir-700 to-noir-500">
-        <div className="relative">
-          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-1 h-20 bg-gradient-to-b from-tertiary-400 to-transparent animate-pulse"></div>
-          <section className="py-20">
-            <div className="container mx-auto px-4 sm:px-8 max-w-6xl">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                <div className="space-y-8">
-                  <div className="flex items-center gap-3 mb-6">
-                    <span className="text-4xl">
-                      <LuHeartHandshake className="text-tertiary-500" />
-                    </span>
-                    <h2 className="text-3xl font-bold text-white font-two">
-                      Une vitrine moderne pour les salons de tatouage
-                    </h2>
-                  </div>
-                  <p className="text-white/80 font-one text-lg leading-relaxed">
-                    Inkera est un espace en ligne où les salons de tatouage et
-                    de piercing présentent leur univers, leurs artistes et leurs
-                    réalisations. Chaque page est une vitrine unique, pensée
-                    pour mettre en valeur le travail de chaque professionnel.
-                  </p>
+      <section className="bg-noir-700 pb-20">
+        <div className="container mx-auto max-w-6xl px-4 sm:px-8">
+          <div className="grid grid-cols-1 overflow-hidden rounded-3xl border border-white/10 lg:grid-cols-2">
 
-                  <div className="bg-gradient-to-br from-tertiary-500/10 to-tertiary-600/5 border border-tertiary-500/30 rounded-2xl p-6">
-                    <div className="flex items-center gap-3 mb-4">
-                      <span className="text-2xl">
-                        <FaLightbulb className="text-tertiary-500" />
-                      </span>
-                      <h3 className="text-tertiary-300 font-semibold font-two">
-                        Ce que vous trouverez ici :
-                      </h3>
-                    </div>
-                    <div className="grid gap-3">
-                      <div className="flex items-start gap-3">
-                        <span className="text-tertiary-400 mt-1">✓</span>
-                        <span className="text-white/90 font-one">
-                          Des salons professionnels et passionnés
-                        </span>
-                      </div>
-                      <div className="flex items-start gap-3">
-                        <span className="text-tertiary-400 mt-1">✓</span>
-                        <span className="text-white/90 font-one">
-                          Des portfolios illustrant chaque style et chaque
-                          artiste
-                        </span>
-                      </div>
-                      <div className="flex items-start gap-3">
-                        <span className="text-tertiary-400 mt-1">✓</span>
-                        <span className="text-white/90 font-one">
-                          Des informations claires sur les services et contacts
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="relative">
-                  <div className="bg-gradient-to-br from-white/10 to-white/5 rounded-3xl p-8 border border-white/20 backdrop-blur-sm">
-                    <div className="text-6xl text-center mb-6">
-                      <PiShootingStarBold className="text-tertiary-500 mx-auto" />
-                    </div>
-                    <h3 className="text-xl font-bold text-white font-two text-center mb-4">
-                      Découvrez les salons partenaires
-                    </h3>
-                    <p className="text-white/70 font-one text-center mb-6">
-                      Parcourez les profils publics des salons inscrits et
-                      plongez dans leurs univers artistiques. Bientôt, un
-                      annuaire complet permettra de rechercher par ville ou par
-                      style.
-                    </p>
-                    <div className="text-center">
-                      <Link
-                        href="/trouver-un-salon"
-                        className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white rounded-xl font-semibold transition-all duration-300 shadow-lg shadow-tertiary-500/25 hover:shadow-tertiary-500/40 transform hover:scale-105"
-                      >
-                        Découvrir les salons
-                        <svg
-                          className="w-4 h-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M9 5l7 7-7 7"
-                          />
-                        </svg>
-                      </Link>
-                    </div>
-                  </div>
+            {/* Panel gauche — image + titre en overlay */}
+            <div className="relative min-h-72 sm:min-h-96 lg:min-h-0">
+              <div
+                className="absolute inset-0 bg-cover bg-center"
+                style={{ backgroundImage: "url('/images/zeze.jpg')" }}
+              />
+              <div className="absolute inset-0 bg-linear-to-br from-noir-700/80 via-noir-700/60 to-noir-900/85" />
+              <div className="relative flex h-full flex-col justify-end p-7 sm:p-10">
+                <span className="mb-3 inline-flex w-fit items-center gap-2 rounded-full border border-tertiary-400/40 bg-tertiary-500/15 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-tertiary-300 font-one">
+                  Pourquoi Inkera
+                </span>
+                <h2 className="text-2xl font-bold leading-tight text-white font-two sm:text-3xl">
+                  Une plateforme pensée pour vous aider à choisir
+                </h2>
+                <p className="mt-3 max-w-sm text-sm leading-relaxed text-white/75 font-one">
+                  Chaque salon dispose d'un profil complet, visuel et structuré
+                  pour faciliter votre décision.
+                </p>
+                <div className="mt-6">
+                  <Link
+                    href="/trouver-un-salon"
+                    className="inline-flex items-center gap-2 rounded-xl bg-linear-to-r from-tertiary-400 to-tertiary-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-tertiary-500/30 transition-all duration-300 hover:-translate-y-0.5 hover:from-tertiary-500 hover:to-tertiary-600"
+                  >
+                    Découvrir les salons
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </Link>
                 </div>
               </div>
             </div>
-          </section>
+
+            {/* Panel droit — grille 2×2 de cards */}
+            <div className="grid grid-cols-2 bg-noir-800/90">
+              <div className="border-b border-r border-white/8 p-6 transition-colors duration-200 hover:bg-white/4">
+                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-tertiary-500/20">
+                  <IoSearch className="text-xl text-tertiary-400" />
+                </div>
+                <h3 className="text-sm font-bold text-white font-two">
+                  Studios sélectionnés
+                </h3>
+                <p className="mt-1.5 text-xs leading-relaxed text-white/65 font-one">
+                  Des salons professionnels, vérifiés et passionnés par leur art.
+                </p>
+              </div>
+
+              <div className="border-b border-white/8 p-6 transition-colors duration-200 hover:bg-white/4">
+                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-tertiary-500/20">
+                  <FaRegImages className="text-xl text-tertiary-400" />
+                </div>
+                <h3 className="text-sm font-bold text-white font-two">
+                  Portfolios visuels
+                </h3>
+                <p className="mt-1.5 text-xs leading-relaxed text-white/65 font-one">
+                  Comparez les styles, les lignes et les univers artistiques avant de choisir.
+                </p>
+              </div>
+
+              <div className="border-r border-white/8 p-6 transition-colors duration-200 hover:bg-white/4">
+                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-tertiary-500/20">
+                  <FaRegAddressBook className="text-xl text-tertiary-400" />
+                </div>
+                <h3 className="text-sm font-bold text-white font-two">
+                  Réservation directe
+                </h3>
+                <p className="mt-1.5 text-xs leading-relaxed text-white/65 font-one">
+                  Contactez votre artiste et prenez rendez-vous sans intermédiaire.
+                </p>
+              </div>
+
+              <div className="p-6 transition-colors duration-200 hover:bg-white/4">
+                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-tertiary-500/20">
+                  <LuHeartHandshake className="text-xl text-tertiary-400" />
+                </div>
+                <h3 className="text-sm font-bold text-white font-two">
+                  Infos claires
+                </h3>
+                <p className="mt-1.5 text-xs leading-relaxed text-white/65 font-one">
+                  Horaires, localisation, tarifs et contacts réunis en un seul endroit.
+                </p>
+              </div>
+            </div>
+
+          </div>
         </div>
-      </div>
+      </section>
 
       {/* Section avantages compte client */}
       <ClientAccountPromoSection />
 
       {/* Section finale CTA */}
-      <section className="bg-gradient-to-t from-noir-700 to-noir-500 py-20">
-        <div className="container mx-auto px-4 sm:px-8 max-w-6xl">
-          <div className="text-center space-y-8">
-            <div className="flex items-center justify-center gap-3 mb-6">
-              <span className="text-4xl">
-                <PiStarFourFill className="text-tertiary-500" />
-              </span>
-              <h2 className="text-3xl sm:text-4xl font-bold text-white font-two">
-                Prêt à trouver votre artiste ?
-              </h2>
-            </div>
-            <p className="text-xl text-white/80 font-one leading-relaxed">
-              {/* Rejoignez des milliers de personnes qui ont trouvé leur salon
-              idéal sur Inkera. */}
-              <span className="text-tertiary-400 font-semibold block mt-2 tracking-widest">
-                Votre prochain chef-d'œuvre commence ici.
-              </span>
-            </p>
+      <section className="relative isolate overflow-hidden bg-noir-700 py-16 sm:py-20">
+        
 
-            <div className="bg-gradient-to-br from-tertiary-500/15 to-tertiary-600/10 border border-tertiary-500/40 rounded-3xl p-8 max-w-2xl mx-auto">
-              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                <Link
-                  href="/trouver-un-salon"
-                  className="bg-gradient-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white font-one font-semibold px-8 py-4 rounded-2xl transition-all duration-300 hover:scale-105 shadow-lg"
-                >
-                  Trouver un salon
-                </Link>
-                <Link
-                  href="/en-savoir-plus"
-                  className="border border-white/20 text-white hover:bg-white/10 font-one font-semibold px-8 py-4 rounded-2xl transition-all duration-300"
-                >
-                  En savoir plus
-                </Link>
-              </div>
-            </div>
+        <div className="relative container mx-auto max-w-3xl px-4 sm:px-8 text-center">
+          <PiStarFourFill className="mx-auto mb-5 text-2xl text-tertiary-400" />
+
+          <h2 className="text-3xl font-bold text-white font-two sm:text-4xl">
+            Prêt à trouver votre artiste ?
+          </h2>
+          <p className="mt-4 text-base text-white/65 font-one sm:text-lg">
+            Votre prochain chef-d'œuvre commence ici.
+          </p>
+
+          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <Link
+              href="/trouver-un-salon"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-2xl bg-linear-to-r from-tertiary-400 to-tertiary-500 px-7 py-3.5 text-sm font-semibold text-white shadow-lg shadow-tertiary-500/30 transition-all duration-300 hover:-translate-y-0.5 hover:from-tertiary-500 hover:to-tertiary-600 hover:shadow-tertiary-500/45 font-one"
+            >
+              Trouver un salon
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </Link>
+            <Link
+              href="/en-savoir-plus"
+              className="w-full sm:w-auto inline-flex items-center justify-center rounded-2xl border border-white/20 bg-white/5 px-7 py-3.5 text-sm font-semibold text-white/85 transition-all duration-300 hover:bg-white/10 hover:text-white font-one"
+            >
+              En savoir plus
+            </Link>
           </div>
         </div>
       </section>

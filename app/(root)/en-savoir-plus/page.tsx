@@ -112,7 +112,7 @@ export default function EnSavoirPlusPage() {
       />
 
       {/* Hero Section */}
-      <section className="min-h-[100vh] bg-noir-700 flex items-center justify-center relative overflow-hidden pt-20">
+      <section className="min-h-screen bg-noir-700 flex items-center justify-center relative overflow-hidden pt-20">
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{
@@ -122,7 +122,7 @@ export default function EnSavoirPlusPage() {
         ></div>
 
         {/* Overlay moderne */}
-        <div className="absolute inset-0 bg-gradient-to-b from-noir-700/60 via-noir-700/40 to-noir-700/80"></div>
+        <div className="absolute inset-0 bg-linear-to-b from-noir-700/60 via-noir-700/40 to-noir-700/80"></div>
 
         <div className="relative z-10 container mx-auto px-4 lg:px-8 text-center py-12">
           <div className="max-w-4xl mx-auto space-y-6">
@@ -139,7 +139,7 @@ export default function EnSavoirPlusPage() {
             {/* Titre principal */}
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white uppercase font-two tracking-widest leading-tight">
               <span className="block mb-1">En savoir plus</span>
-              <span className="block bg-gradient-to-r from-tertiary-400 via-tertiary-500 to-cuatro-500 bg-clip-text text-transparent">
+              <span className="block bg-linear-to-r from-tertiary-400 via-tertiary-500 to-cuatro-500 bg-clip-text text-transparent">
                 sur notre vision
               </span>
               <span className="block">et notre mission</span>
@@ -197,334 +197,260 @@ export default function EnSavoirPlusPage() {
         </div>
       </section>
 
-      {/* Navigation des features */}
-      <section className="bg-gradient-to-b from-noir-700 to-noir-700 py-16">
-        <div className="container mx-auto px-4 sm:px-8 max-w-6xl">
-          <div className="text-center mb-12">
-            <h2 className="text-2xl sm:text-3xl font-bold text-white font-two mb-4">
-              Notre parcours en 4 étapes
+      {/* Parcours */}
+      <section className="relative isolate overflow-hidden bg-noir-700 py-16 sm:py-20">
+        <div className="pointer-events-none absolute inset-0">
+          <div className="absolute left-1/2 top-0 h-48 w-80 -translate-x-1/2 rounded-full bg-tertiary-500/10 blur-3xl"></div>
+        </div>
+
+        <div className="relative container mx-auto max-w-6xl px-4 sm:px-8">
+          <div className="mx-auto mb-12 max-w-3xl text-center">
+            <span className="inline-flex items-center rounded-full border border-tertiary-400/35 bg-tertiary-500/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-tertiary-300 font-one">
+              Vision Inkera
+            </span>
+            <h2 className="mt-5 text-3xl font-bold text-white font-two sm:text-4xl">
+              Une plateforme construite autour du métier
             </h2>
-            <p className="text-white/70 font-one text-lg max-w-2xl mx-auto">
-              De l'idée à la réalisation, découvrez comment nous construisons
-              l'avenir du tatouage professionnel
+            <p className="mt-4 text-base leading-relaxed text-white/70 font-one sm:text-lg">
+              Une lecture plus claire du projet, de sa mission et de la façon
+              dont Inkera veut faire évoluer la visibilité des salons de
+              tatouage professionnels.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {/* Card Vision */}
-            <div className="bg-gradient-to-br from-noir-600/50 to-noir-800/50 backdrop-blur-sm rounded-3xl p-6 border border-white/10 hover:border-tertiary-400/30 transition-all duration-300 group">
-              <div className="flex flex-col items-center text-center space-y-4">
-                <div className="w-16 h-16 bg-gradient-to-br from-tertiary-500/20 to-tertiary-600/20 rounded-2xl flex items-center justify-center group-hover:from-tertiary-500/40 group-hover:to-tertiary-600/40 transition-all duration-300">
-                  <span className="text-2xl">
-                    <FaPen className="text-tertiary-500" />
-                  </span>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <article className="rounded-3xl border border-white/10 bg-white/4 p-6 backdrop-blur-sm transition-colors duration-300 hover:border-tertiary-400/35 hover:bg-white/6">
+              <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-tertiary-500/15 text-xl text-tertiary-400">
+                <FaPen />
+              </div>
+              <h3 className="text-lg font-bold text-white font-two">Pourquoi</h3>
+              <p className="mt-3 text-sm leading-relaxed text-white/70 font-one">
+                Donner aux tatoueurs un espace plus durable, plus lisible et
+                plus professionnel que le flux social classique.
+              </p>
+            </article>
+
+            <article className="rounded-3xl border border-white/10 bg-white/4 p-6 backdrop-blur-sm transition-colors duration-300 hover:border-tertiary-400/35 hover:bg-white/6">
+              <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-tertiary-500/15 text-xl text-tertiary-400">
+                <FaLightbulb />
+              </div>
+              <h3 className="text-lg font-bold text-white font-two">Le projet</h3>
+              <p className="mt-3 text-sm leading-relaxed text-white/70 font-one">
+                Une base SaaS qui alimente à la fois la gestion du salon et sa
+                présence publique.
+              </p>
+            </article>
+
+            <article className="rounded-3xl border border-white/10 bg-white/4 p-6 backdrop-blur-sm transition-colors duration-300 hover:border-tertiary-400/35 hover:bg-white/6">
+              <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-tertiary-500/15 text-xl text-tertiary-400">
+                <LuHeartHandshake />
+              </div>
+              <h3 className="text-lg font-bold text-white font-two">La mission</h3>
+              <p className="mt-3 text-sm leading-relaxed text-white/70 font-one">
+                Réconcilier structure, visibilité et gestion sans effacer
+                l'identité artistique des studios.
+              </p>
+            </article>
+
+            <article className="rounded-3xl border border-white/10 bg-white/4 p-6 backdrop-blur-sm transition-colors duration-300 hover:border-tertiary-400/35 hover:bg-white/6">
+              <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-tertiary-500/15 text-xl text-tertiary-400">
+                <HiMiniRocketLaunch />
+              </div>
+              <h3 className="text-lg font-bold text-white font-two">L'avenir</h3>
+              <p className="mt-3 text-sm leading-relaxed text-white/70 font-one">
+                Devenir la référence francophone pour découvrir, gérer et faire
+                rayonner les salons de tatouage.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      {/* Contenu éditorial */}
+      <section className="bg-primary-500 py-16 sm:py-20">
+        <div className="container mx-auto max-w-6xl px-4 sm:px-8">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+            <div className="rounded-[28px]  bg-linear-to-br from-secondary-500/85 via-secondary-600/80 to-secondary-500 p-6 sm:p-8">
+              <div className="inline-flex items-center gap-2 rounded-full border border-tertiary-400/35 bg-tertiary-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-tertiary-300 font-one">
+                <PiTargetBold className="text-sm" />
+                Pourquoi ce site existe
+              </div>
+
+              <h2 className="mt-5 text-2xl font-bold leading-tight text-white font-two sm:text-3xl">
+                Sortir le travail des artistes du bruit des réseaux sociaux
+              </h2>
+              <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/75 font-one sm:text-base">
+                Inkera a été pensé pour offrir aux salons de tatouage et de
+                piercing une vitrine claire, crédible et durable. Là où les
+                créations se perdent souvent dans un flux rapide, la plateforme
+                leur redonne du contexte, de la lisibilité et une vraie place.
+              </p>
+
+              <div className="mt-7 grid grid-cols-1 gap-3 sm:grid-cols-3">
+                <div className="rounded-2xl border border-white/10 bg-white/4 p-4">
+                  <IoIosArrowDropright className="mb-3 text-xl text-tertiary-400" />
+                  <p className="text-sm text-white/90 font-one">
+                    Valoriser le travail des tatoueurs
+                  </p>
                 </div>
-                <h3 className="text-lg font-bold text-white font-two group-hover:text-tertiary-400 transition-colors">
-                  Pourquoi ?
-                </h3>
-                <p className="text-white/70 font-one text-sm leading-relaxed">
-                  Valoriser le travail des tatoueurs et créer un espace
-                  professionnel centralisé
-                </p>
+                <div className="rounded-2xl border border-white/10 bg-white/4 p-4">
+                  <IoIosArrowDropright className="mb-3 text-xl text-tertiary-400" />
+                  <p className="text-sm text-white/90 font-one">
+                    Faciliter la recherche d'un salon de confiance
+                  </p>
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-white/4 p-4">
+                  <IoIosArrowDropright className="mb-3 text-xl text-tertiary-400" />
+                  <p className="text-sm text-white/90 font-one">
+                    Réunir la communauté dans un espace plus authentique
+                  </p>
+                </div>
               </div>
             </div>
 
-            {/* Card Projet */}
-            <div className="bg-gradient-to-br from-noir-600/50 to-noir-800/50 backdrop-blur-sm rounded-3xl p-6 border border-white/10 hover:border-tertiary-400/30 transition-all duration-300 group">
-              <div className="flex flex-col items-center text-center space-y-4">
-                <div className="w-16 h-16 bg-gradient-to-br from-tertiary-500/20 to-tertiary-600/20 rounded-2xl flex items-center justify-center group-hover:from-tertiary-500/40 group-hover:to-tertiary-600/40 transition-all duration-300">
-                  <span className="text-2xl">
-                    <FaLightbulb className="text-tertiary-500" />
-                  </span>
-                </div>
-                <h3 className="text-lg font-bold text-white font-two group-hover:text-tertiary-400 transition-colors">
-                  Le projet
-                </h3>
-                <p className="text-white/70 font-one text-sm leading-relaxed">
-                  Une plateforme SaaS complète qui grandit avec la communauté
-                </p>
+            <aside className="rounded-[28px] border border-white/10 bg-white/4 p-6 backdrop-blur-sm sm:p-8">
+              <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-tertiary-500/15 text-2xl text-tertiary-400">
+                <MdDataThresholding />
               </div>
-            </div>
+              <h3 className="text-2xl font-bold text-white font-two">
+                Un projet qui grandit avec les salons
+              </h3>
+              <p className="mt-4 text-sm leading-relaxed text-white/75 font-one sm:text-base">
+                Le site public n'est pas un simple annuaire. Il s'inscrit dans
+                un écosystème plus large où chaque salon peut gérer sa présence,
+                son image et sa relation client depuis une seule plateforme.
+              </p>
 
-            {/* Card Mission */}
-            <div className="bg-gradient-to-br from-noir-600/50 to-noir-800/50 backdrop-blur-sm rounded-3xl p-6 border border-white/10 hover:border-tertiary-400/30 transition-all duration-300 group">
-              <div className="flex flex-col items-center text-center space-y-4">
-                <div className="w-16 h-16 bg-gradient-to-br from-tertiary-500/20 to-tertiary-600/20 rounded-2xl flex items-center justify-center group-hover:from-tertiary-500/40 group-hover:to-tertiary-600/40 transition-all duration-300">
-                  <span className="text-2xl">
-                    <LuHeartHandshake className="text-tertiary-500" />
-                  </span>
+              <div className="mt-6 space-y-3">
+                <div className="rounded-2xl border border-white/10 bg-noir-700/35 px-4 py-3">
+                  <p className="text-sm text-white/90 font-one">
+                    Recherche par style, ville et artiste
+                  </p>
                 </div>
-                <h3 className="text-lg font-bold text-white font-two group-hover:text-tertiary-400 transition-colors">
-                  Notre mission
-                </h3>
-                <p className="text-white/70 font-one text-sm leading-relaxed">
-                  Réconcilier l'art et la gestion sans perdre l'âme d'artiste
-                </p>
+                <div className="rounded-2xl border border-white/10 bg-noir-700/35 px-4 py-3">
+                  <p className="text-sm text-white/90 font-one">
+                    Découverte des portfolios et des univers visuels
+                  </p>
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-noir-700/35 px-4 py-3">
+                  <p className="text-sm text-white/90 font-one">
+                    Prise de rendez-vous plus fluide et centralisée
+                  </p>
+                </div>
               </div>
-            </div>
+            </aside>
+          </div>
+        </div>
+      </section>
 
-            {/* Card Avenir */}
-            <div className="bg-gradient-to-br from-noir-600/50 to-noir-800/50 backdrop-blur-sm rounded-3xl p-6 border border-white/10 hover:border-tertiary-400/30 transition-all duration-300 group">
-              <div className="flex flex-col items-center text-center space-y-4">
-                <div className="w-16 h-16 bg-gradient-to-br from-tertiary-500/20 to-tertiary-600/20 rounded-2xl flex items-center justify-center group-hover:from-tertiary-500/40 group-hover:to-tertiary-600/40 transition-all duration-300">
-                  <span className="text-2xl">
-                    <HiMiniRocketLaunch className="text-tertiary-500" />
-                  </span>
+      {/* Mission */}
+      <section className="bg-secondary-500 py-16 sm:py-20">
+        <div className="container mx-auto max-w-6xl px-4 sm:px-8">
+          <div className="rounded-4xl p-6 sm:p-8 lg:p-10">
+            <div className="grid grid-cols-1 gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
+              <div>
+                <div className="inline-flex items-center gap-2 rounded-full border border-tertiary-400/35 bg-tertiary-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-tertiary-300 font-one">
+                  <TiHeartHalfOutline className="text-sm" />
+                  Mission humaine
                 </div>
-                <h3 className="text-lg font-bold text-white font-two group-hover:text-tertiary-400 transition-colors">
-                  L'avenir
-                </h3>
-                <p className="text-white/70 font-one text-sm leading-relaxed">
-                  Devenir LA référence francophone du tatouage professionnel
+
+                <h2 className="mt-5 text-2xl font-bold leading-tight text-white font-two sm:text-3xl">
+                  Offrir un outil moderne sans faire perdre l'âme d'artiste
+                </h2>
+                <p className="mt-4 text-base leading-relaxed text-white/75 font-one">
+                  Inkera veut proposer un cadre professionnel fort tout en
+                  respectant ce qui fait la singularité de chaque studio : son
+                  identité, sa sensibilité et son lien avec ses clients.
                 </p>
+
+                <div className="mt-6 rounded-3xl border border-tertiary-500/25 bg-linear-to-r from-tertiary-500/10 to-cuatro-500/10 p-5">
+                  <p className="text-lg italic leading-relaxed text-white/90 font-one sm:text-xl">
+                    "Un outil clair, puissant et utile, pensé pour servir le
+                    métier sans l'uniformiser."
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="rounded-3xl border border-white/10 bg-white/4 p-5 sm:col-span-2">
+                  <h3 className="text-base font-semibold text-white font-two">
+                    Chaque salon garde la main sur
+                  </h3>
+                  <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+                    <div className="rounded-2xl bg-noir-700/40 px-4 py-3 text-sm text-white/90 font-one">
+                      Ses informations publiques
+                    </div>
+                    <div className="rounded-2xl bg-noir-700/40 px-4 py-3 text-sm text-white/90 font-one">
+                      Son portfolio artistique
+                    </div>
+                    <div className="rounded-2xl bg-noir-700/40 px-4 py-3 text-sm text-white/90 font-one">
+                      Ses disponibilités et rendez-vous
+                    </div>
+                  </div>
+                </div>
+
+                <div className="rounded-3xl border border-white/10 bg-white/4 p-5">
+                  <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-tertiary-500/15 text-xl text-tertiary-400">
+                    <LuHeartHandshake />
+                  </div>
+                  <h3 className="text-base font-semibold text-white font-two">
+                    Transparence
+                  </h3>
+                  <p className="mt-2 text-sm leading-relaxed text-white/70 font-one">
+                    Une relation plus claire entre salons, artistes et clients.
+                  </p>
+                </div>
+
+                <div className="rounded-3xl border border-white/10 bg-white/4 p-5">
+                  <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-tertiary-500/15 text-xl text-tertiary-400">
+                    <HiMiniRocketLaunch />
+                  </div>
+                  <h3 className="text-base font-semibold text-white font-two">
+                    Passion et respect
+                  </h3>
+                  <p className="mt-2 text-sm leading-relaxed text-white/70 font-one">
+                    Une plateforme conçue pour soutenir le métier, pas le lisser.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Sections détaillées */}
-      <div className="bg-gradient-to-b from-noir-700 to-noir-500">
-        {/* Section 1: Pourquoi ce site existe */}
-        <div className="relative">
-          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-1 h-20 bg-gradient-to-b from-tertiary-400 to-transparent animate-pulse"></div>
-          <section className="py-20">
-            <div className="container mx-auto px-4 sm:px-8 max-w-6xl">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                <div className="space-y-6">
-                  <div className="flex items-center gap-3 mb-6">
-                    <span className="text-4xl">
-                      {" "}
-                      <FaPen className="text-tertiary-500" />
-                    </span>
-                    <h2 className="text-3xl font-bold text-white font-two">
-                      Pourquoi ce site existe
-                    </h2>
-                  </div>
-                  <p className="text-white/80 font-one text-lg leading-relaxed">
-                    Ce site a été créé pour offrir une vitrine moderne et
-                    professionnelle aux salons de tatouage et de piercing.
-                    Aujourd'hui, beaucoup d'artistes se font connaître sur
-                    Instagram, mais leurs œuvres sont noyées dans le flux.
-                  </p>
-                  <div className="bg-gradient-to-br from-tertiary-500/10 to-tertiary-600/5 border border-tertiary-500/30 rounded-2xl p-6">
-                    <h3 className="text-tertiary-300 font-semibold mb-4 font-two">
-                      Notre objectif :
-                    </h3>
-                    <div className="grid gap-3">
-                      <div className="flex items-start gap-3">
-                        <span className="text-tertiary-400 mt-1">
-                          <IoIosArrowDropright className="text-tertiary-500" />
-                        </span>
-                        <span className="text-white/90 font-one">
-                          Valoriser le travail des tatoueurs
-                        </span>
-                      </div>
-                      <div className="flex items-start gap-3">
-                        <span className="text-tertiary-400 mt-1">
-                          <IoIosArrowDropright className="text-tertiary-500" />
-                        </span>
-                        <span className="text-white/90 font-one">
-                          Faciliter la recherche d'un salon de confiance
-                        </span>
-                      </div>
-                      <div className="flex items-start gap-3">
-                        <span className="text-tertiary-400 mt-1">
-                          <IoIosArrowDropright className="text-tertiary-500" />
-                        </span>
-                        <span className="text-white/90 font-one">
-                          Réunir la communauté autour d'un espace authentique
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="relative">
-                  <div className="bg-gradient-to-br from-white/10 to-white/5 rounded-3xl p-8 border border-white/20 backdrop-blur-sm">
-                    <div className="text-6xl text-center mb-6">
-                      <PiTargetBold className="text-tertiary-500 mx-auto" />
-                    </div>
-                    <h3 className="text-xl font-bold text-white font-two text-center mb-4">
-                      Une solution centralisée
-                    </h3>
-                    <p className="text-white/70 font-one text-center">
-                      Fini les œuvres perdues dans le flux des réseaux sociaux.
-                      Place à un espace dédié et professionnel.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
+      {/* Section finale CTA */}
+      <section className="relative isolate overflow-hidden bg-noir-700 py-16 sm:py-20">
+        <div className="pointer-events-none absolute inset-0">
+          <div className="absolute left-1/2 top-0 h-40 w-96 -translate-x-1/2 rounded-full bg-tertiary-500/12 blur-3xl"></div>
         </div>
 
-        {/* Section 2: Un projet qui grandit */}
-        <section className="py-20">
-          <div className="container mx-auto px-4 sm:px-8 max-w-6xl">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-              <div className="lg:order-2 space-y-6">
-                <div className="flex items-center gap-3 mb-6">
-                  <span className="text-4xl">
-                    <FaLightbulb className="text-tertiary-500" />
-                  </span>
-                  <h2 className="text-3xl font-bold text-white font-two">
-                    Un projet qui grandit
-                  </h2>
-                </div>
-                <p className="text-white/80 font-one text-lg leading-relaxed">
-                  Ce site public fait partie d'un SaaS de gestion complet pour
-                  salons de tatouage & piercing. Chaque salon inscrit dispose
-                  automatiquement d'une page publique personnalisée.
-                </p>
-                <div className="bg-gradient-to-br from-white/[0.05] to-transparent rounded-2xl border border-white/10 p-6">
-                  <h3 className="text-white font-semibold mb-4 font-two">
-                    L'annuaire national permettra :
-                  </h3>
-                  <div className="grid gap-3">
-                    <div className="flex items-start gap-3">
-                      <span className="w-2 h-2 bg-tertiary-400 rounded-full mt-2"></span>
-                      <span className="text-white/90 font-one">
-                        Recherche par style, ville et artiste
-                      </span>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <span className="w-2 h-2 bg-tertiary-400 rounded-full mt-2"></span>
-                      <span className="text-white/90 font-one">
-                        Découverte des portfolios des artistes
-                      </span>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <span className="w-2 h-2 bg-tertiary-400 rounded-full mt-2"></span>
-                      <span className="text-white/90 font-one">
-                        Prise de rendez-vous en ligne
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="lg:order-1 relative">
-                <div className="bg-gradient-to-br from-white/10 to-white/5 rounded-3xl p-8 border border-white/20 backdrop-blur-sm">
-                  <div className="text-6xl text-center mb-6">
-                    <MdDataThresholding className="text-tertiary-500 mx-auto" />
-                  </div>
-                  <h3 className="text-xl font-bold text-white font-two text-center mb-4">
-                    Croissance continue
-                  </h3>
-                  <p className="text-white/70 font-one text-center">
-                    Chaque nouveau salon enrichit l'écosystème et renforce la
-                    communauté du tatouage professionnel.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+        <div className="relative container mx-auto max-w-3xl px-4 text-center sm:px-8">
+          <span className="inline-flex items-center rounded-full border border-tertiary-400/35 bg-tertiary-500/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-tertiary-300 font-one">
+            Rejoindre Inkera
+          </span>
+          <h2 className="mt-5 text-3xl font-bold text-white font-two sm:text-4xl">
+            Rejoignez l'aventure
+          </h2>
+          <p className="mt-4 text-base leading-relaxed text-white/70 font-one sm:text-lg">
+            Ce projet grandit avec des passionnés de tatouage, de web et de
+            belles expériences utiles aux studios.
+          </p>
 
-        {/* Section 3: Mission humaine */}
-        <section className="py-20">
-          <div className="container mx-auto px-4 sm:px-8 max-w-6xl">
-            <div className="text-center mb-12">
-              <div className="flex items-center justify-center gap-3 mb-6">
-                <span className="text-4xl">
-                  {" "}
-                  <LuHeartHandshake className="text-tertiary-500 mx-auto" />
-                </span>
-                <h2 className="text-3xl font-bold text-white font-two">
-                  Une mission avant tout humaine
-                </h2>
-              </div>
-              <div className="bg-gradient-to-br from-tertiary-500/20 to-cuatro-500/20 border border-pink-500/30 rounded-2xl p-8 max-w-3xl mx-auto">
-                <p className="text-2xl text-center italic text-pink-200 font-one">
-                  "Offrir aux tatoueurs un outil moderne, sans leur faire perdre
-                  leur âme d'artistes."
-                </p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-12">
-              <div className="bg-gradient-to-br from-white/[0.05] to-transparent rounded-2xl border border-white/10 p-6">
-                <h3 className="text-white font-semibold mb-4 font-two">
-                  Contrôle total pour chaque salon :
-                </h3>
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3">
-                    <span className="w-2 h-2 bg-tertiary-400 rounded-full"></span>
-                    <span className="text-white/90 font-one">
-                      Informations publiques
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="w-2 h-2 bg-tertiary-400 rounded-full"></span>
-                    <span className="text-white/90 font-one">
-                      Portfolio artistique
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="w-2 h-2 bg-tertiary-400 rounded-full"></span>
-                    <span className="text-white/90 font-one">
-                      Disponibilités et rendez-vous
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-gradient-to-br from-white/[0.05] to-transparent rounded-2xl border border-white/10 p-6 flex items-center">
-                <div className="text-center w-full">
-                  <div className="text-4xl mb-4">
-                    <TiHeartHalfOutline className="text-tertiary-500 mx-auto" />
-                  </div>
-                  <p className="text-white/90 font-one">
-                    Éthique fondée sur la{" "}
-                    <strong className="text-tertiary-300">transparence</strong>,
-                    la <strong className="text-tertiary-300">passion</strong> et
-                    le <strong className="text-tertiary-300">respect</strong>.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      </div>
-
-      {/* Section finale CTA */}
-      <section className="bg-gradient-to-t from-noir-700 to-noir-500 py-20">
-        <div className="container mx-auto px-4 sm:px-8 text-center">
-          <div className="max-w-4xl mx-auto space-y-8">
-            <div className="flex items-center justify-center gap-3 mb-6">
-              {/* <span className="text-4xl">📬</span> */}
-              <h2 className="text-3xl sm:text-4xl font-bold text-white font-two">
-                Rejoignez l'aventure
-              </h2>
-            </div>
-            <p className="text-xl text-white/80 font-one leading-relaxed">
-              Ce projet est conçu par des passionnés de web & de tatouage, pour
-              des passionnés.
-              <span className="text-tertiary-400 font-semibold block mt-2">
-                C'est ensemble que cette plateforme évoluera.
-              </span>
-            </p>
-
-            <div className="bg-gradient-to-br from-tertiary-500/15 to-tertiary-600/10 border border-tertiary-500/40 rounded-3xl p-8 max-w-2xl mx-auto">
-              <h3 className="text-tertiary-300 font-semibold text-xl mb-6 font-two">
-                Vous êtes tatoueur et vous souhaitez rejoindre l'aventure ?
-              </h3>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                <Link
-                  href="https://www.inkera-studio.com/"
-                  target="_blank"
-                  className="bg-gradient-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white font-one font-semibold px-8 py-4 rounded-2xl transition-all duration-300 hover:scale-105 shadow-lg"
-                >
-                  Découvrez l'application complète
-                </Link>
-                <Link
-                  href="/contactez-nous"
-                  target="_blank"
-                  className="border border-white/20 text-white hover:bg-white/10 font-one font-semibold px-8 py-4 rounded-2xl transition-all duration-300"
-                >
-                  Nous contacter
-                </Link>
-              </div>
-            </div>
+          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <Link
+              href="https://www.inkera-studio.com/"
+              target="_blank"
+              className="inline-flex w-full items-center justify-center rounded-2xl bg-linear-to-r from-tertiary-400 to-tertiary-500 px-7 py-3.5 text-sm font-semibold text-white shadow-lg shadow-tertiary-500/30 transition-all duration-300 hover:-translate-y-0.5 hover:from-tertiary-500 hover:to-tertiary-600 sm:w-auto font-one"
+            >
+              Découvrir l'application complète
+            </Link>
+            <Link
+              href="/contactez-nous"
+              target="_blank"
+              className="inline-flex w-full items-center justify-center rounded-2xl border border-white/20 bg-white/5 px-7 py-3.5 text-sm font-semibold text-white/90 transition-all duration-300 hover:bg-white/10 sm:w-auto font-one"
+            >
+              Nous contacter
+            </Link>
           </div>
         </div>
       </section>
