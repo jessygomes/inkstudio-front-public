@@ -141,15 +141,15 @@ export default function ClientInfoForm({
           <div className="space-y-3">
             {showFlashSelector && (
               <div className="space-y-3">
-                <label className="text-xs text-white/80 font-one font-semibold uppercase tracking-wide">
+                <label className="text-xs text-white/80 font-one uppercase tracking-wide">
                   Choix du flash (optionnel)
                 </label>
                 <select
                   value={selectedFlashId}
                   onChange={(e) => onFlashChange?.(e.target.value)}
-                  className="w-full p-2.5 bg-white/5 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-tertiary-400 focus:ring-1 focus:ring-tertiary-400/30 transition-all"
+                  className="w-full p-2.5 bg-white/5 border border-white/10 rounded-2xl text-white font-one text-sm focus:outline-none focus:border-tertiary-400 focus:ring-1 focus:ring-tertiary-400/30 transition-all"
                 >
-                  <option value="">Aucun flash sélectionné</option>
+                  <option value="" className="bg-noir-500">Aucun flash sélectionné</option>
                   {flashes.map((flash) => {
                     const label = flash.title || flash.name || "Flash";
                     const price =
@@ -159,7 +159,7 @@ export default function ClientInfoForm({
                     const dimensions = getFlashDimensions(flash);
                     const dimensionLabel = dimensions ? ` - ${dimensions}` : "";
                     return (
-                      <option key={flash.id} value={flash.id}>
+                      <option key={flash.id} value={flash.id} className="bg-noir-500">
                         {label}
                         {dimensionLabel}
                         {price}
@@ -169,7 +169,7 @@ export default function ClientInfoForm({
                 </select>
 
                 {selectedFlash && selectedFlash.imageUrl && (
-                  <div className="mx-auto w-full max-w-55 rounded-lg overflow-hidden border border-white/10 bg-white/3 text-center">
+                  <div className="mx-auto w-full max-w-55 rounded-2xl overflow-hidden border border-white/10 bg-white/3 text-center">
                     <div className="relative aspect-square w-full">
                       <Image
                         src={selectedFlash.imageUrl}
@@ -230,11 +230,11 @@ export default function ClientInfoForm({
                     Zone du piercing
                   </label>
                   {isLoadingPiercingZones ? (
-                    <div className="w-full p-2.5 bg-white/5 border border-white/10 rounded-lg text-white/50 text-sm">
+                    <div className="w-full p-2.5 bg-white/5 border border-white/10 rounded-2xl text-white/50 text-sm">
                       Chargement...
                     </div>
                   ) : piercingZones.length === 0 ? (
-                    <div className="w-full p-2.5 bg-red-500/10 border border-red-500/20 rounded-lg text-red-300 text-sm">
+                    <div className="w-full p-2.5 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-300 text-sm">
                       Aucune zone configurée
                     </div>
                   ) : (
@@ -244,11 +244,11 @@ export default function ClientInfoForm({
                         onPiercingZoneChange(e.target.value);
                         onPiercingServiceChange("");
                       }}
-                      className="w-full p-2.5 bg-white/5 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-tertiary-400 focus:ring-1 focus:ring-tertiary-400/30 transition-all"
+                      className="w-full p-2.5 bg-white/5 border border-white/10 rounded-2xl text-white font-one text-sm focus:outline-none focus:border-tertiary-400 focus:ring-1 focus:ring-tertiary-400/30 transition-all"
                     >
-                      <option value="">Sélectionnez une zone</option>
+                      <option value="" className="bg-noir-500">Sélectionnez une zone</option>
                       {piercingZones.map((zone) => (
-                        <option key={zone.id} value={zone.id}>
+                        <option key={zone.id} value={zone.id} className="bg-noir-500">
                           {zone.piercingZone}
                         </option>
                       ))}
@@ -264,11 +264,11 @@ export default function ClientInfoForm({
                     <select
                       value={selectedPiercingService}
                       onChange={(e) => onPiercingServiceChange(e.target.value)}
-                      className="w-full p-2.5 bg-white/5 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-tertiary-400 focus:ring-1 focus:ring-tertiary-400/30 transition-all"
+                      className="w-full p-2.5 bg-white/5 border border-white/10 rounded-2xl text-white font-one text-sm focus:outline-none focus:border-tertiary-400 focus:ring-1 focus:ring-tertiary-400/30 transition-all"
                     >
-                      <option value="">Sélectionnez un type</option>
+                      <option value="" className="bg-noir-500">Sélectionnez un type</option>
                       {selectedZoneServices.map((service: PiercingService) => (
-                        <option key={service.id} value={service.id}>
+                        <option key={service.id} value={service.id} className="bg-noir-500">
                           {getServiceZoneName(service)} -{" "}
                           {service.price
                             ? `${service.price}€`
@@ -302,11 +302,11 @@ export default function ClientInfoForm({
 
             {/* Affichage prix du piercing */}
             {selectedService && selectedService.price && (
-              <div className="p-3 bg-tertiary-500/10 border border-tertiary-500/20 rounded-lg flex items-center justify-between">
+              <div className="p-3 bg-tertiary-500/10 border border-tertiary-500/15 rounded-2xl flex items-center justify-between">
                 <span className="text-white/80 text-sm font-one">
                   {getServiceZoneName(selectedService)}
                 </span>
-                <span className="text-tertiary-400 font-one font-semibold text-lg">
+                <span className="text-white font-one font-semibold text-md">
                   {selectedService.price}€
                 </span>
               </div>
@@ -324,7 +324,7 @@ export default function ClientInfoForm({
                   <label className="text-xs text-white/70 font-one">
                     Référence principale
                   </label>
-                  <div className="bg-white/2 rounded-lg p-3 border border-white/10">
+                  <div className="bg-white/2 rounded-2xl p-3 border border-white/10">
                     <ImageUploader
                       file={referenceFile}
                       onFileSelect={onReferenceChange}
@@ -336,7 +336,7 @@ export default function ClientInfoForm({
                   <label className="text-xs text-white/70 font-one">
                     Croquis / Référence secondaire
                   </label>
-                  <div className="bg-white/2 rounded-lg p-3 border border-white/10">
+                  <div className="bg-white/2 rounded-2xl p-3 border border-white/10">
                     <ImageUploader
                       file={sketchFile}
                       onFileSelect={onSketchChange}

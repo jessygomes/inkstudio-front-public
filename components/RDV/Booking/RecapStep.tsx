@@ -40,6 +40,8 @@ export default function RecapStep({
 
   // Trouver la zone de piercing
   const piercingZone = piercingZones.find((pz) => pz.id === pierc);
+  const piercingZoneLabel =
+    piercingZone?.piercingZone || piercingZone?.name || "Zone non spécifiée";
   const selectedSkinTone = skinToneOptions.find(
     (option) => option.value === formData?.details?.skin,
   );
@@ -48,7 +50,7 @@ export default function RecapStep({
     <Section title="Récapitulatif de votre demande">
       <div className="space-y-4">
         {/* Informations client */}
-        <div className="p-4 rounded-md border border-white/10">
+        <div className="p-4 rounded-2xl border border-white/10">
           <h3 className="text-white font-one mb-3 flex items-center gap-2">
             <svg
               className="w-4 h-4 text-tertiary-400"
@@ -106,7 +108,7 @@ export default function RecapStep({
         </div>
 
         {/* Informations prestation */}
-        <div className="bg-white/3 p-4 rounded-md border border-white/10">
+        <div className="bg-white/3 p-4 rounded-2xl border border-white/10">
           <h3 className="text-white font-one mb-3 flex items-center gap-2">
             <svg
               className="w-4 h-4 text-tertiary-400"
@@ -143,7 +145,7 @@ export default function RecapStep({
                   <p className="text-white/60 font-one text-xs mb-0.5">
                     Zone de piercing
                   </p>
-                  <p className="text-white font-one">{piercingZone.name}</p>
+                  <p className="text-white font-one">{piercingZoneLabel}</p>
                 </div>
                 {piercingPrice !== null && (
                   <div>
@@ -239,7 +241,7 @@ export default function RecapStep({
         </div>
 
         {/* Informations rendez-vous */}
-        <div className="bg-tertiary-500/10 p-4 rounded-md border border-tertiary-500/30">
+        <div className="bg-tertiary-500/10 p-4 rounded-2xl border border-tertiary-500/30">
           <h3 className="text-white font-one mb-3 flex items-center gap-2">
             <svg
               className="w-4 h-4 text-tertiary-400"
@@ -329,7 +331,7 @@ export default function RecapStep({
         </div>
 
         {/* Avertissement */}
-        <div className="bg-orange-500/10 border border-orange-500/30 rounded-md p-4">
+        <div className="bg-orange-500/10 border border-orange-500/30 rounded-2xl p-4">
           <div className="flex items-start gap-3">
             <div className="shrink-0 w-8 h-8 bg-orange-500/20 rounded-full flex items-center justify-center">
               <svg

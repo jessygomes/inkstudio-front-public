@@ -32,7 +32,7 @@ export default function TextInput({
         placeholder={placeholder}
         {...register(name)}
         className={classNames(
-          "w-full p-3 bg-gradient-to-br from-white/[0.08] to-white/[0.02] border rounded-md text-white text-sm focus:outline-none transition-all duration-300 placeholder-white/50 backdrop-blur-sm",
+          "w-full p-3 bg-linear-to-br from-white/0 to-white/2 border rounded-2xl text-white text-sm font-one focus:outline-none transition-all duration-300 placeholder-white/50 backdrop-blur-sm",
           err
             ? "border-red-500/50 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
             : "border-white/20 focus:border-tertiary-400 focus:ring-2 focus:ring-tertiary-400/20",

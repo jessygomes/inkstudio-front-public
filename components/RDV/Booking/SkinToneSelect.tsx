@@ -27,10 +27,10 @@ export default function SkinToneSelect({
 
   return (
     <div className="space-y-2">
-      <label className="text-xs text-white/80 font-one font-semibold uppercase tracking-wide">
+      <label className="text-xs text-white/80 font-one uppercase tracking-wide">
         {label}
       </label>
-      <div className="rounded-lg border border-white/10 bg-white/3 p-3">
+      <div className="rounded-2xl border border-white/10 bg-white/2 p-3">
         <div className="mb-3 flex items-center gap-3">
           <div
             className="h-8 w-8 rounded-full border border-white/15 shadow-inner"
@@ -49,7 +49,7 @@ export default function SkinToneSelect({
         </div>
 
         {loading ? (
-          <div className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white/60 font-one">
+          <div className="rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white/60 font-one">
             Chargement des teintes...
           </div>
         ) : options.length > 0 ? (
@@ -69,7 +69,7 @@ export default function SkinToneSelect({
                     })
                   }
                   className={[
-                    "cursor-pointer flex min-h-24 flex-col items-center justify-center gap-2 rounded-xl border px-3 py-4 text-center font-one transition-all",
+                    "cursor-pointer flex min-h-24 flex-col items-center justify-center gap-2 rounded-2xl border px-3 py-4 text-center font-one transition-all",
                     isSelected
                       ? "border-tertiary-400 bg-tertiary-500/15 text-white shadow-[0_0_0_1px_rgba(244,178,61,0.25)]"
                       : "border-white/10 bg-white/5 text-white/75 hover:border-white/20 hover:text-white",

@@ -183,15 +183,15 @@ export default async function ReserverPage({
   // const directionsHref = `https://www.google.com/maps/search/?api=1&query=${mapsQuery}`;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-noir-700 via-noir-600 to-noir-700 pt-20">
+    <div className="min-h-screen bg-linear-to-br from-noir-700 via-noir-500 to-noir-700 pt-20">
       <section className="px-4 sm:px-6 lg:px-8 xl:px-16 py-4">
         <div className="mx-auto max-w-7xl">
           {/* Header ultra-compact */}
-          <div className="relative overflow-hidden rounded-xl border border-white/10 bg-gradient-to-br from-white/[0.08] to-white/[0.02] backdrop-blur-lg shadow-lg mb-5">
+          <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-linear-to-br from-noir-500/8 to-white/2 backdrop-blur-lg shadow-lg mb-5">
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 p-5">
               {/* Photo compacte - 1/5 sur desktop */}
               <div className="lg:col-span-1">
-                <div className="relative h-32 lg:h-full rounded-lg overflow-hidden border border-white/10">
+                <div className="relative h-32 lg:h-full rounded-2xl overflow-hidden border border-white/10">
                   {salon.image ? (
                     <Image
                       src={salon.image}
@@ -201,7 +201,7 @@ export default async function ReserverPage({
                       priority
                     />
                   ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-noir-600 to-noir-800 grid place-items-center">
+                    <div className="w-full h-full bg-linear-to-br from-noir-600 to-noir-800 grid place-items-center">
                       <div className="text-center text-white/60">
                         <div className="w-8 h-8 bg-white/10 rounded-full grid place-items-center mx-auto mb-1">
                           <svg
@@ -275,7 +275,7 @@ export default async function ReserverPage({
                   {/* Prestations compact */}
 
                   {/* Contact compact */}
-                  <div className="bg-white/[0.02] rounded-lg p-3 border border-white/5">
+                  <div className="bg-linear-to-br from-noir-500/8 to-white/2 rounded-2xl p-3 border border-white/5">
                     <h3 className="text-white/80 font-one text-xs uppercase tracking-wider mb-2 flex items-center gap-1.5">
                       <svg
                         className="w-3 h-3 text-tertiary-400"
@@ -295,7 +295,7 @@ export default async function ReserverPage({
                     <div className="space-y-2">
                       {salon.address && (
                         <div className="flex items-start gap-2">
-                          <div className="w-5 h-5 rounded bg-white/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <div className="w-5 h-5 rounded-2xl bg-white/10 flex items-center justify-center shrink-0 mt-0.5">
                             <svg
                               className="w-3 h-3 text-white/60"
                               fill="none"
@@ -315,7 +315,7 @@ export default async function ReserverPage({
                               {salon.address}
                               {salon.city && (
                                 <>
-                                  <br />
+                                  {", "}
                                   {salon.city}
                                 </>
                               )}
@@ -327,7 +327,7 @@ export default async function ReserverPage({
 
                       {salon.phone && (
                         <div className="flex items-center gap-2">
-                          <div className="w-5 h-5 rounded bg-white/10 flex items-center justify-center flex-shrink-0">
+                          <div className="w-5 h-5 rounded-2xl bg-white/10 flex items-center justify-center shrink-0">
                             <svg
                               className="w-3 h-3 text-white/60"
                               fill="none"
@@ -362,7 +362,7 @@ export default async function ReserverPage({
                               <Link
                                 href={salon.instagram}
                                 target="_blank"
-                                className="w-6 h-6 rounded bg-gradient-to-br from-pink-500/20 to-purple-500/20 border border-pink-500/30 flex items-center justify-center hover:scale-105 transition-transform"
+                                className="w-6 h-6 rounded-2xl bg-linear-to-br from-pink-500/20 to-purple-500/20 border border-pink-500/30 flex items-center justify-center hover:scale-105 transition-transform"
                                 aria-label="Instagram"
                               >
                                 <CiInstagram className="w-3 h-3 text-pink-400" />
@@ -372,7 +372,7 @@ export default async function ReserverPage({
                               <Link
                                 href={salon.facebook}
                                 target="_blank"
-                                className="w-6 h-6 rounded bg-gradient-to-br from-blue-500/20 to-blue-600/20 border border-blue-500/30 flex items-center justify-center hover:scale-105 transition-transform"
+                                className="w-6 h-6 rounded-2xl bg-linear-to-br from-blue-500/20 to-blue-600/20 border border-blue-500/30 flex items-center justify-center hover:scale-105 transition-transform"
                                 aria-label="Facebook"
                               >
                                 <CiFacebook className="w-3 h-3 text-blue-400" />
@@ -382,7 +382,7 @@ export default async function ReserverPage({
                               <Link
                                 href={salon.tiktok}
                                 target="_blank"
-                                className="w-6 h-6 rounded bg-gradient-to-br from-gray-500/20 to-gray-600/20 border border-gray-500/30 flex items-center justify-center hover:scale-105 transition-transform"
+                                className="w-6 h-6 rounded-2xl bg-linear-to-br from-gray-500/20 to-gray-600/20 border border-gray-500/30 flex items-center justify-center hover:scale-105 transition-transform"
                                 aria-label="TikTok"
                               >
                                 <PiTiktokLogoThin className="w-3 h-3 text-gray-400" />
@@ -392,7 +392,7 @@ export default async function ReserverPage({
                               <Link
                                 href={salon.website}
                                 target="_blank"
-                                className="w-6 h-6 rounded bg-gradient-to-br from-emerald-500/20 to-emerald-600/20 border border-emerald-500/30 flex items-center justify-center hover:scale-105 transition-transform"
+                                className="w-6 h-6 rounded-2xl bg-linear-to-br from-emerald-500/20 to-emerald-600/20 border border-emerald-500/30 flex items-center justify-center hover:scale-105 transition-transform"
                                 aria-label="Site web"
                               >
                                 <TfiWorld className="w-3 h-3 text-emerald-400" />
@@ -405,7 +405,7 @@ export default async function ReserverPage({
                   </div>
 
                   {/* Horaires ultra-compact */}
-                  <div className="bg-white/[0.02] rounded-lg p-3 border border-white/5 col-span-2">
+                  <div className="bg-white/2 rounded-2xl p-3 border border-white/5 col-span-2">
                     <h3 className="text-white/80 font-one text-xs uppercase tracking-wider mb-2 flex items-center gap-1.5">
                       <svg
                         className="w-3 h-3 text-tertiary-400"
@@ -425,7 +425,7 @@ export default async function ReserverPage({
 
                     {/* Status aujourd'hui compact */}
                     {openNow.today && (
-                      <div className="mb-2 p-2 rounded bg-gradient-to-r from-tertiary-500/15 to-tertiary-600/10 border border-tertiary-500/25">
+                      <div className="mb-2 p-2 rounded-2xl bg-linear-to-r from-tertiary-500/15 to-tertiary-400/10 border border-tertiary-500/25">
                         <div className="flex items-center justify-between">
                           <span className="text-white font-one text-xs font-semibold">
                             Aujourd&apos;hui

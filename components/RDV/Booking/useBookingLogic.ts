@@ -19,7 +19,7 @@ import { getPiercingPrice } from "@/lib/actions/piercingPrice.action";
 import { createAppointmentByClient } from "@/lib/actions/appointment.action";
 import { uploadFiles } from "@/lib/utils/uploadthing";
 import imageCompression from "browser-image-compression";
-import { FlashProps, PiercingZone } from "@/lib/type";
+import { FlashProps, PiercingService, PiercingZone } from "@/lib/type";
 import { SkinToneOption } from "./types";
 
 type AppointmentRequestForm = z.infer<typeof appointmentRequestSchema>;
@@ -44,6 +44,28 @@ function getFlashDimensions(flash?: FlashProps): string {
   }
 
   return "";
+}
+
+function extractPiercingZones(payload: unknown): PiercingZone[] {
+  if (Array.isArray(payload)) {
+    return payload as PiercingZone[];
+  }
+
+  if (!payload || typeof payload !== "object") {
+    return [];
+  }
+
+  const source = payload as Record<string, unknown>;
+  const candidates = [
+    source.data,
+    source.zones,
+    source.piercingZones,
+    source.configurations,
+    source.items,
+  ];
+
+  const firstArray = candidates.find((value) => Array.isArray(value));
+  return Array.isArray(firstArray) ? (firstArray as PiercingZone[]) : [];
 }
 
 export function useBookingLogic({
@@ -502,22 +524,93 @@ export function useBookingLogic({
     }
   }, [prestation, setValue]);
 
+  // Charger les zones de piercing configurées pour le salon.
+  useEffect(() => {
+    if (prestation !== "PIERCING") {
+      setPiercingZones([]);
+      setSelectedPiercingZone("");
+      setSelectedPiercingService("");
+      setIsLoadingPiercingZones(false);
+      return;
+    }
+
+    let isMounted = true;
+
+    const fetchPiercingZones = async () => {
+      try {
+        setIsLoadingPiercingZones(true);
+        const result = await getPiercingPrice({ salonId: salon.id });
+
+        if (!isMounted) return;
+
+        if (result.ok) {
+          const zones = extractPiercingZones(result.data);
+          setPiercingZones(zones);
+          return;
+        }
+
+        console.error(
+          "Erreur lors du chargement des zones de piercing:",
+          result.message || "Erreur inconnue",
+        );
+        setPiercingZones([]);
+      } catch (error) {
+        if (!isMounted) return;
+        console.error("Erreur réseau chargement zones piercing:", error);
+        setPiercingZones([]);
+      } finally {
+        if (isMounted) {
+          setIsLoadingPiercingZones(false);
+        }
+      }
+    };
+
+    fetchPiercingZones();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [prestation, salon.id]);
+
+  // Nettoyer le service choisi si la zone change ou n'existe plus.
+  useEffect(() => {
+    const zone = piercingZones.find((z) => z.id === selectedPiercingZone);
+
+    if (!zone) {
+      if (selectedPiercingService) {
+        setSelectedPiercingService("");
+      }
+      return;
+    }
+
+    const serviceExists = zone.services.some(
+      (service) => service.id === selectedPiercingService,
+    );
+
+    if (!serviceExists && selectedPiercingService) {
+      setSelectedPiercingService("");
+    }
+  }, [piercingZones, selectedPiercingZone, selectedPiercingService]);
+
   // Gestion du prix du piercing
   useEffect(() => {
-    if (prestation === "PIERCING" && selectedPiercingService) {
-      const fetchPrice = async () => {
-        const result = await getPiercingPrice({ salonId: salon.id });
-        if (result.ok && result.data) {
-          setPiercingPrice(result.data.price);
-        } else {
-          setPiercingPrice(null);
-        }
-      };
-      fetchPrice();
-    } else {
+    if (prestation !== "PIERCING") {
       setPiercingPrice(null);
+      return;
     }
-  }, [prestation, selectedPiercingService, selectedPiercingZone, salon.id]);
+
+    const zone = piercingZones.find((z) => z.id === selectedPiercingZone);
+    const service = zone?.services.find(
+      (item: PiercingService) => item.id === selectedPiercingService,
+    );
+
+    setPiercingPrice(typeof service?.price === "number" ? service.price : null);
+  }, [
+    prestation,
+    piercingZones,
+    selectedPiercingZone,
+    selectedPiercingService,
+  ]);
 
   // Soumission du formulaire
   const onSubmit = async (data: AppointmentRequestForm) => {

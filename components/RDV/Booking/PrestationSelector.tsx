@@ -20,7 +20,7 @@ export default function PrestationSelector({
 
   return (
     <Section title="Choisir la prestation">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 ">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {prestations.map((p) => (
           <button
             key={p}
@@ -31,10 +31,10 @@ export default function PrestationSelector({
               })
             }
             className={classNames(
-              "group relative cursor-pointer rounded-md border-2 px-6 py-4 text-center transition-all duration-300 transform hover:scale-105",
+              "group relative cursor-pointer rounded-2xl border px-6 py-4 text-center transition-all duration-300 transform hover:scale-105",
               prestation === p
-                ? "border-tertiary-500/70 bg-gradient-to-r from-tertiary-500/20 to-tertiary-400/10"
-                : "border-white/20  hover:border-white/30 hover:bg-white/[0.12] backdrop-blur-sm",
+                ? "border-tertiary-500/70 bg-linear-to-r from-tertiary-500/20 to-tertiary-400/10"
+                : "border-white/20  hover:border-white/30 hover:bg-white/12 backdrop-blur-sm",
             )}
           >
             <div className="text-sm font-one font-semibold text-white/90 tracking-wide">

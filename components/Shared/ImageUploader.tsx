@@ -86,8 +86,8 @@ export default function ImageUploader({
           <div
             className={`relative ${
               compact ? "w-full h-24" : "w-[250px] h-[250px]"
-            } rounded-${compact ? "md" : "md"} overflow-hidden bg-white/10 ${
-              compact ? "" : "flex-shrink-0"
+            } rounded-${compact ? "2xl" : "2xl"} overflow-hidden bg-white/10 ${
+              compact ? "" : "shrink-0"
             }`}
           >
             <Image
@@ -110,7 +110,7 @@ export default function ImageUploader({
 
         {/* Zone d'upload */}
         <div
-          className={`relative border-2 border-dashed rounded-${
+          className={`relative border border-dashed rounded-${compact ? "2xl" : "2xl"} ${compact ? "p-3" : "p-6"} text-center transition-colors ${
             compact ? "md" : "md"
           } ${compact ? "p-3" : "p-6"} text-center transition-colors ${
             compact ? "flex-1 min-h-[80px]" : "flex-1 min-h-[192px]"
@@ -135,7 +135,7 @@ export default function ImageUploader({
             <div className="text-white/80">
               <div>
                 <div
-                  className={`font-medium ${compact ? "text-xs" : "text-sm"}`}
+                  className={`font-medium font-one ${compact ? "text-xs" : "text-sm"}`}
                 >
                   {currentImage || previewUrl
                     ? "Remplacer"

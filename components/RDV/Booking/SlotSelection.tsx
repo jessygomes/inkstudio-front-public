@@ -144,7 +144,7 @@ export default function SlotSelection({
     <Section title="Choisir le tatoueur et les créneaux">
       {/* Champ Visio pour prestation PROJET */}
       {prestation === "PROJET" && (
-        <div className="mb-4 bg-white/[0.05] p-3 rounded-md border border-white/10">
+        <div className="mb-4 bg-white/5 p-3 rounded-2xl border border-white/10">
           <label className="flex items-start gap-3 cursor-pointer">
             <input
               type="checkbox"
@@ -199,7 +199,7 @@ export default function SlotSelection({
                   Tatoueur souhaité
                 </label>
                 <select
-                  className="w-full max-w-xs p-2.5 bg-white/[0.05] border border-white/10 rounded-md text-white text-sm focus:outline-none focus:border-tertiary-400 focus:ring-1 focus:ring-tertiary-400/30 transition-all"
+                  className="w-full max-w-xs p-2.5 bg-white/2 border border-white/10 rounded-2xl font-one text-white text-sm focus:outline-none focus:border-tertiary-400 focus:ring-1 focus:ring-tertiary-400/30 transition-all"
                   value={selectedTatoueur || ""}
                   onChange={(e) => onTatoueurChange(e.target.value)}
                 >
@@ -230,7 +230,7 @@ export default function SlotSelection({
                   value={selectedDate}
                   onChange={(e) => onDateChange(e.target.value)}
                   min={new Date().toISOString().split("T")[0]}
-                  className="w-full max-w-xs p-2.5 bg-white/[0.05] border border-white/10 rounded-md text-white text-sm focus:outline-none focus:border-tertiary-400 focus:ring-1 focus:ring-tertiary-400/30 transition-all"
+                  className="w-full max-w-xs p-2.5 bg-white/2 border border-white/10 rounded-2xl font-one text-white text-sm focus:outline-none focus:border-tertiary-400 focus:ring-1 focus:ring-tertiary-400/30 transition-all"
                 />
               </div>
             )}
@@ -249,7 +249,7 @@ export default function SlotSelection({
                 </div>
 
                 {/* Légende */}
-                <div className="bg-white/[0.03] rounded-md border border-white/10 p-3">
+                <div className="bg-white/3 rounded-2xl border border-white/10 p-3">
                   <h4 className="text-white/80 font-one font-semibold text-xs mb-2 uppercase tracking-wide">
                     Légende
                   </h4>
@@ -259,24 +259,24 @@ export default function SlotSelection({
                       <span className="text-white/70 font-one">Disponible</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 bg-gradient-to-br from-tertiary-500/30 to-tertiary-400/20 border border-tertiary-400/60 rounded" />
+                      <div className="w-4 h-4 bg-linear-to-br from-tertiary-500/30 to-tertiary-400/20 border border-tertiary-400/60 rounded" />
                       <span className="text-white/70 font-one">
                         Sélectionné
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 bg-gradient-to-br from-gray-500/20 to-gray-600/10 border border-gray-500/40 rounded" />
+                      <div className="w-4 h-4 bg-linear-to-br from-gray-500/20 to-gray-600/10 border border-gray-500/40 rounded" />
                       <span className="text-white/70 font-one">Occupé</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 bg-gradient-to-br from-red-500/20 to-red-600/10 border border-red-500/40 rounded" />
+                      <div className="w-4 h-4 bg-linear-to-br from-red-500/20 to-red-600/10 border border-red-500/40 rounded" />
                       <span className="text-white/70 font-one">Bloqué</span>
                     </div>
                   </div>
                 </div>
 
                 {isLoadingSlots ? (
-                  <div className="flex flex-col items-center justify-center p-8 bg-white/[0.03] rounded-md border border-white/10">
+                  <div className="flex flex-col items-center justify-center p-8 bg-white/3 rounded-2xl border border-white/10">
                     <div className="animate-spin rounded-full h-8 w-8 border-2 border-tertiary-400 border-t-transparent mb-3"></div>
                     <span className="text-white font-one text-sm">
                       Chargement des créneaux...
@@ -328,16 +328,16 @@ export default function SlotSelection({
                               }
                               disabled={isDisabled}
                               className={classNames(
-                                "cursor-pointer p-3 rounded-md text-xs font-one font-medium transition-all duration-200 border-1 ",
+                                "cursor-pointer p-3 rounded-2xl text-xs font-one font-medium transition-all duration-200 border",
                                 isSelected &&
-                                  "bg-gradient-to-br from-tertiary-500/30 to-tertiary-400/20 border-tertiary-400/60 text-white shadow-lg",
+                                  "bg-linear-to-br from-tertiary-500/30 to-tertiary-400/20 border-tertiary-400/60 text-white shadow-lg",
                                 !isSelected &&
                                   !isDisabled &&
-                                  "bg-gradient-to-br border-white/20 text-white/80 hover:bg-white/[0.12]",
+                                  "bg-linear-to-br border-white/20 text-white/80 hover:bg-white/12",
                                 isOccupied &&
-                                  "bg-gradient-to-br from-gray-500/20 to-gray-600/10 border-gray-500/40 text-gray-400 cursor-not-allowed",
+                                  "bg-linear-to-br from-gray-500/20 to-gray-600/10 border-gray-500/40 text-gray-400 cursor-not-allowed",
                                 isBlocked &&
-                                  "bg-gradient-to-br from-red-500/20 to-red-600/10 border-red-500/40 text-red-400 cursor-not-allowed",
+                                  "bg-linear-to-br from-red-500/20 to-red-600/10 border-red-500/40 text-red-400 cursor-not-allowed",
                               )}
                             >
                               <div className="flex flex-col items-center gap-1">
@@ -352,19 +352,19 @@ export default function SlotSelection({
                       </div>
 
                       {/* Résumé de sélection */}
-                      <div className="flex flex-wrap gap-3 text-xs text-white/70">
+                      <div className="flex flex-wrap gap-3 text-xs text-white/70 font-one">
                         <div className="flex items-center gap-1.5">
-                          <span className="font-semibold">Total:</span>
+                          <span>Total :</span>
                           <span>{displayedSlotStarts.length}</span>
                         </div>
                         <div className="flex items-center gap-1.5">
-                          <span className="font-semibold">Sélectionnés:</span>
+                          <span>Sélectionnés :</span>
                           <span className="text-tertiary-400">
                             {selectedSlots.length}
                           </span>
                         </div>
                         <div className="flex items-center gap-1.5">
-                          <span className="font-semibold">Durée:</span>
+                          <span>Durée :</span>
                           <span className="text-tertiary-400">
                             {selectedSlots.length * 30} min
                           </span>
@@ -373,7 +373,7 @@ export default function SlotSelection({
                           <button
                             type="button"
                             onClick={onClearSelection}
-                            className="ml-auto px-3 py-1 rounded-md border border-white/20 text-white/80 hover:bg-white/[0.12] transition-colors"
+                            className="cursor-pointer ml-auto px-3 py-1 rounded-2xl border border-white/20 text-white/80 hover:bg-white/12 transition-colors"
                           >
                             Tout désélectionner
                           </button>
@@ -383,9 +383,9 @@ export default function SlotSelection({
 
                     {/* Récapitulatif de sélection */}
                     {selectedSlots.length > 0 && (
-                      <div className="bg-tertiary-500/10 border border-tertiary-500/30 rounded-md p-4">
+                      <div className="bg-tertiary-500/10 border border-tertiary-500/30 rounded-2xl p-4">
                         <div className="flex items-start gap-3">
-                          <div className="flex-shrink-0 w-8 h-8 rounded-md bg-tertiary-500/20 flex items-center justify-center">
+                          <div className="shrink-0 w-8 h-8 rounded-2xl bg-tertiary-500/20 flex items-center justify-center">
                             <svg
                               className="w-4 h-4 text-tertiary-300"
                               fill="none"
@@ -410,7 +410,7 @@ export default function SlotSelection({
                               </p>
                             </div>
                             <div className="grid grid-cols-2 gap-2 text-sm">
-                              <div className="bg-white/5 rounded-md p-2 border border-white/10">
+                              <div className="bg-white/5 rounded-2xl p-2 border border-white/10">
                                 <p className="text-xs text-white/60 mb-0.5">
                                   Date
                                 </p>
@@ -426,7 +426,7 @@ export default function SlotSelection({
                                   )}
                                 </p>
                               </div>
-                              <div className="bg-white/5 rounded p-2 border border-white/10">
+                              <div className="bg-white/5 rounded-2xl p-2 border border-white/10">
                                 <p className="text-xs text-white/60 mb-0.5">
                                   Horaire
                                 </p>
@@ -449,7 +449,7 @@ export default function SlotSelection({
                                   })}
                                 </p>
                               </div>
-                              <div className="bg-white/5 rounded p-2 border border-white/10">
+                              <div className="bg-white/5 rounded-2xl p-2 border border-white/10">
                                 <p className="text-xs text-white/60 mb-0.5">
                                   Durée
                                 </p>
@@ -457,7 +457,7 @@ export default function SlotSelection({
                                   {selectedSlots.length * 30} min
                                 </p>
                               </div>
-                              <div className="bg-white/5 rounded p-2 border border-white/10">
+                              <div className="bg-white/5 rounded-2xl p-2 border border-white/10">
                                 <p className="text-xs text-white/60 mb-0.5">
                                   Créneaux
                                 </p>

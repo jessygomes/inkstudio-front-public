@@ -7,7 +7,7 @@ interface SectionProps {
 
 export default function Section({ title, children }: SectionProps) {
   return (
-    <div className="rounded-lg border border-white/10 bg-gradient-to-br from-white/[0.08] to-white/[0.02] p-6 sm:p-8 backdrop-blur-lg">
+    <div className="rounded-2xl border border-white/10 bg-linear-to-br from-noir-500 to-white/2 p-6 sm:p-8 backdrop-blur-lg">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-white/95 font-one text-sm tracking-[0.2em] uppercase font-semibold">
           {title}
