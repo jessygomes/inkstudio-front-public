@@ -47,7 +47,7 @@ export default function Navbar() {
         })}
         {status === "authenticated" && session?.user ? (
           <Link href="/mon-profil" className="relative">
-            <div className="relative w-10 h-10 rounded-full overflow-hidden border-1 border-white/30 transition-all duration-300 cursor-pointer hover:scale-105">
+            <div className="relative w-10 h-10 rounded-full overflow-hidden border border-white/30 transition-all duration-300 cursor-pointer hover:scale-105">
               {session.user.image ? (
                 <Image
                   src={session.user.image}
@@ -57,7 +57,7 @@ export default function Navbar() {
                   className="object-cover"
                 />
               ) : (
-                <div className="w-full h-full bg-gradient-to-br from-tertiary-400/40 to-tertiary-500/40 flex items-center justify-center">
+                <div className="w-full h-full bg-linear-to-br from-tertiary-400/40 to-tertiary-500/40 flex items-center justify-center">
                   <span className="text-white font-bold text-sm">
                     {session.user.firstName?.charAt(0)}
                     {session.user.lastName?.charAt(0)}
@@ -73,8 +73,8 @@ export default function Navbar() {
           </Link>
         ) : (
           <Link href="/se-connecter">
-            <div className="cursor-pointer px-8 py-2 bg-gradient-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white rounded-lg transition-all duration-300 font-medium disabled:opacity-50 disabled:cursor-not-allowed font-two text-xs">
-              Se connecter / S'inscrire
+            <div className="cursor-pointer px-8 py-2 bg-linear-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white rounded-2xl transition-all duration-300 font-medium disabled:opacity-50 disabled:cursor-not-allowed font-two text-xs">
+              Se connecter
             </div>
           </Link>
         )}

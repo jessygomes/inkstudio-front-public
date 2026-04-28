@@ -1,7 +1,7 @@
 /* eslint-disable react/no-unescaped-entities */
 "use client";
 
-import React, { useState } from "react";
+import  { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -13,6 +13,7 @@ import { signIn } from "next-auth/react";
 import { FormError } from "@/components/Shared/FormError";
 import { FormSuccess } from "@/components/Shared/FormSuccess";
 import { CardWrapper } from "./Wrapper/CardWrapper";
+import { FaGoogle } from "react-icons/fa";
 
 // Schema de validation pour l'inscription client
 const registerSchema = z
@@ -76,8 +77,6 @@ export default function Register() {
     setError("");
     setSuccess("");
     setIsPending(true);
-
-    console.log("Données du formulaire d'inscription :", data);
 
     try {
       // Appel à l'API pour l'inscription
@@ -239,6 +238,7 @@ export default function Register() {
             </div>
 
             {/* Mot de passe */}
+            <div className="flex gap-4">
             <div className="flex flex-col gap-1 font-one">
               <label htmlFor="password" className="text-xs">
                 Mot de passe *
@@ -363,6 +363,7 @@ export default function Register() {
                 </p>
               )}
             </div>
+            </div>
 
             {/* Acceptation des conditions */}
             <div className="flex items-start gap-3">
@@ -370,7 +371,7 @@ export default function Register() {
                 type="checkbox"
                 id="acceptTerms"
                 {...form.register("acceptTerms")}
-                className="w-4 h-4 mt-0.5 text-tertiary-500 focus:ring-tertiary-400 bg-transparent border-white/30 rounded"
+                className="w-4 h-4 mt-0.5 text-tertiary-500 focus:ring-tertiary-400 bg-transparent border-white/30 rounded-2xl"
               />
               <label
                 htmlFor="acceptTerms"
@@ -403,7 +404,7 @@ export default function Register() {
 
             {/* Bouton de soumission */}
             <button
-              className="cursor-pointer px-8 py-2 bg-gradient-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white rounded-lg transition-all duration-300 font-medium disabled:opacity-50 disabled:cursor-not-allowed font-one lg:text-xs"
+              className="cursor-pointer px-8 py-2 bg-linear-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white rounded-2xl transition-all duration-300 font-medium disabled:opacity-50 disabled:cursor-not-allowed font-one lg:text-xs"
               type="submit"
               disabled={isPending}
             >
@@ -416,15 +417,21 @@ export default function Register() {
               <span className="h-px flex-1 bg-white/30" />
             </div>
 
-            <button
+              <button
               type="button"
               onClick={handleGoogleSignIn}
-              className="flex items-center justify-center gap-2 px-8 py-2 bg-white text-black rounded-lg transition-all duration-300 font-medium disabled:opacity-70 disabled:cursor-not-allowed font-one lg:text-xs"
+              className="cursor-pointer group relative flex items-center justify-center gap-3 overflow-hidden rounded-2xl border border-white/15 bg-white/8 px-8 py-3 text-white shadow-lg shadow-black/20 backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:border-tertiary-400/40 hover:bg-white/12 hover:shadow-xl hover:shadow-tertiary-500/10 disabled:cursor-not-allowed disabled:opacity-70 font-one lg:text-xs"
               disabled={isGooglePending}
             >
-              {isGooglePending
-                ? "Connexion Google..."
-                : "Continuer avec Google"}
+              <span className="absolute inset-0 bg-linear-to-r from-white/8 via-transparent to-tertiary-400/8 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+              <span className="relative flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white text-[#EA4335] shadow-md shadow-black/10">
+                <FaGoogle className="text-sm" />
+              </span>
+              <span className="relative font-medium tracking-[0.02em]">
+                {isGooglePending
+                  ? "Connexion Google..."
+                  : "Continuer avec Google"}
+              </span>
             </button>
           </div>
         </form>
@@ -435,7 +442,7 @@ export default function Register() {
           Vous avez déjà un compte ?{" "}
           <Link
             className="text-tertiary-400 hover:text-tertiary-500 transition-all ease-in-out duration-150"
-            href="/connexion"
+            href="/se-connecter"
           >
             Se connecter
           </Link>

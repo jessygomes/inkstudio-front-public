@@ -54,8 +54,6 @@ export const Login = () => {
         redirect: false,
       });
 
-      console.log("🔍 [Login] Résultat signIn:", result);
-
       // Vérifier si une erreur existe (pas seulement ok)
       if (result?.error) {
         console.log("❌ [Login] Authentification échouée - Pas de redirection");
@@ -68,7 +66,6 @@ export const Login = () => {
         return;
       }
 
-      console.log("✅ [Login] Authentification réussie - Redirection vers /");
       setSuccess("Connexion réussie !");
       setSuccess("Redirection vers l'app...");
 
@@ -194,7 +191,7 @@ export const Login = () => {
             <FormSuccess message={success} />
 
             <button
-              className="cursor-pointer px-8 py-2 bg-linear-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white rounded-lg transition-all duration-300 font-medium disabled:opacity-50 disabled:cursor-not-allowed font-one lg:text-xs"
+              className="cursor-pointer px-8 py-2 bg-linear-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white rounded-2xl transition-all duration-300 font-medium disabled:opacity-50 disabled:cursor-not-allowed font-one lg:text-xs"
               type="submit"
               disabled={isPending}
             >
@@ -214,7 +211,7 @@ export const Login = () => {
             <button
               type="button"
               onClick={handleGoogleSignIn}
-              className="cursor-pointer group relative flex items-center justify-center gap-3 overflow-hidden rounded-xl border border-white/15 bg-white/8 px-8 py-3 text-white shadow-lg shadow-black/20 backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:border-tertiary-400/40 hover:bg-white/12 hover:shadow-xl hover:shadow-tertiary-500/10 disabled:cursor-not-allowed disabled:opacity-70 font-one lg:text-xs"
+              className="cursor-pointer group relative flex items-center justify-center gap-3 overflow-hidden rounded-2xl border border-white/15 bg-white/8 px-8 py-3 text-white shadow-lg shadow-black/20 backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:border-tertiary-400/40 hover:bg-white/12 hover:shadow-xl hover:shadow-tertiary-500/10 disabled:cursor-not-allowed disabled:opacity-70 font-one lg:text-xs"
               disabled={isGooglePending}
             >
               <span className="absolute inset-0 bg-linear-to-r from-white/8 via-transparent to-tertiary-400/8 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
