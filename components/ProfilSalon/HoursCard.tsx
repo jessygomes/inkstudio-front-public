@@ -16,7 +16,7 @@ export default function HoursCard({ hours, todayFR, openNow }: HoursCardProps) {
   if (hours.length === 0) return null;
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.08] to-white/[0.02] p-5 backdrop-blur-lg shadow-xl">
+    <div className="rounded-2xl border border-white/10 bg-linear-to-br from-noir-500 to-white/2 p-5 backdrop-blur-lg shadow-xl">
       {/* Header avec bouton d'expansion */}
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-white/95 font-one text-sm tracking-wider uppercase flex items-center gap-2">
@@ -62,9 +62,9 @@ export default function HoursCard({ hours, todayFR, openNow }: HoursCardProps) {
 
       {/* Résumé aujourd'hui (toujours visible) */}
       {openNow.today && (
-        <div className="mb-3 p-3 rounded-lg bg-gradient-to-r from-tertiary-500/15 to-tertiary-600/10 border border-tertiary-500/25">
+        <div className="mb-3 rounded-2xl border border-tertiary-400/15 bg-tertiary-400/20 p-3">
           <div className="flex items-center justify-between">
-            <span className="text-white font-one text-sm font-semibold">
+            <span className="text-white font-one text-sm">
               Aujourd&apos;hui
             </span>
             <div className="flex items-center gap-2">
@@ -97,20 +97,20 @@ export default function HoursCard({ hours, todayFR, openNow }: HoursCardProps) {
           return (
             <div
               key={h.day}
-              className={`flex items-center justify-between p-3 rounded-lg transition-all duration-200 ${
+              className={`flex items-center justify-between py-1.5 px-3 rounded-2xl transition-all duration-200 ${
                 isToday
-                  ? "bg-gradient-to-r from-tertiary-500/20 to-tertiary-600/10 border border-tertiary-500/30"
-                  : "bg-white/[0.02] hover:bg-white/[0.05]"
+                  ? "border border-tertiary-400/15 bg-tertiary-400/20"
+                  : "bg-white/2 hover:bg-white/5"
               }`}
             >
               <span
                 className={`font-one text-sm ${
-                  isToday ? "text-tertiary-300 font-semibold" : "text-white/80"
+                  isToday ? "text-white" : "text-white/80"
                 }`}
               >
                 {h.day}
                 {isToday && (
-                  <span className="ml-2 text-xs text-tertiary-400">
+                  <span className="ml-2 text-xs text-tertiary-200">
                     (Aujourd&apos;hui)
                   </span>
                 )}

@@ -399,7 +399,7 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
 
   return (
     <div
-      className="min-h-screen bg-gradient-to-b from-noir-700 via-noir-500 to-noir-700 pt-20"
+      className="min-h-screen bg-linear-to-b from-noir-700 via-noir-500 to-noir-700 pt-20"
       style={customStyle}
     >
       {/* CONTENT */}
@@ -407,7 +407,7 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
         {/* Mobile Hero */}
         <div className="mx-auto lg:hidden mb-6">
           <div className="relative overflow-hidden rounded-2xl border border-white/10 shadow-xl">
-            <div className="relative h-64 bg-gradient-to-br from-noir-600 to-noir-800">
+            <div className="relative h-64 bg-linear-to-br from-noir-600 to-noir-800">
               {heroSrc ? (
                 <Image
                   src={heroSrc}
@@ -441,7 +441,7 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
                   </div>
                 </div>
               )}
-              <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/80" />
+              <div className="absolute inset-0 bg-linear-to-b from-black/20 via-transparent to-black/80" />
 
               {/* Status badges */}
               <div className="absolute top-4 left-4 right-4 flex flex-wrap gap-2 z-10">
@@ -495,9 +495,9 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
 
         <div className="mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Sidebar */}
-          <aside className="lg:order-2 lg:sticky lg:top-24 h-fit space-y-5">
+          <aside className="lg:order-2 lg:sticky lg:top-24 h-fit space-y-3">
             {/* Quick Actions */}
-            <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.08] to-white/[0.02] p-5 backdrop-blur-lg shadow-xl">
+   
               <div className="flex gap-2.5">
                 <FavoriteBtn
                   salonId={salon.id}
@@ -509,7 +509,7 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
                   href={directionsHref}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`group flex justify-center items-center gap-2 py-2.5 px-3 rounded-lg bg-gradient-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white transition-all duration-300 font-one text-sm tracking-widest shadow-lg shadow-tertiary-500/25 hover:shadow-tertiary-500/40 transform hover:scale-[1.02] ${
+                  className={`group flex justify-center items-center gap-2 py-1.5 px-3 rounded-2xl border border-white/15 bg-tertiary-400/20 text-white shadow-[inset_0_-2px_0_0_var(--color-tertiary-400)] transition-all duration-300 font-one text-sm tracking-widest hover:bg-tertiary-400/25 hover:border-tertiary-400/35 transform hover:scale-[1.02] ${
                     isFree ? "flex-1" : "flex-1"
                   }`}
                 >
@@ -538,7 +538,7 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
                 {!isFree && (
                   <Link
                     href={`/salon/${resolvedParams.slug}/${resolvedParams.loc}/reserver`}
-                    className="flex-1 group flex justify-center items-center gap-2 py-2.5 px-3 rounded-lg bg-gradient-to-br from-white/[0.08] to-white/[0.02] hover:from-white/[0.12] hover:to-white/[0.06] text-white border border-white/20 hover:border-white/30 transition-all duration-300 text-sm tracking-widest font-one backdrop-blur-sm transform hover:scale-[1.02]"
+                    className="flex-1 group flex justify-center items-center gap-2 py-1.5 px-3 rounded-2xl bg-linear-to-br from-white/8 to-white/2 hover:from-white/12 hover:to-white/6 text-white border border-white/20 hover:border-white/30 transition-all duration-300 text-sm tracking-widest font-one backdrop-blur-sm transform hover:scale-[1.02]"
                   >
                     <svg
                       className="w-4 h-4"
@@ -557,10 +557,9 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
                   </Link>
                 )}
               </div>
-            </div>
 
             {/* Contact Info */}
-            <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.08] to-white/[0.02] p-5 backdrop-blur-lg shadow-xl">
+            <div className="rounded-2xl border border-white/10 bg-linear-to-br from-noir-500 to-white/2 p-5 backdrop-blur-lg shadow-xl">
               <h3 className="text-white/95 text-sm font-one tracking-wider uppercase mb-4 flex items-center gap-2">
                 <svg
                   className="w-4 h-4"
@@ -579,11 +578,12 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
               </h3>
 
               <div className="space-y-4 sm:flex sm:justify-between sm:gap-12 lg:flex-col lg:gap-0">
+                <div className="flex justify-start gap-6">
                 {salon.address && (
-                  <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-tertiary-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-2xl bg-tertiary-500/30 flex items-center justify-center shrink-0 mt-0.5">
                       <svg
-                        className="w-4 h-4 text-tertiary-400"
+                        className="w-4 h-4 text-white"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -596,12 +596,12 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
                         />
                       </svg>
                     </div>
-                    <div className="flex-1">
+                    <div className="">
                       <p className="text-white/90 font-one text-sm leading-relaxed">
                         {salon.address}
                         {salon.city && (
                           <>
-                            <br />
+                            {", "}
                             {salon.city}
                           </>
                         )}{" "}
@@ -613,9 +613,9 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
 
                 {salon.phone && (
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-tertiary-500/20 flex items-center justify-center flex-shrink-0">
+                    <div className="w-8 h-8 rounded-2xl bg-tertiary-500/30 flex items-center justify-center shrink-0">
                       <svg
-                        className="w-4 h-4 text-tertiary-400"
+                        className="w-4 h-4 text-white"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -630,12 +630,13 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
                     </div>
                     <a
                       href={`tel:${phoneHref}`}
-                      className="text-white/90 font-one text-sm hover:text-tertiary-400 transition-colors"
+                      className="text-white/90 font-one text-sm hover:text-tertiary-500 transition-colors"
                     >
                       {phoneDisplay}
                     </a>
                   </div>
                 )}
+                </div>
 
                 {/* Social Media */}
                 {(salon.instagram ||
@@ -651,7 +652,7 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
                         <Link
                           href={salon.instagram}
                           target="_blank"
-                          className="group w-10 h-10 rounded-lg bg-gradient-to-br from-pink-500/20 to-purple-500/20 border border-pink-500/30 flex items-center justify-center hover:from-pink-500/30 hover:to-purple-500/30 hover:border-pink-400/50 transition-all duration-300 transform hover:scale-110"
+                          className="group w-8 h-8 rounded-2xl bg-linear-to-br from-pink-500/20 to-purple-500/20 border border-pink-500/30 flex items-center justify-center hover:from-pink-500/30 hover:to-purple-500/30 hover:border-pink-400/50 transition-all duration-300 transform hover:scale-110"
                         >
                           <CiInstagram className="w-5 h-5 text-pink-400 group-hover:text-pink-300" />
                         </Link>
@@ -660,7 +661,7 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
                         <Link
                           href={salon.facebook}
                           target="_blank"
-                          className="group w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500/20 to-blue-600/20 border border-blue-500/30 flex items-center justify-center hover:from-blue-500/30 hover:to-blue-600/30 hover:border-blue-400/50 transition-all duration-300 transform hover:scale-110"
+                          className="group w-8 h-8 rounded-2xl bg-linear-to-br from-blue-500/20 to-blue-600/20 border border-blue-500/30 flex items-center justify-center hover:from-blue-500/30 hover:to-blue-600/30 hover:border-blue-400/50 transition-all duration-300 transform hover:scale-110"
                         >
                           <CiFacebook className="w-5 h-5 text-blue-400 group-hover:text-blue-300" />
                         </Link>
@@ -669,7 +670,7 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
                         <Link
                           href={salon.tiktok}
                           target="_blank"
-                          className="group w-10 h-10 rounded-lg bg-gradient-to-br from-gray-500/20 to-gray-600/20 border border-gray-500/30 flex items-center justify-center hover:from-gray-500/30 hover:to-gray-600/30 hover:border-gray-400/50 transition-all duration-300 transform hover:scale-110"
+                          className="group w-8 h-8 rounded-2xl bg-linear-to-br from-gray-500/20 to-gray-600/20 border border-gray-500/30 flex items-center justify-center hover:from-gray-500/30 hover:to-gray-600/30 hover:border-gray-400/50 transition-all duration-300 transform hover:scale-110"
                         >
                           <PiTiktokLogoThin className="w-5 h-5 text-gray-400 group-hover:text-gray-300" />
                         </Link>
@@ -678,7 +679,7 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
                         <Link
                           href={salon.website}
                           target="_blank"
-                          className="group w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500/20 to-emerald-600/20 border border-emerald-500/30 flex items-center justify-center hover:from-emerald-500/30 hover:to-emerald-600/30 hover:border-emerald-400/50 transition-all duration-300 transform hover:scale-110"
+                          className="group w-8 h-8 rounded-2xl bg-linear-to-br from-emerald-500/20 to-emerald-600/20 border border-emerald-500/30 flex items-center justify-center hover:from-emerald-500/30 hover:to-emerald-600/30 hover:border-emerald-400/50 transition-all duration-300 transform hover:scale-110"
                         >
                           <TfiWorld className="w-4 h-4 text-emerald-400 group-hover:text-emerald-300" />
                         </Link>
@@ -698,7 +699,7 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
             {/* Desktop Hero */}
             <div className="hidden lg:block">
               <div className="relative overflow-hidden rounded-2xl shadow-xl">
-                <div className="relative h-80 lg:h-96 bg-gradient-to-br from-noir-600 to-noir-800">
+                <div className="relative h-80 lg:h-96 bg-linear-to-br from-noir-600 to-noir-800">
                   {heroSrc ? (
                     <Image
                       src={heroSrc}
@@ -732,7 +733,7 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
                       </div>
                     </div>
                   )}
-                  <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/80" />
+                  <div className="absolute inset-0 bg-linear-to-b from-black/20 via-transparent to-black/80" />
 
                   {/* Status badges */}
                   <div className="absolute top-5 left-5 right-5 flex flex-wrap gap-3 z-10">
@@ -786,7 +787,7 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
             </div>
 
             {/* Présentation */}
-            <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.08] to-white/[0.02] p-6 backdrop-blur-lg shadow-xl">
+            <div className="rounded-2xl border border-white/10 bg-linear-to-br from-noir-500 to-noir-700 p-6 backdrop-blur-lg shadow-xl">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
                 <h2 className="text-white/95 font-one text-sm tracking-wider uppercase">
                   Présentation
@@ -797,14 +798,14 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
                       {prestationsVisibles.map((p, idx) => (
                         <span
                           key={`${p}-${idx}`}
-                          className="px-3 py-1 rounded-lg bg-gradient-to-br from-white/[0.08] to-white/[0.02] text-white/80 border border-white/10 text-xs font-one backdrop-blur-sm"
+                          className="px-3 py-1 rounded-lg bg-linear-to-br from-noir-500/8 to-noir-700/2 text-white/80 border border-white/10 text-xs font-one backdrop-blur-sm"
                           title={p}
                         >
                           {p}
                         </span>
                       ))}
                       {prestationsRestantes > 0 && (
-                        <span className="px-3 py-1 rounded-lg bg-gradient-to-br from-white/[0.08] to-white/[0.02] text-white/80 border border-white/10 text-xs font-one backdrop-blur-sm">
+                        <span className="px-3 py-1 rounded-lg bg-linear-to-br from-noir-500/8 to-noir-700/2 text-white/80 border border-white/10 text-xs font-one backdrop-blur-sm">
                           +{prestationsRestantes}
                         </span>
                       )}
@@ -835,9 +836,9 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
 
             {/* Équipe */}
             {Array.isArray(salon.Tatoueur) && salon.Tatoueur.length > 0 && (
-              <section className="rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.08] to-white/[0.02] p-6 backdrop-blur-lg shadow-xl">
+              <section className="">
                 <div className="flex items-center justify-between mb-5">
-                  <h3 className="text-white/95 font-one text-sm tracking-wider uppercase">
+                  <h3 className="text-white/95 font-one text-md tracking-wider uppercase">
                     L&apos;équipe
                   </h3>
                   <span className="text-white/60 font-one text-sm">
@@ -846,7 +847,13 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
                   </span>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-5">
+                <div
+                  className={`grid grid-cols-1 gap-5 ${
+                    salon.Tatoueur.length > 1
+                      ? "sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2"
+                      : ""
+                  }`}
+                >
                   {salon.Tatoueur.map((t: any) => (
                     <div key={t.id}>
                       <TeamCard

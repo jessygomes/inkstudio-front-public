@@ -132,7 +132,7 @@ export default function FavoriteBtn({
     return (
       <button
         disabled
-        className={`group cursor-pointer w-10 h-10 rounded-lg bg-white/10 border border-white/20 flex items-center justify-center transition-all duration-300 ${className}`}
+        className={`group cursor-pointer w-10 h-10 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center transition-all duration-300 ${className}`}
       >
         <div className="w-4 h-4 border-2 border-white/40 border-t-transparent rounded-full animate-spin" />
       </button>
@@ -144,9 +144,9 @@ export default function FavoriteBtn({
       <button
         onClick={handleToggle}
         disabled={isPending}
-        className={`group cursor-pointer w-10 h-10 rounded-lg transition-all duration-300 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed ${
+        className={`group cursor-pointer w-8 h-8 rounded-2xl transition-all duration-300 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed ${
           favorite
-            ? "bg-gradient-to-br from-pink-500/30 to-red-500/30 border border-pink-500/50 hover:from-pink-500/40 hover:to-red-500/40"
+            ? "bg-linear-to-br from-pink-500/30 to-red-500/30 border border-pink-500/50 hover:from-pink-500/40 hover:to-red-500/40"
             : "bg-white/10 border border-white/20 hover:bg-white/20"
         } ${className}`}
         title={favorite ? "Retirer des favoris" : "Ajouter aux favoris"}
@@ -154,9 +154,9 @@ export default function FavoriteBtn({
         {isPending ? (
           <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
         ) : favorite ? (
-          <FaHeart className="w-5 h-5 text-pink-400 group-hover:scale-110 transition-transform" />
+          <FaHeart className="w-3 h-3 text-pink-400 group-hover:scale-110 transition-transform" />
         ) : (
-          <FaRegHeart className="w-5 h-5 text-white/80 group-hover:text-white group-hover:scale-110 transition-all" />
+          <FaRegHeart className="w-3 h-3 text-white/80 group-hover:text-white group-hover:scale-110 transition-all" />
         )}
       </button>
     );
@@ -166,9 +166,9 @@ export default function FavoriteBtn({
     <button
       onClick={handleToggle}
       disabled={isPending}
-      className={`group cursor-pointer flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-300 font-one text-sm disabled:opacity-50 disabled:cursor-not-allowed ${
+      className={`group cursor-pointer flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300 font-one text-sm disabled:opacity-50 disabled:cursor-not-allowed ${
         favorite
-          ? "bg-gradient-to-br from-pink-500/30 to-red-500/30 border border-pink-500/50 text-pink-300 hover:from-pink-500/40 hover:to-red-500/40"
+          ? "bg-linear-to-br from-pink-500/30 to-red-500/30 border border-pink-500/50 text-pink-300 hover:from-pink-500/40 hover:to-red-500/40"
           : "bg-white/10 border border-white/20 text-white/80 hover:bg-white/20 hover:text-white"
       } ${className}`}
     >
