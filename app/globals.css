@@ -71,6 +71,15 @@ body {
   scrollbar-color: #9ca3af34 transparent; /* Pour Firefox */
 }
 
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 /* Custom fonts */
 /* @font-face {
   font-family: "walkway-regular";

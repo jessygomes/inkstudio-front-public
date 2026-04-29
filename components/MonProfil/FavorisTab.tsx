@@ -188,7 +188,7 @@ export default function FavorisTab() {
                     href={`/salon/${toSlug(salon.salonName)}/${toSlug(salon.city)}-${
                       salon.postalCode || "00000"
                     }`}
-                    className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-tertiary-500/15 hover:bg-tertiary-500/25 text-tertiary-300 border border-tertiary-500/30 rounded-lg font-one text-xs transition-all"
+                    className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-tertiary-500/15 hover:bg-tertiary-500/25 text-tertiary-300 border border-tertiary-500/30 rounded-2xl font-one text-xs transition-all"
                   >
                     <FaEye className="w-3 h-3" />
                     Voir le salon
@@ -201,7 +201,7 @@ export default function FavorisTab() {
                         href={salon.website}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="w-8 h-8 flex items-center justify-center bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-white/60 hover:text-tertiary-400 transition-all"
+                        className="w-8 h-8 flex items-center justify-center bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl text-white/60 hover:text-tertiary-400 transition-all"
                         title="Site web"
                       >
                         <FaGlobe className="w-3.5 h-3.5" />
@@ -212,7 +212,7 @@ export default function FavorisTab() {
                         href={salon.instagram}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="w-8 h-8 flex items-center justify-center bg-white/5 hover:bg-pink-500/20 border border-white/10 hover:border-pink-500/30 rounded-lg text-white/60 hover:text-pink-400 transition-all"
+                        className="w-8 h-8 flex items-center justify-center bg-white/5 hover:bg-pink-500/20 border border-white/10 hover:border-pink-500/30 rounded-2xl text-white/60 hover:text-pink-400 transition-all"
                         title="Instagram"
                       >
                         <FaInstagram className="w-3.5 h-3.5" />
@@ -223,7 +223,7 @@ export default function FavorisTab() {
                         href={salon.facebook}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="w-8 h-8 flex items-center justify-center bg-white/5 hover:bg-blue-500/20 border border-white/10 hover:border-blue-500/30 rounded-lg text-white/60 hover:text-blue-400 transition-all"
+                        className="w-8 h-8 flex items-center justify-center bg-white/5 hover:bg-blue-500/20 border border-white/10 hover:border-blue-500/30 rounded-2xl text-white/60 hover:text-blue-400 transition-all"
                         title="Facebook"
                       >
                         <FaFacebook className="w-3.5 h-3.5" />

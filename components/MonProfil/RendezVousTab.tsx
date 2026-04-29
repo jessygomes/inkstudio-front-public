@@ -23,6 +23,8 @@ import { createReview } from "@/lib/actions/review.action";
 import { FaStar } from "react-icons/fa";
 import { useEditAppointmentModal } from "@/components/Context/EditAppointmentContext";
 import CancelAppointmentModal from "./CancelAppointmentModal";
+import { CiInstagram } from "react-icons/ci";
+import { TfiWorld } from "react-icons/tfi";
 
 export type Appointment = {
   id: string;
@@ -226,7 +228,7 @@ export default function RendezVousTab() {
     const config = configs[status];
     return (
       <span
-        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-[11px] font-one border ${config.bg} ${config.text} ${config.border}`}
+        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-2xl text-[11px] font-one border ${config.bg} ${config.text} ${config.border}`}
       >
         {config.icon}
         {config.label}
@@ -248,6 +250,35 @@ export default function RendezVousTab() {
       hour: "2-digit",
       minute: "2-digit",
     });
+  };
+
+  const formatPhoneDisplay = (phone?: string | null) => {
+    if (!phone) return "";
+
+    const digits = phone.replace(/\D/g, "");
+
+    let localDigits = digits;
+
+    // +33XXXXXXXXX ou 33XXXXXXXXX
+    if (localDigits.startsWith("33") && localDigits.length >= 11) {
+      localDigits = localDigits.slice(2);
+    }
+
+    // 0033XXXXXXXXX
+    if (localDigits.startsWith("0033") && localDigits.length >= 13) {
+      localDigits = localDigits.slice(4);
+    }
+
+    // Numéro FR sans le 0 initial (9 chiffres)
+    if (localDigits.length === 9) {
+      localDigits = `0${localDigits}`;
+    }
+
+    if (localDigits.length === 10) {
+      return localDigits.match(/.{1,2}/g)?.join(".") || phone;
+    }
+
+    return phone;
   };
 
   //! Gestion annulation rendez-vous
@@ -323,35 +354,31 @@ export default function RendezVousTab() {
       className="rounded-3xl border border-white/10 bg-linear-to-br from-noir-500/6 to-white/3 p-4 shadow-xl sm:p-5"
     >
       {/* Header */}
-      <div className="mb-5 flex flex-col gap-3 border-b border-white/10 pb-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="space-y-1">
+      <div className="mb-5 flex items-start justify-between gap-3 border-b border-white/10 pb-4">
+        <div className="min-w-0 flex-1 space-y-1">
           <h3 className="text-lg font-semibold text-white font-one sm:text-xl">
             Mes rendez-vous
           </h3>
           {rdvData && (
-            <p className="text-white/60 font-one text-xs">
+            <p className="truncate text-white/60 font-one text-xs">
               {rdvData.pagination.totalAppointments} rendez-vous au total
             </p>
           )}
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="flex items-center gap-1.5 rounded-full border border-white/12 bg-white/6 px-3 py-1.5 text-xs text-white/70 font-one">
+        <div className="flex shrink-0 items-center gap-2">
+          <div className="flex shrink-0 items-center gap-1.5 rounded-2xl border border-white/12 bg-white/6 px-3 py-1 text-xs text-white/70 font-one">
             <FaCalendarAlt className="w-3.5 h-3.5 text-tertiary-300" />
             {rdvData
               ? `Page ${rdvData.pagination.currentPage}/${rdvData.pagination.totalPages}`
               : ""}
-          </div>
-          <div className="hidden items-center gap-1 rounded-full border border-tertiary-500/35 bg-tertiary-500/10 px-3 py-1.5 text-xs text-tertiary-200 font-one sm:flex">
-            <FaFilter className="w-3 h-3" />
-            Filtrer par statut
           </div>
         </div>
       </div>
 
       {/* Filtres modernisés */}
       <div className="mb-5">
-        <div className="flex flex-wrap gap-1.5 sm:gap-2">
+        <div className="no-scrollbar -mx-1 flex gap-1.5 overflow-x-auto overflow-y-hidden px-1 py-1 [scrollbar-width:none] [-ms-overflow-style:none] sm:mx-0 sm:flex-wrap sm:gap-2 sm:overflow-visible sm:px-0 sm:py-0">
           {[
             { label: "Tous", value: "" },
             { label: "Confirmés", value: "CONFIRMED" },
@@ -364,7 +391,7 @@ export default function RendezVousTab() {
               <button
                 key={item.value || "all"}
                 onClick={() => handleStatusChange(item.value)}
-                className={`cursor-pointer rounded-full border px-3 py-1.5 text-xs font-medium transition-all duration-200 font-one ${
+                className={`shrink-0 cursor-pointer rounded-full border px-3 py-1.5 text-xs font-medium transition-all duration-200 font-one ${
                   isActive
                     ? "border-transparent bg-linear-to-r from-tertiary-400 to-tertiary-500 text-white shadow-lg shadow-tertiary-500/30"
                     : "border-white/12 bg-white/6 text-white/70 hover:border-white/25 hover:text-white"
@@ -460,7 +487,7 @@ export default function RendezVousTab() {
                                   className="h-full w-full object-cover"
                                 />
                               ) : (
-                                <div className="flex h-full w-full items-center justify-center text-sm font-bold text-tertiary-300">
+                                <div className="flex h-full w-full items-center justify-center text-sm font-bold text-tertiary-500">
                                   {appointment.salon.salonName.charAt(0)}
                                 </div>
                               )}
@@ -510,7 +537,7 @@ export default function RendezVousTab() {
                         <div className="flex flex-wrap items-center gap-1.5 border-t border-white/10 pt-2">
                           <button
                             onClick={() => toggleExpand(appointment.id)}
-                            className="cursor-pointer inline-flex items-center gap-1.5 rounded-lg border border-white/15 bg-white/8 px-2.5 py-1.5 text-[11px] text-white/90 transition-all hover:bg-white/12 font-one"
+                            className="cursor-pointer inline-flex items-center gap-1.5 rounded-2xl border border-white/15 bg-white/8 px-2.5 py-1 text-[11px] text-white/90 transition-all hover:bg-white/12 font-one"
                           >
                             {isExpanded ? "Réduire" : "Détails"}
                             {isExpanded ? (
@@ -522,7 +549,7 @@ export default function RendezVousTab() {
 
                           <Link
                             href={`/salon/${toSlug(appointment.salon.salonName)}/${toSlug(appointment.salon.city)}-${appointment.salon.postalCode}`}
-                            className="cursor-pointer rounded-lg border border-tertiary-500/35 bg-tertiary-500/10 px-2.5 py-1.5 text-[11px] text-tertiary-200 transition-all hover:bg-tertiary-500/20 font-one"
+                            className="cursor-pointer rounded-2xl border border-tertiary-500/35 bg-tertiary-500/10 px-2.5 py-1 text-[11px] text-tertiary-200 transition-all hover:bg-tertiary-500/20 font-one"
                           >
                             Voir salon
                           </Link>
@@ -530,7 +557,7 @@ export default function RendezVousTab() {
                           {appointment.conversation && (
                             <Link
                               href={`/mon-profil/messagerie/${appointment.conversation.id}`}
-                              className="relative inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-white/12 bg-white/6 px-2.5 py-1.5 text-[11px] text-white/85 transition-all hover:bg-white/10 font-one"
+                              className="relative inline-flex cursor-pointer items-center gap-1.5 rounded-2xl border border-white/12 bg-white/6 px-2.5 py-1 text-[11px] text-white/85 transition-all hover:bg-white/10 font-one"
                             >
                               Messagerie
                               {appointment.conversation.unreadCount > 0 && (
@@ -545,7 +572,7 @@ export default function RendezVousTab() {
 
                           {appointment.visio &&
                             appointment.status === "CONFIRMED" && (
-                              <span className="rounded-lg border border-blue-400/30 bg-blue-500/10 px-2.5 py-1.5 text-[11px] text-blue-200 font-one">
+                              <span className="rounded-2xl border border-blue-400/30 bg-blue-500/10 px-2.5 py-1 text-[11px] text-blue-200 font-one">
                                 📹 Visio
                               </span>
                             )}
@@ -554,7 +581,7 @@ export default function RendezVousTab() {
                             <>
                               <button
                                 onClick={() => handleEditClick(appointment)}
-                                className="cursor-pointer rounded-lg border border-white/12 bg-white/6 px-2.5 py-1.5 text-[11px] text-white/85 transition-all hover:bg-white/10 font-one"
+                                className="cursor-pointer rounded-2xl border border-white/12 bg-white/6 px-2.5 py-1 text-[11px] text-white/85 transition-all hover:bg-white/10 font-one"
                               >
                                 Modifier
                               </button>
@@ -565,7 +592,7 @@ export default function RendezVousTab() {
                                 disabled={
                                   cancelingAppointmentId === appointment.id
                                 }
-                                className="cursor-pointer rounded-lg border border-red-500/30 bg-red-500/10 px-2.5 py-1.5 text-[11px] text-red-200 transition-all hover:bg-red-500/20 disabled:opacity-50 font-one"
+                                className="cursor-pointer rounded-2xl border border-red-500/30 bg-red-500/10 px-2.5 py-1 text-[11px] text-red-200 transition-all hover:bg-red-500/20 disabled:opacity-50 font-one"
                               >
                                 {cancelingAppointmentId === appointment.id
                                   ? "..."
@@ -579,7 +606,7 @@ export default function RendezVousTab() {
                               onClick={() =>
                                 handleReviewClick(appointment.id)
                               }
-                              className="cursor-pointer rounded-lg border border-amber-400/30 bg-amber-500/10 px-2.5 py-1.5 text-[11px] text-amber-200 transition-all hover:bg-amber-500/20 font-one"
+                              className="cursor-pointer rounded-2xl border border-amber-400/30 bg-amber-500/10 px-2.5 py-1 text-[11px] text-amber-200 transition-all hover:bg-amber-500/20 font-one"
                             >
                               ⭐ {hasReview ? "Voir l'avis" : "Donner un avis"}
                             </button>
@@ -590,7 +617,7 @@ export default function RendezVousTab() {
                       {isExpanded && (
                         <div className="mt-2 space-y-3 pt-2">
                           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                            <div className="rounded-lg border border-white/10 bg-white/5 px-2.5 py-2">
+                            <div className="rounded-2xl border border-white/10 bg-white/5 px-2.5 py-2">
                               <p className="text-[10px] uppercase tracking-wide text-white/45 font-one">
                                 Date
                               </p>
@@ -598,7 +625,7 @@ export default function RendezVousTab() {
                                 {formatDate(appointment.start)}
                               </p>
                             </div>
-                            <div className="rounded-lg border border-white/10 bg-white/5 px-2.5 py-2">
+                            <div className="rounded-2xl border border-white/10 bg-white/5 px-2.5 py-2">
                               <p className="text-[10px] uppercase tracking-wide text-white/45 font-one">
                                 Heure
                               </p>
@@ -606,7 +633,7 @@ export default function RendezVousTab() {
                                 {formatTime(appointment.start)}
                               </p>
                             </div>
-                            <div className="rounded-lg border border-white/10 bg-white/5 px-2.5 py-2">
+                            <div className="rounded-2xl border border-white/10 bg-white/5 px-2.5 py-2">
                               <p className="text-[10px] uppercase tracking-wide text-white/45 font-one">
                                 Durée
                               </p>
@@ -616,7 +643,7 @@ export default function RendezVousTab() {
                                   : "Non spécifié"}
                               </p>
                             </div>
-                            <div className="rounded-lg border border-white/10 bg-white/5 px-2.5 py-2">
+                            <div className="rounded-2xl border border-white/10 bg-white/5 px-2.5 py-2">
                               <p className="text-[10px] uppercase tracking-wide text-white/45 font-one">
                                 Prix
                               </p>
@@ -630,13 +657,13 @@ export default function RendezVousTab() {
                           </div>
 
                           <div className="grid gap-3 md:grid-cols-3">
-                            <div className="space-y-2 rounded-xl border border-white/10 bg-white/5 p-3">
+                            <div className="space-y-2 rounded-2xl border border-white/10 bg-white/5 p-3">
                               <div className="flex items-center justify-between text-xs text-white/60">
                                 <span>Infos rendez-vous</span>
                                 {getStatusBadge(appointment.status)}
                               </div>
-                              <div className="space-y-1 text-sm text-white">
-                                <p className="text-white/80 text-xs">Adresse</p>
+                              <div className="space-y-1 text-sm text-white font-one">
+                                <p className="text-white/80 text-xs">Adresse du salon</p>
                                 <p className="text-white text-xs">
                                   {appointment.salon.address &&
                                     `${appointment.salon.address}, `}
@@ -647,10 +674,9 @@ export default function RendezVousTab() {
                             </div>
 
                             {appointment.prestationDetails && (
-                              <div className="space-y-3 rounded-xl border border-white/10 bg-white/5 p-3 md:col-span-2">
+                              <div className="space-y-3 rounded-2xl font-one border border-white/10 bg-white/5 p-3 md:col-span-2">
                                 <div className="flex items-center justify-between text-xs text-white/60">
                                   <span>Brief</span>
-                                  <span className="text-white/60">Projet</span>
                                 </div>
                                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 text-xs text-white">
                                   {appointment.prestationDetails.zone && (
@@ -718,7 +744,7 @@ export default function RendezVousTab() {
                                 </div>
 
                                 {appointment.prestationDetails.description && (
-                                  <div className="pt-2 border-t border-white/10 text-sm text-white/80 leading-relaxed">
+                                  <div className="pt-2 border-t border-white/10 text-xs text-white/80 leading-relaxed">
                                     {appointment.prestationDetails.description}
                                   </div>
                                 )}
@@ -741,7 +767,7 @@ export default function RendezVousTab() {
                                             alt="Image de référence"
                                             width={96}
                                             height={96}
-                                            className="h-24 w-24 rounded-lg border border-white/15 object-cover"
+                                            className="h-24 w-24 rounded-2xl border border-white/15 object-cover"
                                           />
                                           <span className="absolute -bottom-1 -right-1 bg-tertiary-500 text-white text-[11px] px-2 py-0.5 rounded">
                                             Référence
@@ -758,7 +784,7 @@ export default function RendezVousTab() {
                                             alt="Croquis"
                                             width={96}
                                             height={96}
-                                            className="h-24 w-24 rounded-lg border border-white/15 object-cover"
+                                            className="h-24 w-24 rounded-2xl border border-white/15 object-cover"
                                           />
                                           <span className="absolute -bottom-1 -right-1 bg-blue-500 text-white text-[11px] px-2 py-0.5 rounded">
                                             Croquis
@@ -773,7 +799,7 @@ export default function RendezVousTab() {
                           </div>
 
                           <div className="grid gap-3 md:grid-cols-2">
-                            <div className="rounded-xl border border-white/10 bg-white/5 p-3">
+                            <div className="rounded-2xl border border-white/10 bg-noir-500/5 p-3">
                               <p className="text-white/60 text-xs mb-3">
                                 Contacts salon
                               </p>
@@ -781,10 +807,12 @@ export default function RendezVousTab() {
                                 {appointment.salon.phone && (
                                   <a
                                     href={`tel:${appointment.salon.phone}`}
-                                    className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-white/10 bg-white/10 hover:bg-white/15 text-white/80 text-xs font-one transition-all"
+                                    className="inline-flex items-center gap-2 px-3 py-1.5 rounded-2xl border border-white/10  text-white/80 text-xs font-one transition-all"
                                   >
                                     <span>📞</span>
-                                    <span>{appointment.salon.phone}</span>
+                                    <span>
+                                      {formatPhoneDisplay(appointment.salon.phone)}
+                                    </span>
                                   </a>
                                 )}
                                 {appointment.salon.website && (
@@ -792,10 +820,10 @@ export default function RendezVousTab() {
                                     href={appointment.salon.website}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-tertiary-500/30 bg-tertiary-500/10 hover:bg-tertiary-500/15 text-tertiary-100 text-xs font-one transition-all"
+                                   className="w-8 h-8 flex items-center justify-center bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl text-white/60 hover:text-tertiary-400 transition-all"
+                        title="Site web"
                                   >
-                                    <span>🌐</span>
-                                    <span>Site web</span>
+                                    <span><TfiWorld className="w-3.5 h-3.5" /></span>
                                   </a>
                                 )}
                                 {appointment.salon.instagram && (
@@ -803,16 +831,16 @@ export default function RendezVousTab() {
                                     href={appointment.salon.instagram}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-white/10 bg-white/10 hover:bg-white/15 text-white/80 text-xs font-one transition-all"
+                                   className="w-8 h-8 flex items-center justify-center bg-white/5 hover:bg-pink-500/20 border border-white/10 hover:border-pink-500/30 rounded-2xl text-white/60 hover:text-pink-400 transition-all"
+                        title="Instagram"
                                   >
-                                    <span>📷</span>
-                                    <span>Instagram</span>
+                                  <span><CiInstagram className="w-4 h-4" /></span>
                                   </a>
                                 )}
                               </div>
                             </div>
 
-                            <div className="rounded-xl border border-white/10 bg-white/5 p-3">
+                            <div className="rounded-2xl border border-white/10 bg-noir-500/5 p-3">
                               <p className="text-white/60 text-xs mb-3">
                                 Contacts tatoueur
                               </p>
@@ -821,10 +849,14 @@ export default function RendezVousTab() {
                                   {appointment.tatoueur.phone && (
                                     <a
                                       href={`tel:${appointment.tatoueur.phone}`}
-                                      className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-white/10 bg-white/10 hover:bg-white/15 text-white/80 text-xs font-one transition-all"
+                                      className="inline-flex items-center gap-2 px-3 py-1.5 rounded-2xl border border-white/10 text-white/80 text-xs font-one transition-all"
                                     >
                                       <span>📞</span>
-                                      <span>{appointment.tatoueur.phone}</span>
+                                      <span>
+                                        {formatPhoneDisplay(
+                                          appointment.tatoueur.phone,
+                                        )}
+                                      </span>
                                     </a>
                                   )}
                                   {appointment.tatoueur.instagram && (
@@ -832,10 +864,10 @@ export default function RendezVousTab() {
                                       href={appointment.tatoueur.instagram}
                                       target="_blank"
                                       rel="noopener noreferrer"
-                                      className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-tertiary-500/30 bg-tertiary-500/10 hover:bg-tertiary-500/15 text-tertiary-100 text-xs font-one transition-all"
+                                      className="w-8 h-8 flex items-center justify-center bg-white/5 hover:bg-pink-500/20 border border-white/10 hover:border-pink-500/30 rounded-2xl text-white/60 hover:text-pink-400 transition-all"
+                        title="Instagram"
                                     >
-                                      <span>📷</span>
-                                      <span>Instagram</span>
+                                      <span><CiInstagram className="w-4 h-4" /></span>
                                     </a>
                                   )}
                                 </div>
@@ -848,7 +880,7 @@ export default function RendezVousTab() {
                           </div>
 
                           {appointment.status === "COMPLETED" && (
-                            <div className="rounded-xl border border-amber-400/30 bg-amber-500/5 p-3.5">
+                            <div className="rounded-2xl border border-amber-400/30 bg-amber-500/5 p-3.5">
                               <div className="flex items-center gap-2 mb-3">
                                 <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/15 text-lg">
                                   ⭐
@@ -888,18 +920,18 @@ export default function RendezVousTab() {
                                   </div>
 
                                   {appointment.review?.title && (
-                                    <p className="text-white font-semibold text-sm">
+                                    <p className="text-white font-semibold text-sm font-one">
                                       {appointment.review.title}
                                     </p>
                                   )}
 
                                   {appointment.review?.comment && (
-                                    <p className="text-white/80 text-sm leading-relaxed">
+                                    <p className="text-white/80 text-sm leading-relaxed font-one">
                                       {appointment.review.comment}
                                     </p>
                                   )}
 
-                                  <p className="text-white/50 text-xs border-t border-white/10 pt-2">
+                                  <p className="text-white/50 text-xs border-t border-white/10 pt-2 font-one">
                                     Publié le{" "}
                                     {appointment.review?.createdAt
                                       ? new Date(
@@ -910,10 +942,10 @@ export default function RendezVousTab() {
 
                                   {appointment.review?.salonResponse && (
                                     <div className="rounded-lg border border-white/10 bg-white/5 p-3">
-                                      <p className="text-white/70 text-xs mb-1 font-semibold">
+                                      <p className="text-white/70 text-xs mb-1 font-one font-semibold">
                                         Réponse du salon
                                       </p>
-                                      <p className="text-white/80 text-sm">
+                                      <p className="text-white/80 text-sm font-one">
                                         {appointment.review.salonResponse}
                                       </p>
                                     </div>
@@ -960,7 +992,7 @@ export default function RendezVousTab() {
                                     </span>
                                   </div>
 
-                                  <div className="space-y-1">
+                                  <div className="space-y-1 font-one">
                                     <label className="text-white/80 text-xs">
                                       Titre (optionnel)
                                     </label>
@@ -975,7 +1007,7 @@ export default function RendezVousTab() {
                                       }
                                       maxLength={100}
                                       placeholder="Ex: Excellent travail"
-                                      className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/15 text-white text-xs focus:outline-none focus:border-tertiary-400 focus:ring-1 focus:ring-tertiary-400/30 placeholder:text-white/40"
+                                      className="w-full px-3 py-2 rounded-2xl bg-white/5 border border-white/15 text-white text-xs focus:outline-none focus:border-tertiary-400 focus:ring-1 focus:ring-tertiary-400/30 placeholder:text-white/40"
                                     />
                                     <p className="text-white/40 text-[11px]">
                                       {reviewForm.title.length}/100
@@ -997,7 +1029,7 @@ export default function RendezVousTab() {
                                       maxLength={500}
                                       rows={3}
                                       placeholder="Partagez votre expérience..."
-                                      className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/15 text-white text-xs focus:outline-none focus:border-tertiary-400 focus:ring-1 focus:ring-tertiary-400/30 placeholder:text-white/40 resize-none"
+                                      className="w-full px-3 py-2 rounded-2xl bg-white/5 border border-white/15 text-white text-xs focus:outline-none focus:border-tertiary-400 focus:ring-1 focus:ring-tertiary-400/30 placeholder:text-white/40 resize-none"
                                     />
                                     <p className="text-white/40 text-[11px]">
                                       {reviewForm.comment.length}/500
@@ -1009,7 +1041,7 @@ export default function RendezVousTab() {
                                       handleSubmitReview(appointment)
                                     }
                                     disabled={reviewSubmitting}
-                                    className="w-full px-4 py-2.5 rounded-lg bg-linear-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white text-xs font-one transition-all disabled:opacity-60 flex items-center justify-center gap-2"
+                                    className="cursor-pointer w-fit px-4 py-2.5 rounded-2xl bg-linear-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white text-xs font-one transition-all disabled:opacity-60 flex items-center justify-center gap-2"
                                   >
                                     {reviewSubmitting ? (
                                       <>
@@ -1044,7 +1076,7 @@ export default function RendezVousTab() {
                 <button
                   onClick={() => handlePageChange(currentPage - 1)}
                   disabled={currentPage === 1}
-                  className="cursor-pointer w-9 h-9 flex items-center justify-center bg-white/5 hover:bg-white/10 disabled:bg-white/5 text-white/80 disabled:text-white/30 border border-white/10 rounded-lg transition-all disabled:cursor-not-allowed"
+                  className="cursor-pointer w-7 h-7 flex items-center justify-center bg-white/5 hover:bg-white/10 disabled:bg-white/5 text-white/80 disabled:text-white/30 border border-white/10 rounded-2xl transition-all disabled:cursor-not-allowed"
                 >
                   <FaChevronLeft className="w-3 h-3" />
                 </button>
@@ -1071,7 +1103,7 @@ export default function RendezVousTab() {
                         <button
                           key={pageNum}
                           onClick={() => handlePageChange(pageNum)}
-                          className={`cursor-pointer w-9 h-9 rounded-lg text-xs font-one font-medium transition-all ${
+                          className={`cursor-pointer w-7 h-7 rounded-2xl text-xs font-one font-medium transition-all ${
                             currentPage === pageNum
                               ? "bg-tertiary-500 text-white shadow-lg shadow-tertiary-500/25"
                               : "bg-white/5 hover:bg-white/10 text-white/70"
@@ -1087,7 +1119,7 @@ export default function RendezVousTab() {
                 <button
                   onClick={() => handlePageChange(currentPage + 1)}
                   disabled={currentPage === rdvData.pagination.totalPages}
-                  className="cursor-pointer w-9 h-9 flex items-center justify-center bg-white/5 hover:bg-white/10 disabled:bg-white/5 text-white/80 disabled:text-white/30 border border-white/10 rounded-lg transition-all disabled:cursor-not-allowed"
+                  className="cursor-pointer w-7 h-7 flex items-center justify-center bg-white/5 hover:bg-white/10 disabled:bg-white/5 text-white/80 disabled:text-white/30 border border-white/10 rounded-2xl transition-all disabled:cursor-not-allowed"
                 >
                   <FaChevronRight className="w-3 h-3" />
                 </button>

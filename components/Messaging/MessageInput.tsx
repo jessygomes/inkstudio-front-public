@@ -19,8 +19,8 @@ export default function MessageInput({
   onSendMessage,
   className = "",
   onInputChange,
-}: // disabled = false,
-MessageInputProps) {
+  disabled = false,
+}: MessageInputProps) {
   const [messageInput, setMessageInput] = useState("");
   const [sendingMessage, setSendingMessage] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -191,12 +191,12 @@ MessageInputProps) {
       <form onSubmit={handleSendMessage} className="flex flex-col gap-2">
         {/* Aperçu de l'image ou message d'erreur */}
         {preview && !compressionError && (
-          <div className="relative w-20 h-20 rounded-lg overflow-hidden bg-noir-700">
+          <div className="relative w-20 h-20 rounded-2xl overflow-hidden bg-noir-700">
             <Image src={preview} alt="Aperçu" fill className="object-cover" />
             <button
               type="button"
               onClick={removeImage}
-              disabled={sendingMessage || isUploading}
+              disabled={disabled || sendingMessage || isUploading}
               className="cursor-pointer absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs"
             >
               <MdClose />
@@ -206,10 +206,10 @@ MessageInputProps) {
 
         {/* Message d'erreur de compression */}
         {compressionError && (
-          <div className="bg-red-900/40 border border-red-500/50 rounded-lg px-3 py-2 flex items-center justify-between gap-2">
+          <div className="bg-red-900/40 border border-red-500/50 rounded-2xl px-3 py-2 flex items-center justify-between gap-2">
             <div className="flex items-center gap-2 flex-1 min-w-0">
               <svg
-                className="w-4 h-4 text-red-400 flex-shrink-0"
+                className="w-4 h-4 text-red-400 shrink-0"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -228,7 +228,7 @@ MessageInputProps) {
             <button
               type="button"
               onClick={() => setCompressionError(null)}
-              className="text-red-400 hover:text-red-300 flex-shrink-0"
+              className="text-red-400 hover:text-red-300 shrink-0"
             >
               <MdClose className="w-4 h-4" />
             </button>
@@ -255,8 +255,8 @@ MessageInputProps) {
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            disabled={sendingMessage || isUploading}
-            className="cursor-pointer bg-noir-700 border border-white/20 hover:border-tertiary-400 text-tertiary-500 hover:text-tertiary-300 px-2 py-1.5 rounded transition-colors flex items-center justify-center text-xs flex-shrink-0"
+            disabled={disabled || sendingMessage || isUploading}
+            className="cursor-pointer bg-noir-700 border border-white/20 hover:border-tertiary-400 text-tertiary-500 hover:text-tertiary-300 px-2 py-1.5 rounded-xl transition-colors flex items-center justify-center text-xs shrink-0"
             title="Ajouter une image"
           >
             <MdImage className="w-4 h-4" />
@@ -268,7 +268,7 @@ MessageInputProps) {
             type="file"
             accept="image/*"
             onChange={handleInputChange}
-            disabled={sendingMessage || isUploading}
+            disabled={disabled || sendingMessage || isUploading}
             className="hidden"
           />
 
@@ -283,8 +283,8 @@ MessageInputProps) {
             placeholder={
               preview ? "Votre message avec l'image..." : "Message..."
             }
-            className="flex-1 bg-noir-700 border border-white/20 rounded px-3 py-1.5 text-white placeholder-white/50 focus:outline-none focus:border-tertiary-400/50 transition-colors text-xs"
-            disabled={sendingMessage || isUploading}
+            className="flex-1 bg-noir-700 border border-white/20 rounded-2xl px-3 py-1.5 text-white placeholder-white/50 focus:outline-none focus:border-tertiary-400/50 transition-colors text-xs"
+            disabled={disabled || sendingMessage || isUploading}
           />
 
           {/* Bouton envoi */}
@@ -292,10 +292,11 @@ MessageInputProps) {
             type="submit"
             disabled={
               sendingMessage ||
+              disabled ||
               isUploading ||
               (!messageInput.trim() && !selectedFile)
             }
-            className="cursor-pointer bg-tertiary-500 hover:bg-tertiary-600 disabled:bg-tertiary-500/50 text-white px-3 py-1.5 rounded font-semibold transition-colors flex items-center gap-1 text-xs flex-shrink-0"
+            className="cursor-pointer bg-tertiary-500 hover:bg-tertiary-600 disabled:bg-tertiary-500/50 text-white px-3 py-1.5 rounded-2xl font-semibold transition-colors flex items-center gap-1 text-xs shrink-0"
           >
             {sendingMessage || isUploading ? (
               <div className="w-3 h-3 border-2 border-white/50 rounded-full animate-spin border-t-white"></div>

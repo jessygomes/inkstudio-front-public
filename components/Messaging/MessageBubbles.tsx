@@ -26,8 +26,6 @@ export default function MessageBubbles({
     );
   }
 
-  console.log("Messages dans MessageBubbles :", messages);
-
   return (
     <>
       {messages.map((message) => {
@@ -47,7 +45,7 @@ export default function MessageBubbles({
                 width={28}
                 height={28}
                 alt={sender?.firstName || "User"}
-                className="w-7 h-7 rounded-full object-cover flex-shrink-0 border border-tertiary-400/20"
+                className="w-7 h-7 rounded-full object-cover shrink-0 border border-tertiary-400/20"
               />
             )}
 
@@ -58,13 +56,13 @@ export default function MessageBubbles({
             >
               <div className="flex items-start gap-1">
                 <div
-                  className={`px-3 py-2 rounded text-xs ${
+                  className={`px-3 py-2 rounded-2xl text-xs ${
                     isOwnMessage
                       ? "bg-linear-to-l from-secondary-500/80 to-secondary-600/80 text-white/90 rounded-br-none"
                       : "bg-linear-to-l from-tertiary-400/80 to-tertiary-500/80 text-white rounded-bl-none"
                   }`}
                 >
-                  <p className="break-words font-one leading-tight">
+                  <p className="wrap-break-word font-one leading-tight">
                     {message.content}
                   </p>
 
@@ -86,7 +84,7 @@ export default function MessageBubbles({
                               alt={attachment.fileName}
                               width={200}
                               height={200}
-                              className="w-full h-auto max-w-[180px] rounded"
+                              className="w-full h-auto max-w-45 rounded"
                             />
                           </a>
                         ))}
@@ -150,7 +148,7 @@ export default function MessageBubbles({
                 width={28}
                 height={28}
                 alt={sender?.firstName || "You"}
-                className="w-7 h-7 rounded-full object-cover flex-shrink-0 border border-tertiary-400/20"
+                className="w-7 h-7 rounded-full object-cover shrink-0 border border-tertiary-400/20"
               />
             )}
           </div>

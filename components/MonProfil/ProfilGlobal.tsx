@@ -185,7 +185,7 @@ export default function ProfilGlobal(user: User) {
                   <div className="mt-4 flex flex-wrap items-center justify-center gap-2 sm:justify-start">
                     <Link
                       href="/mon-profil/modifier"
-                      className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/6 px-4 py-2 text-xs text-white transition-all duration-300 hover:border-white/25 hover:bg-white/10 font-one"
+                      className="inline-flex items-center gap-1.5 rounded-2xl border border-white/10 bg-white/6 px-4 py-2 text-xs text-white transition-all duration-300 hover:border-white/25 hover:bg-white/10 font-one"
                       aria-label="Modifier les informations de mon profil"
                     >
                       <FaEdit className="h-3 w-3" />
@@ -216,7 +216,7 @@ export default function ProfilGlobal(user: User) {
             </div>
 
             <div className="mt-6 border-t border-white/10 pt-1">
-              <div className="flex flex-wrap items-center gap-x-6 gap-y-1">
+              <div className="no-scrollbar -mx-1 flex gap-2 overflow-x-auto overflow-y-hidden px-1 py-2 [scrollbar-width:none] [-ms-overflow-style:none] sm:mx-0 sm:flex-wrap sm:items-center sm:gap-x-6 sm:gap-y-1 sm:overflow-visible sm:px-0 sm:py-0">
                 {(
                   [
                     { key: "rdv", icon: FaCalendarAlt, label: "Rendez-vous" },
@@ -228,16 +228,16 @@ export default function ProfilGlobal(user: User) {
                   <button
                     key={key}
                     onClick={() => setActiveTab(key as any)}
-                    className={`group relative flex cursor-pointer items-center gap-2 py-3 text-sm font-medium transition-colors duration-300 font-one ${
+                    className={`group relative flex shrink-0 cursor-pointer items-center gap-2 rounded-2xl border px-3 py-2 text-sm font-medium transition-all duration-300 font-one sm:rounded-none sm:border-transparent sm:px-0 sm:py-3 ${
                       activeTab === key
-                        ? "text-white"
-                        : "text-white/60 hover:text-white/85"
+                        ? "border-tertiary-400/20 bg-tertiary-400/15 text-white shadow-[inset_0_-2px_0_0_var(--color-tertiary-400)] sm:border-transparent sm:bg-transparent"
+                        : "border-white/10 bg-white/4 text-white/60 hover:text-white/85 sm:border-transparent sm:bg-transparent"
                     }`}
                   >
                     <Icon className="h-4 w-4" />
                     <span>{label}</span>
                     <span
-                      className={`absolute bottom-0 left-0 h-0.5 w-full rounded-full transition-all duration-300 ${
+                      className={`absolute bottom-0 left-0 hidden h-0.5 w-full rounded-full transition-all duration-300 sm:block ${
                         activeTab === key
                           ? "bg-tertiary-400 opacity-100"
                           : "bg-tertiary-400 opacity-0 group-hover:opacity-50"

@@ -61,9 +61,9 @@ export function TeamCard({
     uniqueSkills.length > MAX ? uniqueSkills.length - MAX : 0;
 
   return (
-    <li className="group relative list-none h-full min-h-88 rounded-2xl border border-white/10 bg-linear-to-b from-noir-500/8 to-white/2 p-3.5 sm:p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-tertiary-400/35">
+    <li className="group relative list-none rounded-2xl border border-white/10 bg-linear-to-b from-noir-500/8 to-white/2 p-3.5 sm:p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-tertiary-400/35 lg:h-full lg:min-h-88">
       {/* Header */}
-      <div className="flex items-start gap-3.5">
+      <div className="flex items-center gap-3.5 lg:items-start">
         <div className="relative h-18 w-18 sm:h-20 sm:w-20 shrink-0 rounded-xl overflow-hidden ring-1 ring-white/15 bg-white/10">
           {img ? (
             <Image
@@ -81,7 +81,7 @@ export function TeamCard({
           )}
         </div>
 
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 flex-1 h-18 sm:h-20 flex flex-col justify-center lg:h-auto">
           <p className="text-white text-sm sm:text-base leading-tight tracking-widest font-one font-semibold wrap-break-word">
             {name}
           </p>

@@ -215,6 +215,7 @@ export default function SalonTabs({
   }, [flashSort]);
 
   const sectionRef = useRef<HTMLDivElement>(null);
+
   const scrollToTop = () => {
     if (!sectionRef.current) return;
     const top = sectionRef.current.getBoundingClientRect().top + window.scrollY - 110;
@@ -237,6 +238,11 @@ export default function SalonTabs({
         .filter(Boolean) as string[];
     return [];
   }, [active, photos, portfolio, sortedFlashes]);
+
+  const showSortControl = active === "flashes" && counts.flashes > 0;
+  const showExpandControl =
+    (active === "photos" || active === "portfolio" || active === "flashes") &&
+    activeImages.length > 0;
 
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
@@ -364,13 +370,13 @@ export default function SalonTabs({
 
   return (
     <section ref={sectionRef}>
-      <div className="bg-noir-700 rounded-2xl p-8 border border-white/10">
+      <div className="bg-noir-700 rounded-2xl border border-white/10 p-4 sm:p-6 lg:p-8">
         {/* Segmented tabs */}
-        <div className="flex items-center justify-between gap-4 mb-6">
+        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div
             role="tablist"
             aria-label="Contenus du salon"
-            className="flex gap-1 overflow-x-auto rounded-2xl border border-white/10 bg-noir-700/85 p-1"
+            className="no-scrollbar flex w-full gap-1 overflow-x-auto rounded-2xl border border-white/10 bg-noir-700/85 p-1 sm:w-auto"
           >
             {(
               [
@@ -391,7 +397,7 @@ export default function SalonTabs({
                   role="tab"
                   aria-selected={selected}
                   onClick={() => setTab(t.key)}
-                  className={`group relative inline-flex cursor-pointer items-center gap-2 whitespace-nowrap rounded-xl px-3.5 py-2 text-sm font-one font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tertiary-400/50 ${
+                  className={`group relative inline-flex shrink-0 cursor-pointer items-center gap-2 whitespace-nowrap rounded-xl px-3.5 py-2 text-sm font-one font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tertiary-400/50 ${
                     selected
                       ? "bg-tertiary-400/20 text-white shadow-[inset_0_-2px_0_0_var(--color-tertiary-400)]"
                       : "text-white/65 hover:bg-white/8 hover:text-white"
@@ -414,12 +420,18 @@ export default function SalonTabs({
             })}
           </div>
 
-          <div className="flex items-center gap-2">
-            {active === "flashes" && counts.flashes > 0 && (
+          <div
+            className={`grid w-full gap-2 sm:w-auto sm:flex sm:items-center ${
+              showSortControl && showExpandControl
+                ? "grid-cols-2"
+                : "grid-cols-1"
+            }`}
+          >
+            {showSortControl && (
               <select
                 value={flashSort}
                 onChange={(e) => setFlashSort(e.target.value as FlashSort)}
-                className="cursor-pointer px-3 py-1.5 rounded-2xl text-xs font-one bg-noir-700/10 hover:bg-white/20 border border-white/20 text-white/90 transition"
+                className="h-9 w-full cursor-pointer rounded-2xl border border-white/20 bg-noir-700/10 px-3 py-1.5 text-xs font-one text-white/90 transition hover:bg-white/20 sm:w-auto"
                 aria-label="Trier les flashs"
                 title="Trier les flashs"
               >
@@ -438,13 +450,10 @@ export default function SalonTabs({
               </select>
             )}
 
-            {(active === "photos" ||
-              active === "portfolio" ||
-              active === "flashes") &&
-              activeImages.length > 0 && (
+            {showExpandControl && (
                 <button
                   onClick={() => openLightbox(0)}
-                  className="cursor-pointer inline-flex items-center gap-2 px-4 py-1.5 rounded-2xl text-xs font-one bg-noir-700/10 hover:border-white/40 border border-white/20 text-white/90 transition"
+                  className="inline-flex h-9 w-full cursor-pointer items-center justify-center gap-2 rounded-2xl border border-white/20 bg-noir-700/10 px-4 py-1.5 text-xs font-one text-white/90 transition hover:border-white/40 sm:w-auto"
                   aria-label="Tout agrandir"
                   title="Tout agrandir"
                 >
@@ -463,7 +472,7 @@ export default function SalonTabs({
                       fill="none"
                     />
                   </svg>
-                  <p className="hidden sm:block">Agrandir</p>
+                  <p>Agrandir</p>
                 </button>
               )}
           </div>
@@ -618,7 +627,7 @@ export default function SalonTabs({
                             href={`${bookingPath}?prestation=TATTOO&flashId=${encodeURIComponent(f.id)}`}
                             className="mt-2 inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-one bg-linear-to-r from-tertiary-500 to-tertiary-400 text-white hover:from-tertiary-400 hover:to-tertiary-500 transition"
                           >
-                            Réserver ce flash
+                            Réserver
                           </Link>
                         )}
                       </div>

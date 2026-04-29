@@ -18,7 +18,7 @@ import React, {
 } from "react";
 import MessageBubbles from "./MessageBubbles";
 import MessageInput from "./MessageInput";
-import ConversationRDVDetails from "./ConversationRDVDetails";
+import ConversationRDVDetails from "@/components/Messaging/ConversationRDVDetails";
 import ConversationRDVModal from "./ConversationRDVModal";
 import { getConversationByIdAction } from "@/lib/actions/conversation.action";
 
@@ -26,8 +26,6 @@ export default function Conversation() {
   const params = useParams();
   const id = params?.id as string;
   const { data: session } = useSession();
-
-  console.log("User dans Conversation.tsx :", session);
 
   const [conversation, setConversation] = useState<ConversationDto | null>(
     null
@@ -280,11 +278,11 @@ export default function Conversation() {
   return (
     <>
       {/* Version Mobile */}
-      <div className="lg:hidden w-full flex flex-col h-[calc(100vh-64px)]">
+      <div className="lg:hidden w-full flex min-h-0 flex-col h-[calc(100dvh-64px)]">
         {/* Header */}
-        <div className="flex-shrink-0 flex flex-col gap-2 bg-gradient-to-r from-noir-700/80 to-noir-500/80 p-3 rounded-lg shadow-lg border border-white/10">
+        <div className="shrink-0 flex flex-col gap-2 rounded-2xl border border-white/10 bg-linear-to-r from-noir-700/80 to-noir-500/80 p-3 shadow-lg">
           <div className="flex items-center gap-2 flex-1 min-w-0">
-            <div className="relative flex-shrink-0">
+            <div className="relative shrink-0">
               <Image
                 src={otherUser?.image || "/images/default-avatar.png"}
                 width={40}
@@ -307,9 +305,9 @@ export default function Conversation() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 flex-shrink-0">
+          <div className="flex shrink-0 flex-wrap items-center gap-2">
             <span
-              className={`inline-block px-2 py-1 rounded text-xs font-medium ${
+              className={`inline-block px-2 py-1 rounded-2xl text-xs font-medium ${
                 conversation.status === "ACTIVE"
                   ? "bg-green-900/40 text-green-300"
                   : conversation.status === "ARCHIVED"
@@ -321,7 +319,7 @@ export default function Conversation() {
             </span>
 
             <span
-              className={`inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] font-medium ${
+              className={`inline-flex items-center gap-1 px-2 py-1 rounded-2xl text-[11px] font-medium ${
                 isConnected
                   ? "bg-green-900/40 text-green-300"
                   : "bg-red-900/40 text-red-300"
@@ -339,7 +337,7 @@ export default function Conversation() {
             {conversation.appointmentId && (
               <button
                 onClick={() => setShowRDVDetails(true)}
-                className="lg:hidden cursor-pointer p-2 bg-tertiary-500/20 hover:bg-tertiary-500/30 text-tertiary-400 rounded-lg transition-colors border border-tertiary-400/30"
+                className="lg:hidden cursor-pointer p-2 bg-tertiary-500/20 hover:bg-tertiary-500/30 text-tertiary-400 rounded-2xl transition-colors border border-tertiary-400/30"
                 title="Voir les détails du rendez-vous"
               >
                 <svg
@@ -363,7 +361,7 @@ export default function Conversation() {
         {/* Messages List - Scrollable avec padding bas pour l'input fixe */}
         <div
           ref={messagesContainerRef}
-          className="flex-1 overflow-y-auto p-3 pb-20 space-y-2 scrollbar-thin scrollbar-thumb-tertiary-500/30 scrollbar-track-transparent bg-noir-700/50"
+          className="mt-2 min-h-0 flex-1 space-y-2 overflow-y-auto rounded-2xl border border-white/10 bg-noir-700/50 p-3 pb-4 scrollbar-thin scrollbar-thumb-tertiary-500/30 scrollbar-track-transparent"
         >
           <MessageBubbles
             messages={displayedMessages}
@@ -388,18 +386,18 @@ export default function Conversation() {
           onSendMessage={handleSendMessage}
           onInputChange={handleInputChange}
           disabled={!isConnected}
-          className="fixed bottom-18 left-0 right-0 border-t border-white/10 bg-noir-800/95 backdrop-blur-md p-3 z-40"
+          className="sticky bottom-0 z-20 mt-2 rounded-2xl border border-white/10 bg-noir-800/95 p-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] backdrop-blur-md"
         />
       </div>
 
       {/* Version Desktop */}
-      <div className="hidden lg:flex w-full flex-row gap-3 h-[600px]">
+      <div className="hidden lg:flex w-full flex-row gap-3 h-150">
         {/* Messages Section - Gauche */}
         <div className="w-3/5 flex flex-col gap-3 h-full">
           {/* Header */}
-          <div className="flex items-center justify-between bg-gradient-to-r from-noir-700/80 to-noir-500/80 p-3 rounded-lg shadow-lg border border-white/10">
+          <div className="flex items-center justify-between bg-linear-to-r from-noir-700/80 to-noir-500/80 p-3 rounded-2xl shadow-lg border border-white/10">
             <div className="flex items-center gap-2 flex-1 min-w-0">
-              <div className="relative flex-shrink-0">
+              <div className="relative shrink-0">
                 <Image
                   src={otherUser?.image || "/images/default-avatar.png"}
                   width={40}
@@ -422,9 +420,9 @@ export default function Conversation() {
               </div>
             </div>
 
-            <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="flex items-center gap-2 shrink-0">
               <span
-                className={`inline-block px-2 py-1 rounded text-xs font-medium ${
+                className={`inline-block px-2 py-1 rounded-2xl text-xs font-medium ${
                   conversation.status === "ACTIVE"
                     ? "bg-green-900/40 text-green-300"
                     : conversation.status === "ARCHIVED"
@@ -436,7 +434,7 @@ export default function Conversation() {
               </span>
 
               <span
-                className={`inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] font-medium ${
+                className={`inline-flex items-center gap-1 px-2 py-1 rounded-2xl text-[11px] font-medium ${
                   isConnected
                     ? "bg-green-900/40 text-green-300"
                     : "bg-red-900/40 text-red-300"
@@ -453,7 +451,7 @@ export default function Conversation() {
           </div>
 
           {/* Messages Container */}
-          <div className="bg-noir-700/50 border border-white/10 rounded-lg overflow-hidden flex flex-col flex-1 min-h-0">
+          <div className="bg-noir-700/50 border border-white/10 rounded-2xl overflow-hidden flex flex-col flex-1 min-h-0">
             {/* Messages List */}
             <div
               ref={messagesContainerRef}
@@ -482,7 +480,7 @@ export default function Conversation() {
               onSendMessage={handleSendMessage}
               onInputChange={handleInputChange}
               disabled={!isConnected}
-              className="flex-shrink-0 border-t border-white/10 bg-noir-800/95 backdrop-blur-sm p-2"
+              className="shrink-0 border-t border-white/10 bg-noir-800/95 backdrop-blur-sm p-2"
             />
           </div>
         </div>
