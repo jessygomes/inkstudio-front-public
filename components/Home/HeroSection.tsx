@@ -74,23 +74,23 @@ export default function HeroSection() {
           <h2 className="text-2xl md:text-4xl font-bold text-center md:text-left text-white uppercase font-two tracking-wide">
             Trouvez votre salon de tatouage
           </h2>
-          <p className="text-center md:text-left text-gray-600 text-sm font-semibold font-one max-w-xl">
+          <p className="text-center md:text-left text-white/50 text-sm font-one max-w-xl">
             Trouvez facilement le salon de tatouage qui vous convient proche de
             chez vous. Explorez les portfolios des artistes, consultez les avis
             et prenez rendez-vous en ligne.
           </p>
         </div>
-        <div>
+        <div className="flex  items-center sm:flex-row gap-2">
         <Link
           href={"/trouver-un-salon"}
-          className="relative z-10 cursor-pointer px-8 py-2 bg-linear-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white rounded-2xl transition-all duration-300 font-medium disabled:opacity-50 disabled:cursor-not-allowed font-one text-xs"
+          className="w-40 sm:w-46 relative z-10 cursor-pointer text-center py-2 bg-linear-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white rounded-2xl transition-all duration-300 font-medium disabled:opacity-50 disabled:cursor-not-allowed font-one text-xs"
         >
           Trouver un salon
         </Link>
 
         <Link
           href={"/decouvrir-des-tatouages"}
-          className="relative z-10 ml-4 cursor-pointer px-8 py-2 bg-linear-to-r from-cuatro-500 to-cuatro-600 hover:bg-cuatro-600 text-white rounded-2xl transition-all duration-300 font-medium disabled:opacity-50 disabled:cursor-not-allowed font-one text-xs"
+          className="w-40 sm:w-46 relative z-10 cursor-pointer text-center py-2 bg-linear-to-r from-primary-400 to-primary-500 hover:from-primary-600 hover:to-primary-700 text-white rounded-2xl transition-all duration-300 font-medium disabled:opacity-50 disabled:cursor-not-allowed font-one text-xs"
         >
           Découvrir des tatouages
         </Link>

@@ -60,7 +60,7 @@ export default function NavbarMobile() {
                   className="object-cover"
                 />
               ) : (
-                <div className="w-full h-full bg-gradient-to-br from-tertiary-400/40 to-tertiary-500/40 flex items-center justify-center">
+                <div className="w-full h-full bg-linear-to-br from-tertiary-400/40 to-tertiary-500/40 flex items-center justify-center">
                   <FaUser className="w-4 h-4 text-tertiary-300" />
                 </div>
               )}
@@ -73,7 +73,7 @@ export default function NavbarMobile() {
           </Link>
         ) : (
           <Link href="/se-connecter" className="group flex-1 sm:flex-none">
-            <div className="cursor-pointer px-4 sm:px-6 py-2 bg-gradient-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white rounded-lg transition-all duration-300 font-medium disabled:opacity-50 disabled:cursor-not-allowed font-two text-xs shadow-lg shadow-tertiary-500/25 group-hover:shadow-tertiary-500/40 transform group-hover:scale-105 text-center">
+            <div className="cursor-pointer px-4 sm:px-6 py-2 bg-linear-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white rounded-2xl transition-all duration-300 font-medium disabled:opacity-50 disabled:cursor-not-allowed font-two text-xs shadow-lg shadow-tertiary-500/25 group-hover:shadow-tertiary-500/40 transform group-hover:scale-105 text-center">
               Connexion
             </div>
           </Link>
@@ -98,14 +98,14 @@ export default function NavbarMobile() {
       {/* Sidebar Menu - Modernisé */}
       <div
         ref={navRef}
-        className={`fixed top-0 right-0 z-50 w-72 h-screen bg-gradient-to-b from-noir-600 to-noir-800 backdrop-blur-xl text-white transform transition-all duration-500 ease-out ${
+        className={`fixed top-0 right-0 z-50 w-72 h-screen bg-linear-to-b from-noir-600 to-noir-800 backdrop-blur-xl text-white transform transition-all duration-500 ease-out ${
           isOpen
             ? "translate-x-0 opacity-100"
             : "translate-x-full opacity-0 pointer-events-none"
         } border-l border-white/10 shadow-2xl`}
       >
         {/* Header moderne avec gradient */}
-        <div className="flex items-center justify-between p-6 border-b border-white/10 bg-gradient-to-r from-white/[0.05] to-white/[0.02]">
+        <div className="flex items-center justify-between p-6 border-b border-white/10 bg-linear-to-r from-white/5 to-white/2">
           <div className="flex items-center gap-3">
             <h2 className="text-lg font-bold font-two tracking-wider">
               <Image
