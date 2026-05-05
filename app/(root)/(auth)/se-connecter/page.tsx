@@ -27,9 +27,9 @@ export default async function page() {
   }
 
   return (
-    <section className="">
+    <section className="-mt-16 md:-mt-21">
       <div
-        className="flex h-screen w-full bg-cover bg-center items-center justify-center px-4"
+        className="flex min-h-screen w-full bg-cover bg-center items-center justify-center px-4"
         style={{
           backgroundImage: "url('/images/bv.png')",
           backgroundSize: "cover",

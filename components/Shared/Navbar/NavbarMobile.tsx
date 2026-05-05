@@ -28,6 +28,7 @@ export default function NavbarMobile() {
   const links = [
     { href: "/", label: "Accueil" },
     { href: "/trouver-un-salon", label: "Trouver un salon" },
+    { href: "/articles", label: "Journal" },
     { href: "/en-savoir-plus", label: "En savoir plus" },
     // { href: "/je-suis-tatoueur", label: "Je suis tatoueur ?" },
   ];

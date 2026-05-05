@@ -46,7 +46,7 @@ export default function Parcours() {
             </span>
             <span className="h-px w-10 bg-tertiary-400/60" />
           </div>
-          <h2 className="text-4xl font-bold text-white font-two sm:text-5xl lg:text-6xl">
+          <h2 className="text-3xl font-bold text-white font-two sm:text-5xl lg:text-6xl">
             Comment ça marche ?
           </h2>
           <p className="max-w-xl text-base leading-relaxed text-white/50 font-one">
@@ -60,7 +60,7 @@ export default function Parcours() {
           {steps.map(({ step, title, description, icon: Icon, photo }) => (
             <article
               key={step}
-              className="group relative h-120 overflow-hidden rounded-2xl cursor-default border-2 border-tertiary-400/50 transition-all duration-300 hover:border-tertiary-400/70 hover:shadow-lg hover:shadow-tertiary-500/30"
+              className="group relative h-80 sm:h-120 overflow-hidden rounded-2xl cursor-default border-2 border-tertiary-400/50 transition-all duration-300 hover:border-tertiary-400/70 hover:shadow-lg hover:shadow-tertiary-500/30"
             >
               {/* Background photo */}
               <Image
@@ -72,9 +72,9 @@ export default function Parcours() {
               />
 
               {/* Gradient overlay global */}
-              <div className="absolute inset-0 bg-linear-to-t from-noir-900/80 via-noir-900/20 to-transparent" />
+              <div className="absolute inset-0 bg-linear-to-t from-noir-700/80 via-noir-700/20 to-transparent" />
               {/* Gradient bottom renforcé pour la lisibilité du texte */}
-              <div className="absolute inset-x-0 bottom-0 h-3/5 bg-linear-to-t from-noir-500 to-transparent" />
+              <div className="absolute inset-x-0 bottom-0 h-5/5 bg-linear-to-t from-noir-500 via-noir-700/30 to-transparent" />
 
               {/* Step number watermark */}
               <span className="absolute -right-1 -top-4 select-none text-[9rem] font-black leading-none text-white/20 font-two transition-all duration-500 group-hover:text-tertiary-400/70">

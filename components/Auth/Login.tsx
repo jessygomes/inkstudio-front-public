@@ -96,9 +96,6 @@ export const Login = () => {
 
   return (
     <div>
-      <div className="flex justify-center items-center">
-        <Image src="/images/Logo22.png" alt="Logo" width={40} height={100} />
-      </div>
       <CardWrapper headerLabel="Connectez-vous à votre compte Inkera">
         <form
           method="post"

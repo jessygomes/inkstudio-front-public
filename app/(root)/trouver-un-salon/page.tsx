@@ -189,14 +189,14 @@ export default function TrouverUnSalonPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <div className="min-h-screen bg-gradient-to-b from-noir-700 via-noir-500 to-noir-700 pt-20">
-        <div className="container mx-auto px-4 sm:px-8 max-w-4xl py-12">
+      <div className="min-h-screen bg-linear-to-t from-noir-700 via-noir-500 to-noir-700">
+        <div className="container mx-auto max-w-4xl px-4 py-6 sm:px-8 sm:py-8 lg:py-10">
           {/* Coming Soon Card */}
-          <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="flex items-center justify-center min-h-[calc(100vh-10rem)] sm:min-h-[calc(100vh-11rem)]">
             <div className="text-center space-y-8 max-w-2xl">
               {/* Icon */}
               <div className="flex justify-center">
-                <div className="w-24 h-24 bg-gradient-to-br from-tertiary-400/30 to-cuatro-500/30 rounded-full flex items-center justify-center border-2 border-tertiary-400/50 animate-pulse">
+                <div className="w-24 h-24 bg-linear-to-br from-tertiary-400/30 to-cuatro-500/30 rounded-full flex items-center justify-center border-2 border-tertiary-400/50 animate-pulse">
                   <HiMiniRocketLaunch className="w-12 h-12 text-tertiary-400" />
                 </div>
               </div>
@@ -212,9 +212,9 @@ export default function TrouverUnSalonPage() {
               </div>
 
               {/* Description */}
-              <div className="bg-gradient-to-br from-white/[0.08] to-white/[0.02] backdrop-blur-lg border border-white/10 rounded-2xl p-8 space-y-4">
+              <div className="bg-linear-to-br from-white/8 to-white/2 backdrop-blur-lg border border-white/10 rounded-2xl p-8 space-y-4">
                 <div className="flex items-start gap-4">
-                  <MdNotificationsActive className="w-6 h-6 text-tertiary-400 flex-shrink-0 mt-1" />
+                  <MdNotificationsActive className="w-6 h-6 text-tertiary-400 shrink-0 mt-1" />
                   <div className="text-left">
                     <h2 className="text-white font-one font-semibold text-lg mb-2">
                       Ce qui arrive
@@ -248,7 +248,7 @@ export default function TrouverUnSalonPage() {
                 </p>
                 <Link
                   href="https://www.inkera-studio.com/"
-                  className="inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white rounded-xl transition-all duration-300 font-one text-sm shadow-lg shadow-tertiary-500/25 hover:shadow-tertiary-500/40 transform hover:scale-105"
+                  className="inline-flex items-center gap-2 px-8 py-3 bg-linear-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white rounded-xl transition-all duration-300 font-one text-sm shadow-lg shadow-tertiary-500/25 hover:shadow-tertiary-500/40 transform hover:scale-105"
                 >
                   En savoir plus sur notre plateforme
                 </Link>

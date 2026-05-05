@@ -4,9 +4,15 @@ import React, { useEffect, useState } from "react";
 import Navbar from "./Navbar/Navbar";
 import NavMobile from "./Navbar/NavbarMobile";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
+  const pathname = usePathname();
+  const isHomePage = pathname === "/";
+  const isAuthPage = pathname === "/se-connecter" || pathname === "/creer-un-compte";
+  const showTransparentHeader = (isHomePage && !isScrolled) || isAuthPage;
+  const shouldShowLogo = !showTransparentHeader || isAuthPage;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -25,15 +31,19 @@ export default function Header() {
     <>
       <div
         className={`hidden lg:block transition-all duration-300 ${
-          isScrolled ? "bg-noir-700 backdrop-blur-sm" : "bg-transparent"
+          showTransparentHeader
+            ? "bg-transparent"
+            : "bg-noir-700 backdrop-blur-sm"
         }`}
       >
-        <Navbar showLogo={isScrolled} />
+        <Navbar showLogo={shouldShowLogo} />
       </div>
 
       <div
         className={`lg:hidden py-2 px-4 flex justify-between items-center mt-2 transition-all duration-300 ${
-          isScrolled ? "bg-noir-700 backdrop-blur-sm" : "bg-transparent"
+          showTransparentHeader
+            ? "bg-transparent"
+            : "bg-noir-700 backdrop-blur-sm"
         }`}
       >
         <Image
@@ -42,7 +52,7 @@ export default function Header() {
           width={100}
           height={50}
           className={`w-25 md:w-35 h-auto transition-opacity duration-300 ${
-            isScrolled ? "opacity-100" : "opacity-0"
+            shouldShowLogo ? "opacity-100" : "opacity-0"
           }`}
         />
         <NavMobile />

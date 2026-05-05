@@ -12,6 +12,7 @@ import ClientAccountPromoSection from "@/components/Auth/ClientAccountPromoSecti
 import FinalCtaSection from "@/components/Home/FinalCtaSection";
 import HeroSection from "@/components/Home/HeroSection";
 import Parcours from "@/components/Home/Parcours";
+import ArticleAccueil from "@/components/Articles/ArticleAccueil";
 
 export const metadata: Metadata = {
   title: "Inkera - Trouvez votre salon de tatouage idéal en France",
@@ -131,6 +132,17 @@ export default function Home() {
       {/* Navigation des features */}
       <Parcours />
 
+      <ArticleAccueil />
+
+      {/* Section avantages compte client */}
+      <ClientAccountPromoSection />
+
+      <FinalCtaSection />
+
+    </>
+  );
+}
+
 
       {/* Section détaillée */}
       {/* <section className="bg-noir-700 pb-20">
@@ -222,10 +234,5 @@ export default function Home() {
         </div>
       </section> */}
 
-      {/* Section avantages compte client */}
-      <ClientAccountPromoSection />
 
-      <FinalCtaSection />
-    </>
-  );
-}
+
