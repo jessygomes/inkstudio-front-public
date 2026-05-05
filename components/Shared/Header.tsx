@@ -25,15 +25,15 @@ export default function Header() {
     <>
       <div
         className={`hidden lg:block transition-all duration-300 ${
-          isScrolled ? "bg-noir-800/80 backdrop-blur-sm" : "bg-transparent"
+          isScrolled ? "bg-noir-700 backdrop-blur-sm" : "bg-transparent"
         }`}
       >
-        <Navbar />
+        <Navbar showLogo={isScrolled} />
       </div>
 
       <div
-        className={`lg:hidden py-1 px-2 rounded-2xl flex justify-between items-center mx-2 mt-2 transition-all duration-300 ${
-          isScrolled ? "bg-noir-800/80 backdrop-blur-sm" : "bg-transparent"
+        className={`lg:hidden py-2 px-4 flex justify-between items-center mt-2 transition-all duration-300 ${
+          isScrolled ? "bg-noir-700 backdrop-blur-sm" : "bg-transparent"
         }`}
       >
         <Image
@@ -41,7 +41,9 @@ export default function Header() {
           alt="Logo"
           width={100}
           height={50}
-          className="w-[100px] md:w-[140px] h-auto"
+          className={`w-25 md:w-35 h-auto transition-opacity duration-300 ${
+            isScrolled ? "opacity-100" : "opacity-0"
+          }`}
         />
         <NavMobile />
       </div>

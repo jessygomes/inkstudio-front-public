@@ -10,6 +10,7 @@ import { FaRegAddressBook } from "react-icons/fa6";
 import { LuHeartHandshake } from "react-icons/lu";
 import { PiStarFourFill } from "react-icons/pi";
 import ClientAccountPromoSection from "@/components/Auth/ClientAccountPromoSection";
+import HeroSection from "@/components/Home/HeroSection";
 
 export const metadata: Metadata = {
   title: "Inkera - Trouvez votre salon de tatouage idéal en France",
@@ -124,7 +125,8 @@ export default function Home() {
       />
 
       {/* Hero Section */}
-      <section className="min-h-screen bg-noir-700 flex items-center justify-center relative overflow-hidden pt-20">
+      <HeroSection />
+      {/* <section className="min-h-screen bg-noir-700 flex items-center justify-center relative overflow-hidden pt-20">
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{
@@ -133,12 +135,10 @@ export default function Home() {
           }}
         ></div>
 
-        {/* Overlay moderne */}
         <div className="absolute inset-0 bg-linear-to-b from-noir-700/60 via-noir-700/40 to-noir-700/80"></div>
 
         <div className="relative z-10 container mx-auto px-4 lg:px-8 text-center py-12">
           <div className="max-w-4xl mx-auto space-y-6">
-            {/* Badge moderne */}
             <div className="inline-flex items-center gap-2">
               <Image
                 src="/images/Logo22.png"
@@ -148,7 +148,6 @@ export default function Home() {
               />
             </div>
 
-            {/* Titre principal */}
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white uppercase font-two tracking-widest leading-tight">
               <span className="block mb-1">Trouvez votre</span>
               <span className="block bg-linear-to-r from-tertiary-400 via-tertiary-500 to-cuatro-500 bg-clip-text text-transparent">
@@ -157,7 +156,6 @@ export default function Home() {
               <span className="block">idéal</span>
             </h1>
 
-            {/* Sous-titre */}
             <p className="text-lg sm:text-xl text-white/80 font-one leading-relaxed max-w-3xl mx-auto">
               Trouvez facilement le salon de tatouage qui vous convient proche
               de chez vous.
@@ -167,35 +165,6 @@ export default function Home() {
               </span>
             </p>
 
-            {/* Statistiques rapides */}
-            {/* <div className="hidden sm:grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8 max-w-xl mx-auto">
-              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20">
-                <div className="text-xl font-bold text-tertiary-400 font-two">
-                  100+
-                </div>
-                <div className="text-sm text-white/80 font-one">
-                  Salons partenaires
-                </div>
-              </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20">
-                <div className="text-xl font-bold text-tertiary-400 font-two">
-                  24/7
-                </div>
-                <div className="text-sm text-white/80 font-one">
-                  Réservation en ligne
-                </div>
-              </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20">
-                <div className="text-xl font-bold text-tertiary-400 font-two">
-                  FR
-                </div>
-                <div className="text-sm text-white/80 font-one">
-                  Partout en France
-                </div>
-              </div>
-            </div> */}
-
-            {/* CTA d'exploration */}
             <div className="flex flex-col items-center gap-4 mt-8">
               <div className="text-white/60 font-one text-md">
                 Découvrez nos salons
@@ -207,7 +176,7 @@ export default function Home() {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Navigation des features */}
       <section className="relative isolate overflow-hidden bg-noir-700 py-20 sm:pt-20 sm:pb-10">
@@ -282,7 +251,7 @@ export default function Home() {
             <div className="relative min-h-72 sm:min-h-96 lg:min-h-0">
               <div
                 className="absolute inset-0 bg-cover bg-center"
-                style={{ backgroundImage: "url('/images/zeze.jpg')" }}
+                style={{ backgroundImage: "url('/zeze.jpg')" }}
               />
               <div className="absolute inset-0 bg-linear-to-br from-noir-700/80 via-noir-700/60 to-noir-900/85" />
               <div className="relative flex h-full flex-col justify-end p-7 sm:p-10">

@@ -7,7 +7,11 @@ import { usePathname } from "next/navigation";
 import { useRef } from "react";
 import { useMessagingContext } from "@/components/Context/MessageProvider";
 
-export default function Navbar() {
+type NavbarProps = {
+  showLogo?: boolean;
+};
+
+export default function Navbar({ showLogo = false }: NavbarProps) {
   const { data: session, status } = useSession();
   const pathname = usePathname();
   const { unreadCount } = useMessagingContext();
@@ -22,12 +26,17 @@ export default function Navbar() {
 
   return (
     <nav className="flex justify-between items-center py-4 mx-20">
-      <Image
-        src="/images/logo_inline_white.png"
-        alt="Logo"
-        width={150}
-        height={50}
-      />
+      <div className="w-37.5 h-12.5 flex items-center">
+        <Image
+          src="/images/logo_inline_white.png"
+          alt="Logo"
+          width={150}
+          height={50}
+          className={`transition-opacity duration-300 ${
+            showLogo ? "opacity-100" : "opacity-0"
+          }`}
+        />
+      </div>
       <ul ref={navRef} className="flex gap-8 items-center">
         {links.map((link, index) => {
           const isActive = pathname === link.href;

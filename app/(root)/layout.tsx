@@ -56,7 +56,7 @@ export default async function RootLayout({
             <CookieBanner />
             <UserProvider user={user}>
               <div>
-                <div className="fixed top-0 left-0 w-full z-30 ">
+                <div className="sticky top-0 left-0 w-full z-30 ">
                   <Header />
                 </div>
                 {children}
