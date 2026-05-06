@@ -6,6 +6,11 @@ import { useMemo, useRef, useState, useCallback, useEffect } from "react";
 import { createPortal } from "react-dom";
 import type { FlashProps, PortfolioProps, ProductSalonProps } from "@/lib/type";
 
+type Tatoueur = {
+  id: string;
+  name: string;
+};
+
 type Props = {
   portfolio: PortfolioProps[];
   products: ProductSalonProps[];
@@ -14,6 +19,7 @@ type Props = {
   salonName?: string;
   bookingPath?: string;
   canBookFlashes?: boolean;
+  tatoueurs?: Tatoueur[];
 };
 
 type FlashSort = "default" | "price-asc" | "price-desc" | "name-asc";
@@ -92,8 +98,10 @@ export default function SalonTabs({
   salonName,
   bookingPath,
   canBookFlashes = true,
+  tatoueurs = [],
 }: Props) {
   const [flashSort, setFlashSort] = useState<FlashSort>("default");
+  const [portfolioTatoueurFilter, setPortfolioTatoueurFilter] = useState<string | null>(null);
 
   const availableFlashes = useMemo(
     () =>
@@ -134,14 +142,20 @@ export default function SalonTabs({
     });
   }, [availableFlashes, flashSort]);
 
+  const filteredPortfolio = useMemo(() => {
+    const base = portfolio?.filter((p) => !!p.imageUrl) ?? [];
+    if (!portfolioTatoueurFilter) return base;
+    return base.filter((p) => p.tatoueurId === portfolioTatoueurFilter);
+  }, [portfolio, portfolioTatoueurFilter]);
+
   const counts = useMemo(
     () => ({
       photos: photos?.filter(Boolean).length ?? 0,
-      portfolio: portfolio?.filter((p) => !!p.imageUrl).length ?? 0,
+      portfolio: filteredPortfolio.length,
       flashes: sortedFlashes.length,
       products: products?.length ?? 0,
     }),
-    [portfolio, products, photos, sortedFlashes],
+    [filteredPortfolio, products, photos, sortedFlashes],
   );
 
   // Priorité d’onglet: photos > portfolio > flash > produits
@@ -173,7 +187,7 @@ export default function SalonTabs({
   );
 
   const portfolioStart = (portfolioPage - 1) * PER_PAGE;
-  const portfolioPageItems = portfolio.slice(
+  const portfolioPageItems = filteredPortfolio.slice(
     portfolioStart,
     portfolioStart + PER_PAGE,
   );
@@ -211,6 +225,10 @@ export default function SalonTabs({
   }, [active]);
 
   useEffect(() => {
+    setPortfolioPage(1);
+  }, [portfolioTatoueurFilter]);
+
+  useEffect(() => {
     setFlashesPage(1);
   }, [flashSort]);
 
@@ -231,13 +249,13 @@ export default function SalonTabs({
   const activeImages = useMemo<string[]>(() => {
     if (active === "photos") return (photos ?? []).filter(Boolean);
     if (active === "portfolio")
-      return (portfolio ?? []).map((p) => p.imageUrl).filter(Boolean);
+      return filteredPortfolio.map((p) => p.imageUrl).filter(Boolean);
     if (active === "flashes")
       return (sortedFlashes ?? [])
         .map((f) => f.imageUrl)
         .filter(Boolean) as string[];
     return [];
-  }, [active, photos, portfolio, sortedFlashes]);
+  }, [active, photos, filteredPortfolio, sortedFlashes]);
 
   const showSortControl = active === "flashes" && counts.flashes > 0;
   const showExpandControl =
@@ -505,6 +523,41 @@ export default function SalonTabs({
           ))}
 
         {/* PORTFOLIO */}
+        {active === "portfolio" && (
+          <>
+            {tatoueurs.length > 1 && (
+              <div className="mb-4 flex flex-wrap gap-2">
+                <button
+                  onClick={() => setPortfolioTatoueurFilter(null)}
+                  className={`cursor-pointer px-3 py-1.5 rounded-2xl text-xs font-one transition-all duration-200 border ${
+                    portfolioTatoueurFilter === null
+                      ? "bg-tertiary-400/20 border-tertiary-400/40 text-white"
+                      : "border-white/15 text-white/65 hover:bg-white/8 hover:text-white"
+                  }`}
+                >
+                  Tous
+                </button>
+                {tatoueurs.map((t) => (
+                  <button
+                    key={t.id}
+                    onClick={() =>
+                      setPortfolioTatoueurFilter(
+                        portfolioTatoueurFilter === t.id ? null : t.id,
+                      )
+                    }
+                    className={`cursor-pointer px-3 py-1.5 rounded-2xl text-xs font-one transition-all duration-200 border ${
+                      portfolioTatoueurFilter === t.id
+                        ? "bg-tertiary-400/20 border-tertiary-400/40 text-white"
+                        : "border-white/15 text-white/65 hover:bg-white/8 hover:text-white"
+                    }`}
+                  >
+                    {t.name}
+                  </button>
+                ))}
+              </div>
+            )}
+          </>
+        )}
         {active === "portfolio" &&
           (counts.portfolio === 0 ? (
             <Empty>Aucune pièce dans le portfolio.</Empty>

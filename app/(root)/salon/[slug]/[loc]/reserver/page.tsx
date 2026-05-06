@@ -66,9 +66,11 @@ async function getAvailableFlashes(userId: string): Promise<FlashProps[]> {
       ? payload
       : Array.isArray(payload?.data)
         ? payload.data
-        : Array.isArray(payload?.flashes)
-          ? payload.flashes
-          : [];
+        : Array.isArray(payload?.flashs)
+          ? payload.flashs
+          : Array.isArray(payload?.flashes)
+            ? payload.flashes
+            : [];
 
     return list as FlashProps[];
   } catch {

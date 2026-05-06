@@ -91,6 +91,7 @@ export type SalonProfilProps = {
   id: string;
   salonName: string;
   image: string;
+  profileImage?: string | null;
   email: string;
   phone: string;
   address: string;

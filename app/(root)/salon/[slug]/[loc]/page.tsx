@@ -61,9 +61,11 @@ async function getAvailableFlashes(userId: string): Promise<FlashProps[]> {
       ? payload
       : Array.isArray(payload?.data)
         ? payload.data
-        : Array.isArray(payload?.flashes)
-          ? payload.flashes
-          : [];
+        : Array.isArray(payload?.flashs)
+          ? payload.flashs
+          : Array.isArray(payload?.flashes)
+            ? payload.flashes
+            : [];
 
     return list as FlashProps[];
   } catch {
@@ -219,6 +221,7 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
   const isFree = salon.saasPlan === "FREE";
 
   const heroSrc = salon.image || null;
+  const profileSrc = salon.profileImage || null;
   const rawHours = parseSalonHours(salon.salonHours as any);
   const hours = hoursToLines(rawHours);
   const openNow = getOpenNow(salon.salonHours);
@@ -399,7 +402,7 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
 
   return (
     <div
-      className="min-h-screen bg-linear-to-b from-noir-700 via-noir-500 to-noir-700 pt-20"
+      className="min-h-screen bg-noir-700 pt-2 "
       style={customStyle}
     >
       {/* CONTENT */}
@@ -411,7 +414,7 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
               {heroSrc ? (
                 <Image
                   src={heroSrc}
-                  alt={`${salon.salonName} - photo de profil`}
+                  alt={`${salon.salonName} - banniere`}
                   fill
                   sizes="100vw"
                   className="object-cover"
@@ -478,16 +481,47 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
                 </span>
               </div>
 
-              {/* Title overlay */}
+              {/* Title + Profile overlay */}
               <div className="absolute bottom-0 left-0 right-0 p-4">
-                <h1 className="text-2xl font-one text-white tracking-wide drop-shadow-lg mb-2">
-                  {salon.salonName}
-                </h1>
-                {openNow.today && (
-                  <p className="text-white/80 text-xs font-one">
-                    Aujourd&apos;hui: {openNow.today.start}–{openNow.today.end}
-                  </p>
-                )}
+                <div className="flex items-end gap-3">
+                  <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-full border border-white/10 bg-noir-700/80 shadow-lg backdrop-blur-sm">
+                    {profileSrc ? (
+                      <Image
+                        src={profileSrc}
+                        alt={`${salon.salonName} - photo de profil`}
+                        fill
+                        sizes="64px"
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="grid h-full w-full place-items-center text-white/60">
+                        <svg
+                          className="h-6 w-6"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={1.5}
+                            d="M15.75 6.75a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.5 20.118a7.5 7.5 0 0115 0A17.933 17.933 0 0112 21.75a17.933 17.933 0 01-7.5-1.632z"
+                          />
+                        </svg>
+                      </div>
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <h1 className="text-2xl font-one text-white tracking-wide drop-shadow-lg mb-1">
+                      {salon.salonName}
+                    </h1>
+                    {openNow.today && (
+                      <p className="text-white/80 text-xs font-one">
+                        Aujourd&apos;hui: {openNow.today.start}–{openNow.today.end}
+                      </p>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -699,11 +733,11 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
             {/* Desktop Hero */}
             <div className="hidden lg:block">
               <div className="relative overflow-hidden rounded-2xl shadow-xl">
-                <div className="relative h-80 lg:h-96 bg-linear-to-br from-noir-600 to-noir-800">
+                <div className="relative h-80 lg:h-96 bg-linear-to-br from-noir-500 to-noir-700">
                   {heroSrc ? (
                     <Image
                       src={heroSrc}
-                      alt={`${salon.salonName} - photo de profil`}
+                      alt={`${salon.salonName} - banniere`}
                       fill
                       sizes="(min-width:1024px) 66vw, 100vw"
                       className="object-cover"
@@ -770,17 +804,48 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
                     </span>
                   </div>
 
-                  {/* Title overlay */}
+                  {/* Title + Profile overlay */}
                   <div className="absolute bottom-0 left-0 right-0 p-6">
-                    <h1 className="text-3xl lg:text-4xl font-one text-white tracking-wide drop-shadow-lg mb-2">
-                      {salon.salonName}
-                    </h1>
-                    {openNow.today && (
-                      <p className="text-white/80 text-base font-one">
-                        Aujourd&apos;hui: {openNow.today.start}–
-                        {openNow.today.end}
-                      </p>
-                    )}
+                    <div className="flex items-end gap-4">
+                      <div className="relative h-32 w-32 shrink-0 overflow-hidden rounded-full border border-white/10 bg-noir-700/80 shadow-lg backdrop-blur-sm">
+                        {profileSrc ? (
+                          <Image
+                            src={profileSrc}
+                            alt={`${salon.salonName} - photo de profil`}
+                            fill
+                            sizes="128px"
+                            className="object-cover"
+                          />
+                        ) : (
+                          <div className="grid h-full w-full place-items-center text-white/60">
+                            <svg
+                              className="h-7 w-7"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={1.5}
+                                d="M15.75 6.75a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.5 20.118a7.5 7.5 0 0115 0A17.933 17.933 0 0112 21.75a17.933 17.933 0 01-7.5-1.632z"
+                              />
+                            </svg>
+                          </div>
+                        )}
+                      </div>
+                      <div className="min-w-0">
+                        <h1 className="text-3xl lg:text-4xl font-one text-white tracking-wide drop-shadow-lg mb-2">
+                          {salon.salonName}
+                        </h1>
+                        {openNow.today && (
+                          <p className="text-white/80 text-base font-one">
+                            Aujourd&apos;hui: {openNow.today.start}–
+                            {openNow.today.end}
+                          </p>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -832,6 +897,7 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
               salonName={salon.salonName}
               bookingPath={`/salon/${resolvedParams.slug}/${resolvedParams.loc}/reserver`}
               canBookFlashes={!isFree}
+              tatoueurs={(Array.isArray(salon.Tatoueur) ? salon.Tatoueur : []).map((t: { id: string; name: string }) => ({ id: t.id, name: t.name }))}
             />
 
             {/* Équipe */}
