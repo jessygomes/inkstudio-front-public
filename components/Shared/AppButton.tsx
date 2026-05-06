@@ -40,7 +40,7 @@ export default function AppButton({
 
   if (href) {
     return (
-      <Link href={href} className={finalClass}>
+      <Link href={href} onClick={onClick} className={finalClass}>
         {icon}
         {children}
       </Link>

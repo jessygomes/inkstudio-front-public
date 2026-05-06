@@ -16,6 +16,11 @@ export const getUnreadMessagesCountAction = async (): Promise<number> => {
     }
   );
 
+  // Utilisateur non connecte: cas attendu, on retourne simplement 0 message non lu.
+  if (response.status === 401 || response.status === 403) {
+    return 0;
+  }
+
   if (!response.ok) {
     throw new Error(
       `Failed to fetch unread messages count: ${response.statusText}`

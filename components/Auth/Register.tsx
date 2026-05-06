@@ -1,7 +1,7 @@
 /* eslint-disable react/no-unescaped-entities */
 "use client";
 
-import  { useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -157,9 +157,9 @@ export default function Register() {
           onSubmit={form.handleSubmit(onSubmit)}
           className="relative text-white"
         >
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-3">
             {/* Nom et Prénom */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
               <div className="flex flex-col gap-1 font-one">
                 <label htmlFor="firstName" className="text-xs">
                   Prénom *
@@ -169,7 +169,7 @@ export default function Register() {
                   placeholder="Votre prénom"
                   type="text"
                   required
-                  className="bg-white/30 py-2 px-4 rounded-lg text-sm"
+                  className="bg-white/30 py-2.5 px-4 rounded-2xl text-sm w-full"
                   {...form.register("firstName")}
                 />
                 {form.formState.errors.firstName && (
@@ -188,7 +188,7 @@ export default function Register() {
                   placeholder="Votre nom"
                   type="text"
                   required
-                  className="bg-white/30 py-2 px-4 rounded-lg text-sm"
+                  className="bg-white/30 py-2.5 px-4 rounded-2xl text-sm w-full"
                   {...form.register("lastName")}
                 />
                 {form.formState.errors.lastName && (
@@ -209,7 +209,7 @@ export default function Register() {
                 placeholder="votre.email@exemple.com"
                 type="email"
                 required
-                className="bg-white/30 py-2 px-4 rounded-lg text-sm"
+                className="bg-white/30 py-2.5 px-4 rounded-2xl text-sm w-full"
                 {...form.register("email")}
               />
               {form.formState.errors.email && (
@@ -227,7 +227,7 @@ export default function Register() {
               <input
                 id="birthDate"
                 type="date"
-                className="bg-white/30 py-2 px-4 rounded-lg text-sm"
+                className="bg-white/30 py-2.5 px-4 rounded-2xl text-sm w-full"
                 {...form.register("birthDate")}
               />
               {form.formState.errors.birthDate && (
@@ -238,7 +238,7 @@ export default function Register() {
             </div>
 
             {/* Mot de passe */}
-            <div className="flex gap-4">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
             <div className="flex flex-col gap-1 font-one">
               <label htmlFor="password" className="text-xs">
                 Mot de passe *
@@ -249,7 +249,7 @@ export default function Register() {
                   placeholder="••••••••"
                   type={showPassword ? "text" : "password"}
                   required
-                  className="bg-white/30 py-2 px-4 pr-10 rounded-lg text-sm w-full"
+                  className="bg-white/30 py-2.5 px-4 pr-10 rounded-2xl text-sm w-full"
                   {...form.register("password")}
                 />
                 <button
@@ -312,7 +312,7 @@ export default function Register() {
                   placeholder="••••••••"
                   type={showConfirmPassword ? "text" : "password"}
                   required
-                  className="bg-white/30 py-2 px-4 pr-10 rounded-lg text-sm w-full"
+                  className="bg-white/30 py-2.5 px-4 pr-10 rounded-2xl text-sm w-full"
                   {...form.register("confirmPassword")}
                 />
                 <button
@@ -404,7 +404,7 @@ export default function Register() {
 
             {/* Bouton de soumission */}
             <button
-              className="cursor-pointer px-8 py-2 bg-linear-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white rounded-2xl transition-all duration-300 font-medium disabled:opacity-50 disabled:cursor-not-allowed font-one lg:text-xs"
+              className="cursor-pointer w-full px-6 py-2.5 bg-linear-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white rounded-2xl transition-all duration-300 font-medium disabled:opacity-50 disabled:cursor-not-allowed font-one text-sm lg:text-xs"
               type="submit"
               disabled={isPending}
             >
@@ -420,7 +420,7 @@ export default function Register() {
               <button
               type="button"
               onClick={handleGoogleSignIn}
-              className="cursor-pointer group relative flex items-center justify-center gap-3 overflow-hidden rounded-2xl border border-white/15 bg-white/8 px-8 py-3 text-white shadow-lg shadow-black/20 backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:border-tertiary-400/40 hover:bg-white/12 hover:shadow-xl hover:shadow-tertiary-500/10 disabled:cursor-not-allowed disabled:opacity-70 font-one lg:text-xs"
+              className="cursor-pointer group relative flex w-full items-center justify-center gap-3 overflow-hidden rounded-2xl border border-white/15 bg-white/8 px-6 py-3 text-white shadow-lg shadow-black/20 backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:border-tertiary-400/40 hover:bg-white/12 hover:shadow-xl hover:shadow-tertiary-500/10 disabled:cursor-not-allowed disabled:opacity-70 font-one text-sm lg:text-xs"
               disabled={isGooglePending}
             >
               <span className="absolute inset-0 bg-linear-to-r from-white/8 via-transparent to-tertiary-400/8 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />

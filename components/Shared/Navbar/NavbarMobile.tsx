@@ -8,6 +8,7 @@ import { useEffect, useRef, useState } from "react";
 import { MdMenu, MdClose } from "react-icons/md";
 import { FaUser } from "react-icons/fa";
 import { useMessagingContext } from "@/components/Context/MessageProvider";
+import AppButton from "@/components/Shared/AppButton";
 
 export default function NavbarMobile() {
   const { data: session, status } = useSession();
@@ -28,7 +29,7 @@ export default function NavbarMobile() {
   const links = [
     { href: "/", label: "Accueil" },
     { href: "/trouver-un-salon", label: "Trouver un salon" },
-    { href: "/articles", label: "Journal" },
+    { href: "/journal", label: "Journal" },
     { href: "/en-savoir-plus", label: "En savoir plus" },
     // { href: "/je-suis-tatoueur", label: "Je suis tatoueur ?" },
   ];
@@ -142,9 +143,9 @@ export default function NavbarMobile() {
                         : link.href
                     }
                     onClick={handleClose}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 group ${
+                    className={`flex items-center gap-3 px-4 py-2 rounded-2xl transition-all duration-300 group ${
                       isActive
-                        ? "bg-gradient-to-r from-tertiary-400/25 to-tertiary-500/15 border border-tertiary-400/40 text-white shadow-lg shadow-tertiary-400/10"
+                        ? "bg-linear-to-r from-tertiary-400/25 to-tertiary-500/15 border border-tertiary-400/40 text-white shadow-lg shadow-tertiary-400/10"
                         : "hover:bg-white/5 text-white/80 hover:text-white border border-transparent"
                     }`}
                   >
@@ -167,14 +168,14 @@ export default function NavbarMobile() {
           </ul>
 
           {/* Divider */}
-          <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent my-6" />
+          <div className="h-px bg-linear-to-r from-transparent via-white/10 to-transparent my-6" />
 
           {/* User Section */}
           {status === "authenticated" && session?.user ? (
             <div className="space-y-4">
               {/* User Profile Card */}
               <Link href="/mon-profil" onClick={handleClose}>
-                <div className="bg-gradient-to-br from-white/[0.08] to-white/[0.02] border border-white/10 rounded-xl p-4 hover:from-white/[0.12] hover:to-white/[0.06] hover:border-white/20 transition-all duration-300 group cursor-pointer">
+                <div className="bg-linear-to-br from-white/8 to-white/2 border border-white/10 rounded-xl p-4 hover:from-white/12 hover:to-white/6 hover:border-white/20 transition-all duration-300 group cursor-pointer">
                   <div className="flex items-center gap-3">
                     <div className="relative w-10 h-10 rounded-full overflow-hidden border-2 border-tertiary-400/50 group-hover:border-tertiary-400 transition-all duration-300">
                       {session.user.image ? (
@@ -186,7 +187,7 @@ export default function NavbarMobile() {
                           className="object-cover"
                         />
                       ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-tertiary-400/40 to-tertiary-500/40 flex items-center justify-center">
+                        <div className="w-full h-full bg-linear-to-br from-tertiary-400/40 to-tertiary-500/40 flex items-center justify-center">
                           <FaUser className="w-4 h-4 text-tertiary-300" />
                         </div>
                       )}
@@ -205,16 +206,20 @@ export default function NavbarMobile() {
             </div>
           ) : (
             <div className="flex flex-col gap-4">
-              <Link href="/se-connecter" onClick={handleClose}>
-                <div className="cursor-pointer px-4 py-3 bg-gradient-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white rounded-xl transition-all duration-300 font-medium font-one text-sm shadow-lg shadow-tertiary-500/25 hover:shadow-tertiary-500/40 transform hover:scale-105 text-center">
-                  Se connecter
-                </div>
-              </Link>
-              <Link href="/creer-un-compte" onClick={handleClose}>
-                <div className="cursor-pointer px-4 py-3 bg-gradient-to-br from-white/[0.08] to-white/[0.02] hover:from-white/[0.12] hover:to-white/[0.06] text-white/80 hover:text-white border border-white/20 hover:border-white/30 rounded-xl transition-all duration-300 font-medium font-one text-sm text-center">
-                  Créer un compte
-                </div>
-              </Link>
+              <AppButton
+                href="/se-connecter"
+                onClick={handleClose}
+                variant="primary"
+              >
+                Se connecter
+              </AppButton>
+              <AppButton
+                href="/creer-un-compte"
+                onClick={handleClose}
+                variant="secondary"
+              >
+                Créer un compte
+              </AppButton>
             </div>
           )}
         </div>

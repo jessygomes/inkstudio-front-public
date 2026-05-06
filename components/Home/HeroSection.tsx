@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
+import { motion } from "framer-motion";
 
 export default function HeroSection() {
   const allHeroPhotos = [
@@ -50,13 +51,48 @@ export default function HeroSection() {
     setHeroPhotos(shuffled.slice(0, 9));
   }, []);
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.08,
+        delayChildren: 0.1,
+      },
+    },
+  };
+
+  const imageVariants = {
+    hidden: { opacity: 0, scale: 0.8 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      transition: { duration: 0.5 },
+    },
+  };
+
+  const logoVariants = {
+    hidden: { opacity: 0, scale: 0.5 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      transition: { duration: 0.8, delay: 0.8 },
+    },
+  };
+
   return (
     <section className="w-full -mt-16 md:-mt-21 min-h-screen md:min-h-screen grid grid-cols-1 md:grid-cols-2 gap-0 md:gap-12 items-center z-20 bg-noir-700">
-      <div className="relative w-full h-[55vh] max-h-[55vh] md:h-screen md:max-h-screen grid grid-cols-3 grid-rows-3 gap-2 overflow-hidden">
+      <motion.div
+        className="relative w-full h-[55vh] max-h-[55vh] md:h-screen md:max-h-screen grid grid-cols-3 grid-rows-3 gap-2 overflow-hidden"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
         {heroPhotos.map((photo, index) => (
-          <div
+          <motion.div
             key={`${photo}-${index}`}
             className="relative overflow-hidden"
+            variants={imageVariants}
           >
             <Image
               src={photo}
@@ -66,19 +102,25 @@ export default function HeroSection() {
               sizes="(max-width: 768px) 33vw, 16vw"
               priority={index < 3}
             />
-          </div>
+          </motion.div>
         ))}
 
         <div className="pointer-events-none absolute inset-0 bg-noir-700/60 flex items-center justify-center">
-          <Image
-            src="/logo/Logo16.png"
-            alt="Logo Inkera"
-            width={420}
-            height={420}
-            className="w-56 h-auto sm:w-64 md:w-72 lg:w-80 opacity-80"
-          />
+          <motion.div
+            variants={logoVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            <Image
+              src="/logo/Logo16.png"
+              alt="Logo Inkera"
+              width={420}
+              height={420}
+              className="w-56 h-auto sm:w-64 md:w-72 lg:w-80 opacity-80"
+            />
+          </motion.div>
         </div>
-      </div>
+      </motion.div>
 
       <div className="relative w-full min-h-0 md:min-h-screen px-4 lg:px-10 py-4 md:py-8 flex flex-col items-center justify-start md:justify-center gap-4 md:gap-8 md:items-start -mt-10 sm:mt-0">
         <div className="relative z-10 flex flex-col justify-center items-center md:items-start gap-1 sm:gap-2">

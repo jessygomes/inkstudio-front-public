@@ -1,17 +1,11 @@
-import Link from "next/link";
 import type { Metadata } from "next";
 import { getPublicArticlesAction } from "@/lib/actions/article.action";
 import FinalCtaSection from "@/components/Home/FinalCtaSection";
+import ArticleCard from "@/components/Articles/ArticleCard";
 
 export const metadata: Metadata = {
   title: "Articles - Inkera",
   description: "Tous les articles Inkera sur l'univers du tatouage.",
-};
-
-const toExcerpt = (text: string, maxLength = 180) => {
-  if (!text) return "";
-  if (text.length <= maxLength) return text;
-  return `${text.slice(0, maxLength).trim()}...`;
 };
 
 export default async function ArticlesPage() {
@@ -55,37 +49,7 @@ export default async function ArticlesPage() {
         {!!articles.length && (
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
             {articles.map((article) => (
-              <article
-                key={article.id}
-                className="overflow-hidden rounded-3xl border border-white/10 bg-white/4 backdrop-blur-sm transition-colors hover:border-tertiary-400/35"
-              >
-                <div className="h-48 w-full bg-noir-900/60">
-                  {article.imageUrls?.[0] ? (
-                    <img
-                      src={article.imageUrls[0]}
-                      alt={article.title}
-                      className="h-full w-full object-cover"
-                    />
-                  ) : null}
-                </div>
-                <div className="p-6">
-                  <p className="text-[11px] uppercase tracking-[0.14em] text-white/50 font-one">
-                    {new Date(article.createdAt).toLocaleDateString("fr-FR")} - {article.author}
-                  </p>
-                  <h2 className="mt-2 line-clamp-2 text-2xl text-white font-two">
-                    {article.title}
-                  </h2>
-                  <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-white/75 font-one">
-                    {toExcerpt(article.content)}
-                  </p>
-                  <Link
-                    href={`/articles/${article.id}`}
-                    className="mt-4 inline-flex text-sm text-tertiary-300 transition-colors hover:text-tertiary-200 font-one"
-                  >
-                    Lire l&apos;article
-                  </Link>
-                </div>
-              </article>
+              <ArticleCard key={article.id} article={article} />
             ))}
           </div>
         )}

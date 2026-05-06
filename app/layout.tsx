@@ -123,6 +123,7 @@ export default async function RootLayout({
   return (
     <html lang="fr">
       <body
+        suppressHydrationWarning
         className={`${didact_gothic.variable} ${exo_2.variable} ${montserrat_alternates.variable} ${walkway.variable} antialiased relative`}
       >
         {children}

@@ -34,8 +34,16 @@ const steps = [
 
 export default function Parcours() {
   return (
-    <section className="bg-noir-700 py-24">
-      <div className="mx-4 sm:mx-8 lg:mx-20">
+    <section className="relative isolate overflow-hidden bg-noir-700 py-24">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute inset-0 bg-linear-to-b from-noir-700 via-noir-500/80 to-noir-700" />
+        <div className="absolute top-0 inset-x-0 h-px bg-linear-to-r from-transparent via-tertiary-400/25 to-transparent" />
+        <div className="absolute bottom-0 inset-x-0 h-px bg-linear-to-r from-transparent via-white/8 to-transparent" />
+        <div className="absolute -left-40 top-1/2 -translate-y-1/2 h-96 w-96 rounded-full bg-tertiary-500/6 blur-3xl" />
+        <div className="absolute -right-24 top-1/3 h-80 w-80 rounded-full bg-secondary-500/10 blur-3xl" />
+      </div>
+
+      <div className="relative mx-4 sm:mx-8 lg:mx-20">
 
         {/* Header */}
         <div className="mb-20 flex flex-col items-center gap-4 text-center">
@@ -56,11 +64,11 @@ export default function Parcours() {
         </div>
 
         {/* Cards */}
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3 lg:gap-6">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
           {steps.map(({ step, title, description, icon: Icon, photo }) => (
             <article
               key={step}
-              className="group relative h-80 sm:h-120 overflow-hidden rounded-2xl cursor-default border-2 border-tertiary-400/50 transition-all duration-300 hover:border-tertiary-400/70 hover:shadow-lg hover:shadow-tertiary-500/30"
+              className="group relative h-80 sm:h-120 overflow-hidden rounded-3xl cursor-default border border-white/10 transition-all duration-300 hover:border-tertiary-400/40 hover:shadow-xl hover:shadow-tertiary-500/15"
             >
               {/* Background photo */}
               <Image
@@ -71,33 +79,37 @@ export default function Parcours() {
                 sizes="(max-width: 768px) 100vw, 33vw"
               />
 
-              {/* Gradient overlay global */}
-              <div className="absolute inset-0 bg-linear-to-t from-noir-700/80 via-noir-700/20 to-transparent" />
-              {/* Gradient bottom renforcé pour la lisibilité du texte */}
-              <div className="absolute inset-x-0 bottom-0 h-5/5 bg-linear-to-t from-noir-500 via-noir-700/30 to-transparent" />
+              {/* Gradient overlay unifié */}
+              <div className="absolute inset-0 bg-linear-to-t from-noir-800/95 via-noir-800/35 to-noir-800/10" />
+
+              {/* Teinte orange subtile au hover */}
+              <div className="absolute inset-0 bg-linear-to-bl from-tertiary-500/0 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100 group-hover:from-tertiary-500/8" />
 
               {/* Step number watermark */}
-              <span className="absolute -right-1 -top-4 select-none text-[9rem] font-black leading-none text-white/20 font-two transition-all duration-500 group-hover:text-tertiary-400/70">
+              <span className="absolute -right-2 -top-4 select-none text-[9rem] font-black leading-none text-white/6 font-two transition-all duration-500 group-hover:text-tertiary-400/50">
                 {step}
               </span>
+
+              {/* Indicateur d'étape — ligne + chiffre */}
+              <div className="absolute left-5 top-5 flex items-center gap-2">
+                <span className="h-px w-4 bg-tertiary-400/55" />
+                <span className="text-[10px] font-semibold tracking-[0.3em] text-tertiary-400/70 font-one uppercase">
+                  {step}
+                </span>
+              </div>
 
               {/* Content pinned to bottom */}
               <div className="absolute inset-x-0 bottom-0 p-7">
                 <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-2xl bg-tertiary-500/25 ring-1 ring-tertiary-400/30 backdrop-blur-sm transition-colors duration-300 group-hover:bg-tertiary-500/40">
-                  <Icon size={20} className="text-tertiary-400 text-base" />
+                  <Icon size={20} className="text-tertiary-400" />
                 </div>
                 <h3 className="text-2xl font-bold text-white font-two">
                   {title}
                 </h3>
-                <p className="mt-2 text-sm leading-relaxed text-white/90 font-one">
+                <p className="mt-2 text-sm leading-relaxed text-white/75 font-one">
                   {description}
                 </p>
               </div>
-
-              {/* Top-left step label */}
-              <span className="absolute left-5 top-5 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-semibold tracking-widest text-white/70 font-one backdrop-blur-sm">
-                Étape {step}
-              </span>
             </article>
           ))}
         </div>

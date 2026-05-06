@@ -242,7 +242,18 @@ export default function EnSavoirPlusPage() {
       </section>
 
       {/* Contenu éditorial */}
-      <section className="relative isolate overflow-hidden bg-noir-800 py-16 sm:py-24">
+      <section 
+        className="relative isolate overflow-hidden bg-noir-700 py-16 sm:py-24"
+        style={{
+          backgroundImage: "url('/photos/complete.jpg')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundAttachment: "fixed",
+        }}
+      >
+        {/* Overlay sombre pour la lisibilité */}
+        <div className="pointer-events-none absolute inset-0 bg-linear-to-br from-noir-700/85 via-noir-700/80 to-noir-800/85" />
+        
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute -left-20 top-1/2 h-72 w-72 -translate-y-1/2 rounded-full bg-tertiary-500/8 blur-3xl" />
           <div className="absolute -right-10 bottom-0 h-56 w-56 rounded-full bg-tertiary-400/5 blur-3xl" />
@@ -322,10 +333,10 @@ export default function EnSavoirPlusPage() {
 
       {/* Mission */}
       <section className="relative isolate overflow-hidden bg-noir-700 py-16 sm:py-24">
-        <div className="pointer-events-none absolute inset-0">
+        {/* <div className="pointer-events-none absolute inset-0">
           <div className="absolute left-1/2 top-0 h-64 w-96 -translate-x-1/2 rounded-full bg-tertiary-500/6 blur-3xl" />
           <div className="absolute right-0 bottom-0 h-48 w-48 rounded-full bg-tertiary-400/4 blur-3xl" />
-        </div>
+        </div> */}
 
         <div className="relative container mx-auto max-w-6xl px-4 sm:px-8">
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
@@ -400,7 +411,7 @@ export default function EnSavoirPlusPage() {
       </section>
 
       {/* Section finale CTA */}
-      <section className="relative isolate overflow-hidden bg-noir-800 py-20 sm:py-28">
+      <section className="relative isolate overflow-hidden bg-noir-700 py-20 sm:py-28">
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute left-1/2 top-1/2 h-96 w-96 -translate-x-1/2 -translate-y-1/2 rounded-full bg-tertiary-500/10 blur-3xl" />
         </div>

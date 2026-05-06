@@ -96,7 +96,7 @@ export const Login = () => {
 
   return (
     <div>
-      <CardWrapper headerLabel="Connectez-vous à votre compte Inkera">
+      <CardWrapper headerLabel="Connectez-vous">
         <form
           method="post"
           onSubmit={form.handleSubmit(onSubmit)}
@@ -112,7 +112,7 @@ export const Login = () => {
                 placeholder="johndoe@domaine.com"
                 type="text"
                 required
-                className="bg-white/30 py-2 px-4 rounded-lg"
+                className="bg-white/30 py-2 px-4 rounded-2xl"
                 {...form.register("email")}
               />
               {form.formState.errors.email && (
@@ -132,7 +132,7 @@ export const Login = () => {
                   placeholder="Mot de passe"
                   type={showPassword ? "text" : "password"}
                   required
-                  className="bg-white/30 py-2 px-4 pr-10 rounded-lg text-sm w-full"
+                  className="bg-white/30 py-2 px-4 pr-10 rounded-2xl text-sm w-full"
                   {...form.register("password")}
                 />
                 <button

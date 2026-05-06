@@ -21,7 +21,7 @@ export default function Navbar({ showLogo = false }: NavbarProps) {
   const links = [
     { href: "/", label: "Accueil" },
     { href: "/trouver-un-salon", label: "Trouver un salon" },
-    { href: "/articles", label: "Journal" },
+    { href: "/journal", label: "Journal" },
     { href: "/en-savoir-plus", label: "En savoir plus" },
   ];
 
