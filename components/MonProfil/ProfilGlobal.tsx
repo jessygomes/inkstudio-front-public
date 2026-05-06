@@ -8,6 +8,7 @@ import InfosTab from "./InfosTab";
 import FavorisTab from "./FavorisTab";
 import RendezVousTab from "./RendezVousTab";
 import MesAvisTab from "./MesAvisTab";
+import MoodboardTab from "./MoodboardTab";
 
 import {
   FaUser,
@@ -16,13 +17,14 @@ import {
   FaEdit,
   FaEnvelope,
   FaMapMarkerAlt,
+  FaPalette,
 } from "react-icons/fa";
 import Image from "next/image";
 import { LogoutBtn } from "../Auth/LogoutBtn";
 
 export default function ProfilGlobal(user: User) {
   const [activeTab, setActiveTab] = useState<
-    "rdv" | "favoris" | "infos" | "mesavis"
+    "rdv" | "favoris" | "infos" | "mesavis" | "moodboard"
   >("rdv");
 
   // État pour les données complètes du profil avec type explicite
@@ -223,6 +225,7 @@ export default function ProfilGlobal(user: User) {
                     { key: "favoris", icon: FaHeart, label: "Favoris" },
                     { key: "infos", icon: FaUser, label: "Infos" },
                     { key: "mesavis", icon: FaEnvelope, label: "Avis" },
+                    { key: "moodboard", icon: FaPalette, label: "Moodboard" },
                   ] as const
                 ).map(({ key, icon: Icon, label }) => (
                   <button
@@ -255,6 +258,7 @@ export default function ProfilGlobal(user: User) {
           {activeTab === "favoris" && <FavorisTab />}
           {activeTab === "rdv" && <RendezVousTab />}
           {activeTab === "mesavis" && <MesAvisTab />}
+          {activeTab === "moodboard" && <MoodboardTab />}
         </div>
       </div>
     </div>

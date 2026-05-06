@@ -29,7 +29,7 @@ export default async function MonProfilPage() {
   const user = session.user as any;
 
   return (
-    <div className="min-h-screen bg-linear-to-b from-noir-700 via-noir-500 to-noir-700 pt-20">
+    <div className="min-h-screen bg-linear-to-b from-noir-700 via-noir-500 to-noir-700 pt-2">
       <ProfilGlobal {...user} />
     </div>
   );

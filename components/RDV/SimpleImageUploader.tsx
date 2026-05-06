@@ -45,21 +45,21 @@ export default function SimpleImageUploader({
       return;
     }
 
-    // Vérifier la taille du fichier (max 8MB)
-    const maxSize = 8 * 1024 * 1024; // 8MB
+    // Vérifier la taille du fichier (max 15MB)
+    const maxSize = 15 * 1024 * 1024; // 15MB
     if (file.size > maxSize) {
-      alert("L'image est trop volumineuse. Taille maximale : 8MB");
+      alert("L'image est trop volumineuse. Taille maximale : 15MB");
       return;
     }
 
     try {
-      // Compresser l'image
+      // Compression agressive mais visuellement propre pour optimiser le stockage.
       const compressed = await imageCompression(file, {
-        maxSizeMB: 1,
-        maxWidthOrHeight: 1920,
+        maxSizeMB: 0.7,
+        maxWidthOrHeight: 1600,
         useWebWorker: true,
         fileType: "image/webp",
-        initialQuality: 0.8,
+        initialQuality: 0.78,
       });
 
       await startUpload([compressed]);
@@ -91,7 +91,7 @@ export default function SimpleImageUploader({
       <label className="text-sm text-white/90 font-one font-semibold">
         {label}
       </label>
-      <div className="bg-gradient-to-br from-white/[0.08] to-white/[0.02] rounded-xl p-4 border border-white/20 backdrop-blur-sm">
+      <div className="bg-linear-to-br from-white/8 to-white/2 rounded-xl p-4 border border-white/20 backdrop-blur-sm">
         {/* Zone d'affichage de l'image */}
         {currentImage && (
           <div className="relative w-full h-24 rounded-lg overflow-hidden bg-white/10 mb-3">
@@ -113,7 +113,7 @@ export default function SimpleImageUploader({
 
         {/* Zone d'upload */}
         <div
-          className={`relative border-2 border-dashed rounded-lg p-3 text-center transition-colors flex-1 min-h-[80px] flex items-center justify-center ${
+          className={`relative border-2 border-dashed rounded-lg p-3 text-center transition-colors flex-1 min-h-20 flex items-center justify-center ${
             isDragOver
               ? "border-tertiary-400 bg-tertiary-400/10"
               : "border-white/30 bg-white/5"
