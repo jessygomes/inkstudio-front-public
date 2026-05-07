@@ -27,7 +27,7 @@ export default function Navbar({ showLogo = false }: NavbarProps) {
 
   return (
     <nav className="flex justify-between items-center py-4 mx-20">
-      <div className="w-37.5 h-12.5 flex items-center">
+      <Link href={"/"} className="w-37.5 h-12.5 flex items-center">
         <Image
           src="/images/logo_inline_white.png"
           alt="Logo"
@@ -37,7 +37,7 @@ export default function Navbar({ showLogo = false }: NavbarProps) {
             showLogo ? "opacity-100" : "opacity-0"
           }`}
         />
-      </div>
+      </Link>
       <ul ref={navRef} className="flex gap-8 items-center">
         {links.map((link, index) => {
           const isActive = pathname === link.href;
@@ -57,7 +57,7 @@ export default function Navbar({ showLogo = false }: NavbarProps) {
         })}
         {status === "authenticated" && session?.user ? (
           <Link href="/mon-profil" className="relative">
-            <div className="relative w-10 h-10 rounded-full overflow-hidden border border-white/30 transition-all duration-300 cursor-pointer hover:scale-105">
+            <div className="relative w-10 h-10 rounded-full overflow-hidden border-4 border-tertiary-400/90 transition-all duration-300 cursor-pointer hover:scale-105">
               {session.user.image ? (
                 <Image
                   src={session.user.image}

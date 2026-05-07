@@ -5,6 +5,7 @@ import Navbar from "./Navbar/Navbar";
 import NavMobile from "./Navbar/NavbarMobile";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import Link from "next/link";
 
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -46,15 +47,17 @@ export default function Header() {
             : "bg-noir-700 backdrop-blur-sm"
         }`}
       >
+        <Link href={"/"} className=" flex items-center">
         <Image
           src="/images/logo_inline_white.png"
           alt="Logo"
           width={100}
           height={50}
-          className={`w-25 md:w-35 h-auto transition-opacity duration-300 ${
+          className={`w-30 md:w-40 h-auto transition-opacity duration-300 ${
             shouldShowLogo ? "opacity-100" : "opacity-0"
           }`}
         />
+        </Link>
         <NavMobile />
       </div>
     </>

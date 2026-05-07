@@ -4,6 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import { motion } from "framer-motion";
+import AppButton from "../Shared/AppButton";
+import { IoSearch } from "react-icons/io5";
 
 export default function HeroSection() {
   const allHeroPhotos = [
@@ -81,9 +83,9 @@ export default function HeroSection() {
   };
 
   return (
-    <section className="w-full -mt-16 md:-mt-21 min-h-screen md:min-h-screen grid grid-cols-1 md:grid-cols-2 gap-0 md:gap-12 items-center z-20 bg-noir-700">
+    <section className="w-full -mt-16 md:-mt-21 min-h-screen grid grid-cols-1 lg:grid-cols-2 gap-0 lg:gap-12 items-center z-20 bg-noir-700">
       <motion.div
-        className="relative w-full h-[55vh] max-h-[55vh] md:h-screen md:max-h-screen grid grid-cols-3 grid-rows-3 gap-2 overflow-hidden"
+        className="relative w-full h-[55vh] max-h-[55vh] md:h-[55vh] md:max-h-[55vh] lg:h-screen lg:max-h-screen p-3 grid grid-cols-3 grid-rows-3 gap-2 overflow-hidden"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
@@ -98,7 +100,7 @@ export default function HeroSection() {
               src={photo}
               alt={`Inspiration tatouage ${index + 1}`}
               fill
-              className="object-cover"
+              className="object-cover rounded-2xl"
               sizes="(max-width: 768px) 33vw, 16vw"
               priority={index < 3}
             />
@@ -122,9 +124,9 @@ export default function HeroSection() {
         </div>
       </motion.div>
 
-      <div className="relative w-full min-h-0 md:min-h-screen px-4 lg:px-10 py-4 md:py-8 flex flex-col items-center justify-start md:justify-center gap-4 md:gap-8 md:items-start -mt-10 sm:mt-0">
+      <div className="relative w-full min-h-0 lg:min-h-screen px-4 lg:px-10 py-2 md:py-2 lg:py-8 flex flex-col items-center justify-start lg:justify-center gap-4 lg:gap-8 lg:items-start -mt-10 md:-mt-26 lg:mt-0">
         <div className="relative z-10 flex flex-col justify-center items-center md:items-start gap-1 sm:gap-2">
-          <h1 className="hidden md:block text-white font-two">INKERA</h1>
+          <h1 className="hidden md:block md:text-center lg:text-left text-white font-two">INKERA</h1>
           <h2 className="text-2xl md:text-4xl font-bold text-center md:text-left text-white uppercase font-two tracking-wide">
             Trouvez votre salon de tatouage
           </h2>
@@ -135,19 +137,22 @@ export default function HeroSection() {
           </p>
         </div>
         <div className="flex  items-center sm:flex-row gap-2">
-        <Link
-          href={"/trouver-un-salon"}
-          className="w-40 sm:w-46 relative z-10 cursor-pointer text-center py-2 bg-linear-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white rounded-2xl transition-all duration-300 font-medium disabled:opacity-50 disabled:cursor-not-allowed font-one text-xs"
+        <AppButton
+          href="/trouver-un-salon"
+          variant="primary"
+          icon={<IoSearch />}
+          className="sm:min-w-48 whitespace-nowrap"
         >
           Trouver un salon
-        </Link>
+        </AppButton>
 
-        <Link
-          href={"/decouvrir-des-tatouages"}
-          className="w-40 sm:w-46 relative z-10 cursor-pointer text-center py-2 bg-linear-to-r from-primary-400 to-primary-500 hover:from-primary-600 hover:to-primary-700 text-white rounded-2xl transition-all duration-300 font-medium disabled:opacity-50 disabled:cursor-not-allowed font-one text-xs"
+        <AppButton
+          href={"/inspiration"}
+          variant="secondary"
+          className="whitespace-nowrap"
         >
           Découvrir des tatouages
-        </Link>
+        </AppButton>
 
         </div>
       </div>
