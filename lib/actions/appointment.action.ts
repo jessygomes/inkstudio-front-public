@@ -128,11 +128,13 @@ type RdvBody = {
   piercingZoneBouche?: string | null;
   piercingZoneCorps?: string | null;
   piercingZoneMicrodermal?: string | null;
+  moodboardId?: string;
 };
 
 export const createAppointmentByClient = async (
   salonId: string,
   rdvBody: RdvBody,
+  clientUserId?: string,
 ) => {
   try {
     const headers = await getAuthHeaders();
@@ -145,11 +147,11 @@ export const createAppointmentByClient = async (
       body: JSON.stringify({
         userId: salonId,
         rdvBody: rdvBody,
+        clientUserId,
       }),
     });
 
     const json = await response.json();
-    console.log("Réponse du backend:", json);
 
     if (!response.ok || (json && json.error)) {
       throw new Error(json?.message || "Échec de la création du rendez-vous");

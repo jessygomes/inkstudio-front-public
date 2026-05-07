@@ -6,7 +6,7 @@ import TextArea from "./TextArea";
 import SkinToneSelect from "./SkinToneSelect";
 import ImageUploader from "../../Shared/ImageUploader";
 import { FlashProps, PiercingZone, PiercingService } from "@/lib/type";
-import { SkinToneOption } from "./types";
+import { BookingMoodboardOption, SkinToneOption } from "./types";
 
 interface ClientInfoFormProps {
   prestation: string;
@@ -26,6 +26,11 @@ interface ClientInfoFormProps {
   onFlashChange?: (flashId: string) => void;
   skinToneOptions?: SkinToneOption[];
   isLoadingSkinTones?: boolean;
+  moodboards?: BookingMoodboardOption[];
+  selectedMoodboardId?: string;
+  onMoodboardChange?: (moodboardId: string) => void;
+  isAuthenticated?: boolean;
+  isLoadingMoodboards?: boolean;
 }
 
 export default function ClientInfoForm({
@@ -46,6 +51,11 @@ export default function ClientInfoForm({
   onFlashChange,
   skinToneOptions = [],
   isLoadingSkinTones = false,
+  moodboards = [],
+  selectedMoodboardId = "",
+  onMoodboardChange,
+  isAuthenticated = false,
+  isLoadingMoodboards = false,
 }: ClientInfoFormProps) {
   const selectedZone = piercingZones.find((z) => z.id === selectedPiercingZone);
   const selectedZoneServices = selectedZone?.services || [];
@@ -133,6 +143,36 @@ export default function ClientInfoForm({
             errors={errors}
           />
         </div>
+
+        {isAuthenticated && (
+          <div className="space-y-2">
+            <label className="text-xs text-white/80 font-one uppercase tracking-wide">
+              Moodboard à partager (optionnel)
+            </label>
+            <select
+              value={selectedMoodboardId}
+              onChange={(e) => onMoodboardChange?.(e.target.value)}
+              disabled={isLoadingMoodboards}
+              className="w-full p-2.5 bg-white/5 border border-white/10 rounded-2xl text-white font-one text-sm focus:outline-none focus:border-tertiary-400 focus:ring-1 focus:ring-tertiary-400/30 transition-all disabled:opacity-60"
+            >
+              <option value="" className="bg-noir-500">
+                Aucun moodboard
+              </option>
+              {moodboards.map((moodboard) => (
+                <option
+                  key={moodboard.id}
+                  value={moodboard.id}
+                  className="bg-noir-500"
+                >
+                  {moodboard.name}
+                </option>
+              ))}
+            </select>
+            <p className="text-[11px] text-white/55 font-one">
+              Le salon pourra consulter ce moodboard depuis le rendez-vous.
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Détails du projet */}

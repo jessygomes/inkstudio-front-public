@@ -3,7 +3,7 @@
 import { getClientProfile } from "@/lib/actions/user.action";
 import { User } from "@/lib/type";
 import Link from "next/link";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import InfosTab from "./InfosTab";
 import FavorisTab from "./FavorisTab";
 import RendezVousTab from "./RendezVousTab";
@@ -16,7 +16,6 @@ import {
   FaCalendarAlt,
   FaEdit,
   FaEnvelope,
-  FaMapMarkerAlt,
   FaPalette,
 } from "react-icons/fa";
 import Image from "next/image";
@@ -24,7 +23,7 @@ import { LogoutBtn } from "../Auth/LogoutBtn";
 
 export default function ProfilGlobal(user: User) {
   const [activeTab, setActiveTab] = useState<
-    "rdv" | "favoris" | "infos" | "mesavis" | "moodboard"
+    "rdv" | "moodboard" | "favoris"  | "mesavis" | "infos"
   >("rdv");
 
   // État pour les données complètes du profil avec type explicite
@@ -222,10 +221,10 @@ export default function ProfilGlobal(user: User) {
                 {(
                   [
                     { key: "rdv", icon: FaCalendarAlt, label: "Rendez-vous" },
-                    { key: "favoris", icon: FaHeart, label: "Favoris" },
-                    { key: "infos", icon: FaUser, label: "Infos" },
-                    { key: "mesavis", icon: FaEnvelope, label: "Avis" },
                     { key: "moodboard", icon: FaPalette, label: "Moodboard" },
+                    { key: "favoris", icon: FaHeart, label: "Favoris" },
+                    { key: "mesavis", icon: FaEnvelope, label: "Avis" },
+                    { key: "infos", icon: FaUser, label: "Infos" },
                   ] as const
                 ).map(({ key, icon: Icon, label }) => (
                   <button
@@ -255,10 +254,10 @@ export default function ProfilGlobal(user: User) {
 
         <div className="space-y-6">
           {activeTab === "infos" && <InfosTab user={profileData} />}
+          {activeTab === "moodboard" && <MoodboardTab />}
           {activeTab === "favoris" && <FavorisTab />}
           {activeTab === "rdv" && <RendezVousTab />}
           {activeTab === "mesavis" && <MesAvisTab />}
-          {activeTab === "moodboard" && <MoodboardTab />}
         </div>
       </div>
     </div>

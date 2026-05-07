@@ -17,10 +17,11 @@ import {
 } from "@/lib/actions/timeslot.action";
 import { getPiercingPrice } from "@/lib/actions/piercingPrice.action";
 import { createAppointmentByClient } from "@/lib/actions/appointment.action";
+import { getMyMoodboardsAction } from "@/lib/actions/moodboard.action";
 import { uploadFiles } from "@/lib/utils/uploadthing";
 import imageCompression from "browser-image-compression";
 import { FlashProps, PiercingService, PiercingZone } from "@/lib/type";
-import { SkinToneOption } from "./types";
+import { BookingMoodboardOption, SkinToneOption } from "./types";
 
 type AppointmentRequestForm = z.infer<typeof appointmentRequestSchema>;
 
@@ -87,6 +88,7 @@ export function useBookingLogic({
   const isAuthenticated = status === "authenticated";
 
   const sessionUser = (session?.user || {}) as {
+    id?: string;
     firstName?: string;
     lastName?: string;
     email?: string;
@@ -96,6 +98,7 @@ export function useBookingLogic({
   };
 
   const {
+    id: sessionUserId,
     firstName: sessionFirstName,
     lastName: sessionLastName,
     email: sessionEmail,
@@ -131,6 +134,7 @@ export function useBookingLogic({
             : "",
       },
       details: {},
+      moodboardId: "",
       message: "",
     },
   });
@@ -247,6 +251,9 @@ export function useBookingLogic({
   const [piercingPrice, setPiercingPrice] = useState<number | null>(null);
   const [skinToneOptions, setSkinToneOptions] = useState<SkinToneOption[]>([]);
   const [isLoadingSkinTones, setIsLoadingSkinTones] = useState(false);
+  const [moodboards, setMoodboards] = useState<BookingMoodboardOption[]>([]);
+  const [selectedMoodboardId, setSelectedMoodboardId] = useState("");
+  const [isLoadingMoodboards, setIsLoadingMoodboards] = useState(false);
 
   // États pour les images
   const [sketchFile, setSketchFile] = useState<File | null>(null);
@@ -254,6 +261,61 @@ export function useBookingLogic({
   const [existingImages, setExistingImages] = useState<string[]>([]);
   const [placementImageUrl, setPlacementImageUrl] = useState<string>("");
   const [selectedFlashId, setSelectedFlashId] = useState<string>("");
+
+  useEffect(() => {
+    let active = true;
+
+    const fetchMoodboards = async () => {
+      if (!isAuthenticated) {
+        setMoodboards([]);
+        setSelectedMoodboardId("");
+        setValue("moodboardId", "", { shouldValidate: false });
+        return;
+      }
+
+      try {
+        setIsLoadingMoodboards(true);
+        const result = await getMyMoodboardsAction();
+
+        if (!active) return;
+
+        if (!result.ok || !result.data) {
+          setMoodboards([]);
+          return;
+        }
+
+        const nextMoodboards = result.data.map((moodboard) => ({
+          id: moodboard.id,
+          name: moodboard.name,
+          description: moodboard.description,
+        }));
+
+        setMoodboards(nextMoodboards);
+
+        if (
+          selectedMoodboardId &&
+          !nextMoodboards.some((moodboard) => moodboard.id === selectedMoodboardId)
+        ) {
+          setSelectedMoodboardId("");
+          setValue("moodboardId", "", { shouldValidate: false });
+        }
+      } catch (error) {
+        if (!active) return;
+        console.error("Erreur chargement moodboards:", error);
+        setMoodboards([]);
+      } finally {
+        if (active) {
+          setIsLoadingMoodboards(false);
+        }
+      }
+    };
+
+    fetchMoodboards();
+
+    return () => {
+      active = false;
+    };
+  }, [isAuthenticated, selectedMoodboardId, setValue]);
 
   const availableFlashes = useMemo(
     () =>
@@ -642,7 +704,10 @@ export function useBookingLogic({
         const urls = await uploadFiles("imageUploader", {
           files: [compressed],
         });
-        if (urls.length > 0) uploadedFileUrls.sketch = urls[0].url;
+        if (urls.length > 0)
+          uploadedFileUrls.sketch =
+            (urls[0] as { ufsUrl?: string; url?: string }).ufsUrl ||
+            (urls[0] as { ufsUrl?: string; url?: string }).url;
       }
 
       if (referenceFile) {
@@ -650,7 +715,10 @@ export function useBookingLogic({
         const urls = await uploadFiles("imageUploader", {
           files: [compressed],
         });
-        if (urls.length > 0) uploadedFileUrls.reference = urls[0].url;
+        if (urls.length > 0)
+          uploadedFileUrls.reference =
+            (urls[0] as { ufsUrl?: string; url?: string }).ufsUrl ||
+            (urls[0] as { ufsUrl?: string; url?: string }).url;
       }
 
       // Préparer les données
@@ -706,12 +774,20 @@ export function useBookingLogic({
         size: data.details?.size || "",
         colorStyle: data.details?.colorStyle || "",
         skin: shouldSendSkin ? data.details?.skin || undefined : undefined,
+        moodboardId:
+          isAuthenticated && sessionUserId
+            ? selectedMoodboardId || undefined
+            : undefined,
         reference: uploadedFileUrls.reference || data.details?.reference || "",
         sketch: uploadedFileUrls.sketch || data.details?.sketch || "",
         piercingZone: selectedPiercingZone || undefined,
       };
 
-      const result = await createAppointmentByClient(salon.id, payload);
+      const result = await createAppointmentByClient(
+        salon.id,
+        payload,
+        isAuthenticated ? sessionUserId : undefined,
+      );
 
       if (result.ok) {
         toast.success("Demande de rendez-vous envoyée !");
@@ -774,6 +850,11 @@ export function useBookingLogic({
     }
   };
 
+  const handleMoodboardChange = (moodboardId: string) => {
+    setSelectedMoodboardId(moodboardId);
+    setValue("moodboardId", moodboardId, { shouldValidate: false });
+  };
+
   return {
     // Form methods
     methods,
@@ -813,6 +894,9 @@ export function useBookingLogic({
     piercingPrice,
     skinToneOptions,
     isLoadingSkinTones,
+    moodboards,
+    selectedMoodboardId,
+    isLoadingMoodboards,
 
     // Images
     sketchFile,
@@ -835,6 +919,7 @@ export function useBookingLogic({
     handleDateChange,
     handlePrestationChange,
     handleFlashChange,
+    handleMoodboardChange,
     onSubmit,
     isSlotBlocked,
     isSlotOccupied,

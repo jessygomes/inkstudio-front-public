@@ -29,6 +29,12 @@ export interface SkinToneOption {
   previewHex: string;
 }
 
+export interface BookingMoodboardOption {
+  id: string;
+  name: string;
+  description?: string | null;
+}
+
 export interface TimeSlot {
   start: string;
   end: string;

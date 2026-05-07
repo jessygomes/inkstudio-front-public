@@ -1,30 +1,32 @@
 /* eslint-disable react/no-unescaped-entities */
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { toSlug } from "@/lib/utils";
 import {
   FaCalendarAlt,
   FaClock,
   FaCheck,
   FaTimes,
-  FaFilter,
   FaChevronLeft,
   FaChevronRight,
-  FaChevronDown,
-  FaChevronUp,
 } from "react-icons/fa";
 import { getAllRdvClient } from "@/lib/actions/user.action";
 import { toast } from "sonner";
 import Image from "next/image";
 import { cancelAppointmentByClient } from "@/lib/actions/appointment.action";
 import { createReview } from "@/lib/actions/review.action";
-import { FaStar } from "react-icons/fa";
+import {
+  getMoodboardByIdAction,
+  getMyMoodboardsAction,
+  connectMoodboardToAppointmentAction,
+  disconnectMoodboardFromAppointmentAction,
+  type Moodboard,
+} from "@/lib/actions/moodboard.action";
+import { createPortal } from "react-dom";
 import { useEditAppointmentModal } from "@/components/Context/EditAppointmentContext";
 import CancelAppointmentModal from "./CancelAppointmentModal";
-import { CiInstagram } from "react-icons/ci";
-import { TfiWorld } from "react-icons/tfi";
+import RendezVousCard from "./RendezVousCard";
 
 export type Appointment = {
   id: string;
@@ -71,6 +73,11 @@ export type Appointment = {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     piercingDetails?: any;
   };
+  moodboard?: {
+    id: string;
+    name: string;
+    description?: string | null;
+  } | null;
   conversation?: {
     id: string;
     lastMessageAt: string;
@@ -119,6 +126,14 @@ export default function RendezVousTab() {
     null,
   );
   const { openModal: openEditModal } = useEditAppointmentModal();
+  const [moodboardModal, setMoodboardModal] = useState<{ id: string; name: string; appointmentId: string; appointmentStatus: Appointment["status"] } | null>(null);
+  const [moodboardDetail, setMoodboardDetail] = useState<Moodboard | null>(null);
+  const [moodboardLoading, setMoodboardLoading] = useState(false);
+  const [connectModal, setConnectModal] = useState<{ appointmentId: string } | null>(null);
+  const [connectMoodboards, setConnectMoodboards] = useState<Moodboard[]>([]);
+  const [connectMoodboardsLoading, setConnectMoodboardsLoading] = useState(false);
+  const [connectingMoodboardId, setConnectingMoodboardId] = useState<string | null>(null);
+  const [disconnectingAppointmentId, setDisconnectingAppointmentId] = useState<string | null>(null);
   // const [showReviewModal, setShowReviewModal] = useState(false);
   // const [appointmentToReview, setAppointmentToReview] =
   //   useState<Appointment | null>(null);
@@ -321,6 +336,81 @@ export default function RendezVousTab() {
     toggleExpand(appointmentId);
   };
 
+  //! Ouverture modal moodboard lié au RDV
+  const handleOpenMoodboard = async (id: string, name: string, appointmentId: string, appointmentStatus: Appointment["status"]) => {
+    setMoodboardModal({ id, name, appointmentId, appointmentStatus });
+    setMoodboardDetail(null);
+    setMoodboardLoading(true);
+    try {
+      const result = await getMoodboardByIdAction(id);
+      if (result.ok && result.data) {
+        setMoodboardDetail(result.data);
+      } else {
+        toast.error("Impossible de charger le moodboard");
+      }
+    } catch {
+      toast.error("Erreur lors du chargement du moodboard");
+    } finally {
+      setMoodboardLoading(false);
+    }
+  };
+
+  //! Ouverture modal de connexion moodboard
+  const handleOpenConnectModal = async (appointmentId: string) => {
+    setConnectModal({ appointmentId });
+    setConnectMoodboards([]);
+    setConnectMoodboardsLoading(true);
+    try {
+      const result = await getMyMoodboardsAction();
+      if (result.ok && result.data) {
+        setConnectMoodboards(result.data);
+      } else {
+        toast.error("Impossible de charger vos moodboards");
+      }
+    } catch {
+      toast.error("Erreur lors du chargement des moodboards");
+    } finally {
+      setConnectMoodboardsLoading(false);
+    }
+  };
+
+  //! Connexion d'un moodboard à un RDV
+  const handleConnectMoodboard = async (moodboardId: string, appointmentId: string) => {
+    setConnectingMoodboardId(moodboardId);
+    try {
+      const result = await connectMoodboardToAppointmentAction(moodboardId, appointmentId);
+      if (result.ok) {
+        toast.success("Moodboard lié au rendez-vous");
+        setConnectModal(null);
+        fetchRdvClient(statusFilter, currentPage, limit);
+      } else {
+        toast.error(result.message || "Erreur lors de la liaison");
+      }
+    } catch {
+      toast.error("Erreur lors de la liaison du moodboard");
+    } finally {
+      setConnectingMoodboardId(null);
+    }
+  };
+
+  //! Déconnexion d'un moodboard d'un RDV
+  const handleDisconnectMoodboard = async (moodboardId: string, appointmentId: string) => {
+    setDisconnectingAppointmentId(appointmentId);
+    try {
+      const result = await disconnectMoodboardFromAppointmentAction(moodboardId, appointmentId);
+      if (result.ok) {
+        toast.success("Moodboard délié du rendez-vous");
+        fetchRdvClient(statusFilter, currentPage, limit);
+      } else {
+        toast.error(result.message || "Erreur lors de la suppression du lien");
+      }
+    } catch {
+      toast.error("Erreur lors de la suppression du lien");
+    } finally {
+      setDisconnectingAppointmentId(null);
+    }
+  };
+
   //! Soumission avis
   const handleSubmitReview = async (appointment: Appointment) => {
     try {
@@ -455,611 +545,29 @@ export default function RendezVousTab() {
                 const hasReview = !!appointment.review;
 
                 return (
-                  <div
+                  <RendezVousCard
                     key={appointment.id}
-                    className={`group relative overflow-hidden rounded-2xl border border-white/10 bg-white/4 transition-all duration-300 hover:border-white/25 hover:bg-white/6 ${
-                      isExpanded ? "sm:col-span-2" : ""
-                    }`}
-                  >
-                    <div
-                      className={`absolute inset-y-0 left-0 w-1 ${
-                        appointment.status === "CONFIRMED"
-                          ? "bg-emerald-400"
-                          : appointment.status === "PENDING"
-                            ? "bg-orange-400"
-                            : appointment.status === "COMPLETED"
-                              ? "bg-blue-400"
-                              : "bg-red-400"
-                      }`}
-                    />
-
-                    <div className="bg-linear-to-b from-noir-700/55 to-noir-500/45 p-3 sm:p-3.5">
-                      <div className="flex flex-col gap-2.5">
-                        <div className="flex min-w-0 items-start gap-3">
-                          <div className="relative shrink-0">
-                            <div className="h-11 w-11 overflow-hidden rounded-xl border border-white/10 bg-linear-to-br from-tertiary-400/15 to-tertiary-500/15">
-                              {appointment.salon.image ? (
-                                <Image
-                                  src={appointment.salon.image}
-                                  alt={appointment.salon.salonName}
-                                  width={44}
-                                  height={44}
-                                  className="h-full w-full object-cover"
-                                />
-                              ) : (
-                                <div className="flex h-full w-full items-center justify-center text-sm font-bold text-tertiary-500">
-                                  {appointment.salon.salonName.charAt(0)}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-
-                          <div className="min-w-0 flex-1">
-                            <div className="flex items-start justify-between gap-2">
-                              <div className="min-w-0">
-                                <h4 className="line-clamp-1 text-sm font-semibold leading-tight text-white font-one">
-                                  {appointment.prestation}
-                                </h4>
-                                <p className="mt-0.5 truncate text-xs text-white/60 font-one">
-                                  {appointment.salon.salonName}
-                                  {appointment.tatoueur && (
-                                    <> • {appointment.tatoueur.name}</>
-                                  )}
-                                </p>
-                              </div>
-                              <div className="shrink-0">
-                                {getStatusBadge(appointment.status)}
-                              </div>
-                            </div>
-
-                            <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[11px] text-white/70">
-                              <span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/6 px-2 py-0.5 font-one">
-                                <FaCalendarAlt className="h-3 w-3 text-tertiary-400" />
-                                {formatDate(appointment.start)}
-                              </span>
-                              <span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/6 px-2 py-0.5 font-one">
-                                <FaClock className="h-3 w-3 text-tertiary-400" />
-                                {formatTime(appointment.start)}
-                              </span>
-                              {appointment.prestationDetails &&
-                                appointment.prestationDetails.price !==
-                                  undefined &&
-                                (appointment.prestationDetails.price ?? 0) >
-                                  0 && (
-                                  <span className="inline-flex items-center rounded-full border border-white/10 bg-white/10 px-2 py-0.5 font-semibold text-white font-one">
-                                    {appointment.prestationDetails.price}€
-                                  </span>
-                                )}
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="flex flex-wrap items-center gap-1.5 border-t border-white/10 pt-2">
-                          <button
-                            onClick={() => toggleExpand(appointment.id)}
-                            className="cursor-pointer inline-flex items-center gap-1.5 rounded-2xl border border-white/15 bg-white/8 px-2.5 py-1 text-[11px] text-white/90 transition-all hover:bg-white/12 font-one"
-                          >
-                            {isExpanded ? "Réduire" : "Détails"}
-                            {isExpanded ? (
-                              <FaChevronUp className="h-3 w-3" />
-                            ) : (
-                              <FaChevronDown className="h-3 w-3" />
-                            )}
-                          </button>
-
-                          <Link
-                            href={`/salon/${toSlug(appointment.salon.salonName)}/${toSlug(appointment.salon.city)}-${appointment.salon.postalCode}`}
-                            className="cursor-pointer rounded-2xl border border-tertiary-500/35 bg-tertiary-500/10 px-2.5 py-1 text-[11px] text-tertiary-200 transition-all hover:bg-tertiary-500/20 font-one"
-                          >
-                            Voir salon
-                          </Link>
-
-                          {appointment.conversation && (
-                            <Link
-                              href={`/mon-profil/messagerie/${appointment.conversation.id}`}
-                              className="relative inline-flex cursor-pointer items-center gap-1.5 rounded-2xl border border-white/12 bg-white/6 px-2.5 py-1 text-[11px] text-white/85 transition-all hover:bg-white/10 font-one"
-                            >
-                              Messagerie
-                              {appointment.conversation.unreadCount > 0 && (
-                                <span className="absolute -right-2 -top-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-tertiary-500 px-1 text-[10px] font-semibold text-white">
-                                  {appointment.conversation.unreadCount > 9
-                                    ? "9+"
-                                    : appointment.conversation.unreadCount}
-                                </span>
-                              )}
-                            </Link>
-                          )}
-
-                          {appointment.visio &&
-                            appointment.status === "CONFIRMED" && (
-                              <span className="rounded-2xl border border-blue-400/30 bg-blue-500/10 px-2.5 py-1 text-[11px] text-blue-200 font-one">
-                                📹 Visio
-                              </span>
-                            )}
-
-                          {appointment.status === "CONFIRMED" && (
-                            <>
-                              <button
-                                onClick={() => handleEditClick(appointment)}
-                                className="cursor-pointer rounded-2xl border border-white/12 bg-white/6 px-2.5 py-1 text-[11px] text-white/85 transition-all hover:bg-white/10 font-one"
-                              >
-                                Modifier
-                              </button>
-                              <button
-                                onClick={() =>
-                                  handleCancelClick(appointment.id)
-                                }
-                                disabled={
-                                  cancelingAppointmentId === appointment.id
-                                }
-                                className="cursor-pointer rounded-2xl border border-red-500/30 bg-red-500/10 px-2.5 py-1 text-[11px] text-red-200 transition-all hover:bg-red-500/20 disabled:opacity-50 font-one"
-                              >
-                                {cancelingAppointmentId === appointment.id
-                                  ? "..."
-                                  : "Annuler"}
-                              </button>
-                            </>
-                          )}
-
-                          {appointment.status === "COMPLETED" && (
-                            <button
-                              onClick={() =>
-                                handleReviewClick(appointment.id)
-                              }
-                              className="cursor-pointer rounded-2xl border border-amber-400/30 bg-amber-500/10 px-2.5 py-1 text-[11px] text-amber-200 transition-all hover:bg-amber-500/20 font-one"
-                            >
-                              ⭐ {hasReview ? "Voir l'avis" : "Donner un avis"}
-                            </button>
-                          )}
-                        </div>
-                      </div>
-
-                      {isExpanded && (
-                        <div className="mt-2 space-y-3 pt-2">
-                          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                            <div className="rounded-2xl border border-white/10 bg-white/5 px-2.5 py-2">
-                              <p className="text-[10px] uppercase tracking-wide text-white/45 font-one">
-                                Date
-                              </p>
-                              <p className="mt-0.5 text-xs text-white font-one">
-                                {formatDate(appointment.start)}
-                              </p>
-                            </div>
-                            <div className="rounded-2xl border border-white/10 bg-white/5 px-2.5 py-2">
-                              <p className="text-[10px] uppercase tracking-wide text-white/45 font-one">
-                                Heure
-                              </p>
-                              <p className="mt-0.5 text-xs text-white font-one">
-                                {formatTime(appointment.start)}
-                              </p>
-                            </div>
-                            <div className="rounded-2xl border border-white/10 bg-white/5 px-2.5 py-2">
-                              <p className="text-[10px] uppercase tracking-wide text-white/45 font-one">
-                                Durée
-                              </p>
-                              <p className="mt-0.5 text-xs text-white font-one">
-                                {appointment.duration
-                                  ? `${appointment.duration} min`
-                                  : "Non spécifié"}
-                              </p>
-                            </div>
-                            <div className="rounded-2xl border border-white/10 bg-white/5 px-2.5 py-2">
-                              <p className="text-[10px] uppercase tracking-wide text-white/45 font-one">
-                                Prix
-                              </p>
-                              <p className="mt-0.5 text-xs text-white font-one">
-                                {appointment.prestationDetails?.price &&
-                                appointment.prestationDetails.price > 0
-                                  ? `${appointment.prestationDetails.price}€`
-                                  : "Non spécifié"}
-                              </p>
-                            </div>
-                          </div>
-
-                          <div className="grid gap-3 md:grid-cols-3">
-                            <div className="space-y-2 rounded-2xl border border-white/10 bg-white/5 p-3">
-                              <div className="flex items-center justify-between text-xs text-white/60">
-                                <span>Infos rendez-vous</span>
-                                {getStatusBadge(appointment.status)}
-                              </div>
-                              <div className="space-y-1 text-sm text-white font-one">
-                                <p className="text-white/80 text-xs">Adresse du salon</p>
-                                <p className="text-white text-xs">
-                                  {appointment.salon.address &&
-                                    `${appointment.salon.address}, `}
-                                  {appointment.salon.city}{" "}
-                                  {appointment.salon.postalCode}
-                                </p>
-                              </div>
-                            </div>
-
-                            {appointment.prestationDetails && (
-                              <div className="space-y-3 rounded-2xl font-one border border-white/10 bg-white/5 p-3 md:col-span-2">
-                                <div className="flex items-center justify-between text-xs text-white/60">
-                                  <span>Brief</span>
-                                </div>
-                                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 text-xs text-white">
-                                  {appointment.prestationDetails.zone && (
-                                    <div>
-                                      <p className="text-white/60">Zone</p>
-                                      <p>
-                                        {appointment.prestationDetails.zone}
-                                      </p>
-                                    </div>
-                                  )}
-                                  {appointment.prestationDetails.size && (
-                                    <div>
-                                      <p className="text-white/60">Taille</p>
-                                      <p>
-                                        {appointment.prestationDetails.size}
-                                      </p>
-                                    </div>
-                                  )}
-                                  {appointment.prestationDetails.colorStyle && (
-                                    <div>
-                                      <p className="text-white/60">Style</p>
-                                      <p>
-                                        {
-                                          appointment.prestationDetails
-                                            .colorStyle
-                                        }
-                                      </p>
-                                    </div>
-                                  )}
-                                  {appointment.prestationDetails
-                                    .piercingZone && (
-                                    <div>
-                                      <p className="text-white/60">
-                                        Zone piercing
-                                      </p>
-                                      <p>
-                                        {
-                                          appointment.prestationDetails
-                                            .piercingZone
-                                        }
-                                      </p>
-                                    </div>
-                                  )}
-                                  {appointment.prestationDetails
-                                    .piercingDetails && (
-                                    <div className="sm:col-span-2 lg:col-span-1">
-                                      <p className="text-white/60">
-                                        Détail piercing
-                                      </p>
-                                      <p>
-                                        {appointment.prestationDetails
-                                          .piercingDetails.zoneOreille ||
-                                          appointment.prestationDetails
-                                            .piercingDetails.zoneVisage ||
-                                          appointment.prestationDetails
-                                            .piercingDetails.zoneBouche ||
-                                          appointment.prestationDetails
-                                            .piercingDetails.zoneCorps ||
-                                          appointment.prestationDetails
-                                            .piercingDetails.zoneMicrodermal ||
-                                          "Non spécifié"}
-                                      </p>
-                                    </div>
-                                  )}
-                                </div>
-
-                                {appointment.prestationDetails.description && (
-                                  <div className="pt-2 border-t border-white/10 text-xs text-white/80 leading-relaxed">
-                                    {appointment.prestationDetails.description}
-                                  </div>
-                                )}
-
-                                {(appointment.prestationDetails.reference ||
-                                  appointment.prestationDetails.sketch) && (
-                                  <div className="border-t border-white/10 pt-2">
-                                    <p className="text-white/60 text-xs mb-2">
-                                      Références
-                                    </p>
-                                    <div className="flex flex-wrap gap-2">
-                                      {appointment.prestationDetails
-                                        .reference && (
-                                        <div className="relative">
-                                          <Image
-                                            src={
-                                              appointment.prestationDetails
-                                                .reference
-                                            }
-                                            alt="Image de référence"
-                                            width={96}
-                                            height={96}
-                                            className="h-24 w-24 rounded-2xl border border-white/15 object-cover"
-                                          />
-                                          <span className="absolute -bottom-1 -right-1 bg-tertiary-500 text-white text-[11px] px-2 py-0.5 rounded">
-                                            Référence
-                                          </span>
-                                        </div>
-                                      )}
-                                      {appointment.prestationDetails.sketch && (
-                                        <div className="relative">
-                                          <Image
-                                            src={
-                                              appointment.prestationDetails
-                                                .sketch
-                                            }
-                                            alt="Croquis"
-                                            width={96}
-                                            height={96}
-                                            className="h-24 w-24 rounded-2xl border border-white/15 object-cover"
-                                          />
-                                          <span className="absolute -bottom-1 -right-1 bg-blue-500 text-white text-[11px] px-2 py-0.5 rounded">
-                                            Croquis
-                                          </span>
-                                        </div>
-                                      )}
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
-                            )}
-                          </div>
-
-                          <div className="grid gap-3 md:grid-cols-2">
-                            <div className="rounded-2xl border border-white/10 bg-noir-500/5 p-3">
-                              <p className="text-white/60 text-xs mb-3">
-                                Contacts salon
-                              </p>
-                              <div className="flex flex-wrap gap-2">
-                                {appointment.salon.phone && (
-                                  <a
-                                    href={`tel:${appointment.salon.phone}`}
-                                    className="inline-flex items-center gap-2 px-3 py-1.5 rounded-2xl border border-white/10  text-white/80 text-xs font-one transition-all"
-                                  >
-                                    <span>📞</span>
-                                    <span>
-                                      {formatPhoneDisplay(appointment.salon.phone)}
-                                    </span>
-                                  </a>
-                                )}
-                                {appointment.salon.website && (
-                                  <a
-                                    href={appointment.salon.website}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                   className="w-8 h-8 flex items-center justify-center bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl text-white/60 hover:text-tertiary-400 transition-all"
-                        title="Site web"
-                                  >
-                                    <span><TfiWorld className="w-3.5 h-3.5" /></span>
-                                  </a>
-                                )}
-                                {appointment.salon.instagram && (
-                                  <a
-                                    href={appointment.salon.instagram}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                   className="w-8 h-8 flex items-center justify-center bg-white/5 hover:bg-pink-500/20 border border-white/10 hover:border-pink-500/30 rounded-2xl text-white/60 hover:text-pink-400 transition-all"
-                        title="Instagram"
-                                  >
-                                  <span><CiInstagram className="w-4 h-4" /></span>
-                                  </a>
-                                )}
-                              </div>
-                            </div>
-
-                            <div className="rounded-2xl border border-white/10 bg-noir-500/5 p-3">
-                              <p className="text-white/60 text-xs mb-3">
-                                Contacts tatoueur
-                              </p>
-                              {appointment.tatoueur ? (
-                                <div className="flex flex-wrap gap-2">
-                                  {appointment.tatoueur.phone && (
-                                    <a
-                                      href={`tel:${appointment.tatoueur.phone}`}
-                                      className="inline-flex items-center gap-2 px-3 py-1.5 rounded-2xl border border-white/10 text-white/80 text-xs font-one transition-all"
-                                    >
-                                      <span>📞</span>
-                                      <span>
-                                        {formatPhoneDisplay(
-                                          appointment.tatoueur.phone,
-                                        )}
-                                      </span>
-                                    </a>
-                                  )}
-                                  {appointment.tatoueur.instagram && (
-                                    <a
-                                      href={appointment.tatoueur.instagram}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="w-8 h-8 flex items-center justify-center bg-white/5 hover:bg-pink-500/20 border border-white/10 hover:border-pink-500/30 rounded-2xl text-white/60 hover:text-pink-400 transition-all"
-                        title="Instagram"
-                                    >
-                                      <span><CiInstagram className="w-4 h-4" /></span>
-                                    </a>
-                                  )}
-                                </div>
-                              ) : (
-                                <p className="text-white/50 text-xs">
-                                  Non assigné
-                                </p>
-                              )}
-                            </div>
-                          </div>
-
-                          {appointment.status === "COMPLETED" && (
-                            <div className="rounded-2xl border border-amber-400/30 bg-amber-500/5 p-3.5">
-                              <div className="flex items-center gap-2 mb-3">
-                                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/15 text-lg">
-                                  ⭐
-                                </span>
-                                <div>
-                                  <p className="text-white font-one text-sm font-semibold">
-                                    {hasReview
-                                      ? "Votre avis"
-                                      : "Donner votre avis"}
-                                  </p>
-                                  <p className="text-white/60 text-xs">
-                                    Partagez votre expérience avec le salon
-                                  </p>
-                                </div>
-                              </div>
-
-                              {hasReview ? (
-                                <div className="space-y-3">
-                                  <div className="flex items-center gap-2">
-                                    <div className="text-amber-300 text-sm">
-                                      {Array.from({ length: 5 }).map((_, i) => (
-                                        <span key={i}>
-                                          {i < (appointment.review?.rating || 0)
-                                            ? "★"
-                                            : "☆"}
-                                        </span>
-                                      ))}
-                                    </div>
-                                    <span className="text-white/70 text-xs">
-                                      {appointment.review?.rating}/5
-                                    </span>
-                                    {appointment.review?.isVerified && (
-                                      <span className="ml-auto px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-400/30 text-emerald-200 text-[11px]">
-                                        ✓ Vérifié
-                                      </span>
-                                    )}
-                                  </div>
-
-                                  {appointment.review?.title && (
-                                    <p className="text-white font-semibold text-sm font-one">
-                                      {appointment.review.title}
-                                    </p>
-                                  )}
-
-                                  {appointment.review?.comment && (
-                                    <p className="text-white/80 text-sm leading-relaxed font-one">
-                                      {appointment.review.comment}
-                                    </p>
-                                  )}
-
-                                  <p className="text-white/50 text-xs border-t border-white/10 pt-2 font-one">
-                                    Publié le{" "}
-                                    {appointment.review?.createdAt
-                                      ? new Date(
-                                          appointment.review.createdAt,
-                                        ).toLocaleDateString("fr-FR")
-                                      : ""}
-                                  </p>
-
-                                  {appointment.review?.salonResponse && (
-                                    <div className="rounded-lg border border-white/10 bg-white/5 p-3">
-                                      <p className="text-white/70 text-xs mb-1 font-one font-semibold">
-                                        Réponse du salon
-                                      </p>
-                                      <p className="text-white/80 text-sm font-one">
-                                        {appointment.review.salonResponse}
-                                      </p>
-                                    </div>
-                                  )}
-                                </div>
-                              ) : (
-                                <div className="space-y-3">
-                                  <div className="flex items-center gap-2">
-                                    {Array.from({ length: 5 }).map((_, i) => {
-                                      const value = i + 1;
-                                      const active =
-                                        (hoverRating ?? reviewForm.rating) >=
-                                        value;
-                                      return (
-                                        <button
-                                          key={value}
-                                          type="button"
-                                          onMouseEnter={() =>
-                                            setHoverRating(value)
-                                          }
-                                          onMouseLeave={() =>
-                                            setHoverRating(null)
-                                          }
-                                          onClick={() =>
-                                            setReviewForm((f) => ({
-                                              ...f,
-                                              rating: value,
-                                            }))
-                                          }
-                                          className="p-1"
-                                        >
-                                          <FaStar
-                                            className={`w-5 h-5 transition-all ${
-                                              active
-                                                ? "text-amber-300 scale-105 drop-shadow-[0_0_6px_rgba(251,191,36,0.5)]"
-                                                : "text-white/30 hover:text-white/60"
-                                            }`}
-                                          />
-                                        </button>
-                                      );
-                                    })}
-                                    <span className="text-white/70 text-xs ml-2">
-                                      {reviewForm.rating}/5
-                                    </span>
-                                  </div>
-
-                                  <div className="space-y-1 font-one">
-                                    <label className="text-white/80 text-xs">
-                                      Titre (optionnel)
-                                    </label>
-                                    <input
-                                      type="text"
-                                      value={reviewForm.title}
-                                      onChange={(e) =>
-                                        setReviewForm((f) => ({
-                                          ...f,
-                                          title: e.target.value,
-                                        }))
-                                      }
-                                      maxLength={100}
-                                      placeholder="Ex: Excellent travail"
-                                      className="w-full px-3 py-2 rounded-2xl bg-white/5 border border-white/15 text-white text-xs focus:outline-none focus:border-tertiary-400 focus:ring-1 focus:ring-tertiary-400/30 placeholder:text-white/40"
-                                    />
-                                    <p className="text-white/40 text-[11px]">
-                                      {reviewForm.title.length}/100
-                                    </p>
-                                  </div>
-
-                                  <div className="space-y-1">
-                                    <label className="text-white/80 text-xs">
-                                      Votre avis
-                                    </label>
-                                    <textarea
-                                      value={reviewForm.comment}
-                                      onChange={(e) =>
-                                        setReviewForm((f) => ({
-                                          ...f,
-                                          comment: e.target.value,
-                                        }))
-                                      }
-                                      maxLength={500}
-                                      rows={3}
-                                      placeholder="Partagez votre expérience..."
-                                      className="w-full px-3 py-2 rounded-2xl bg-white/5 border border-white/15 text-white text-xs focus:outline-none focus:border-tertiary-400 focus:ring-1 focus:ring-tertiary-400/30 placeholder:text-white/40 resize-none"
-                                    />
-                                    <p className="text-white/40 text-[11px]">
-                                      {reviewForm.comment.length}/500
-                                    </p>
-                                  </div>
-
-                                  <button
-                                    onClick={() =>
-                                      handleSubmitReview(appointment)
-                                    }
-                                    disabled={reviewSubmitting}
-                                    className="cursor-pointer w-fit px-4 py-2.5 rounded-2xl bg-linear-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white text-xs font-one transition-all disabled:opacity-60 flex items-center justify-center gap-2"
-                                  >
-                                    {reviewSubmitting ? (
-                                      <>
-                                        <div className="animate-spin rounded-full h-3 w-3 border-2 border-white border-t-transparent" />
-                                        Publication...
-                                      </>
-                                    ) : (
-                                      "Publier l'avis"
-                                    )}
-                                  </button>
-                                </div>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                    appointment={appointment}
+                    isExpanded={isExpanded}
+                    hasReview={hasReview}
+                    cancelingAppointmentId={cancelingAppointmentId}
+                    reviewForm={reviewForm}
+                    hoverRating={hoverRating}
+                    reviewSubmitting={reviewSubmitting}
+                    getStatusBadge={getStatusBadge}
+                    formatDate={formatDate}
+                    formatTime={formatTime}
+                    formatPhoneDisplay={formatPhoneDisplay}
+                    toggleExpand={toggleExpand}
+                    handleOpenMoodboard={handleOpenMoodboard}
+                    handleOpenConnectModal={handleOpenConnectModal}
+                    handleEditClick={handleEditClick}
+                    handleCancelClick={handleCancelClick}
+                    handleReviewClick={handleReviewClick}
+                    handleSubmitReview={handleSubmitReview}
+                    setHoverRating={setHoverRating}
+                    setReviewForm={setReviewForm}
+                  />
                 );
               })}
           </div>
@@ -1132,6 +640,212 @@ export default function RendezVousTab() {
           )}
         </>
       )}
+
+      {/* Modal moodboard lié au RDV */}
+      {moodboardModal &&
+        typeof window !== "undefined" &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            onClick={() => setMoodboardModal(null)}
+          >
+            <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" />
+            <div
+              className="relative z-10 w-full max-w-2xl max-h-[85vh] flex flex-col rounded-3xl border border-white/15 bg-noir-700 shadow-2xl overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between gap-3 border-b border-white/10 px-5 py-4 shrink-0">
+                <div className="min-w-0 flex-1">
+                  <p className="text-[11px] text-white/45 font-one uppercase tracking-wide mb-0.5">
+                    Moodboard lié au rendez-vous
+                  </p>
+                  <h3 className="text-base font-semibold text-white font-one truncate">
+                    🎨 {moodboardModal.name}
+                  </h3>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  {moodboardModal.appointmentStatus !== "CANCELED" &&
+                    moodboardModal.appointmentStatus !== "COMPLETED" && (
+                      <button
+                        onClick={() =>
+                          handleDisconnectMoodboard(
+                            moodboardModal.id,
+                            moodboardModal.appointmentId,
+                          ).then(() => setMoodboardModal(null))
+                        }
+                        disabled={disconnectingAppointmentId === moodboardModal.appointmentId}
+                        className="cursor-pointer inline-flex items-center gap-1.5 rounded-2xl border border-red-400/30 bg-red-500/10 px-3 py-1.5 text-xs text-red-300 transition-all hover:bg-red-500/20 disabled:opacity-50 font-one"
+                      >
+                        {disconnectingAppointmentId === moodboardModal.appointmentId
+                          ? "..."
+                          : "Délier"}
+                      </button>
+                    )}
+                  <button
+                    onClick={() => setMoodboardModal(null)}
+                    className="w-8 h-8 flex items-center justify-center rounded-full bg-white/8 hover:bg-white/15 text-white/60 hover:text-white transition-all text-lg"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+
+              {/* Content */}
+              <div className="overflow-y-auto flex-1 p-5">
+                {moodboardLoading ? (
+                  <div className="flex flex-col items-center justify-center py-16 gap-4">
+                    <div className="animate-spin rounded-full h-8 w-8 border-2 border-violet-400 border-t-transparent" />
+                    <p className="text-white/50 text-sm font-one">Chargement du moodboard...</p>
+                  </div>
+                ) : moodboardDetail ? (
+                  <>
+                    {moodboardDetail.description && (
+                      <p className="text-white/60 text-sm font-one mb-4 leading-relaxed">
+                        {moodboardDetail.description}
+                      </p>
+                    )}
+
+                    {moodboardDetail.images.length === 0 ? (
+                      <div className="text-center py-12">
+                        <p className="text-white/40 text-sm font-one">
+                          Ce moodboard ne contient pas encore d&apos;images
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                        {moodboardDetail.images.map((img) => (
+                          <div
+                            key={img.id}
+                            className="relative group overflow-hidden rounded-2xl border border-white/10 bg-white/5 aspect-square"
+                          >
+                            <Image
+                              src={img.url}
+                              alt={img.caption || "Image moodboard"}
+                              fill
+                              sizes="(max-width: 640px) 50vw, 33vw"
+                              className="object-cover transition-transform duration-300 group-hover:scale-105"
+                            />
+                            {img.caption && (
+                              <div className="absolute bottom-0 inset-x-0 bg-linear-to-t from-black/70 to-transparent px-2 py-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <p className="text-white text-[11px] font-one truncate">
+                                  {img.caption}
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                ) : null}
+              </div>
+            </div>
+          </div>,
+          document.body,
+        )}
+
+      {/* Modal connexion moodboard */}
+      {connectModal &&
+        typeof window !== "undefined" &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            onClick={() => setConnectModal(null)}
+          >
+            <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" />
+            <div
+              className="relative z-10 w-full max-w-lg max-h-[80vh] flex flex-col rounded-3xl border border-white/15 bg-noir-700 shadow-2xl overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between gap-3 border-b border-white/10 px-5 py-4 shrink-0">
+                <div>
+                  <h3 className="text-base font-semibold text-white font-one">
+                    Lier un moodboard
+                  </h3>
+                  <p className="text-[11px] text-white/45 font-one mt-0.5">
+                    Choisissez un moodboard à associer à ce rendez-vous
+                  </p>
+                </div>
+                <button
+                  onClick={() => setConnectModal(null)}
+                  className="shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-white/8 hover:bg-white/15 text-white/60 hover:text-white transition-all text-lg"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Content */}
+              <div className="overflow-y-auto flex-1 p-4">
+                {connectMoodboardsLoading ? (
+                  <div className="flex flex-col items-center justify-center py-12 gap-4">
+                    <div className="animate-spin rounded-full h-8 w-8 border-2 border-violet-400 border-t-transparent" />
+                    <p className="text-white/50 text-sm font-one">
+                      Chargement de vos moodboards...
+                    </p>
+                  </div>
+                ) : connectMoodboards.length === 0 ? (
+                  <div className="text-center py-12">
+                    <p className="text-4xl mb-3">🎨</p>
+                    <p className="text-white/50 text-sm font-one">
+                      Vous n&apos;avez pas encore de moodboard
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {connectMoodboards.map((mb) => (
+                      <button
+                        key={mb.id}
+                        onClick={() =>
+                          handleConnectMoodboard(mb.id, connectModal.appointmentId)
+                        }
+                        disabled={connectingMoodboardId !== null}
+                        className="w-full cursor-pointer flex items-center gap-3 p-3 rounded-2xl border border-white/10 bg-white/4 hover:bg-white/8 hover:border-white/20 transition-all text-left disabled:opacity-60"
+                      >
+                        {mb.images[0] ? (
+                          <Image
+                            src={mb.images[0].url}
+                            alt={mb.name}
+                            width={48}
+                            height={48}
+                            className="h-12 w-12 rounded-xl object-cover shrink-0"
+                          />
+                        ) : (
+                          <div className="h-12 w-12 rounded-xl bg-violet-500/15 flex items-center justify-center shrink-0 text-xl">
+                            🎨
+                          </div>
+                        )}
+                        <div className="min-w-0 flex-1">
+                          <p className="text-white text-sm font-semibold font-one truncate">
+                            {mb.name}
+                          </p>
+                          {mb.description && (
+                            <p className="text-white/50 text-xs font-one truncate">
+                              {mb.description}
+                            </p>
+                          )}
+                          <p className="text-white/40 text-[11px] font-one">
+                            {mb.images.length} image
+                            {mb.images.length !== 1 ? "s" : ""}
+                          </p>
+                        </div>
+                        {connectingMoodboardId === mb.id ? (
+                          <div className="animate-spin rounded-full h-4 w-4 border-2 border-violet-400 border-t-transparent shrink-0" />
+                        ) : (
+                          <span className="text-white/40 shrink-0 text-xs font-one">
+                            Choisir →
+                          </span>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }

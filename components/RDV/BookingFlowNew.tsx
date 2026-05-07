@@ -46,12 +46,16 @@ export default function BookingFlow({
     piercingPrice,
     skinToneOptions,
     isLoadingSkinTones,
+    moodboards,
+    selectedMoodboardId,
+    isLoadingMoodboards,
     sketchFile,
     setSketchFile,
     referenceFile,
     setReferenceFile,
     selectedFlashId,
     handleFlashChange,
+    handleMoodboardChange,
     goNext,
     goPrev,
     handleSlotSelection,
@@ -59,6 +63,7 @@ export default function BookingFlow({
     handleTatoueurChange,
     handleDateChange,
     onSubmit,
+    isAuthenticated,
   } = useBookingLogic({
     salon,
     defaultTatoueurId,
@@ -124,6 +129,11 @@ export default function BookingFlow({
                 onFlashChange={handleFlashChange}
                 skinToneOptions={skinToneOptions}
                 isLoadingSkinTones={isLoadingSkinTones}
+                moodboards={moodboards}
+                selectedMoodboardId={selectedMoodboardId}
+                onMoodboardChange={handleMoodboardChange}
+                isAuthenticated={isAuthenticated}
+                isLoadingMoodboards={isLoadingMoodboards}
               />
             )}
 

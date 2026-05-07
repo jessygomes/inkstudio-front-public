@@ -173,3 +173,26 @@ export const removeMoodboardImageAction = async (
 		},
 	);
 };
+
+//! ----------------------------------------------------------------------------
+//!  CONNEXION / DÉCONNEXION D'UN RDV
+//! ----------------------------------------------------------------------------
+export const connectMoodboardToAppointmentAction = async (
+	moodboardId: string,
+	appointmentId: string,
+) => {
+	return moodboardRequest<{ id: string; title?: string; start?: string; moodboardId?: string }>(
+		`/${moodboardId}/connect/${appointmentId}`,
+		{ method: "POST" },
+	);
+};
+
+export const disconnectMoodboardFromAppointmentAction = async (
+	moodboardId: string,
+	appointmentId: string,
+) => {
+	return moodboardRequest<{ id: string; title?: string; start?: string; moodboardId?: string | null }>(
+		`/${moodboardId}/disconnect/${appointmentId}`,
+		{ method: "DELETE" },
+	);
+};

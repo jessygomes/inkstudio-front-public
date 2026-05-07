@@ -82,6 +82,8 @@ export const appointmentRequestSchema = z
       piercingServiceId: z.string().optional(),
     }),
 
+    moodboardId: z.string().optional(),
+
     message: z.string().optional(),
   })
   .superRefine((data, ctx) => {
