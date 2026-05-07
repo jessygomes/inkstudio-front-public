@@ -80,7 +80,7 @@ export default function Parcours() {
               />
 
               {/* Gradient overlay unifié */}
-              <div className="absolute inset-0 bg-linear-to-t from-noir-800/95 via-noir-800/35 to-noir-800/10" />
+              <div className="absolute inset-0 bg-linear-to-t from-noir-700/95 via-noir-700/55 to-noir-700/20" />
 
               {/* Teinte orange subtile au hover */}
               <div className="absolute inset-0 bg-linear-to-bl from-tertiary-500/0 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100 group-hover:from-tertiary-500/8" />
