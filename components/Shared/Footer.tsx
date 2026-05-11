@@ -38,6 +38,22 @@ export default function Footer() {
             </li>
             <li>
               <Link
+                href={"/journal"}
+                className="hover:text-tertiary-400 duration-300 transition-colors"
+              >
+                Journal
+              </Link>
+            </li>
+            <li>
+              <Link
+                href={"/inspirations"}
+                className="hover:text-tertiary-400 duration-300 transition-colors"
+              >
+                Inspirations
+              </Link>
+            </li>
+            <li>
+              <Link
                 href={"/en-savoir-plus"}
                 className="hover:text-tertiary-400 duration-300 transition-colors"
               >

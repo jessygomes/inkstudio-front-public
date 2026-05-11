@@ -55,7 +55,7 @@ export default function NavbarMobile() {
         {/* Avatar ou bouton connexion - Modernisé */}
         {status === "authenticated" && session?.user ? (
           <Link href="/mon-profil" className="group relative">
-            <div className="relative w-9 h-9 rounded-full overflow-hidden border-2 border-tertiary-400/50 group-hover:border-tertiary-400 transition-all duration-300 cursor-pointer group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-tertiary-400/25">
+            <div className="relative w-9 h-9 rounded-full overflow-hidden group-hover:border-tertiary-400 transition-all duration-300 cursor-pointer group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-tertiary-400/25">
               {session.user.image ? (
                 <Image
                   src={session.user.image}

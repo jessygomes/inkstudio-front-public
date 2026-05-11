@@ -56,19 +56,23 @@ export default function Navbar({ showLogo = false }: NavbarProps) {
           );
         })}
         {status === "authenticated" && session?.user ? (
-          <Link href="/mon-profil" className="relative">
-            <div className="relative w-10 h-10 rounded-full overflow-hidden border-4 border-tertiary-400/90 transition-all duration-300 cursor-pointer hover:scale-105">
+          <Link
+            href="/mon-profil"
+            aria-label="Accéder à mon profil"
+            className="group relative inline-flex items-center justify-center rounded-full transition-all duration-300"
+          >
+            <div className="relative w-10 h-10 rounded-full overflow-hidden bg-noir-700/80 ring-1 ring-white/15 transition-all duration-300 group-hover:ring-white/35">
               {session.user.image ? (
                 <Image
                   src={session.user.image}
                   alt={`${session.user.firstName} ${session.user.lastName}`}
                   fill
                   sizes="40px"
-                  className="object-cover"
+                  className="object-cover transition-transform duration-300 group-hover:scale-110"
                 />
               ) : (
-                <div className="w-full h-full bg-linear-to-br from-tertiary-400/40 to-tertiary-500/40 flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">
+                <div className="w-full h-full bg-linear-to-br from-tertiary-300/45 to-tertiary-500/50 flex items-center justify-center">
+                  <span className="text-white font-bold text-sm tracking-wide">
                     {session.user.firstName?.charAt(0)}
                     {session.user.lastName?.charAt(0)}
                   </span>
@@ -76,7 +80,7 @@ export default function Navbar({ showLogo = false }: NavbarProps) {
               )}
             </div>
             {unreadCount > 0 && (
-              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+              <span className="absolute -top-1.5 -right-1.5 min-w-5 h-5 px-1.5 bg-red-500 text-white text-[10px] font-bold rounded-full border border-noir-700 flex items-center justify-center shadow-md">
                 {unreadCount > 99 ? "99+" : unreadCount}
               </span>
             )}
