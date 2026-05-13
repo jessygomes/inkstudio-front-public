@@ -43,7 +43,8 @@ export default function Navbar({ showLogo = false }: NavbarProps) {
     <nav className="flex justify-between items-center py-4 mx-20">
       <Link href={"/"} className="w-37.5 h-12.5 flex items-center">
         <Image
-          src="/images/logo_inline_white.png"
+          // src="/images/logo_inline_white.png"
+          src="/logo/logo_inline_people_white.png"
           alt="Logo"
           width={150}
           height={50}
