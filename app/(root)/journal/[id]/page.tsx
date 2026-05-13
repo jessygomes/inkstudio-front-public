@@ -93,7 +93,7 @@ export default async function ArticleDetailPage({ params }: PageProps) {
         <div className="relative mx-4 sm:mx-8 lg:mx-20">
           <div className="mx-auto max-w-5xl">
             <Link
-              href="/articles"
+              href="/journal"
               className="mb-6 inline-flex items-center gap-2 text-xs uppercase tracking-[0.14em] text-white/65 transition-colors hover:text-white font-one"
             >
               <span className="text-sm">←</span>

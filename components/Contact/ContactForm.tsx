@@ -68,10 +68,10 @@ export default function ContactForm() {
   };
 
   return (
-    <div className="bg-gradient-to-br from-noir-600/40 to-noir-800/40 backdrop-blur-xl rounded-3xl p-8 border border-white/10 shadow-xl">
+    <div className="bg-linear-to-br from-noir-600/40 to-noir-800/40 backdrop-blur-xl rounded-3xl p-8 border border-white/10 shadow-xl">
       <div className="mb-8">
         <h2 className="text-2xl font-bold text-white font-two mb-4 flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-tertiary-500/20 to-tertiary-600/20 rounded-xl flex items-center justify-center">
+          <div className="w-10 h-10 bg-linear-to-br from-tertiary-500/20 to-tertiary-600/20 rounded-xl flex items-center justify-center">
             <FaEnvelope size={20} className="text-tertiary-400" />
           </div>
           Nous contacter

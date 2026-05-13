@@ -11,7 +11,7 @@ export default function FinalCtaSection() {
               Trouvez votre artiste, <span className="text-tertiary-400">réservez en confiance.</span>
             </h2>
             <p className="text-xl text-white/80 font-one leading-relaxed">
-              Parcourez des portfolios précis, comparez les styles et prenez contact avec le studio qui vous correspond vraiment.
+              Parcourez des portfolios précis, comparez les styles et prenez contact avec le studio qui vous correspond.
               {/* <span className="text-tertiary-400 font-semibold">
                 {" "}
                 simplifier leur quotidien

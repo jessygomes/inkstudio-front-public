@@ -57,9 +57,9 @@ export default function Parcours() {
           <h2 className="text-3xl font-bold text-white font-two sm:text-5xl lg:text-6xl">
             Comment ça marche ?
           </h2>
-          <p className="max-w-xl text-base leading-relaxed text-white/50 font-one">
+          <p className="max-w-xl text-base leading-relaxed text-white/50 font-one lg:whitespace-nowrap">
             Trois étapes claires pour trouver un salon, comparer les styles et
-            réserver avec confiance.
+            réserver.
           </p>
         </div>
 

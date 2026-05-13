@@ -47,7 +47,7 @@ export default function Footer() {
             </li>
             <li>
               <Link
-                href={"/inspirations"}
+                href={"/inspiration"}
                 className="hover:text-tertiary-400 duration-300 transition-colors"
               >
                 Inspirations

@@ -117,9 +117,9 @@ export default function ContactPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <div className="min-h-screen bg-gradient-to-b from-noir-700 via-noir-600 to-noir-700 pt-20">
+      <div className="min-h-screen bg-linear-to-b from-noir-700 via-noir-600 to-noir-700">
         {/* Hero Section */}
-        <section className="bg-gradient-to-r from-noir-700 to-noir-800 py-20 relative overflow-hidden">
+        <section className="bg-linear-to-r from-noir-700 to-noir-800 pt-20 relative overflow-hidden">
           {/* <div className="absolute top-0 right-0 w-80 h-80 bg-tertiary-400/5 rounded-full blur-3xl"></div>
           <div className="absolute bottom-0 left-0 w-96 h-96 bg-tertiary-500/3 rounded-full blur-3xl"></div> */}
 
@@ -127,7 +127,7 @@ export default function ContactPage() {
             <div className="text-center">
               <div className="inline-flex items-center gap-2">
                 <Image
-                  src="/images/logo13.png"
+                  src="/logo/logo16.png"
                   alt="Logo"
                   width={50}
                   height={50}
@@ -136,14 +136,14 @@ export default function ContactPage() {
 
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-two uppercase text-white font-bold leading-tight tracking-widest mb-6">
                 Contactez{" "}
-                <span className="bg-gradient-to-r from-tertiary-400 via-tertiary-500 to-cuatro-500 bg-clip-text text-transparent">
+                <span className="bg-linear-to-r from-tertiary-400 via-tertiary-500 to-cuatro-500 bg-clip-text text-transparent">
                   Nous
                 </span>
               </h1>
 
-              <div className="w-24 h-1 bg-gradient-to-r from-tertiary-400 to-tertiary-500 rounded-full mx-auto mb-8"></div>
+              <div className="w-24 h-1 bg-linear-to-r from-tertiary-400 to-tertiary-500 rounded-full mx-auto mb-8"></div>
 
-              <p className="text-xl text-white/70 font-one leading-relaxed max-w-3xl mx-auto">
+              <p className="text-lg text-white/70 font-one leading-relaxed max-w-3xl mx-auto">
                 Une question, une suggestion ou besoin d'aide ?{" "}
                 <span className="text-tertiary-400 font-semibold">
                   Notre équipe est là pour vous accompagner.
@@ -165,9 +165,9 @@ export default function ContactPage() {
               {/* Informations et FAQ */}
               <div className="space-y-8">
                 {/* Informations de contact */}
-                <div className="bg-gradient-to-br from-noir-600/40 to-noir-800/40 backdrop-blur-xl rounded-3xl p-8 border border-white/10">
+                <div className="bg-linear-to-br from-noir-600/40 to-noir-800/40 backdrop-blur-xl rounded-3xl p-8 border border-white/10">
                   <div className="flex items-center gap-4 mb-6">
-                    <div className="w-16 h-16 bg-gradient-to-br from-tertiary-500/20 to-tertiary-600/20 rounded-2xl flex items-center justify-center">
+                    <div className="w-16 h-16 bg-linear-to-br from-tertiary-500/20 to-tertiary-600/20 rounded-2xl flex items-center justify-center">
                       <FaEnvelope size={24} className="text-tertiary-400" />
                     </div>
                     <h2 className="text-2xl font-bold text-white font-two">
@@ -177,7 +177,7 @@ export default function ContactPage() {
 
                   <div className="space-y-6 text-white/80 font-one leading-relaxed">
                     <div className="flex items-start gap-4">
-                      <div className="w-10 h-10 bg-tertiary-500/20 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
+                      <div className="w-10 h-10 bg-tertiary-500/20 rounded-lg flex items-center justify-center shrink-0 mt-1">
                         <FaLifeRing className="w-4 h-4 text-tertiary-400" />
                       </div>
                       <div>
@@ -197,7 +197,7 @@ export default function ContactPage() {
                     </div>
 
                     <div className="flex items-start gap-4">
-                      <div className="w-10 h-10 bg-tertiary-500/20 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
+                      <div className="w-10 h-10 bg-tertiary-500/20 rounded-lg flex items-center justify-center shrink-0 mt-1">
                         <FaHandshake className="w-4 h-4 text-tertiary-400" />
                       </div>
                       <div>
@@ -219,9 +219,9 @@ export default function ContactPage() {
                 </div>
 
                 {/* Questions fréquentes */}
-                <div className="bg-gradient-to-br from-tertiary-500/10 to-tertiary-600/15 backdrop-blur-xl rounded-3xl p-8 border border-tertiary-400/20">
+                <div className="bg-linear-to-br from-tertiary-500/10 to-tertiary-600/15 backdrop-blur-xl rounded-3xl p-8 border border-tertiary-400/20">
                   <div className="flex items-center gap-4 mb-6">
-                    <div className="w-16 h-16 bg-gradient-to-br from-tertiary-500/20 to-tertiary-600/20 rounded-2xl flex items-center justify-center">
+                    <div className="w-16 h-16 bg-linear-to-br from-tertiary-500/20 to-tertiary-600/20 rounded-2xl flex items-center justify-center">
                       <FaQuestionCircle
                         size={24}
                         className="text-tertiary-400"
@@ -269,7 +269,7 @@ export default function ContactPage() {
                 </div>
 
                 {/* Engagement */}
-                <div className="bg-gradient-to-br from-noir-600/40 to-noir-800/40 backdrop-blur-xl rounded-3xl p-8 border border-white/10">
+                <div className="bg-linear-to-br from-noir-600/40 to-noir-800/40 backdrop-blur-xl rounded-3xl p-8 border border-white/10">
                   <h3 className="text-xl font-bold text-white font-two mb-4">
                     Notre engagement
                   </h3>
