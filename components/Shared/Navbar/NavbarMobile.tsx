@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { MdMenu, MdClose } from "react-icons/md";
 import { FaUser } from "react-icons/fa";
+import { FaInstagram, FaTiktok } from "react-icons/fa";
 import { useMessagingContext } from "@/components/Context/MessageProvider";
 import AppButton from "@/components/Shared/AppButton";
 
@@ -32,6 +33,19 @@ export default function NavbarMobile() {
     { href: "/journal", label: "Journal" },
     { href: "/en-savoir-plus", label: "En savoir plus" },
     // { href: "/je-suis-tatoueur", label: "Je suis tatoueur ?" },
+  ];
+
+  const socialLinks = [
+    {
+      href: "https://www.instagram.com/the.inkera",
+      label: "Instagram Inkera",
+      icon: FaInstagram,
+    },
+    {
+      href: "https://www.tiktok.com/@inkera2?_r=1&_t=ZN-96K7CgxVqsw",
+      label: "TikTok Inkera",
+      icon: FaTiktok,
+    },
   ];
 
   useEffect(() => {
@@ -169,6 +183,33 @@ export default function NavbarMobile() {
               );
             })}
           </ul>
+
+          <div className="mb-6">
+            <p className="mb-3 px-1 text-xs uppercase tracking-wider text-white/45 font-one">
+              Réseaux sociaux
+            </p>
+            <div className="grid grid-cols-2 gap-2">
+              {socialLinks.map((item) => {
+                const Icon = item.icon;
+
+                return (
+                  <a
+                    key={item.href}
+                    href={item.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={handleClose}
+                    aria-label={item.label}
+                    title={item.label}
+                    className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/12 bg-white/5 px-3 py-2 text-sm text-white/85 transition-all duration-300 hover:border-white/25 hover:bg-white/10 hover:text-white"
+                  >
+                    <Icon className="h-4 w-4" />
+                    <span className="font-one">{item.label.split(" ")[0]}</span>
+                  </a>
+                );
+              })}
+            </div>
+          </div>
 
           {/* Divider */}
           <div className="h-px bg-linear-to-r from-transparent via-white/10 to-transparent my-6" />

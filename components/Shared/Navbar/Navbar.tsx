@@ -6,6 +6,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useRef } from "react";
 import { useMessagingContext } from "@/components/Context/MessageProvider";
+import { FaInstagram, FaTiktok } from "react-icons/fa";
 
 type NavbarProps = {
   showLogo?: boolean;
@@ -25,6 +26,19 @@ export default function Navbar({ showLogo = false }: NavbarProps) {
     { href: "/en-savoir-plus", label: "En savoir plus" },
   ];
 
+  const socialLinks = [
+    {
+      href: "https://www.instagram.com/the.inkera",
+      label: "Instagram Inkera",
+      icon: FaInstagram,
+    },
+    {
+      href: "https://www.tiktok.com/@inkera2?_r=1&_t=ZN-96K7CgxVqsw",
+      label: "TikTok Inkera",
+      icon: FaTiktok,
+    },
+  ];
+
   return (
     <nav className="flex justify-between items-center py-4 mx-20">
       <Link href={"/"} className="w-37.5 h-12.5 flex items-center">
@@ -38,9 +52,10 @@ export default function Navbar({ showLogo = false }: NavbarProps) {
           }`}
         />
       </Link>
-      <ul ref={navRef} className="flex gap-8 items-center">
+      <ul ref={navRef} className="flex gap-6 items-center">
         {links.map((link, index) => {
           const isActive = pathname === link.href;
+          const isHomeAccueilLink = pathname === "/" && link.href === "/";
 
           return (
             <li
@@ -49,12 +64,37 @@ export default function Navbar({ showLogo = false }: NavbarProps) {
                 isActive
                   ? "active font-two text-white font-bold"
                   : "font-normal"
-              } pb-1 text-white text-sm font-two pt-1 px-2 tracking-widest hover:text-white/70 transition-all duration-300`}
+              } pb-1 text-white text-sm font-two pt-1 px-2 tracking-widest hover:text-white/70 transition-all duration-300 ${
+                isHomeAccueilLink
+                  ? showLogo
+                    ? "opacity-100"
+                    : "opacity-0 pointer-events-none"
+                  : "opacity-100"
+              }`}
             >
               <Link href={link.href}>{link.label}</Link>
             </li>
           );
         })}
+        <li className="flex items-center gap-2">
+          {socialLinks.map((item) => {
+            const Icon = item.icon;
+
+            return (
+              <a
+                key={item.href}
+                href={item.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={item.label}
+                title={item.label}
+                className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white/75 transition-all duration-300 hover:-translate-y-0.5 hover:border-white/35 hover:bg-white/12 hover:text-white"
+              >
+                <Icon className="h-3.5 w-3.5" />
+              </a>
+            );
+          })}
+        </li>
         {status === "authenticated" && session?.user ? (
           <Link
             href="/mon-profil"
@@ -92,6 +132,7 @@ export default function Navbar({ showLogo = false }: NavbarProps) {
             </div>
           </Link>
         )}
+        
       </ul>
     </nav>
   );

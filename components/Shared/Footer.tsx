@@ -1,5 +1,6 @@
 import Link from "next/link";
 import React from "react";
+import { FaInstagram, FaTiktok } from "react-icons/fa";
 
 export default function Footer() {
   return (
@@ -127,6 +128,28 @@ export default function Footer() {
               >
                 Contactez-nous
               </Link>
+            </li>
+            <li>
+              <a
+                href="https://www.instagram.com/the.inkera"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 hover:text-tertiary-400 duration-300 transition-colors"
+              >
+                <FaInstagram className="w-3.5 h-3.5" />
+                Instagram
+              </a>
+            </li>
+            <li>
+              <a
+                href="https://www.tiktok.com/@inkera2?_r=1&_t=ZN-96K7CgxVqsw"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 hover:text-tertiary-400 duration-300 transition-colors"
+              >
+                <FaTiktok className="w-3.5 h-3.5" />
+                TikTok
+              </a>
             </li>
             {/* <li>
               <a

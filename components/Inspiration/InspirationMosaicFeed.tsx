@@ -43,7 +43,7 @@ const MOCK_ITEMS: PortfolioFeedItem[] = [
     city: "Paris",
     href: "/trouver-un-salon",
     artistName: "Nora",
-    instagram: "@lignenoire.tattoo",
+    instagram: "@the.inkera",
   },
   {
     key: "mock-2",
@@ -54,7 +54,7 @@ const MOCK_ITEMS: PortfolioFeedItem[] = [
     city: "Lyon",
     href: "/trouver-un-salon",
     artistName: "Mila",
-    instagram: "@ateliereden.ink",
+    instagram: "@the.inkera",
   },
   {
     key: "mock-3",
@@ -65,7 +65,7 @@ const MOCK_ITEMS: PortfolioFeedItem[] = [
     city: "Marseille",
     href: "/trouver-un-salon",
     artistName: "Kenji",
-    instagram: "@kurostudio_tattoo",
+    instagram: "@the.inkera",
   },
   {
     key: "mock-4",
@@ -75,7 +75,7 @@ const MOCK_ITEMS: PortfolioFeedItem[] = [
     salonName: "Obsidian Ink",
     city: "Bordeaux",
     href: "/trouver-un-salon",
-    instagram: "@obsidianink_bdx",
+    instagram: "@the.inkera",
   },
   {
     key: "mock-5",
@@ -86,7 +86,7 @@ const MOCK_ITEMS: PortfolioFeedItem[] = [
     city: "Lille",
     href: "/trouver-un-salon",
     artistName: "Sam",
-    instagram: "@rouge13.tattoo",
+    instagram: "@the.inkera",
   },
   {
     key: "mock-6",
@@ -96,7 +96,7 @@ const MOCK_ITEMS: PortfolioFeedItem[] = [
     salonName: "Nocturne",
     city: "Nantes",
     href: "/trouver-un-salon",
-    instagram: "@nocturne.ink",
+    instagram: "@the.inkera",
   },
   {
     key: "mock-7",
@@ -107,7 +107,7 @@ const MOCK_ITEMS: PortfolioFeedItem[] = [
     city: "Toulouse",
     href: "/trouver-un-salon",
     artistName: "Elsa",
-    instagram: "@monoink.tls",
+    instagram: "@the.inkera",
   },
   {
     key: "mock-8",
@@ -117,7 +117,7 @@ const MOCK_ITEMS: PortfolioFeedItem[] = [
     salonName: "Mana Atelier",
     city: "Montpellier",
     href: "/trouver-un-salon",
-    instagram: "@manaatelier.tattoo",
+    instagram: "@the.inkera",
   },
   {
     key: "mock-9",
@@ -127,7 +127,7 @@ const MOCK_ITEMS: PortfolioFeedItem[] = [
     salonName: "Velvet Needle",
     city: "Nice",
     href: "/trouver-un-salon",
-    instagram: "@velvetneedle.nice",
+    instagram: "@the.inkera",
   },
   {
     key: "mock-10",
@@ -137,7 +137,7 @@ const MOCK_ITEMS: PortfolioFeedItem[] = [
     salonName: "Ancre Atelier",
     city: "Rennes",
     href: "/trouver-un-salon",
-    instagram: "@ancre.atelier",
+    instagram: "@the.inkera",
   },
   {
     key: "mock-11",
@@ -147,7 +147,7 @@ const MOCK_ITEMS: PortfolioFeedItem[] = [
     salonName: "Serif Ink",
     city: "Strasbourg",
     href: "/trouver-un-salon",
-    instagram: "@serifink.stras",
+    instagram: "@the.inkera",
   },
   {
     key: "mock-12",
@@ -158,7 +158,7 @@ const MOCK_ITEMS: PortfolioFeedItem[] = [
     city: "Grenoble",
     href: "/trouver-un-salon",
     artistName: "Iris",
-    instagram: "@blocnoir.grenoble",
+    instagram: "@the.inkera",
   },
 ];
 
