@@ -49,6 +49,9 @@ export default function NavbarMobile() {
   ];
 
   useEffect(() => {
+    document.documentElement.style.overflowX = "hidden";
+    document.body.style.overflowX = "hidden";
+
     if (isOpen) {
       document.addEventListener("mousedown", handleClickOutside);
       document.body.style.overflow = "hidden";
@@ -60,11 +63,13 @@ export default function NavbarMobile() {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
       document.body.style.overflow = "";
+      document.body.style.overflowX = "";
+      document.documentElement.style.overflowX = "";
     };
   }, [isOpen]);
 
   return (
-    <nav>
+    <nav className="w-full max-w-full overflow-x-clip">
       <div className="flex gap-3 items-center justify-between text-white">
         {/* Avatar ou bouton connexion - Modernisé */}
         {status === "authenticated" && session?.user ? (
@@ -91,8 +96,8 @@ export default function NavbarMobile() {
             )}
           </Link>
         ) : (
-          <Link href="/se-connecter" className="group flex-1 sm:flex-none">
-            <div className="cursor-pointer px-4 sm:px-6 py-2 bg-linear-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-400 text-white rounded-2xl transition-all duration-300 font-medium disabled:opacity-50 disabled:cursor-not-allowed font-two text-xs shadow-lg shadow-tertiary-500/25 group-hover:shadow-tertiary-500/40 transform group-hover:scale-105 text-center">
+          <Link href="/se-connecter" className="group ml-auto">
+            <div className="cursor-pointer w-fit px-2 sm:px-6 py-2 bg-linear-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-400 text-white rounded-2xl transition-all duration-300 font-medium disabled:opacity-50 disabled:cursor-not-allowed font-two text-xs shadow-lg shadow-tertiary-500/25 group-hover:shadow-tertiary-500/40 transform text-center">
               Connexion
             </div>
           </Link>
@@ -117,7 +122,7 @@ export default function NavbarMobile() {
       {/* Sidebar Menu - Modernisé */}
       <div
         ref={navRef}
-        className={`fixed top-0 right-0 z-50 w-72 h-screen bg-noir-700 bg-linear-to-b from-noir-600 to-noir-800 backdrop-blur-xl text-white transform transition-all duration-500 ease-out ${
+        className={`fixed top-0 right-0 z-50 w-72 max-w-[85vw] h-screen bg-noir-700 bg-linear-to-b from-noir-600 to-noir-800 backdrop-blur-xl text-white transform transition-all duration-500 ease-out ${
           isOpen
             ? "translate-x-0 opacity-100"
             : "translate-x-full opacity-0 pointer-events-none"
@@ -128,7 +133,7 @@ export default function NavbarMobile() {
           <div className="flex items-center gap-3">
             <h2 className="text-lg font-bold font-two tracking-wider">
               <Image
-                src="/images/logo_inline_white.png"
+                src="/logo/logo_inline_people_white.png"
                 alt="Logo"
                 width={150}
                 height={50}

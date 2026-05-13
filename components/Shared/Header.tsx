@@ -29,7 +29,7 @@ export default function Header() {
   }, []);
 
   return (
-    <>
+    <header className="sticky top-0 left-0 z-30 w-full overflow-x-clip">
       <div
         className={`hidden lg:block transition-all duration-300 ${
           showTransparentHeader
@@ -41,15 +41,15 @@ export default function Header() {
       </div>
 
       <div
-        className={`lg:hidden py-2 px-4 flex justify-between items-center mt-2 transition-all duration-300 ${
+        className={`lg:hidden py-2 px-4 flex justify-between items-center transition-all duration-300 ${
           showTransparentHeader
             ? "bg-transparent"
             : "bg-noir-700 backdrop-blur-sm"
-        }`}
+        } w-full max-w-full`}
       >
         <Link href={"/"} className=" flex items-center">
         <Image
-          src="/images/logo_inline_white.png"
+          src="/logo/logo_inline_white.png"
           alt="Logo"
           width={100}
           height={50}
@@ -60,6 +60,6 @@ export default function Header() {
         </Link>
         <NavMobile />
       </div>
-    </>
+    </header>
   );
 }
