@@ -17,11 +17,6 @@ export default async function ArticleAccueil() {
 
   return (
     <section className="relative isolate overflow-hidden bg-noir-700 py-20">
-      <div className="pointer-events-none absolute inset-0">
-        {/* Ligne séparatrice en haut — accent orange subtil */}
-        {/* <div className="absolute top-0 inset-x-0 h-px bg-linear-to-r from-transparent via-tertiary-400/25 to-transparent" /> */}
-      </div>
-
       <div className="relative mx-4 sm:mx-8 lg:mx-20">
         <div className="mb-10 flex items-end justify-between gap-4">
           <div>

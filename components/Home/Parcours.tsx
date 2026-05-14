@@ -39,7 +39,7 @@ export default function Parcours() {
         <div className="absolute inset-0 bg-linear-to-b from-noir-700 via-noir-500/80 to-noir-700" />
         <div className="absolute top-0 inset-x-0 h-px bg-linear-to-r from-transparent via-tertiary-400/25 to-transparent" />
         <div className="absolute bottom-0 inset-x-0 h-px bg-linear-to-r from-transparent via-white/8 to-transparent" />
-        <div className="absolute -left-40 top-1/2 -translate-y-1/2 h-96 w-96 rounded-full bg-tertiary-500/6 blur-3xl" />
+        {/* <div className="absolute -left-40 top-1/2 -translate-y-1/2 h-96 w-96 rounded-full bg-tertiary-500/6 blur-3xl" /> */}
         <div className="absolute -right-24 top-1/3 h-80 w-80 rounded-full bg-secondary-500/10 blur-3xl" />
       </div>
 

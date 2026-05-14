@@ -126,7 +126,7 @@ export default function HeroSection() {
 
       <div className="relative w-full min-h-0 lg:min-h-screen px-4 lg:px-10 py-2 md:py-2 lg:py-8 flex flex-col items-center justify-start lg:justify-center gap-4 lg:gap-8 lg:items-start -mt-14 md:-mt-26 lg:mt-0">
         <div className="relative z-10 flex flex-col justify-center items-center md:items-start gap-1 sm:gap-2">
-          <h1 className="hidden md:block md:text-center lg:text-left text-white font-two">INKERA</h1>
+          <h1 className="hidden md:block md:text-center lg:text-left text-white font-two">INKERA <span className="text-white/30">PEOPLE</span></h1>
           <h2 className="text-2xl md:text-4xl font-bold text-center md:text-left text-white uppercase font-two tracking-wide">
             Trouvez votre salon de tatouage
           </h2>
@@ -153,7 +153,6 @@ export default function HeroSection() {
         >
           Découvrir des tatouages
         </AppButton>
-
         </div>
       </div>
     </section>

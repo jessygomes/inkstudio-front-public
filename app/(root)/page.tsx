@@ -10,6 +10,7 @@ import { FaRegAddressBook } from "react-icons/fa6";
 import { LuHeartHandshake } from "react-icons/lu";
 import ClientAccountPromoSection from "@/components/Auth/ClientAccountPromoSection";
 import FinalCtaSection from "@/components/Home/FinalCtaSection";
+import TatoueurCtaSection from "@/components/Home/TatoueurCtaSection";
 import HeroSection from "@/components/Home/HeroSection";
 import Parcours from "@/components/Home/Parcours";
 import ArticleAccueil from "@/components/Articles/ArticleAccueil";
@@ -137,8 +138,10 @@ export default function Home() {
       {/* Section avantages compte client */}
       <ClientAccountPromoSection />
 
-      <FinalCtaSection />
+      {/* Section Tatoueur CTA */}
+      <TatoueurCtaSection />
 
+      <FinalCtaSection />
     </>
   );
 }
