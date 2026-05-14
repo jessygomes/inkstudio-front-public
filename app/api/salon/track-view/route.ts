@@ -21,7 +21,7 @@ function detectDeviceType(userAgent: string): string {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { salonId, loc } = body;
+    const { salonId } = body;
 
     if (!salonId) {
       return NextResponse.json(
@@ -41,8 +41,16 @@ export async function POST(request: NextRequest) {
       request.headers.get('referer') || request.headers.get('referrer') || '';
     const ipHash = hashIP(ip);
     const deviceType = detectDeviceType(userAgent);
+    const geoCountry =
+      request.headers.get('x-vercel-ip-country') ||
+      request.headers.get('cf-ipcountry') ||
+      'unknown';
+    const geoCity =
+      request.headers.get('x-vercel-ip-city') ||
+      request.headers.get('cf-ipcity') ||
+      'unknown';
 
-    // Envoyer au backend
+    // Envoyer au backend avec les métadonnées nécessaires au comptage et à l'analyse.
     const backendUrl = process.env.NEXT_PUBLIC_BACK_URL;
     const response = await fetch(`${backendUrl}/salon-analytics/track`, {
       method: 'POST',
@@ -52,21 +60,50 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify({
         salonId,
         ipHash,
-        referrer: referrer.substring(0, 255), // Limiter la longueur
+        referrer: referrer.substring(0, 255),
         userAgent: userAgent.substring(0, 255),
         deviceType,
-        country: loc?.country || 'unknown',
-        city: loc?.city || 'unknown',
+        country: geoCountry,
+        city: geoCity,
       }),
     });
 
+    // console.log('Tracking salon profile view:', {
+    //   salonId,
+    //   ipHash,
+    //   referrer: referrer.substring(0, 255),
+    //   userAgent: userAgent.substring(0, 255),
+    //   deviceType,
+    //   country: geoCountry,
+    //   city: geoCity,
+    //   backendStatus: response.status,
+    // });
+
+    const responseText = await response.text();
+
     if (!response.ok) {
-      console.error('Failed to track profile view:', response.statusText);
+      console.error('Failed to track profile view:', {
+        status: response.status,
+        statusText: response.statusText,
+        body: responseText,
+      });
+
+      return NextResponse.json(
+        {
+          success: false,
+          tracked: false,
+          backendStatus: response.status,
+          backendError: responseText || response.statusText,
+        },
+        { status: response.status }
+      );
     }
 
     return NextResponse.json({
       success: true,
       tracked: response.ok,
+      backendStatus: response.status,
+      backendResponse: responseText || null,
     });
   } catch (error) {
     console.error('Error tracking profile view:', error);

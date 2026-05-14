@@ -81,8 +81,6 @@ export const getSalonReviews = async (
 
     const data = await response.json();
 
-    console.log("getSalonReviews - Response data:", data);
-
     if (!response.ok || data?.error) {
       const message =
         data?.message ||
