@@ -15,6 +15,7 @@ import { TfiWorld } from "react-icons/tfi";
 import HoursCard from "@/components/ProfilSalon/HoursCard";
 import FavoriteBtn from "@/components/Shared/FavoriteBtn";
 import SalonReviews from "@/components/ProfilSalon/SalonReviews";
+import { SalonProfileViewTracker } from "@/components/Shared/SalonProfileViewTracker";
 
 type PageParams = {
   params: Promise<{ slug: string; loc: string }>;
@@ -142,7 +143,6 @@ export async function generateMetadata({
       "business:contact_data:locality": salon.city || "",
       "business:contact_data:postal_code": salon.postalCode || "",
       "business:contact_data:country_name": "France",
-      "business:contact_data:phone_number": salon.phone || "",
     },
   };
 }
@@ -401,10 +401,15 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
     : {};
 
   return (
-    <div
-      className="min-h-screen bg-noir-700 pt-2 "
-      style={customStyle}
+    <SalonProfileViewTracker
+      salonId={salon.id}
+      slug={resolvedParams.slug}
+      loc={resolvedParams.loc}
     >
+      <div
+        className="min-h-screen bg-noir-700 pt-2 "
+        style={customStyle}
+      >
       {/* CONTENT */}
       <section className="relative z-10 px-4 sm:px-6 lg:px-8 xl:px-16 py-6">
         {/* Mobile Hero */}
@@ -943,11 +948,12 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
       </section>
 
       {/* JSON-LD */}
-      <Script
-        id="salon-ld-json"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }}
-      />
-    </div>
+        <Script
+          id="salon-ld-json"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }}
+        />
+      </div>
+    </SalonProfileViewTracker>
   );
 }

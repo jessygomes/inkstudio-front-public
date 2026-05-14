@@ -49,11 +49,11 @@ export const metadata: Metadata = {
     process.env.NEXT_PUBLIC_SITE_URL || "https://theinkera.com",
   ),
   title: {
-    default: "Inkera - Trouvez votre salon de tatouage idéal",
+    default: "Inkera - Trouvez votre tatoueur idéal",
     template: "%s | Inkera",
   },
   description:
-    "Découvrez les meilleurs salons de tatouage près de chez vous. Réservez en ligne, consultez les portfolios et trouvez l'artiste tatoueur parfait pour votre projet.",
+    "Découvrez les meilleurs tatoueurs près de chez vous. Réservez en ligne, consultez les portfolios et trouvez l'artiste tatoueur parfait pour votre projet.",
   keywords: [
     "tatouage",
     "salon tatouage",
@@ -84,9 +84,9 @@ export const metadata: Metadata = {
     locale: "fr_FR",
     url: process.env.NEXT_PUBLIC_SITE_URL,
     siteName: "Inkera",
-    title: "Inkera - Trouvez votre salon de tatouage idéal",
+    title: "Inkera - Trouvez votre tatoueur idéal",
     description:
-      "Découvrez les meilleurs salons de tatouage près de chez vous. Réservez en ligne, consultez les portfolios et trouvez l'artiste tatoueur parfait.",
+      "Découvrez les meilleurs tatoueurs près de chez vous. Réservez en ligne, consultez les portfolios et trouvez l'artiste tatoueur parfait pour votre projet.",
     images: [
       {
         url: "/og-image.jpg",
