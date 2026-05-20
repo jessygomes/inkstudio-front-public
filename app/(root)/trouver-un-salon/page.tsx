@@ -328,7 +328,7 @@ export default async function TrouverUnSalonPage({
                       </div>
                     </article>
 
-                    <article className="overflow-hidden rounded-3xl  border-tertiary-400/20 bg-linear-to-br from-tertiary-500/12 to-noir-700/35 transition-all duration-300 hover:border-tertiary-400/35 hover:from-tertiary-500/18">
+                    <article className="overflow-hidden rounded-3xl border border-tertiary-400/20 bg-linear-to-br from-tertiary-500/12 to-noir-700/35 transition-all duration-300 hover:border-tertiary-400/35 hover:from-tertiary-500/18">
                       <div className="relative h-70 w-full">
                         <Image
                           src="/photos/grd.jpg"
