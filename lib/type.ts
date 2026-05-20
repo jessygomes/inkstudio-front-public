@@ -2,6 +2,7 @@ export type SalonProps = {
   id: string;
   salonName: string;
   image: string;
+  profileImage?: string | null;
   email: string;
   phone: string;
   address: string;

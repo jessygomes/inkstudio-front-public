@@ -150,8 +150,8 @@ export default function Register() {
   };
 
   return (
-    <div>
-      <CardWrapper headerLabel="Créez votre compte client - Inkera">
+    <div className="">
+      <CardWrapper headerLabel="Créer mon compte">
         <form
           method="post"
           onSubmit={form.handleSubmit(onSubmit)}

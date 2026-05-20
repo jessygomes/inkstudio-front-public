@@ -167,16 +167,16 @@ export default function ListeSalon() {
       <div className="flex flex-col gap-4">
         <div className="flex gap-8 flex-col sm:flex-row">
           {/* Ville */}
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center font-one">
             <label
               className="text-xs text-white/80 font-var(--font-one)"
               htmlFor="city-select"
             >
-              Filtrer par ville
+              Par ville
             </label>
             <select
               id="city-select"
-              className="w-full sm:w-64 text-xs font-var(--font-one) rounded-lg border border-white/10 bg-black/20 text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-tertiary-500 transition"
+              className="w-full sm:w-64 text-xs font-var(--font-one) rounded-2xl border border-white/10 bg-black/20 text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-tertiary-500 transition"
               value={selectedCity}
               onChange={(e) => handleCityChange(e.target.value)}
             >
@@ -192,16 +192,16 @@ export default function ListeSalon() {
           </div>
 
           {/* Style */}
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center font-one">
             <label
-              className="text-xs text-white/80 font-var(--font-one)"
+              className="text-xs text-white/80 font-one"
               htmlFor="style-select"
             >
-              Filtrer par style
+              Par style
             </label>
             <select
               id="style-select"
-              className="w-full sm:w-64 text-xs font-var(--font-one) rounded-lg border border-white/10 bg-black/20 text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-tertiary-500 transition"
+              className="w-full sm:w-64 text-xs font-var(--font-one) rounded-2xl border border-white/10 bg-black/20 text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-tertiary-500 transition"
               value={selectedStyle}
               onChange={(e) => handleStyleChange(e.target.value)}
             >
@@ -220,12 +220,12 @@ export default function ListeSalon() {
         {/* Filtres actifs */}
         {(selectedCity || selectedStyle) && (
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs font-var(--font-one) text-white/50">
+            <span className="text-xs font-one text-white/50">
               Filtres actifs :
             </span>
 
             {selectedCity && (
-              <span className="inline-flex items-center gap-2 px-2 py-1 bg-cyan-400/20 text-cyan-300 rounded-full text-xs font-var(--font-one) border border-cyan-400/30">
+              <span className="inline-flex items-center gap-2 px-2 py-1 bg-cyan-400/20 text-cyan-300 rounded-full text-xs font-one border border-cyan-400/30">
                 ville: {selectedCity}
                 <button
                   onClick={() => clearFilter("city")}
@@ -238,7 +238,7 @@ export default function ListeSalon() {
             )}
 
             {selectedStyle && (
-              <span className="inline-flex items-center gap-2 px-2 py-1 bg-violet-400/20 text-violet-300 rounded-full text-xs font-var(--font-one) border border-violet-400/30">
+              <span className="inline-flex items-center gap-2 px-2 py-1 bg-violet-400/20 text-violet-300 rounded-full text-xs font-one border border-violet-400/30">
                 style: {selectedStyle}
                 <button
                   onClick={() => clearFilter("style")}
@@ -252,7 +252,7 @@ export default function ListeSalon() {
 
             <button
               onClick={clearAllFilters}
-              className="cursor-pointer px-2 py-1 bg-red-400/20 text-red-300 rounded-full font-var(--font-one) text-xs border border-red-400/30 hover:bg-red-400/30 transition-colors"
+              className="cursor-pointer px-2 py-1 bg-red-400/20 text-red-300 rounded-full font-one text-xs border border-red-400/30 hover:bg-red-400/30 transition-colors"
             >
               ✕ Effacer tout
             </button>
@@ -261,7 +261,7 @@ export default function ListeSalon() {
       </div>
 
       {/* Ligne d’info “Affichage de X à Y…” */}
-      <div className="text-white/60 text-xs font-var(--font-one)">
+      <div className="text-white/60 text-xs font-one">
         Affichage de {pagination?.startIndex ?? 0} à {pagination?.endIndex ?? 0}{" "}
         sur {pagination?.totalUsers ?? 0} salon
         {(pagination?.totalUsers ?? 0) > 1 ? "s" : ""}
@@ -292,7 +292,7 @@ export default function ListeSalon() {
       ) : error ? (
         <div className="h-full w-full flex">
           <div className="mt-4 w-full rounded-2xl shadow-xl border border-white/10 p-10 flex flex-col items-center justify-center gap-6 mx-auto">
-            <div className="w-20 h-20 bg-gradient-to-br from-tertiary-400/30 to-tertiary-500/20 rounded-full flex items-center justify-center mb-2">
+            <div className="w-20 h-20 bg-linear-to-br from-tertiary-400/30 to-tertiary-500/20 rounded-full flex items-center justify-center mb-2">
               <svg
                 className="w-10 h-10 text-tertiary-400"
                 fill="none"
@@ -307,7 +307,7 @@ export default function ListeSalon() {
                 />
               </svg>
             </div>
-            <p className="text-white font-var(--font-one) text-xl text-center">
+            <p className="text-white font-one text-xl text-center">
               {error}
             </p>
             <button
@@ -320,7 +320,7 @@ export default function ListeSalon() {
                   limit: limitFromUrl,
                 })
               }
-              className="cursor-pointer mt-2 px-6 py-2 bg-gradient-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white rounded-lg font-medium font-var(--font-one) text-xs shadow-lg transition-all"
+              className="cursor-pointer mt-2 px-6 py-2 bg-linear-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white rounded-2xl font-medium font-one text-xs shadow-lg transition-all"
             >
               Réessayer
             </button>
@@ -367,9 +367,9 @@ export default function ListeSalon() {
                       <button
                         key={pageNumber}
                         onClick={() => goToPage(pageNumber)}
-                        className={`cursor-pointer w-8 h-8 rounded-lg text-xs font-var(--font-one) transition-all ${
+                        className={`cursor-pointer w-8 h-8 rounded-lg text-xs font-one transition-all ${
                           curr === pageNumber
-                            ? "bg-gradient-to-r from-tertiary-400 to-tertiary-500 text-white"
+                            ? "bg-linear-to-r from-tertiary-400 to-tertiary-500 text-white"
                             : "bg-white/10 text-white/70 hover:bg-white/20 hover:text-white"
                         }`}
                       >

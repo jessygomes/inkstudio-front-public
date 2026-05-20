@@ -28,7 +28,7 @@ const perks = [
 
 export default function TatoueurCtaSection() {
   return (
-    <section className="relative overflow-hidden border-t border-tertiary-400/80 bg-noir-700 py-12">
+    <section className="relative overflow-hidden border-t border-tertiary-400/80 bg-noir-700 py-32">
        <div className="absolute top-0 inset-x-0 h-px bg-linear-to-r from-transparent via-tertiary-400/25 to-transparent" />
       {/* Background photo */}
       <Image

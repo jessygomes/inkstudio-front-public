@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import React from "react";
 import { motion } from "framer-motion";
 import AppButton from "../Shared/AppButton";
@@ -128,10 +127,10 @@ export default function HeroSection() {
         <div className="relative z-10 flex flex-col justify-center items-center md:items-start gap-1 sm:gap-2">
           <h1 className="hidden md:block md:text-center lg:text-left text-white font-two">INKERA <span className="text-white/30">PEOPLE</span></h1>
           <h2 className="text-2xl md:text-4xl font-bold text-center md:text-left text-white uppercase font-two tracking-wide">
-            Trouvez votre salon de tatouage
+            Trouvez votre tatoueur idéal
           </h2>
           <p className="text-center md:text-left text-white/50 text-sm font-one max-w-xl">
-            Trouvez facilement le salon de tatouage qui vous convient proche de
+            Trouvez facilement le tatoueur/tatoueuse qui vous convient proche de
             chez vous. Explorez les portfolios des artistes, consultez les avis
             et prenez rendez-vous en ligne.
           </p>
@@ -143,7 +142,7 @@ export default function HeroSection() {
           icon={<IoSearch />}
           className="w-fit sm:min-w-48 whitespace-nowrap"
         >
-          Trouver un salon
+          Trouver un tatoueur
         </AppButton>
 
         <AppButton

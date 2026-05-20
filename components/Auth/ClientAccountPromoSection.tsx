@@ -13,15 +13,25 @@ const perks = [
     description: "Prenez rendez-vous 24/7 et suivez vos demandes en temps réel.",
   },
   {
+    icon: BsCalendarCheck,
+    title: "Moodboard ",
+    description: "Créez et partagez vos inspirations avec votre tatoueur pour chacun de vos projet tatouage.",
+  },
+  {
     icon: BsChatDots,
     title: "Messagerie directe",
-    description: "Échangez avec les salons pour affiner votre projet avant le jour J.",
+    description: "Discutez autour d'un futur projet ? Échangez avec les salons pour affiner votre projet avant le jour J.",
   },
   {
     icon: BsHeart,
     title: "Favoris & historique",
     description: "Sauvegardez vos salons préférés et retrouvez tous vos rendez-vous passés.",
   },
+  // {
+  //   icon: BsHeart,
+  //   title: "Essayez votre tatouage (bientôt)",
+  //   description: "Un modèle 3D vous permettra prochainement de visualiser et tester votre tatouage sur différentes zones et tailles.",
+  // },
 ];
 
 export default function ClientAccountPromoSection() {
@@ -40,7 +50,7 @@ export default function ClientAccountPromoSection() {
         sizes="100vw"
       />
       {/* Overlay */}
-      <div className="absolute inset-0 bg-noir-900/75" />
+      <div className="absolute inset-0 bg-noir-500/50" />
 
       {/* Content */}
       <div className="relative z-10 mx-4 sm:mx-8 lg:mx-20 py-20 flex flex-col items-center gap-10 text-center">
@@ -63,7 +73,7 @@ export default function ClientAccountPromoSection() {
         </div>
 
         {/* Perks */}
-        <div className="grid w-full grid-cols-1 gap-3 md:grid-cols-3 max-w-6xl">
+        <div className="grid w-full grid-cols-1 gap-3 md:grid-cols-4 max-w-7xl">
           {perks.map(({ icon: Icon, title, description }) => (
             <div
               key={title}

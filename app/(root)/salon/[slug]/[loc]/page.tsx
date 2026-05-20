@@ -536,7 +536,6 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
           {/* Sidebar */}
           <aside className="lg:order-2 lg:sticky lg:top-24 h-fit space-y-3">
             {/* Quick Actions */}
-   
               <div className="flex gap-2.5">
                 <FavoriteBtn
                   salonId={salon.id}
@@ -544,13 +543,37 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
                   className="hover:scale-110"
                 />
 
+                {!isFree && (
+                  <Link
+                    href={`/salon/${resolvedParams.slug}/${resolvedParams.loc}/reserver`}
+                    className={`group flex justify-center items-center gap-2 py-1.5 px-3 rounded-2xl border border-white/15 bg-tertiary-400/20 text-white shadow-[inset_0_-2px_0_0_var(--color-tertiary-400)] transition-all duration-300 font-one text-sm tracking-widest hover:bg-tertiary-400/25 hover:border-tertiary-400/35 transform hover:scale-[1.02] ${
+                    isFree ? "flex-1" : "flex-1"
+                  }`}
+                  >
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                      />
+                    </svg>
+                    Réserver
+                  </Link>
+                )}
+
                 <Link
                   href={directionsHref}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`group flex justify-center items-center gap-2 py-1.5 px-3 rounded-2xl border border-white/15 bg-tertiary-400/20 text-white shadow-[inset_0_-2px_0_0_var(--color-tertiary-400)] transition-all duration-300 font-one text-sm tracking-widest hover:bg-tertiary-400/25 hover:border-tertiary-400/35 transform hover:scale-[1.02] ${
+                  className={`flex-1 group flex justify-center items-center gap-2 py-1.5 px-3 rounded-2xl bg-linear-to-br from-noir-500/8 to-white/2 hover:from-white/12 hover:to-white/6 text-white border border-white/20 hover:border-white/30 transition-all duration-300 text-sm tracking-widest font-one backdrop-blur-sm transform hover:scale-[1.02] ${
                     isFree ? "flex-1" : "flex-1"
-                  }`}
+                  }`} 
                 >
                   <svg
                     className="w-4 h-4"
@@ -574,27 +597,7 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
                   Itinéraire
                 </Link>
 
-                {!isFree && (
-                  <Link
-                    href={`/salon/${resolvedParams.slug}/${resolvedParams.loc}/reserver`}
-                    className="flex-1 group flex justify-center items-center gap-2 py-1.5 px-3 rounded-2xl bg-linear-to-br from-white/8 to-white/2 hover:from-white/12 hover:to-white/6 text-white border border-white/20 hover:border-white/30 transition-all duration-300 text-sm tracking-widest font-one backdrop-blur-sm transform hover:scale-[1.02]"
-                  >
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                      />
-                    </svg>
-                    Réserver
-                  </Link>
-                )}
+               
               </div>
 
             {/* Contact Info */}

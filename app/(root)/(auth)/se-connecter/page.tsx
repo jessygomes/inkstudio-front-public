@@ -27,7 +27,7 @@ export default async function page() {
   }
 
   return (
-    <section className="-mt-16 md:-mt-21">
+    <section className="-mt-16 md:-mt-12">
       <div
         className="flex min-h-screen w-full bg-cover bg-center items-center justify-center px-2"
         style={{

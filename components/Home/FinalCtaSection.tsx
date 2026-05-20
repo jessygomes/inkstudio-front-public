@@ -15,10 +15,9 @@ export default function FinalCtaSection() {
 
   return (
     <section className="relative bg-noir-700 py-20 ">
-             
       {/* Background grid */}
       <motion.div
-        className="absolute inset-0 grid grid-cols-3 gap-2 w-full h-full p-4 px-20"
+        className="absolute inset-0 grid grid-cols-3 gap-2 w-full h-full p-10 px-20"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 1 }}
@@ -37,7 +36,7 @@ export default function FinalCtaSection() {
       </motion.div>
 
       {/* Overlay */}
-      <div className="absolute inset-0 bg-noir-700/70 backdrop-blur-[10px]" />
+      <div className="absolute inset-0 bg-noir-700/70 backdrop-blur-[10px] rounded-2xl" />
 
       {/* Content */}
       <div className="relative z-10 container mx-auto px-4 sm:px-8 text-center">

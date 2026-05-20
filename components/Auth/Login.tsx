@@ -95,7 +95,7 @@ export const Login = () => {
   };
 
   return (
-    <div>
+    <div className="w-full sm:w-2/3 lg:w-1/3">
       <CardWrapper headerLabel="Connectez-vous">
         <form
           method="post"

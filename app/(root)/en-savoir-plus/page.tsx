@@ -3,16 +3,14 @@ import React from "react";
 import AppButton from "@/components/Shared/AppButton";
 import Script from "next/script";
 import { Metadata } from "next";
-import { FaArrowDown } from "react-icons/fa";
 import { FaPen } from "react-icons/fa";
 import { FaLightbulb } from "react-icons/fa6";
 import { LuHeartHandshake } from "react-icons/lu";
 import { HiMiniRocketLaunch } from "react-icons/hi2";
 import { PiTargetBold } from "react-icons/pi";
-import { IoIosArrowDropright } from "react-icons/io";
 import { MdDataThresholding } from "react-icons/md";
 import { TiHeartHalfOutline } from "react-icons/ti";
-import Image from "next/image";
+import HeroSection from "@/components/EnSavoirPlus/heroSection";
 
 export const dynamic = "force-dynamic";
 
@@ -31,7 +29,7 @@ export const metadata: Metadata = {
     "projet tatouage",
   ],
   openGraph: {
-    title: "En savoir plus - Inkera | Notre mission et vision",
+    title: "En savoir plus - Inkera | Notre mission et notre ambition",
     description:
       "Découvrez l'histoire et la philosophie derrière Inkera, plateforme dédiée aux salons de tatouage professionnels.",
     type: "website",
@@ -49,7 +47,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "En savoir plus - Inkera | Notre mission",
+    title: "En savoir plus - Inkera | Notre mission et notre ambition",
     description:
       "Découvrez l'histoire et la philosophie derrière Inkera, plateforme dédiée aux salons de tatouage.",
     images: ["https://theinkera.com/images/og-about.jpg"],
@@ -64,24 +62,12 @@ export const metadata: Metadata = {
 };
 
 export default function EnSavoirPlusPage() {
-  const heroMosaicPhotos = [
-    "/photos/recherche.jpg",
-    "/photos/reserve.jpg",
-    "/photos/yddd.jpg",
-    "/photos/complete.jpg",
-    "/photos/Gorgeous.jpg",
-    "/photos/Instagram.jpg",
-    "/photos/AI Art.jpg",
-    "/photos/sit.jpg",
-    "/photos/metro.jpg",
-  ];
-
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "AboutPage",
     name: "En savoir plus sur Inkera",
     description:
-      "Histoire, mission et vision de Inkera, plateforme dédiée aux salons de tatouage professionnels",
+      "Histoire, mission et ambition de Inkera, plateforme dédiée aux salons de tatouage professionnels",
     url: "https://theinkera.com/en-savoir-plus",
     mainEntity: {
       "@type": "Organization",
@@ -104,12 +90,22 @@ export default function EnSavoirPlusPage() {
         "Annuaire de salons de tatouage",
       ],
       mission:
-        "Valoriser le travail des tatoueurs et créer un espace professionnel centralisé pour la communauté du tatouage",
+        "Valoriser le travail des tatoueurs et créer un espace professionnel centralisé pour la communauté du tatouage. Mettre en avant la diversité et la richesse des styles et des personnes tatouées.",
       knowsAbout: [
         "Gestion de salon de tatouage",
         "Marketing pour tatoueurs",
         "Portfolios artistiques",
         "Réservation en ligne tatouage",
+        "Communauté tatouage",
+        "SaaS pour tatoueurs",
+        "Visibilité en ligne pour salons de tatouage",
+        "Plateforme de tatouage professionnelle",
+        "Annuaire de tatoueurs en France",
+        "Outils de gestion pour salons de tatouage",
+        "Vitrine en ligne pour tatoueurs",
+        "Mission de Inkera",
+        "Vision de Inkera",
+        "Histoire de Inkera",
       ],
     },
   };
@@ -124,57 +120,7 @@ export default function EnSavoirPlusPage() {
       />
 
       {/* Hero Section */}
-      <section className="relative isolate min-h-[calc(100vh-4.75rem)] overflow-hidden bg-noir-700 lg:min-h-[calc(100vh-5.25rem)]">
-        <div className="absolute inset-0 grid grid-cols-3 grid-rows-3 gap-2 p-2">
-          {heroMosaicPhotos.map((photo, index) => (
-            <div key={`${photo}-${index}`} className="relative overflow-hidden rounded-xl">
-              <Image
-                src={photo}
-                alt={`Inspiration tatouage ${index + 1}`}
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 33vw, 33vw"
-                priority={index < 3}
-              />
-            </div>
-          ))}
-        </div>
-
-        <div className="pointer-events-none absolute inset-0 bg-linear-to-b from-noir-700/70 to-noir-700/85" />
-
-        <div className="relative z-10 container mx-auto flex min-h-[calc(100vh-4.75rem)] items-center px-4 py-10 text-center lg:min-h-[calc(100vh-5.25rem)] lg:px-8">
-          <div className="max-w-4xl mx-auto space-y-6 ">
-            {/* Titre principal */}
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white uppercase font-two tracking-widest leading-tight">
-              <span className="block bg-linear-to-r from-tertiary-400 to-tertiary-500 bg-clip-text text-transparent">
-                Notre vision
-              </span>
-              <span className="block">et notre mission</span>
-            </h1>
-
-            {/* Sous-titre */}
-            <p className="text-lg sm:text-xl text-white/80 font-one leading-relaxed max-w-2xl mx-auto ">
-              Découvrez l'histoire et la philosophie derrière cette plateforme
-              dédiée à la
-              <span className="text-tertiary-400 font-semibold">
-                {" "}
-                communauté du tatouage
-              </span>
-            </p>
-
-            {/* CTA d'exploration */}
-            <div className="flex flex-col items-center gap-4 mt-8">
-              <div className="text-white/60 font-one text-md">
-                Découvrez notre histoire
-              </div>
-              <FaArrowDown
-                size={24}
-                className="text-tertiary-400 animate-bounce"
-              />
-            </div>
-          </div>
-        </div>
-      </section>
+      <HeroSection />
 
       {/* Parcours */}
       <section className="relative isolate overflow-hidden bg-noir-700 py-16 sm:py-20">
@@ -200,8 +146,8 @@ export default function EnSavoirPlusPage() {
               </div>
               <h3 className="text-lg font-bold text-white font-two">Pourquoi</h3>
               <p className="mt-3 text-sm leading-relaxed text-white/70 font-one">
-                Donner aux tatoueurs un espace plus durable, plus lisible et
-                plus professionnel que le flux social classique.
+                Donner un espace plus durable, plus lisible et
+                plus professionnel que le flux social classique. Un espace qu'on fera évoluer tous ensemble.
               </p>
             </article>
 
@@ -212,7 +158,7 @@ export default function EnSavoirPlusPage() {
               <h3 className="text-lg font-bold text-white font-two">Le projet</h3>
               <p className="mt-3 text-sm leading-relaxed text-white/70 font-one">
                 Une base SaaS qui alimente à la fois la gestion du salon et sa
-                présence publique.
+                présence publique. <strong>Un outil aussi pensé pour vos clients !</strong>
               </p>
             </article>
 
@@ -223,7 +169,7 @@ export default function EnSavoirPlusPage() {
               <h3 className="text-lg font-bold text-white font-two">La mission</h3>
               <p className="mt-3 text-sm leading-relaxed text-white/70 font-one">
                 Réconcilier structure, visibilité et gestion sans effacer
-                l'identité artistique des studios.
+                l'identité artistique des studios et leur diversité.
               </p>
             </article>
 
@@ -234,7 +180,7 @@ export default function EnSavoirPlusPage() {
               <h3 className="text-lg font-bold text-white font-two">L'avenir</h3>
               <p className="mt-3 text-sm leading-relaxed text-white/70 font-one">
                 Devenir la référence francophone pour découvrir, gérer et faire
-                rayonner les salons de tatouage.
+                rayonner les tatoueurs et tatoueuses, en restant à l'écoute de leurs besoins.
               </p>
             </article>
           </div>
@@ -252,82 +198,90 @@ export default function EnSavoirPlusPage() {
         }}
       >
         {/* Overlay sombre pour la lisibilité */}
-        <div className="pointer-events-none absolute inset-0 bg-linear-to-br from-noir-700/85 via-noir-700/80 to-noir-800/85" />
+        <div className="pointer-events-none absolute inset-0 bg-linear-to-br from-noir-700/85 via-noir-700/80 to-noir-500/85" />
         
-        <div className="pointer-events-none absolute inset-0">
+        {/* <div className="pointer-events-none absolute inset-0">
           <div className="absolute -left-20 top-1/2 h-72 w-72 -translate-y-1/2 rounded-full bg-tertiary-500/8 blur-3xl" />
           <div className="absolute -right-10 bottom-0 h-56 w-56 rounded-full bg-tertiary-400/5 blur-3xl" />
-        </div>
+        </div> */}
 
-        <div className="relative container mx-auto max-w-6xl px-4 sm:px-8">
-          <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1.1fr_0.9fr]">
-            <div className="rounded-3xl border border-white/10 bg-linear-to-br from-white/6 via-white/3 to-transparent p-8 backdrop-blur-sm sm:p-10">
-              <div className="inline-flex items-center gap-2 rounded-full border border-tertiary-400/35 bg-tertiary-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-tertiary-300 font-one">
+        <div className="relative container mx-auto max-w-7xl px-4 sm:px-8 flex flex-col gap-8 items-center">
+          {/* Bloc ambitions mis en avant */}
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="rounded-3xl border border-tertiary-400/30 bg-linear-to-r from-tertiary-500/10 to-tertiary-400/10 p-6 shadow-lg backdrop-blur-md flex flex-col w-full">
+              <span className="w-fit inline-block mb-2 text-tertiary-400 font-one font-semibold uppercase tracking-[0.18em] text-md rounded-full border border-tertiary-400/30 bg-tertiary-500/10 px-3 py-1">
+                Nos ambitions
+              </span>
+              <p className="text-base sm:text-base text-white/90 font-one">
+                <strong className="tracking-widest">Représenter toute la diversité de la communauté tatouage.</strong><br />
+                Le tatouage touche aujourd'hui un éventail bien plus large de personnes, de tous âges, genres et cultures. Inkera veut valoriser cette pluralité, loin des clichés, et donner de la visibilité à tous les profils, pour que chacun puisse s'identifier et trouver sa place.
+              </p>
+            </div>
+
+            {/* Texte éditorial */}
+            <div className="rounded-3xl border border-white/10 bg-linear-to-br from-white/6 via-white/3 to-transparent p-8 backdrop-blur-sm w-full">
+              <div className="inline-flex items-center gap-2 rounded-full border border-tertiary-400/35 bg-tertiary-500/10 px-3 py-1 text-sm sm:text-md font-semibold uppercase tracking-[0.16em] text-tertiary-400 font-one mb-4">
                 <PiTargetBold className="text-sm" />
                 Pourquoi ce site existe
               </div>
-
-              <h2 className="mt-6 text-2xl font-bold leading-tight text-white font-two sm:text-3xl">
-                Sortir le travail des artistes du bruit des réseaux sociaux
-              </h2>
-              <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/70 font-one sm:text-base">
-                Inkera a été pensé pour offrir aux salons de tatouage et de
-                piercing une vitrine claire, crédible et durable. Là où les
-                créations se perdent souvent dans un flux rapide, la plateforme
-                leur redonne du contexte, de la lisibilité et une vraie place.
+              <p className="max-w-2xl mx-auto text-sm leading-relaxed text-white/70 font-one sm:text-base">
+                Inkera a été pensé pour offrir aux salons de tatouage et de piercing une vitrine claire, crédible et durable. Là où les créations se perdent souvent dans un flux rapide, la plateforme leur redonne du contexte, de la lisibilité et une vraie place.
               </p>
+            </div>
+          </div>
 
-              <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-3">
-                <div className="rounded-2xl border border-tertiary-400/20 bg-tertiary-500/10 p-4 transition-colors duration-200 hover:border-tertiary-400/40 hover:bg-tertiary-500/15">
-                  <IoIosArrowDropright className="mb-3 text-xl text-tertiary-400" />
-                  <p className="text-sm leading-relaxed text-white/85 font-one">
-                    Valoriser le travail des tatoueurs
-                  </p>
-                </div>
-                <div className="rounded-2xl border border-tertiary-400/20 bg-tertiary-500/10 p-4 transition-colors duration-200 hover:border-tertiary-400/40 hover:bg-tertiary-500/15">
-                  <IoIosArrowDropright className="mb-3 text-xl text-tertiary-400" />
-                  <p className="text-sm leading-relaxed text-white/85 font-one">
-                    Faciliter la recherche d'un salon de confiance
-                  </p>
-                </div>
-                <div className="rounded-2xl border border-tertiary-400/20 bg-tertiary-500/10 p-4 transition-colors duration-200 hover:border-tertiary-400/40 hover:bg-tertiary-500/15">
-                  <IoIosArrowDropright className="mb-3 text-xl text-tertiary-400" />
-                  <p className="text-sm leading-relaxed text-white/85 font-one">
-                    Réunir la communauté dans un espace plus authentique
-                  </p>
-                </div>
+          {/* Points clés */}
+          {/* <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 w-full">
+            <div className="rounded-2xl border border-tertiary-400/20 bg-tertiary-500/10 p-4 transition-colors duration-200 hover:border-tertiary-400/40 hover:bg-tertiary-500/15">
+              <IoIosArrowDropright className="mb-3 text-xl text-tertiary-400" />
+              <p className="text-sm leading-relaxed text-white/85 font-one">
+                Valoriser le travail des tatoueurs
+              </p>
+            </div>
+            <div className="rounded-2xl border border-tertiary-400/20 bg-tertiary-500/10 p-4 transition-colors duration-200 hover:border-tertiary-400/40 hover:bg-tertiary-500/15">
+              <IoIosArrowDropright className="mb-3 text-xl text-tertiary-400" />
+              <p className="text-sm leading-relaxed text-white/85 font-one">
+                Faciliter la recherche d'un salon de confiance
+              </p>
+            </div>
+            <div className="rounded-2xl border border-tertiary-400/20 bg-tertiary-500/10 p-4 transition-colors duration-200 hover:border-tertiary-400/40 hover:bg-tertiary-500/15">
+              <IoIosArrowDropright className="mb-3 text-xl text-tertiary-400" />
+              <p className="text-sm leading-relaxed text-white/85 font-one">
+                Réunir la communauté dans un espace plus authentique
+              </p>
+            </div>
+          </div> */}
+
+          {/* Encart projet */}
+          <aside className="rounded-3xl border border-white/10 bg-white/4 p-8 backdrop-blur-sm w-full">
+            <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-tertiary-500/15 text-2xl text-tertiary-400">
+              <MdDataThresholding />
+            </div>
+            <h3 className="text-2xl font-bold text-white font-two">
+              Un projet qui grandit avec les salons
+            </h3>
+            <p className="mt-4 text-sm leading-relaxed text-white/70 font-one sm:text-base">
+              Le site public n'est pas un simple annuaire. Il s'inscrit dans un écosystème plus large où chaque salon peut gérer sa présence, son image et sa relation client depuis une seule plateforme.
+            </p>
+            <p className="mt-4 text-xs leading-relaxed text-white/70 font-one sm:text-xs bg-noir-500/60 p-4 rounded-2xl">
+              L'annuaire sera disponible quand il y aura suffisamment de salons inscrits pour offrir une expérience riche et pertinente. En attendant, nous construisons la plateforme de gestion et travaillons main dans la main avec les premiers salons pour co-créer un outil qui répond vraiment à leurs besoins et aux besoins de leurs clients.
+            </p>
+
+            <div className="mt-7 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/4 p-3">
+                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-tertiary-500/25 text-[10px] font-bold text-tertiary-300 font-two">1</span>
+                <p className="text-sm text-white/85 font-one">Recherche par style, ville et artiste</p>
+              </div>
+              <div className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/4 p-3">
+                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-tertiary-500/25 text-[10px] font-bold text-tertiary-300 font-two">2</span>
+                <p className="text-sm text-white/85 font-one">Découverte des portfolios et des univers visuels</p>
+              </div>
+              <div className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/4 p-3">
+                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-tertiary-500/25 text-[10px] font-bold text-tertiary-300 font-two">3</span>
+                <p className="text-sm text-white/85 font-one">Prise de rendez-vous plus fluide et centralisée</p>
               </div>
             </div>
-
-            <aside className="rounded-3xl border border-white/10 bg-white/4 p-8 backdrop-blur-sm sm:p-10">
-              <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-tertiary-500/15 text-2xl text-tertiary-400">
-                <MdDataThresholding />
-              </div>
-              <h3 className="text-2xl font-bold text-white font-two">
-                Un projet qui grandit avec les salons
-              </h3>
-              <p className="mt-4 text-sm leading-relaxed text-white/70 font-one sm:text-base">
-                Le site public n'est pas un simple annuaire. Il s'inscrit dans
-                un écosystème plus large où chaque salon peut gérer sa présence,
-                son image et sa relation client depuis une seule plateforme.
-              </p>
-
-              <div className="mt-7 space-y-3">
-                <div className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/4 px-4 py-3">
-                  <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-tertiary-500/25 text-[10px] font-bold text-tertiary-300 font-two">1</span>
-                  <p className="text-sm text-white/85 font-one">Recherche par style, ville et artiste</p>
-                </div>
-                <div className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/4 px-4 py-3">
-                  <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-tertiary-500/25 text-[10px] font-bold text-tertiary-300 font-two">2</span>
-                  <p className="text-sm text-white/85 font-one">Découverte des portfolios et des univers visuels</p>
-                </div>
-                <div className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/4 px-4 py-3">
-                  <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-tertiary-500/25 text-[10px] font-bold text-tertiary-300 font-two">3</span>
-                  <p className="text-sm text-white/85 font-one">Prise de rendez-vous plus fluide et centralisée</p>
-                </div>
-              </div>
-            </aside>
-          </div>
+          </aside>
         </div>
       </section>
 
@@ -347,7 +301,7 @@ export default function EnSavoirPlusPage() {
               </div>
 
               <h2 className="mt-6 text-2xl font-bold leading-tight text-white font-two sm:text-3xl">
-                Offrir un outil moderne sans faire perdre l'âme d'artiste
+                Offrir un outil moderne en gardant votre âme d'artiste
               </h2>
               <p className="mt-4 text-base leading-relaxed text-white/70 font-one">
                 Inkera veut proposer un cadre professionnel fort tout en

@@ -6,10 +6,25 @@ import { Suspense } from "react";
 import Script from "next/script";
 import { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { MdNotificationsActive } from "react-icons/md";
 import { HiMiniRocketLaunch } from "react-icons/hi2";
 
 export const dynamic = "force-dynamic";
+
+type TrouverUnSalonPageProps = {
+  searchParams?:
+    | {
+        query?: string | string[];
+        city?: string | string[];
+        style?: string | string[];
+      }
+    | Promise<{
+        query?: string | string[];
+        city?: string | string[];
+        style?: string | string[];
+      }>;
+};
 
 export const metadata: Metadata = {
   title: "Trouver un salon de tatouage - Inkera | Annuaire France",
@@ -88,7 +103,28 @@ function SalonListFallback() {
   );
 }
 
-export default function TrouverUnSalonPage() {
+export default async function TrouverUnSalonPage({
+  searchParams,
+}: TrouverUnSalonPageProps) {
+  const headerBackgroundPhotos = [
+    "/photos/womensit.jpg",
+    "/photos/tatas.jpg",
+    "/photos/conf.jpg",
+  ];
+
+  const resolvedSearchParams = searchParams
+    ? await Promise.resolve(searchParams)
+    : undefined;
+
+  const getSingleParam = (value?: string | string[]) =>
+    Array.isArray(value) ? value[0] : value;
+
+  const hasActiveSearch = Boolean(
+    getSingleParam(resolvedSearchParams?.query) ||
+      getSingleParam(resolvedSearchParams?.city) ||
+      getSingleParam(resolvedSearchParams?.style),
+  );
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
@@ -189,79 +225,148 @@ export default function TrouverUnSalonPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <div className="min-h-screen bg-linear-to-t from-noir-700 via-noir-500 to-noir-700">
-        <div className="container mx-auto max-w-4xl px-4 py-6 sm:px-8 sm:py-8 lg:py-10">
+      <div className="min-h-screen bg-linear-to-t from-noir-700 via-noir-700 to-noir-700">
+        <div className="mx-auto px-4 py-6 sm:px-8 sm:py-8 lg:py-10">
           {/* Coming Soon Card */}
           <div className="flex items-center justify-center min-h-[calc(100vh-10rem)] sm:min-h-[calc(100vh-11rem)]">
-            <div className="text-center space-y-8 max-w-2xl">
+            <div className="text-center space-y-8 w-full sm:mx-10">
               {/* Icon */}
-              <div className="flex justify-center">
+              {/* <div className="flex justify-center">
                 <div className="w-24 h-24 bg-linear-to-br from-tertiary-400/30 to-cuatro-500/30 rounded-full flex items-center justify-center border-2 border-tertiary-400/50 animate-pulse">
                   <HiMiniRocketLaunch className="w-12 h-12 text-tertiary-400" />
                 </div>
-              </div>
+              </div> */}
 
               {/* Heading */}
-              <div className="space-y-3">
-                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white font-two tracking-wide">
-                  Bientôt disponible
-                </h1>
-                <p className="text-lg text-white/80 font-one">
-                  L'annuaire des salons de tatouage arrive très bientôt !
-                </p>
-              </div>
+              <div className="relative overflow-hidden rounded-2xl">
+                <div className="absolute inset-0 grid grid-cols-3 w-full h-full p-4">
+                  {headerBackgroundPhotos.map((photo, index) => (
+                    <div key={`${photo}-${index}`} className="relative h-full w-full">
+                      <Image
+                        src={photo}
+                        alt={`Fond header ${index + 1}`}
+                        fill
+                        className="object-cover rounded-2xl"
+                        sizes="(max-width: 768px) 33vw, 33vw"
+                      />
+                    </div>
+                  ))}
+                </div>
+                <div className="absolute inset-0 bg-noir-700/70 backdrop-blur-[10px]" />
 
-              {/* Description */}
-              <div className="bg-linear-to-br from-white/8 to-white/2 backdrop-blur-lg border border-white/10 rounded-2xl p-8 space-y-4">
-                <div className="flex items-start gap-4">
-                  <MdNotificationsActive className="w-6 h-6 text-tertiary-400 shrink-0 mt-1" />
-                  <div className="text-left">
-                    <h2 className="text-white font-one font-semibold text-lg mb-2">
-                      Ce qui arrive
-                    </h2>
-                    <ul className="space-y-2 text-white/80 font-one text-sm">
-                      <li className="flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 bg-tertiary-400 rounded-full"></span>
-                        Recherche avancée de salons par ville et style
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 bg-tertiary-400 rounded-full"></span>
-                        Découvrez les portfolios des artistes
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 bg-tertiary-400 rounded-full"></span>
-                        Prenez rendez-vous en ligne directement
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 bg-tertiary-400 rounded-full"></span>
-                        Consultez les avis et évaluations
-                      </li>
-                    </ul>
-                  </div>
+                <div className="relative z-10 space-y-3 px-6 py-10 sm:px-8 sm:py-12">
+                  <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white font-one tracking-wide">
+                    Bientôt disponible
+                  </h1>
+                  <p className="text-sm leading-relaxed text-white/70 font-one sm:text-sm px-4 rounded-2xl">
+                    L'annuaire sera disponible quand il y aura suffisamment de salons inscrits pour offrir une expérience riche et pertinente.
+                  </p>
                 </div>
               </div>
+
+              {/* Recherche déjà disponible */}
+              <div className="backdrop-blur-lg text-left shadow-lg shadow-noir-700/40 ">
+                <div className="flex items-start gap-3 mb-4">
+                  <IoBusinessOutline className="w-6 h-6 text-tertiary-400 shrink-0 mt-0.5" />
+                  <div>
+                    <h2 className="text-white font-one font-semibold text-md">
+                      Recherche active
+                    </h2>
+                    <p className="text-white/80 font-one text-xs mt-1">
+                      Vous pouvez déjà rechercher un salon ou un artiste inscrit via la barre de recherche ci-dessous.
+                    </p>
+                  </div>
+                </div>
+                <Suspense fallback={<SearchFallback />}>
+                  <SearchContent />
+                </Suspense>
+              </div>
+
+              {hasActiveSearch && (
+                <div className="bg-linear-to-br from-white/3 to-noir-500/2 backdrop-blur-lg border border-white/10 rounded-3xl p-6 sm:p-8 text-left">
+                  <div className="mb-5 flex items-center gap-3">
+                    <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-tertiary-500/20 border border-tertiary-400/35 text-tertiary-300 text-xs font-one">
+                      Live
+                    </span>
+                    <h2 className="text-white font-one text-base">
+                      Résultats de recherche
+                    </h2>
+                  </div>
+
+                  <Suspense fallback={<SalonListFallback />}>
+                    <SalonListContent />
+                  </Suspense>
+                </div>
+              )}
+
+              {/* Description */}
+              {!hasActiveSearch && (
+                <div className="rounded-3xl  text-left shadow-xl shadow-noir-700/35">
+                  <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                    <article className="overflow-hidden rounded-3xl border border-white/10 bg-noir-700/45 transition-all duration-300 hover:border-white/20 hover:bg-noir-700/55">
+                      <div className="relative h-70 w-full">
+                        <Image
+                          src="/photos/fbb.jpg"
+                          alt="Salons/Tatoueurs déjà présents sur Inkera"
+                          fill
+                          className="object-cover object-[center_37%]"
+                          sizes="(max-width: 1024px) 100vw, 50vw"
+                        />
+                        <div className="absolute inset-0 bg-linear-to-t from-noir-700/90 via-noir-700/30 to-transparent" />
+                        <span className="absolute left-3 top-3 inline-flex items-center gap-2 rounded-full border border-white/20 bg-noir-500/60 px-3 py-1 text-xs text-white/90 font-one">
+                          <MdNotificationsActive className="h-4 w-4 text-tertiary-400" />
+                          Déjà présents
+                        </span>
+                      </div>
+                      <div className="p-5">
+                        <h2 className="text-white font-one font-semibold text-lg">
+                          Des salons sont déjà consultables
+                        </h2>
+                        <p className="mt-2 text-white/75 font-one text-sm leading-relaxed">
+                          Utilisez la barre de recherche pour trouver des salons ou des artistes déjà inscrits sur la plateforme.
+                        </p>
+                      </div>
+                    </article>
+
+                    <article className="overflow-hidden rounded-3xl  border-tertiary-400/20 bg-linear-to-br from-tertiary-500/12 to-noir-700/35 transition-all duration-300 hover:border-tertiary-400/35 hover:from-tertiary-500/18">
+                      <div className="relative h-70 w-full">
+                        <Image
+                          src="/photos/grd.jpg"
+                          alt="La communauté Inkera grandit"
+                          fill
+                          className="object-cover object-[center_40%]"
+                          sizes="(min-width: 1024px) 100vw, 50vw"
+                        />
+                        <div className="absolute inset-0 bg-linear-to-t from-noir-700/90 via-noir-700/35 to-transparent" />
+                        <span className="absolute left-3 top-3 inline-flex items-center gap-2 rounded-full border border-tertiary-400/35 bg-noir-500/60 px-3 py-1 text-xs text-tertiary-300 font-one">
+                          <HiMiniRocketLaunch className="h-4 w-4" />
+                          Communauté
+                        </span>
+                      </div>
+                      <div className="p-5">
+                        <h3 className="text-white font-one font-semibold text-lg">
+                          La communauté grandit chaque semaine
+                        </h3>
+                        <p className="mt-2 text-white/75 font-one text-sm leading-relaxed">
+                          De nouveaux artistes rejoignent Inkera régulièrement. Revenez souvent pour découvrir les derniers profils.
+                        </p>
+                      </div>
+                    </article>
+                  </div>
+                </div>
+              )}
 
               {/* Newsletter signup or CTA */}
               <div className="space-y-4 pt-4">
                 <p className="text-white/70 font-one">
-                  Vous êtes propriétaire d'un salon de tatouage ?
+                  Vous êtes tatoueur/tatoueuse ?
                 </p>
                 <Link
-                  href="https://www.inkera-studio.com/"
-                  className="inline-flex items-center gap-2 px-8 py-3 bg-linear-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white rounded-xl transition-all duration-300 font-one text-sm shadow-lg shadow-tertiary-500/25 hover:shadow-tertiary-500/40 transform hover:scale-105"
+                  href="/en-savoir-plus"
+                  className="inline-flex items-center gap-2 px-8 py-3 bg-linear-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-400 text-white rounded-2xl transition-all duration-300 font-one text-sm shadow-lg shadow-tertiary-500/25 hover:shadow-tertiary-500/40 transform hover:scale-105"
                 >
                   En savoir plus sur notre plateforme
                 </Link>
-              </div>
-
-              {/* Status badge */}
-              <div className="pt-4">
-                <div className="inline-block">
-                  <span className="inline-flex items-center gap-2 px-4 py-2 bg-orange-500/20 border border-orange-500/40 rounded-full text-orange-300 text-xs font-one font-semibold">
-                    <span className="w-2 h-2 bg-orange-400 rounded-full animate-pulse"></span>
-                    En développement
-                  </span>
-                </div>
               </div>
             </div>
           </div>
