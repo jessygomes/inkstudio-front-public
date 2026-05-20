@@ -21,10 +21,10 @@ CardWrapperProps) => {
   return (
     <div className="w-full max-w-137.5 mx-auto flex flex-col gap-4 p-4 rounded-2xl">
       <div className="flex flex-col justify-between items-center">
-        <h1 className="text-xl sm:text-lg p-2 rounded-t-[20px] text-white font-one tracking-widest uppercase font-semibold text-center w-full bg-linear-to-r from-tertiary-500/50 to-tertiary-400/50">
+        <h1 className="text-xl sm:text-lg p-2 rounded-[20px] mb-2 text-white font-one tracking-widest uppercase font-semibold text-center w-full">
           {headerLabel}
         </h1>
-        <div className="h-[0.6px] bg-white/60 w-full" />
+        <div className="h-1.25 w-1/3 rounded-full bg-linear-to-r from-tertiary-500 to-tertiary-400 animate-pulse shadow-2xl" />
       </div>
 
       <div>{children}</div>

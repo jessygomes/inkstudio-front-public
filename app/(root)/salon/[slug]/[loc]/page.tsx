@@ -407,7 +407,7 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
       loc={resolvedParams.loc}
     >
       <div
-        className="min-h-screen bg-noir-700 pt-2 "
+        className="min-h-screen bg-noir-700 pt-2"
         style={customStyle}
       >
       {/* CONTENT */}
@@ -415,7 +415,7 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
         {/* Mobile Hero */}
         <div className="mx-auto lg:hidden mb-6">
           <div className="relative overflow-hidden rounded-2xl border border-white/10 shadow-xl">
-            <div className="relative h-64 bg-linear-to-br from-noir-600 to-noir-800">
+            <div className="relative h-64 bg-linear-to-br from-noir-500 to-noir-700">
               {heroSrc ? (
                 <Image
                   src={heroSrc}
@@ -536,7 +536,7 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
           {/* Sidebar */}
           <aside className="lg:order-2 lg:sticky lg:top-24 h-fit space-y-3">
             {/* Quick Actions */}
-              <div className="flex gap-2.5">
+              <div className="flex items-center gap-2.5">
                 <FavoriteBtn
                   salonId={salon.id}
                   variant="icon-only"
@@ -546,9 +546,8 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
                 {!isFree && (
                   <Link
                     href={`/salon/${resolvedParams.slug}/${resolvedParams.loc}/reserver`}
-                    className={`group flex justify-center items-center gap-2 py-1.5 px-3 rounded-2xl border border-white/15 bg-tertiary-400/20 text-white shadow-[inset_0_-2px_0_0_var(--color-tertiary-400)] transition-all duration-300 font-one text-sm tracking-widest hover:bg-tertiary-400/25 hover:border-tertiary-400/35 transform hover:scale-[1.02] ${
-                    isFree ? "flex-1" : "flex-1"
-                  }`}
+                    className="flex-1 inline-flex items-center justify-center gap-2 rounded-3xl px-4 py-2.5 text-sm font-one transition-all duration-300 bg-linear-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white shadow-lg shadow-tertiary-500/25 hover:shadow-tertiary-500/40 hover:-translate-y-0.5"
+                    title="Réserver un rendez-vous avec ce salon"
                   >
                     <svg
                       className="w-4 h-4"
@@ -571,9 +570,10 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
                   href={directionsHref}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`flex-1 group flex justify-center items-center gap-2 py-1.5 px-3 rounded-2xl bg-linear-to-br from-noir-500/8 to-white/2 hover:from-white/12 hover:to-white/6 text-white border border-white/20 hover:border-white/30 transition-all duration-300 text-sm tracking-widest font-one backdrop-blur-sm transform hover:scale-[1.02] ${
+                  className={`flex-1 group flex justify-center items-center gap-2 p-3 rounded-3xl bg-linear-to-br from-noir-500/8 to-white/2 hover:from-white/12 hover:to-white/6 text-white border border-white/20 hover:border-white/30 transition-all duration-300 text-sm tracking-widest font-one backdrop-blur-sm transform hover:scale-[1.02] ${
                     isFree ? "flex-1" : "flex-1"
-                  }`} 
+                  }`}
+                  title="Voir l'emplacement du salon sur Google Maps" 
                 >
                   <svg
                     className="w-4 h-4"
@@ -596,12 +596,10 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
                   </svg>
                   Itinéraire
                 </Link>
-
-               
               </div>
 
             {/* Contact Info */}
-            <div className="rounded-2xl border border-white/10 bg-linear-to-br from-noir-500 to-white/2 p-5 backdrop-blur-lg shadow-xl">
+            <div className="rounded-3xl border border-white/10 bg-linear-to-br from-noir-500 to-white/2 p-5 backdrop-blur-lg shadow-xl">
               <h3 className="text-white/95 text-sm font-one tracking-wider uppercase mb-4 flex items-center gap-2">
                 <svg
                   className="w-4 h-4"
@@ -740,7 +738,7 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
           <div className="lg:col-span-2 lg:order-1 space-y-6">
             {/* Desktop Hero */}
             <div className="hidden lg:block">
-              <div className="relative overflow-hidden rounded-2xl shadow-xl">
+              <div className="relative overflow-hidden rounded-3xl shadow-xl">
                 <div className="relative h-80 lg:h-96 bg-linear-to-br from-noir-500 to-noir-700">
                   {heroSrc ? (
                     <Image
@@ -860,7 +858,7 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
             </div>
 
             {/* Présentation */}
-            <div className="rounded-2xl border border-white/10 bg-linear-to-br from-noir-500 to-noir-700 p-6 backdrop-blur-lg shadow-xl">
+            <div className="rounded-3xl border border-white/10 bg-linear-to-br from-noir-500 to-noir-700 p-6 backdrop-blur-lg shadow-xl">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
                 <h2 className="text-white/95 font-one text-sm tracking-wider uppercase">
                   Présentation
@@ -871,14 +869,14 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
                       {prestationsVisibles.map((p, idx) => (
                         <span
                           key={`${p}-${idx}`}
-                          className="px-3 py-1 rounded-lg bg-linear-to-br from-noir-500/8 to-noir-700/2 text-white/80 border border-white/10 text-xs font-one backdrop-blur-sm"
+                          className="px-3 py-1 rounded-2xl bg-linear-to-br from-noir-500/8 to-noir-700/2 text-white/80 border border-white/10 text-xs font-one backdrop-blur-sm"
                           title={p}
                         >
                           {p}
                         </span>
                       ))}
                       {prestationsRestantes > 0 && (
-                        <span className="px-3 py-1 rounded-lg bg-linear-to-br from-noir-500/8 to-noir-700/2 text-white/80 border border-white/10 text-xs font-one backdrop-blur-sm">
+                        <span className="px-3 py-1 rounded-2xl bg-linear-to-br from-noir-500/8 to-noir-700/2 text-white/80 border border-white/10 text-xs font-one backdrop-blur-sm">
                           +{prestationsRestantes}
                         </span>
                       )}

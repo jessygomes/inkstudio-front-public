@@ -388,13 +388,13 @@ export default function SalonTabs({
 
   return (
     <section ref={sectionRef}>
-      <div className="bg-noir-700 rounded-2xl border border-white/10 p-4 sm:p-6 lg:p-8">
+      <div className="bg-noir-700 rounded-3xl border border-white/10 p-4 sm:p-6 lg:p-8">
         {/* Segmented tabs */}
         <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div
             role="tablist"
             aria-label="Contenus du salon"
-            className="no-scrollbar flex w-full gap-1 overflow-x-auto rounded-2xl border border-white/10 bg-noir-700/85 p-1 sm:w-auto"
+            className="no-scrollbar flex w-full gap-1 overflow-x-auto rounded-3xl border border-white/10 bg-noir-700/85 p-1 sm:w-auto"
           >
             {(
               [
@@ -415,18 +415,18 @@ export default function SalonTabs({
                   role="tab"
                   aria-selected={selected}
                   onClick={() => setTab(t.key)}
-                  className={`group relative inline-flex shrink-0 cursor-pointer items-center gap-2 whitespace-nowrap rounded-xl px-3.5 py-2 text-sm font-one font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tertiary-400/50 ${
+                  className={`group relative inline-flex shrink-0 cursor-pointer items-center gap-2 whitespace-nowrap rounded-3xl px-3.5 py-2 text-sm font-one font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tertiary-400/50 ${
                     selected
-                      ? "bg-tertiary-400/20 text-white shadow-[inset_0_-2px_0_0_var(--color-tertiary-400)]"
+                      ? "bg-linear-to-r from-tertiary-400/50 to-tertiary-500/70 text-white"
                       : "text-white/65 hover:bg-white/8 hover:text-white"
                   }`}
                 >
                   <span>{t.label}</span>
                   {t.count > 0 && (
                     <span
-                      className={`inline-flex min-w-5 items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] leading-none ${
+                      className={`inline-flex min-w-3 items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] leading-none ${
                         selected
-                          ? "bg-tertiary-400/25 text-tertiary-100"
+                          ? "bg-white text-tertiary-400"
                           : "bg-white/10 text-white/75"
                       }`}
                     >
@@ -449,7 +449,7 @@ export default function SalonTabs({
               <select
                 value={flashSort}
                 onChange={(e) => setFlashSort(e.target.value as FlashSort)}
-                className="h-9 w-full cursor-pointer rounded-2xl border border-white/20 bg-noir-700/10 px-3 py-1.5 text-xs font-one text-white/90 transition hover:bg-white/20 sm:w-auto"
+                className="h-9 w-full cursor-pointer rounded-3xl border border-white/20 bg-noir-700/10 px-3 py-1.5 text-xs font-one text-white/90 transition hover:bg-white/20 sm:w-auto"
                 aria-label="Trier les flashs"
                 title="Trier les flashs"
               >
@@ -471,7 +471,7 @@ export default function SalonTabs({
             {showExpandControl && (
                 <button
                   onClick={() => openLightbox(0)}
-                  className="inline-flex h-9 w-full cursor-pointer items-center justify-center gap-2 rounded-2xl border border-white/20 bg-noir-700/10 px-4 py-1.5 text-xs font-one text-white/90 transition hover:border-white/40 sm:w-auto"
+                  className="inline-flex h-9 w-full cursor-pointer items-center justify-center gap-2 rounded-3xl border border-white/20 bg-noir-700/10 px-4 py-1.5 text-xs font-one text-white/90 transition hover:border-white/40 sm:w-auto"
                   aria-label="Tout agrandir"
                   title="Tout agrandir"
                 >
@@ -676,12 +676,14 @@ export default function SalonTabs({
                         )}
 
                         {bookingPath && canBookFlashes && (
-                          <Link
-                            href={`${bookingPath}?prestation=TATTOO&flashId=${encodeURIComponent(f.id)}`}
-                            className="mt-2 inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-one bg-linear-to-r from-tertiary-500 to-tertiary-400 text-white hover:from-tertiary-400 hover:to-tertiary-500 transition"
-                          >
-                            Réserver
-                          </Link>
+                          <div className="flex justify-end pt-1">
+                            <Link
+                              href={`${bookingPath}?prestation=TATTOO&flashId=${encodeURIComponent(f.id)}`}
+                              className="inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-2 text-xs font-one transition-all duration-300 bg-linear-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white shadow-lg shadow-tertiary-500/25 hover:shadow-tertiary-500/40 hover:-translate-y-0.5"
+                            >
+                              Réserver
+                            </Link>
+                          </div>
                         )}
                       </div>
                     </li>

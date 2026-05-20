@@ -89,7 +89,7 @@ export default function MesAvisTab() {
 
   return (
     <>
-      <div className="rounded-2xl border border-white/10 bg-linear-to-br from-noir-500/6 to-white/3 p-5 backdrop-blur-lg shadow-xl sm:p-6">
+      <div className="rounded-3xl border border-white/10 bg-linear-to-br from-noir-500/6 to-white/3 p-5 backdrop-blur-lg shadow-xl sm:p-6">
         <div className="mb-5 flex items-center justify-between border-b border-white/10 pb-4">
           <h3 className="text-white font-one font-semibold text-lg">
             Mes avis

@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import AppButton from "@/components/Shared/AppButton";
 import { createReview, getSalonReviews } from "@/lib/actions/review.action";
 import { useUser } from "@/components/Context/UserContext";
 import { toast } from "sonner";
@@ -149,13 +150,16 @@ export default function SalonReviews({ salonId, salonName }: Props) {
           rows={2}
           className="w-full bg-white/5 border border-white/20 rounded-2xl px-2.5 py-1.5 text-white text-xs focus:outline-none focus:border-tertiary-400 resize-none"
         />
-        <button
-          onClick={submit}
-          disabled={submitting}
-          className="cursor-pointer w-full sm:w-auto px-3 py-1.5 bg-linear-to-r from-tertiary-500 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-500 text-white rounded-2xl text-xs font-one transition-all duration-300 disabled:opacity-50"
-        >
-          {submitting ? "Envoi..." : "Publier l'avis"}
-        </button>
+        <div className="flex justify-end pt-1">
+          <AppButton
+            onClick={submit}
+            disabled={submitting}
+            variant="primary"
+            className="cursor-pointer text-xs px-5 py-2"
+          >
+            {submitting ? "Envoi..." : "Publier l'avis"}
+          </AppButton>
+        </div>
       </div>
 
       {/* Liste des avis */}

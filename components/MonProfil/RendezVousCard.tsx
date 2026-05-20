@@ -2,6 +2,7 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { toSlug } from "@/lib/utils";
+import AppButton from "@/components/Shared/AppButton";
 import {
   FaCalendarAlt,
   FaClock,
@@ -472,7 +473,7 @@ export default function RendezVousCard({
                     <p className="text-white font-one text-sm font-semibold">
                       {hasReview ? "Votre avis" : "Donner votre avis"}
                     </p>
-                    <p className="text-white/60 text-xs">
+                    <p className="text-white/60 text-xs font-one">
                       Partagez votre expérience avec le salon
                     </p>
                   </div>
@@ -488,7 +489,7 @@ export default function RendezVousCard({
                       </div>
                       <span className="text-white/70 text-xs">{appointment.review?.rating}/5</span>
                       {appointment.review?.isVerified && (
-                        <span className="ml-auto px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-400/30 text-emerald-200 text-[11px]">
+                        <span className="ml-auto px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-400/30 font-one text-emerald-200 text-[11px]">
                           ✓ Vérifié
                         </span>
                       )}
@@ -593,20 +594,17 @@ export default function RendezVousCard({
                       <p className="text-white/40 text-[11px]">{reviewForm.comment.length}/500</p>
                     </div>
 
-                    <button
-                      onClick={() => handleSubmitReview(appointment)}
-                      disabled={reviewSubmitting}
-                      className="cursor-pointer w-fit px-4 py-2.5 rounded-2xl bg-linear-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white text-xs font-one transition-all disabled:opacity-60 flex items-center justify-center gap-2"
-                    >
-                      {reviewSubmitting ? (
-                        <>
-                          <div className="animate-spin rounded-full h-3 w-3 border-2 border-white border-t-transparent" />
-                          Publication...
-                        </>
-                      ) : (
-                        "Publier l'avis"
-                      )}
-                    </button>
+                    <div className="flex justify-end">
+                      <AppButton
+                        onClick={() => handleSubmitReview(appointment)}
+                        disabled={reviewSubmitting}
+                        variant="primary"
+                        icon={reviewSubmitting ? <div className="animate-spin rounded-full h-3 w-3 border-2 border-white border-t-transparent" /> : undefined}
+                        className="text-xs py-2 cursor-pointer"
+                      >
+                        {reviewSubmitting ? "Publication..." : "Publier l'avis"}
+                      </AppButton>
+                    </div>
                   </div>
                 )}
               </div>

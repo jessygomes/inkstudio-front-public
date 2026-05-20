@@ -16,12 +16,12 @@ export default function HoursCard({ hours, todayFR, openNow }: HoursCardProps) {
   if (hours.length === 0) return null;
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-linear-to-br from-noir-500 to-white/2 p-5 backdrop-blur-lg shadow-xl">
+    <div className="rounded-3xl border border-white/10 bg-noir-700/90 p-3 sm:p-4 backdrop-blur-md shadow-xl">
       {/* Header avec bouton d'expansion */}
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-white/95 font-one text-sm tracking-wider uppercase flex items-center gap-2">
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="text-white/90 font-one text-xs tracking-widest uppercase flex items-center gap-1">
           <svg
-            className="w-4 h-4"
+            className="w-3.5 h-3.5 opacity-80"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -33,13 +33,12 @@ export default function HoursCard({ hours, todayFR, openNow }: HoursCardProps) {
               d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
             />
           </svg>
-          Horaires d&apos;ouverture
+          Horaires
         </h3>
-
         {/* Bouton d'expansion (mobile et tablette) */}
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="lg:hidden flex items-center justify-center w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 text-white/70 hover:text-white transition-all"
+          className="lg:hidden flex items-center justify-center w-7 h-7 rounded-2xl bg-white/10 hover:bg-white/20 text-white/70 hover:text-white transition-all"
           aria-label={isExpanded ? "Réduire" : "Développer"}
         >
           <svg
@@ -62,66 +61,31 @@ export default function HoursCard({ hours, todayFR, openNow }: HoursCardProps) {
 
       {/* Résumé aujourd'hui (toujours visible) */}
       {openNow.today && (
-        <div className="mb-3 rounded-2xl border border-tertiary-400/15 bg-tertiary-400/20 p-3">
-          <div className="flex items-center justify-between">
-            <span className="text-white font-one text-sm">
-              Aujourd&apos;hui
-            </span>
-            <div className="flex items-center gap-2">
-              <span
-                className={`h-1.5 w-1.5 rounded-full ${
-                  openNow.open ? "bg-emerald-400" : "bg-red-400"
-                }`}
-              />
-              <span
-                className={`text-sm font-one ${
-                  openNow.open ? "text-emerald-300" : "text-red-300"
-                }`}
-              >
-                {openNow.open ? "Ouvert" : "Fermé"}
-              </span>
-            </div>
-          </div>
-          <p className="text-white/80 font-one text-sm mt-1">
-            {openNow.today.start}–{openNow.today.end}
-          </p>
+        <div className="mb-1 flex items-center gap-2 bg-noir-500 rounded-2xl">
+          <span className="w-full inline-flex items-center justify-between gap-3 px-4 py-1 text-sm font-one text-white/90 ">
+            <span className="font-semibold tracking-widest">Aujourd'hui</span>
+            <span className="text-white/70 font-one">{openNow.today.start}–{openNow.today.end}</span>
+          </span>
         </div>
       )}
+      {/* <div className="h-px w-2/3 rounded-2xl animate-pulse mx-auto bg-linear-to-r from-tertiary-400/30 to-tertiary-500/30 mb-1" /> */}
 
       {/* Horaires détaillés (dépliable sur mobile/tablette) */}
-      <div
-        className={`${isExpanded ? "block" : "hidden"} lg:block space-y-1.5`}
-      >
+      <div className={`${isExpanded ? "block" : "hidden"} lg:block space-y-2`}>
         {hours.map((h) => {
           const isToday = h.day.toLowerCase() === todayFR;
           return (
             <div
               key={h.day}
-              className={`flex items-center justify-between py-1.5 px-3 rounded-2xl transition-all duration-200 ${
-                isToday
-                  ? "border border-tertiary-400/15 bg-tertiary-400/20"
-                  : "bg-white/2 hover:bg-white/5"
-              }`}
+              className={`flex items-center justify-between py-1 px-2 rounded-xl transition-all duration-200 ${isToday ? "border border-tertiary-400/15 bg-tertiary-400/5" : ""}`}
             >
-              <span
-                className={`font-one text-sm ${
-                  isToday ? "text-white" : "text-white/80"
-                }`}
-              >
+              <span className={`font-one text-xs ${isToday ? "text-white" : "text-white/70"}`}>
                 {h.day}
                 {isToday && (
-                  <span className="ml-2 text-xs text-tertiary-200">
-                    (Aujourd&apos;hui)
-                  </span>
+                  <span className="ml-1 text-[11px] text-tertiary-200">(Aujourd'hui)</span>
                 )}
               </span>
-              <span
-                className={`font-one text-sm ${
-                  isToday ? "text-white font-semibold" : "text-white/90"
-                }`}
-              >
-                {h.value}
-              </span>
+              <span className={`font-one text-xs ${isToday ? "text-white" : "text-white/80"}`}>{h.value}</span>
             </div>
           );
         })}

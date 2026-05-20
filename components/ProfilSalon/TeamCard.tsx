@@ -61,16 +61,32 @@ export function TeamCard({
     uniqueSkills.length > MAX ? uniqueSkills.length - MAX : 0;
 
   return (
-    <li className="group relative list-none rounded-2xl border border-white/10 bg-linear-to-b from-noir-500/8 to-white/2 p-3.5 sm:p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-tertiary-400/35 lg:h-full lg:min-h-88">
+    <li className="group relative list-none overflow-hidden rounded-3xl border border-white/10 bg-linear-to-b from-noir-500/8 to-white/2 p-3.5 sm:p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-tertiary-400/35 lg:h-full lg:min-h-88">
       {/* Header */}
-      <div className="flex items-center gap-3.5 lg:items-start">
-        <div className="relative h-18 w-18 sm:h-20 sm:w-20 shrink-0 rounded-xl overflow-hidden ring-1 ring-white/15 bg-white/10">
+      <div className="relative -mx-3.5 -mt-3.5 mb-3 flex sm:flex-col items-center gap-3.5 rounded-none px-3.5 py-4 sm:-mx-4 sm:-mt-4 sm:px-4 sm:py-5 lg:mb-4 lg:min-h-64 lg:justify-center lg:rounded-t-3xl lg:py-8">
+        {img ? (
+          <>
+            <div className="pointer-events-none absolute inset-0">
+              <Image
+                src={img}
+                alt=""
+                fill
+                className="object-cover blur-lg scale-100 sm:scale-105 opacity-60"
+                aria-hidden
+              />
+            </div>
+            {/* <div className="pointer-events-none absolute inset-0 bg-noir-700/45 lg:bg-noir-700/55" /> */}
+          </>
+        ) : (
+          <div className="pointer-events-none absolute inset-0 bg-linear-to-br from-white/8 to-white/2" />
+        )}
+
+        <div className="relative z-10 h-18 w-18 sm:h-40 sm:w-40 shrink-0 rounded-2xl overflow-hidden shadow-2xl bg-white/10">
           {img ? (
             <Image
               src={img}
               alt={name}
               fill
-              sizes="80px"
               className="object-cover"
               priority={false}
             />
@@ -81,7 +97,7 @@ export function TeamCard({
           )}
         </div>
 
-        <div className="min-w-0 flex-1 h-18 sm:h-20 flex flex-col justify-center lg:h-auto">
+        <div className="relative z-10 min-w-0 flex-1 h-18 sm:h-20 flex flex-col justify-center lg:h-auto sm:text-center">
           <p className="text-white text-sm sm:text-base leading-tight tracking-widest font-one font-semibold wrap-break-word">
             {name}
           </p>
@@ -93,7 +109,7 @@ export function TeamCard({
         {/* Bouton d'expansion (mobile et tablette) */}
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="lg:hidden inline-flex items-center justify-center h-8 w-8 rounded-lg border border-white/10 bg-white/5 text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+          className="relative z-10 lg:hidden inline-flex items-center justify-center h-8 w-8 rounded-lg border border-white/10 bg-white/5 text-white/70 transition-colors hover:bg-white/10 hover:text-white"
           aria-label={isExpanded ? "Réduire" : "Développer"}
         >
           <svg
@@ -191,7 +207,7 @@ export function TeamCard({
                 href={instaUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex h-7 w-7 items-center justify-center rounded-2xl border border-white/15 bg-tertiary-400/20 text-white shadow-[inset_0_-2px_0_0_var(--color-tertiary-400)] transition-colors hover:bg-tertiary-400/25 hover:border-tertiary-400/35"
+                className="inline-flex h-7 w-7 items-center justify-center rounded-2xl bg-linear-to-r from-tertiary-400 to-tertiary-500 text-white shadow-lg shadow-tertiary-500/25 transition-all duration-300 hover:from-tertiary-500 hover:to-tertiary-600 hover:shadow-tertiary-500/40 hover:-translate-y-0.5"
                 title="Instagram"
                 aria-label={`Instagram de ${name}`}
               >

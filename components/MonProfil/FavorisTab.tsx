@@ -74,7 +74,7 @@ export default function FavorisTab() {
 
   if (loading) {
     return (
-      <div className="bg-linear-to-br from-noir-500/6 to-white/3 backdrop-blur-lg border border-white/10 rounded-2xl p-4 sm:p-6 shadow-xl">
+      <div className="bg-linear-to-br from-noir-500/6 to-white/3 backdrop-blur-lg border border-white/10 rounded-3xl p-4 sm:p-6 shadow-xl">
         <div className="text-center py-12">
           <div className="animate-spin rounded-full h-8 w-8 border-2 border-tertiary-400 border-t-transparent mx-auto mb-4"></div>
           <p className="text-white/60 font-one">Chargement des favoris...</p>
@@ -84,7 +84,7 @@ export default function FavorisTab() {
   }
 
   return (
-    <div className="bg-linear-to-br from-noir-500/6 to-white/3 backdrop-blur-lg border border-white/10 rounded-2xl p-4 sm:p-6 shadow-xl">
+    <div className="bg-linear-to-br from-noir-500/6 to-white/3 backdrop-blur-lg border border-white/10 rounded-3xl p-4 sm:p-6 shadow-xl">
       {/* Header modernisé */}
       <div className="flex items-center justify-between mb-6 pb-4 border-b border-white/10">
         <div>
