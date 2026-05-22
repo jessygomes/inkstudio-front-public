@@ -27,6 +27,8 @@ export function SalonCard({ salon }: { salon: SalonProps }) {
       `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 240'><rect width='400' height='240' fill='%231a1a1a'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%23ffffff88' font-family='sans-serif' font-size='18'>Aucune image</text></svg>`
     );
 
+  const mediaSrc = hasImages ? images[current] : profileSrc || FALLBACK;
+
   const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (!hasImages) return;
     if (e.key === "ArrowRight") setCurrent((c) => (c + 1) % images.length);
@@ -120,11 +122,13 @@ export function SalonCard({ salon }: { salon: SalonProps }) {
         onKeyDown={onKeyDown}
       >
         <Image
-          src={hasImages ? images[current] : FALLBACK}
+          src={mediaSrc}
           alt={salon.salonName}
           fill
           sizes="(min-width: 1280px) 33vw, (min-width: 768px) 50vw, 100vw"
-          className="object-cover transition-transform duration-500 group-hover:scale-105"
+          className={`object-cover transition-transform duration-500 ${
+            hasImages ? "group-hover:scale-105" : "blur-2xl scale-110"
+          }`}
           priority={false}
         />
         <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-noir-700/80 via-transparent to-transparent" />

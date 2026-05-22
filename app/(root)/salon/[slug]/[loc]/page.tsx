@@ -425,6 +425,15 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
                   className="object-cover"
                   priority
                 />
+              ) : profileSrc ? (
+                <Image
+                  src={profileSrc}
+                  alt={`${salon.salonName} - photo de profil en arrière-plan`}
+                  fill
+                  sizes="100vw"
+                  className="object-cover blur-2xl scale-110"
+                  priority
+                />
               ) : (
                 <div className="w-full h-full grid place-items-center">
                   <div className="text-center text-white/60">
@@ -747,6 +756,15 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
                       fill
                       sizes="(min-width:1024px) 66vw, 100vw"
                       className="object-cover"
+                      priority
+                    />
+                  ) : profileSrc ? (
+                    <Image
+                      src={profileSrc}
+                      alt={`${salon.salonName} - photo de profil en arrière-plan`}
+                      fill
+                      sizes="(min-width:1024px) 66vw, 100vw"
+                      className="object-cover blur-2xl scale-110"
                       priority
                     />
                   ) : (
