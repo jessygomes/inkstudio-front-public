@@ -1,7 +1,16 @@
 import type { NextAuthConfig } from "next-auth";
+import { CredentialsSignin } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
+import { createRateLimitCode, parseRateLimit } from "./lib/auth-rate-limit";
 import { userLoginSchema } from "./lib/zod/validator-schema";
+
+class CredentialsRateLimitError extends CredentialsSignin {
+  constructor(retryAfterSeconds: number) {
+    super();
+    this.code = createRateLimitCode(retryAfterSeconds);
+  }
+}
 
 /**
  * Configuration NextAuth pour l'authentification
@@ -51,6 +60,12 @@ export default {
             },
             body: JSON.stringify({ email, password }),
           });
+
+          const rateLimit = await parseRateLimit(response);
+
+          if (rateLimit.isRateLimited) {
+            throw new CredentialsRateLimitError(rateLimit.retryAfterSeconds);
+          }
 
           if (!response.ok) {
             console.error(
@@ -111,6 +126,10 @@ export default {
           console.error("Données complètes:", JSON.stringify(data, null, 2));
           return null;
         } catch (error) {
+          if (error instanceof CredentialsSignin) {
+            throw error;
+          }
+
           console.error("❌ Erreur lors de l'authentification:", error);
           return null;
         }

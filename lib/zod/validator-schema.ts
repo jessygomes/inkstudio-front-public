@@ -152,6 +152,10 @@ export const userLoginSchema = z.object({
     .min(8, "Le mot de passe doit contenir au moins 8 caractères"),
 });
 
+export const forgotPasswordSchema = z.object({
+  email: z.string().email("Veuillez entrer un email valide").toLowerCase(),
+});
+
 // Schema de validation pour les modifications du profil
 export const updateProfileSchema = z.object({
   firstName: z.string().min(2, "Le prénom doit contenir au moins 2 caractères"),

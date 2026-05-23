@@ -1,7 +1,7 @@
 /* eslint-disable react/no-unescaped-entities */
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -12,6 +12,7 @@ import { signIn } from "next-auth/react";
 
 import { FormError } from "@/components/Shared/FormError";
 import { FormSuccess } from "@/components/Shared/FormSuccess";
+import { parseRateLimit } from "../../lib/auth-rate-limit";
 import { CardWrapper } from "./Wrapper/CardWrapper";
 import { FaGoogle } from "react-icons/fa";
 
@@ -36,6 +37,7 @@ const registerSchema = z
       ),
     confirmPassword: z.string(),
     birthDate: z.string().optional(),
+    website: z.string().max(0).optional(),
     acceptTerms: z
       .boolean()
       .refine(
@@ -56,6 +58,8 @@ export default function Register() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isPending, setIsPending] = useState(false);
   const [isGooglePending, setIsGooglePending] = useState(false);
+  const [cooldownSeconds, setCooldownSeconds] = useState(0);
+  const [hasRateLimitError, setHasRateLimitError] = useState(false);
   const [error, setError] = useState<string | undefined>("");
   const [success, setSuccess] = useState<string | undefined>("");
 
@@ -69,13 +73,43 @@ export default function Register() {
       password: "",
       confirmPassword: "",
       birthDate: "",
+      website: "",
       acceptTerms: false,
     },
   });
 
+  useEffect(() => {
+    if (cooldownSeconds <= 0) {
+      if (hasRateLimitError) {
+        setError("");
+        setHasRateLimitError(false);
+      }
+
+      return;
+    }
+
+    const intervalId = window.setInterval(() => {
+      setCooldownSeconds((previousSeconds) =>
+        previousSeconds > 0 ? previousSeconds - 1 : 0,
+      );
+    }, 1000);
+
+    return () => window.clearInterval(intervalId);
+  }, [cooldownSeconds, hasRateLimitError]);
+
   const onSubmit = async (data: RegisterForm) => {
+    if (cooldownSeconds > 0) {
+      return;
+    }
+
+    if (data.website?.trim()) {
+      setError("Impossible de finaliser l'inscription. Veuillez réessayer.");
+      return;
+    }
+
     setError("");
     setSuccess("");
+    setHasRateLimitError(false);
     setIsPending(true);
 
     try {
@@ -97,11 +131,20 @@ export default function Register() {
         },
       );
 
-      const registerData = await registerResponse.json();
+      const rateLimit = await parseRateLimit(registerResponse);
+
+      if (rateLimit.isRateLimited) {
+        setCooldownSeconds(rateLimit.retryAfterSeconds);
+        setHasRateLimitError(true);
+        setError(rateLimit.message);
+        return;
+      }
+
+      const registerData = await registerResponse.json().catch(() => null);
 
       if (!registerResponse.ok || registerData.error) {
         throw new Error(
-          registerData.message || "Échec de l'inscription. Veuillez réessayer.",
+          registerData?.message || "Échec de l'inscription. Veuillez réessayer.",
         );
       }
 
@@ -135,6 +178,8 @@ export default function Register() {
     }
   };
 
+  const isBlocked = cooldownSeconds > 0;
+
   const handleGoogleSignIn = async () => {
     setError("");
     setSuccess("");
@@ -158,6 +203,17 @@ export default function Register() {
           className="relative text-white"
         >
           <div className="flex flex-col gap-3">
+            <div className="sr-only" aria-hidden="true">
+              <label htmlFor="website">Site web</label>
+              <input
+                id="website"
+                type="text"
+                tabIndex={-1}
+                autoComplete="off"
+                {...form.register("website")}
+              />
+            </div>
+
             {/* Nom et Prénom */}
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
               <div className="flex flex-col gap-1 font-one">
@@ -406,9 +462,13 @@ export default function Register() {
             <button
               className="cursor-pointer w-full px-6 py-2.5 bg-linear-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white rounded-2xl transition-all duration-300 font-medium disabled:opacity-50 disabled:cursor-not-allowed font-one text-sm lg:text-xs"
               type="submit"
-              disabled={isPending}
+              disabled={isPending || isBlocked}
             >
-              {isPending ? "Inscription en cours..." : "Créer mon compte"}
+              {isBlocked
+                ? `Réessayer dans ${cooldownSeconds}s`
+                : isPending
+                  ? "Inscription en cours..."
+                  : "Créer mon compte"}
             </button>
 
             <div className="flex items-center gap-3 text-white/70 text-xs">

@@ -9,6 +9,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { FormError } from "@/components/Shared/FormError";
 import { FormSuccess } from "@/components/Shared/FormSuccess";
+import { parseRateLimitCode } from "../../lib/auth-rate-limit";
 import Link from "next/link";
 import { FaGoogle } from "react-icons/fa";
 
@@ -23,6 +24,8 @@ export const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isPending, setIsPending] = useState(false);
   const [isGooglePending, setIsGooglePending] = useState(false);
+  const [cooldownSeconds, setCooldownSeconds] = useState(0);
+  const [hasRateLimitError, setHasRateLimitError] = useState(false);
   const [error, setError] = useState<string | undefined>("");
   const [success, setSuccess] = useState<string | undefined>("");
 
@@ -34,6 +37,25 @@ export const Login = () => {
     }
   }, [searchParams]);
 
+  useEffect(() => {
+    if (cooldownSeconds <= 0) {
+      if (hasRateLimitError) {
+        setError("");
+        setHasRateLimitError(false);
+      }
+
+      return;
+    }
+
+    const intervalId = window.setInterval(() => {
+      setCooldownSeconds((previousSeconds) =>
+        previousSeconds > 0 ? previousSeconds - 1 : 0,
+      );
+    }, 1000);
+
+    return () => window.clearInterval(intervalId);
+  }, [cooldownSeconds, hasRateLimitError]);
+
   const form = useForm<z.infer<typeof userLoginSchema>>({
     resolver: zodResolver(userLoginSchema),
     defaultValues: {
@@ -43,8 +65,13 @@ export const Login = () => {
   });
 
   const onSubmit = async (data: z.infer<typeof userLoginSchema>) => {
+    if (cooldownSeconds > 0) {
+      return;
+    }
+
     setError("");
     setSuccess("");
+    setHasRateLimitError(false);
     setIsPending(true);
 
     try {
@@ -53,6 +80,16 @@ export const Login = () => {
         password: data.password,
         redirect: false,
       });
+
+      const rateLimit = parseRateLimitCode(result?.code);
+
+      if (rateLimit.isRateLimited) {
+        setCooldownSeconds(rateLimit.retryAfterSeconds);
+        setHasRateLimitError(true);
+        setError(rateLimit.message);
+        setIsPending(false);
+        return;
+      }
 
       // Vérifier si une erreur existe (pas seulement ok)
       if (result?.error) {
@@ -79,6 +116,8 @@ export const Login = () => {
       setIsPending(false);
     }
   };
+
+  const isBlocked = cooldownSeconds > 0;
 
   const handleGoogleSignIn = async () => {
     setError("");
@@ -190,13 +229,15 @@ export const Login = () => {
             <button
               className="cursor-pointer px-8 py-2 bg-linear-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white rounded-2xl transition-all duration-300 font-medium disabled:opacity-50 disabled:cursor-not-allowed font-one lg:text-xs"
               type="submit"
-              disabled={isPending}
+              disabled={isPending || isBlocked}
             >
-              {isPending
-                ? success === "Redirection vers l'app..."
-                  ? "Redirection vers l'app..."
-                  : "Connexion..."
-                : "Se connecter"}
+              {isBlocked
+                ? `Réessayer dans ${cooldownSeconds}s`
+                : isPending
+                  ? success === "Redirection vers l'app..."
+                    ? "Redirection vers l'app..."
+                    : "Connexion..."
+                  : "Se connecter"}
             </button>
 
             <div className="flex items-center gap-3 text-white/70 text-xs">
