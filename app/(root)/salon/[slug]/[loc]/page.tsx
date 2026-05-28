@@ -225,6 +225,7 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
   const rawHours = parseSalonHours(salon.salonHours as any);
   const hours = hoursToLines(rawHours);
   const openNow = getOpenNow(salon.salonHours);
+  const isVerifiedSalon = salon.verifiedSalon === true;
 
   const mapsQuery = encodeURIComponent(
     [salon.address, salon.postalCode, salon.city].filter(Boolean).join(" "),
@@ -526,9 +527,29 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
                     )}
                   </div>
                   <div className="min-w-0">
-                    <h1 className="text-2xl font-one text-white tracking-wide drop-shadow-lg mb-1">
-                      {salon.salonName}
-                    </h1>
+                    <div className="mb-1 flex items-center justify-between gap-2">
+                      <h1 className="text-2xl font-one text-white tracking-wide drop-shadow-lg">
+                        {salon.salonName}
+                      </h1>
+                      {isVerifiedSalon && (
+                        <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-emerald-300/30 bg-emerald-500/20 px-2 py-0.5 text-[10px] font-one uppercase tracking-wide text-emerald-200">
+                          <svg
+                            className="h-3 w-3"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M5 13l4 4L19 7"
+                            />
+                          </svg>
+                          Vérifié
+                        </span>
+                      )}
+                    </div>
                     {openNow.today && (
                       <p className="text-white/80 text-xs font-one">
                         Aujourd&apos;hui: {openNow.today.start}–{openNow.today.end}
@@ -859,9 +880,29 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
                         )}
                       </div>
                       <div className="min-w-0">
-                        <h1 className="text-3xl lg:text-4xl font-one text-white tracking-wide drop-shadow-lg mb-2">
-                          {salon.salonName}
-                        </h1>
+                        <div className="mb-2 flex items-center justify-between gap-3">
+                          <h1 className="text-3xl lg:text-4xl font-one text-white tracking-wide drop-shadow-lg">
+                            {salon.salonName}
+                          </h1>
+                          {isVerifiedSalon && (
+                            <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-emerald-300/30 bg-emerald-500/20 px-3 py-1 text-xs font-one uppercase tracking-wide text-emerald-200">
+                              <svg
+                                className="h-3.5 w-3.5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M5 13l4 4L19 7"
+                                />
+                              </svg>
+                              Vérifié
+                            </span>
+                          )}
+                        </div>
                         {openNow.today && (
                           <p className="text-white/80 text-base font-one">
                             Aujourd&apos;hui: {openNow.today.start}–

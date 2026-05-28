@@ -91,6 +91,7 @@ export type UsersResponse = {
 export type SalonProfilProps = {
   id: string;
   salonName: string;
+  verifiedSalon?: boolean;
   image: string;
   profileImage?: string | null;
   email: string;
