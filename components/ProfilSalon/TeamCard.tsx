@@ -1,5 +1,6 @@
 "use client";
 import Image from "next/image";
+import Link from "next/link";
 import { useState } from "react";
 
 export function TeamCard({
@@ -9,6 +10,9 @@ export function TeamCard({
   instagram,
   skills,
   style,
+  isLinkedUser,
+  profileUserId,
+  profileHref,
 }: {
   name: string;
   img?: string | null;
@@ -17,6 +21,9 @@ export function TeamCard({
   phone?: string | null;
   skills?: string[] | null;
   style?: string[] | null;
+  isLinkedUser?: boolean | null;
+  profileUserId?: string | null;
+  profileHref?: string | null;
 }) {
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -24,6 +31,14 @@ export function TeamCard({
     ? instagram.startsWith("http")
       ? instagram
       : `https://instagram.com/${instagram.replace(/^@/, "")}`
+    : null;
+
+  const hasInkeraProfile =
+    isLinkedUser === true && typeof profileUserId === "string" && profileUserId.trim() !== "";
+  const inkeraProfileHref = hasInkeraProfile
+    ? (typeof profileHref === "string" && profileHref.trim() !== ""
+        ? profileHref
+        : `/mon-profil/${encodeURIComponent(profileUserId!.trim())}`)
     : null;
 
   // -- Styles (chips)
@@ -202,25 +217,37 @@ export function TeamCard({
         <div className="mt-auto pt-3">
           <div className="flex items-center justify-between border-t border-white/10 pt-3">
             <p className="text-xs text-white/55 font-one">Profil artiste</p>
-            {instaUrl ? (
-              <a
-                href={instaUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex h-7 w-7 items-center justify-center rounded-2xl bg-linear-to-r from-tertiary-400 to-tertiary-500 text-white shadow-lg shadow-tertiary-500/25 transition-all duration-300 hover:from-tertiary-500 hover:to-tertiary-600 hover:shadow-tertiary-500/40 hover:-translate-y-0.5"
-                title="Instagram"
-                aria-label={`Instagram de ${name}`}
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden>
-                  <path
-                    fill="currentColor"
-                    d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5Zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7Zm5 3a5 5 0 1 1 0 10a5 5 0 0 1 0-10Zm0 2.2a2.8 2.8 0 1 0 0 5.6a2.8 2.8 0 0 0 0-5.6ZM18.5 6a1 1 0 1 1 0 2a1 1 0 0 1 0-2Z"
-                  />
-                </svg>
-              </a>
-            ) : (
-              <span className="text-[11px] text-white/35 font-one">Sans Instagram</span>
-            )}
+            <div className="flex items-center gap-2">
+              {hasInkeraProfile && inkeraProfileHref && (
+                <Link
+                  href={inkeraProfileHref}
+                  className="inline-flex h-7 items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-2.5 text-[11px] text-white/85 font-one transition-all duration-300 hover:border-tertiary-400/40 hover:text-white"
+                  title="Voir le profil Inkera"
+                >
+                  Profil Inkera
+                </Link>
+              )}
+
+              {instaUrl ? (
+                <a
+                  href={instaUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex h-7 w-7 items-center justify-center rounded-2xl bg-linear-to-r from-tertiary-400 to-tertiary-500 text-white shadow-lg shadow-tertiary-500/25 transition-all duration-300 hover:from-tertiary-500 hover:to-tertiary-600 hover:shadow-tertiary-500/40 hover:-translate-y-0.5"
+                  title="Instagram"
+                  aria-label={`Instagram de ${name}`}
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden>
+                    <path
+                      fill="currentColor"
+                      d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5Zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7Zm5 3a5 5 0 1 1 0 10a5 5 0 0 1 0-10Zm0 2.2a2.8 2.8 0 1 0 0 5.6a2.8 2.8 0 0 0 0-5.6ZM18.5 6a1 1 0 1 1 0 2a1 1 0 0 1 0-2Z"
+                    />
+                  </svg>
+                </a>
+              ) : (
+                <span className="text-[11px] text-white/35 font-one">Sans Instagram</span>
+              )}
+            </div>
           </div>
         </div>
       </div>

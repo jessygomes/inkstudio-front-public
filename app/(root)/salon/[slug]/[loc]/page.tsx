@@ -1,8 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import SalonTabs from "@/components/ProfilSalon/SalonTabs";
 import { TeamCard } from "@/components/ProfilSalon/TeamCard";
+import { LinkedSalonCard } from "@/components/ProfilSalon/LinkedSalonCard";
 import { hoursToLines, parseSalonHours } from "@/lib/horaireHelper";
-import { FlashProps, SalonProfilProps } from "@/lib/type";
+import { FlashProps, LinkedSalonProps, SalonProfilProps } from "@/lib/type";
+import { toSlug } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -19,6 +21,21 @@ import { SalonProfileViewTracker } from "@/components/Shared/SalonProfileViewTra
 
 type PageParams = {
   params: Promise<{ slug: string; loc: string }>;
+};
+
+type SalonTatoueur = {
+  id: string;
+  name: string;
+  salonName?: string | null;
+  city?: string | null;
+  postalCode?: string | null;
+  img?: string | null;
+  description?: string | null;
+  instagram?: string | null;
+  style?: string[] | null;
+  skills?: string[] | null;
+  isLinkedUser?: boolean;
+  profileUserId?: string | null;
 };
 
 // --- data
@@ -217,6 +234,52 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
 
   const salon = await getSalon(slug, loc);
   if (!salon) notFound();
+
+  const role = typeof salon.role === "string" ? salon.role.toLowerCase() : "";
+  const isSalonRole = role === "user_salon";
+  const isTatoueurRole = role === "user_tatoueur";
+
+  const tatoueurs: SalonTatoueur[] = Array.isArray(salon.Tatoueur)
+    ? (salon.Tatoueur as SalonTatoueur[])
+    : salon.Tatoueur
+      ? [salon.Tatoueur as SalonTatoueur]
+      : [];
+
+  const sortedTatoueurs = [...tatoueurs].sort((a, b) => {
+    const aLinked = a.isLinkedUser === true ? 1 : 0;
+    const bLinked = b.isLinkedUser === true ? 1 : 0;
+    return bLinked - aLinked;
+  });
+
+  const linkedProfileHref = (tatoueur: SalonTatoueur) => {
+    if (tatoueur.isLinkedUser !== true || !tatoueur.profileUserId) return null;
+
+    const nameSource =
+      typeof tatoueur.salonName === "string" ? tatoueur.salonName.trim() : "";
+    if (!nameSource) return null;
+
+    const linkedCity =
+      typeof tatoueur.city === "string" ? tatoueur.city.trim() : "";
+    const linkedPostalCode =
+      typeof tatoueur.postalCode === "string" ? tatoueur.postalCode.trim() : "";
+    if (!linkedCity || !linkedPostalCode) return null;
+
+    const nameSlug = toSlug(nameSource);
+
+    const locSource = [linkedCity, linkedPostalCode].join("-");
+    const locSlug = toSlug(locSource) || "localisation";
+
+    if (!nameSlug) return null;
+    return `/salon/${nameSlug}/${locSlug}`;
+  };
+
+  const shouldShowTeamSection =
+    isSalonRole || (!isTatoueurRole && sortedTatoueurs.length > 0);
+
+  const linkedSalons: LinkedSalonProps[] = Array.isArray(salon.linkedSalons)
+    ? (salon.linkedSalons as LinkedSalonProps[])
+    : [];
+
   const flashes = await getAvailableFlashes(salon.id);
   const isFree = salon.saasPlan === "FREE";
 
@@ -648,7 +711,7 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
               </h3>
 
               <div className="space-y-4 sm:flex sm:justify-between sm:gap-12 lg:flex-col lg:gap-0">
-                <div className="flex flex-col sm:flex-row justify-start gap-6">
+                <div className="flex flex-col justify-start gap-6">
                 {salon.address && (
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-2xl bg-tertiary-500/30 flex items-center justify-center shrink-0 mt-0.5">
@@ -962,30 +1025,30 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
               salonName={salon.salonName}
               bookingPath={`/salon/${resolvedParams.slug}/${resolvedParams.loc}/reserver`}
               canBookFlashes={!isFree}
-              tatoueurs={(Array.isArray(salon.Tatoueur) ? salon.Tatoueur : []).map((t: { id: string; name: string }) => ({ id: t.id, name: t.name }))}
+              tatoueurs={sortedTatoueurs.map((t) => ({ id: t.id, name: t.name }))}
             />
 
             {/* Équipe */}
-            {Array.isArray(salon.Tatoueur) && salon.Tatoueur.length > 0 && (
+            {shouldShowTeamSection && sortedTatoueurs.length > 0 && (
               <section className="">
                 <div className="flex items-center justify-between mb-5">
                   <h3 className="text-white/95 font-one text-md tracking-wider uppercase">
                     L&apos;équipe
                   </h3>
                   <span className="text-white/60 font-one text-sm">
-                    {salon.Tatoueur.length}{" "}
-                    {salon.Tatoueur.length > 1 ? "tatoueurs" : "tatoueur"}
+                    {sortedTatoueurs.length}{" "}
+                    {sortedTatoueurs.length > 1 ? "tatoueurs" : "tatoueur"}
                   </span>
                 </div>
 
                 <div
                   className={`grid grid-cols-1 gap-5 ${
-                    salon.Tatoueur.length > 1
+                    sortedTatoueurs.length > 1
                       ? "sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2"
                       : ""
                   }`}
                 >
-                  {salon.Tatoueur.map((t: any) => (
+                  {sortedTatoueurs.map((t) => (
                     <div key={t.id}>
                       <TeamCard
                         name={t.name}
@@ -994,10 +1057,40 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
                         instagram={t.instagram}
                         style={t.style}
                         skills={t.skills}
+                        isLinkedUser={t.isLinkedUser}
+                        profileUserId={t.profileUserId}
+                        profileHref={linkedProfileHref(t)}
                       />
                     </div>
                   ))}
                 </div>
+              </section>
+            )}
+
+            {/* Salons liés (tatoueur) */}
+            {isTatoueurRole && linkedSalons.length > 0 && (
+              <section>
+                <div className="flex items-center justify-between mb-5">
+                  <h3 className="text-white/95 font-one text-md tracking-wider uppercase">
+                    Salons liés
+                  </h3>
+                  <span className="text-white/60 font-one text-sm">
+                    {linkedSalons.length}{" "}
+                    {linkedSalons.length > 1 ? "salons" : "salon"}
+                  </span>
+                </div>
+
+                <ul
+                  className={`grid grid-cols-1 gap-5 ${
+                    linkedSalons.length > 1
+                      ? "sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2"
+                      : ""
+                  }`}
+                >
+                  {linkedSalons.map((ls) => (
+                    <LinkedSalonCard key={ls.id} salon={ls} />
+                  ))}
+                </ul>
               </section>
             )}
 

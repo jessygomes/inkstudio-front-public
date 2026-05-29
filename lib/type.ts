@@ -31,11 +31,16 @@ export type SalonProps = {
 export type TatoueurProps = {
   id: string;
   name: string;
+  salonName?: string | null;
+  city?: string | null;
+  postalCode?: string | null;
   img: string;
   description: string;
   email: string;
   phone: string;
   instagram: string;
+  isLinkedUser?: boolean;
+  profileUserId?: string | null;
 };
 
 export type PortfolioProps = {
@@ -88,8 +93,25 @@ export type UsersResponse = {
   filters: { query: string | null; city: string | null };
 };
 
+export type LinkedSalonProps = {
+  id: string;
+  salonName: string | null;
+  image: string | null;
+  profileImage: string | null;
+  address: string | null;
+  city: string | null;
+  postalCode: string | null;
+  instagram: string | null;
+  website: string | null;
+  salonHours: string | null;
+  prestations: string[];
+  isCurrentSalon: boolean;
+  linkedAt: string | null;
+};
+
 export type SalonProfilProps = {
   id: string;
+  role?: string;
   salonName: string;
   verifiedSalon?: boolean;
   image: string;
@@ -100,7 +122,7 @@ export type SalonProfilProps = {
   city: string;
   postalCode: string;
   salonHours: string;
-  Tatoueur: TatoueurProps;
+  Tatoueur: TatoueurProps[] | TatoueurProps | null;
   salonPhotos: string[];
   instagram: string;
   facebook: string;
@@ -112,6 +134,7 @@ export type SalonProfilProps = {
   saasPlan: string;
   Portfolio: PortfolioProps[];
   ProductSalon: ProductSalonProps[];
+  linkedSalons?: LinkedSalonProps[];
 };
 
 export type FavoriteSalon = {
