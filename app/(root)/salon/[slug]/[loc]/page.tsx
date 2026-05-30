@@ -526,7 +526,7 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
 
               {/* Status badges */}
               <div className="absolute top-4 left-4 right-4 flex flex-wrap gap-2 z-10">
-                <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/20 text-white/90 text-xs font-one backdrop-blur-md">
+                <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-noir-500/30 border border-white/20 text-white/90 text-xs font-one backdrop-blur-lg">
                   <svg
                     className="w-3 h-3"
                     fill="currentColor"
@@ -878,8 +878,8 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
                   <div className="absolute inset-0 bg-linear-to-b from-black/20 via-transparent to-black/80" />
 
                   {/* Status badges */}
-                  <div className="absolute top-5 left-5 right-5 flex flex-wrap gap-3 z-10">
-                    <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 text-white/90 text-sm font-one backdrop-blur-md">
+                  <div className="absolute bottom-5 right-5 flex flex-wrap gap-3 z-10">
+                    <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-noir-500/30 border border-white/20 text-white/90 text-xs font-one backdrop-blur-lg">
                       <svg
                         className="w-4 h-4"
                         fill="currentColor"
@@ -897,7 +897,7 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
                       )}
                     </span>
                     <span
-                      className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-one border backdrop-blur-md ${
+                      className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-one border backdrop-blur-lg ${
                         openNow.open
                           ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40"
                           : "bg-red-500/20 text-red-300 border-red-500/40"
