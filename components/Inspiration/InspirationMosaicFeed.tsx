@@ -1,5 +1,15 @@
 "use client";
 
+import {
+  type InspirationFilterOptions,
+  getInspirationPortfolioPhotosAction,
+  type InspirationPhoto,
+  type InspirationPhotosResponse,
+} from "@/lib/actions/inspiration.action";
+import AppButton from "@/components/Shared/AppButton";
+import FavoritePortfolioBtn from "@/components/Shared/FavoritePortfolioBtn";
+import { toSlug } from "@/lib/utils";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -15,11 +25,23 @@ type PortfolioFeedItem = {
   salonName: string;
   city: string;
   href: string;
+  styles: string[];
   artistName?: string;
-  instagram?: string;
+  artistInstagram?: string;
+  salonInstagram?: string;
 };
 
-const PAGE_SIZE = 8;
+type InstagramProfile = {
+  href: string;
+  label: string;
+};
+
+type InspirationMosaicFeedProps = {
+  initialData: InspirationPhotosResponse;
+  initialFilters: InspirationFilterOptions;
+};
+
+const PAGE_SIZE = 12;
 
 // Ratios hauteur/largeur pour donner un aspect mosaïque varié
 const CARD_ASPECT_RATIOS = [
@@ -33,142 +55,137 @@ const CARD_ASPECT_RATIOS = [
   "aspect-square",
 ] as const;
 
-const MOCK_ITEMS: PortfolioFeedItem[] = [
-  {
-    key: "mock-1",
-    imageUrl: "/photos/AI%20Art.jpg",
-    title: "Blackwork organique",
-    description: "Lignes fluides et ombrages profonds.",
-    salonName: "Ligne Noire",
-    city: "Paris",
-    href: "/trouver-un-salon",
-    artistName: "Nora",
-    instagram: "@the.inkera",
-  },
-  {
-    key: "mock-2",
-    imageUrl: "/photos/Gorgeous.jpg",
-    title: "Fine line floral",
-    description: "Composition florale en tracé fin.",
-    salonName: "Atelier Eden",
-    city: "Lyon",
-    href: "/trouver-un-salon",
-    artistName: "Mila",
-    instagram: "@the.inkera",
-  },
-  {
-    key: "mock-3",
-    imageUrl: "/photos/complete.jpg",
-    title: "Pièce japonaise",
-    description: "Contraste fort et mouvement.",
-    salonName: "Kuro Studio",
-    city: "Marseille",
-    href: "/trouver-un-salon",
-    artistName: "Kenji",
-    instagram: "@the.inkera",
-  },
-  {
-    key: "mock-4",
-    imageUrl: "/photos/assis.jpg",
-    title: "Motif graphique",
-    description: "Approche géométrique moderne.",
-    salonName: "Obsidian Ink",
-    city: "Bordeaux",
-    href: "/trouver-un-salon",
-    instagram: "@the.inkera",
-  },
-  {
-    key: "mock-5",
-    imageUrl: "/photos/drink.jpg",
-    title: "Old school color",
-    description: "Palette vive et contour marqué.",
-    salonName: "Rouge 13",
-    city: "Lille",
-    href: "/trouver-un-salon",
-    artistName: "Sam",
-    instagram: "@the.inkera",
-  },
-  {
-    key: "mock-6",
-    imageUrl: "/photos/goth.jpg",
-    title: "Dark ornamental",
-    description: "Textures denses et finesse des détails.",
-    salonName: "Nocturne",
-    city: "Nantes",
-    href: "/trouver-un-salon",
-    instagram: "@the.inkera",
-  },
-  {
-    key: "mock-7",
-    imageUrl: "/photos/metro.jpg",
-    title: "Minimal symbol",
-    description: "Micro-tatouage à haute précision.",
-    salonName: "Mono Ink",
-    city: "Toulouse",
-    href: "/trouver-un-salon",
-    artistName: "Elsa",
-    instagram: "@the.inkera",
-  },
-  {
-    key: "mock-8",
-    imageUrl: "/photos/recherche.jpg",
-    title: "Polynesian pattern",
-    description: "Trame inspirée des traditions insulaires.",
-    salonName: "Mana Atelier",
-    city: "Montpellier",
-    href: "/trouver-un-salon",
-    instagram: "@the.inkera",
-  },
-  {
-    key: "mock-9",
-    imageUrl: "/photos/red.jpg",
-    title: "Rouge contrast",
-    description: "Encrage contrasté sur fond neutre.",
-    salonName: "Velvet Needle",
-    city: "Nice",
-    href: "/trouver-un-salon",
-    instagram: "@the.inkera",
-  },
-  {
-    key: "mock-10",
-    imageUrl: "/photos/sit.jpg",
-    title: "Neo tribal",
-    description: "Volumétrie maîtrisée et rythme graphique.",
-    salonName: "Ancre Atelier",
-    city: "Rennes",
-    href: "/trouver-un-salon",
-    instagram: "@the.inkera",
-  },
-  {
-    key: "mock-11",
-    imageUrl: "/photos/X.jpg",
-    title: "Typo serif",
-    description: "Lettrage subtil et équilibré.",
-    salonName: "Serif Ink",
-    city: "Strasbourg",
-    href: "/trouver-un-salon",
-    instagram: "@the.inkera",
-  },
-  {
-    key: "mock-12",
-    imageUrl: "/photos/blk.jpg",
-    title: "Heavy black",
-    description: "Aplats noirs nets et puissants.",
-    salonName: "Bloc Noir",
-    city: "Grenoble",
-    href: "/trouver-un-salon",
-    artistName: "Iris",
-    instagram: "@the.inkera",
-  },
-];
+const buildSalonHref = (salonName: string, city: string, postalCode?: string) => {
+  const nameSlug = toSlug(salonName || "salon");
+  const locSource = [city, postalCode]
+    .filter((value) => typeof value === "string" && value.trim() !== "")
+    .join("-");
+  const locSlug = toSlug(locSource) || "localisation";
 
-export default function InspirationMosaicFeed() {
-  const [items, setItems] = useState<PortfolioFeedItem[]>([]);
-  const [page, setPage] = useState(0);
+  return `/salon/${nameSlug}/${locSlug}`;
+};
+
+const getUniqueSortedValues = (values: Array<string | undefined>) => {
+  const uniqueValues = Array.from(
+    new Set(
+      values
+        .map((value) => (typeof value === "string" ? value.trim() : ""))
+        .filter(Boolean),
+    ),
+  );
+
+  return uniqueValues.sort((first, second) => first.localeCompare(second, "fr"));
+};
+
+const createSlugLabelMaps = (values: string[]) => {
+  const entries = values
+    .map((label) => {
+      const cleaned = label.trim();
+      return { slug: toSlug(cleaned), label: cleaned };
+    })
+    .filter((entry) => entry.slug && entry.label);
+
+  return {
+    slugToLabel: new Map(entries.map((entry) => [entry.slug, entry.label])),
+    labelToSlug: new Map(entries.map((entry) => [entry.label, entry.slug])),
+  };
+};
+
+const normalizeInstagramProfile = (
+  input?: string | null,
+): InstagramProfile | null => {
+  const raw = (input || "").trim();
+  if (!raw) return null;
+
+  // Certaines APIs renvoient des URLs échappées (https:\/\/instagram.com\/compte)
+  const unescapedRaw = raw.replace(/\\\//g, "/").trim();
+  const withoutAt = unescapedRaw.replace(/^@+/, "").trim();
+  let handle = withoutAt;
+
+  const looksLikeUrl = /^https?:\/\//i.test(withoutAt) || /^www\./i.test(withoutAt);
+  const urlCandidate = /^https?:\/\//i.test(withoutAt)
+    ? withoutAt
+    : looksLikeUrl
+      ? `https://${withoutAt}`
+      : null;
+
+  if (urlCandidate) {
+    try {
+      const parsed = new URL(urlCandidate);
+      const firstPathSegment = parsed.pathname
+        .split("/")
+        .find((segment) => segment.trim().length > 0);
+
+      if (firstPathSegment) {
+        handle = firstPathSegment.replace(/^@+/, "").trim();
+      }
+    } catch {
+      return { href: urlCandidate, label: unescapedRaw };
+    }
+  } else {
+    const instagramMatch = withoutAt.match(/instagram\.com\/?@?([^/?#]+)/i);
+    if (instagramMatch?.[1]) {
+      handle = instagramMatch[1].trim();
+    }
+  }
+
+  handle = handle.replace(/^@+/, "").trim();
+  if (!handle) {
+    if (/instagram\.com/i.test(unescapedRaw)) {
+      const fallbackHref = /^https?:\/\//i.test(unescapedRaw)
+        ? unescapedRaw
+        : `https://${unescapedRaw}`;
+      return { href: fallbackHref, label: unescapedRaw };
+    }
+    return null;
+  }
+
+  return {
+    href: `https://instagram.com/${handle}`,
+    label: `@${handle}`,
+  };
+};
+
+const mapPhotoToFeedItem = (photo: InspirationPhoto): PortfolioFeedItem => ({
+  key: photo.id,
+  imageUrl: photo.imageUrl,
+  title: photo.title,
+  description: photo.description,
+  salonName: photo.user.salonName || "Salon Inkera",
+  city: photo.user.city || "France",
+  href: buildSalonHref(
+    photo.user.salonName || "salon",
+    photo.user.city || "",
+    photo.user.postalCode || undefined,
+  ),
+  styles: photo.style,
+  artistName: photo.tatoueur?.name || undefined,
+  artistInstagram: photo.tatoueur?.instagram || undefined,
+  salonInstagram: photo.user.instagram || undefined,
+});
+
+export default function InspirationMosaicFeed({
+  initialData,
+  initialFilters,
+}: InspirationMosaicFeedProps) {
+  const [items, setItems] = useState<PortfolioFeedItem[]>(() =>
+    initialData.photos.map(mapPhotoToFeedItem),
+  );
+  const [page, setPage] = useState(initialData.pagination.page);
   const [isLoading, setIsLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
+  const [hasMore, setHasMore] = useState(initialData.pagination.hasNextPage);
   const [isMounted, setIsMounted] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [isUsingMockData, setIsUsingMockData] = useState(
+    initialData.source === "mock",
+  );
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [selectedCity, setSelectedCity] = useState("");
+  const [selectedStyle, setSelectedStyle] = useState("");
+
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   const observerRef = useRef<IntersectionObserver | null>(null);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
@@ -191,24 +208,37 @@ export default function InspirationMosaicFeed() {
     };
   }, [isMounted, lightboxIndex]);
 
-  const loadNextPage = useCallback(() => {
+  const loadNextPage = useCallback(async () => {
     if (isLoading || !hasMore) return;
 
     setIsLoading(true);
-    const nextPage = page + 1;
-    const start = (nextPage - 1) * PAGE_SIZE;
-    const end = start + PAGE_SIZE;
-    const chunk = MOCK_ITEMS.slice(start, end);
+    setLoadError(null);
 
-    setItems((prev) => [...prev, ...chunk]);
-    setPage(nextPage);
-    setHasMore(end < MOCK_ITEMS.length);
-    setIsLoading(false);
+    try {
+      const nextPage = page + 1;
+      const response = await getInspirationPortfolioPhotosAction({
+        page: nextPage,
+        limit: PAGE_SIZE,
+      });
+
+      setItems((prev) => [
+        ...prev,
+        ...response.photos.map(mapPhotoToFeedItem),
+      ]);
+      setPage(response.pagination.page);
+      setHasMore(response.pagination.hasNextPage);
+      setIsUsingMockData((prev) => prev || response.source === "mock");
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Impossible de charger plus d'images pour le moment.";
+      setLoadError(message);
+      setHasMore(false);
+    } finally {
+      setIsLoading(false);
+    }
   }, [hasMore, isLoading, page]);
-
-  useEffect(() => {
-    loadNextPage();
-  }, [loadNextPage]);
 
   useEffect(() => {
     if (!sentinelRef.current) return;
@@ -218,7 +248,7 @@ export default function InspirationMosaicFeed() {
       (entries) => {
         const first = entries[0];
         if (!first?.isIntersecting || isLoading || !hasMore) return;
-        loadNextPage();
+        void loadNextPage();
       },
       { rootMargin: "600px 0px" },
     );
@@ -230,15 +260,101 @@ export default function InspirationMosaicFeed() {
     };
   }, [hasMore, isLoading, loadNextPage]);
 
+  const introText = useMemo(() => {
+    if (items.length === 0) return "Découvre les portfolios des salons partenaires.";
+    return `${items.length} photo${items.length > 1 ? "s" : ""} de tatouage chargée${items.length > 1 ? "s" : ""}.`;
+  }, [items.length]);
+
+  const availableCities = useMemo(
+    () =>
+      getUniqueSortedValues([
+        ...initialFilters.cities,
+        ...items.map((item) => item.city),
+      ]),
+    [initialFilters.cities, items],
+  );
+
+  const availableStyles = useMemo(
+    () => getUniqueSortedValues(initialFilters.styles),
+    [initialFilters.styles],
+  );
+
+  const cityMaps = useMemo(
+    () => createSlugLabelMaps(availableCities),
+    [availableCities],
+  );
+  const styleMaps = useMemo(
+    () => createSlugLabelMaps(availableStyles),
+    [availableStyles],
+  );
+
+  useEffect(() => {
+    const cityParam = (searchParams.get("city") || "").trim();
+    const styleParam = (searchParams.get("style") || "").trim();
+
+    const resolvedCity =
+      cityMaps.slugToLabel.get(toSlug(cityParam)) ||
+      availableCities.find((city) => city === cityParam) ||
+      "";
+    const resolvedStyle =
+      styleMaps.slugToLabel.get(toSlug(styleParam)) ||
+      availableStyles.find((style) => style === styleParam) ||
+      "";
+
+    setSelectedCity(resolvedCity);
+    setSelectedStyle(resolvedStyle);
+  }, [searchParams, cityMaps.slugToLabel, styleMaps.slugToLabel, availableCities, availableStyles]);
+
+  const updateFilterInUrl = useCallback(
+    (key: "city" | "style", value: string, slugMap: Map<string, string>) => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (value.trim()) {
+        params.set(key, slugMap.get(value) || toSlug(value));
+      } else {
+        params.delete(key);
+      }
+
+      const query = params.toString();
+      router.replace(query ? `${pathname}?${query}` : pathname, {
+        scroll: false,
+      });
+    },
+    [pathname, router, searchParams],
+  );
+
+  const filteredItems = useMemo(() => {
+    return items.filter((item) => {
+      const matchesCity = !selectedCity || item.city === selectedCity;
+      const normalizedStyle = selectedStyle.trim().toLowerCase();
+      const matchesStyle =
+        !normalizedStyle ||
+        item.styles.some((style) => style.toLowerCase() === normalizedStyle) ||
+        item.title.toLowerCase().includes(normalizedStyle) ||
+        item.description.toLowerCase().includes(normalizedStyle);
+
+      return matchesCity && matchesStyle;
+    });
+  }, [items, selectedCity, selectedStyle]);
+
   // Navigation lightbox
   const closeLightbox = useCallback(() => setLightboxIndex(null), []);
   const prevImage = useCallback(
-    () => setLightboxIndex((i) => (i === null ? null : (i - 1 + items.length) % items.length)),
-    [items.length],
+    () =>
+      setLightboxIndex((i) =>
+        i === null || filteredItems.length === 0
+          ? null
+          : (i - 1 + filteredItems.length) % filteredItems.length,
+      ),
+    [filteredItems.length],
   );
   const nextImage = useCallback(
-    () => setLightboxIndex((i) => (i === null ? null : (i + 1) % items.length)),
-    [items.length],
+    () =>
+      setLightboxIndex((i) =>
+        i === null || filteredItems.length === 0
+          ? null
+          : (i + 1) % filteredItems.length,
+      ),
+    [filteredItems.length],
   );
 
   // Clavier lightbox
@@ -253,12 +369,61 @@ export default function InspirationMosaicFeed() {
     return () => window.removeEventListener("keydown", onKey);
   }, [lightboxIndex, closeLightbox, prevImage, nextImage]);
 
-  const introText = useMemo(() => {
-    if (items.length === 0) return "Découvre les portfolios des salons partenaires.";
-    return `${items.length} photo${items.length > 1 ? "s" : ""} de tatouage chargée${items.length > 1 ? "s" : ""}.`;
-  }, [items.length]);
+  const filteredIntroText = useMemo(() => {
+    if (!selectedCity && !selectedStyle) {
+      return introText;
+    }
 
-  const activeItem = lightboxIndex !== null ? items[lightboxIndex] : null;
+    if (filteredItems.length === 0) {
+      return "Aucune inspiration ne correspond aux filtres sélectionnés pour l'instant.";
+    }
+
+    return `${filteredItems.length} inspiration${filteredItems.length > 1 ? "s" : ""} visible${filteredItems.length > 1 ? "s" : ""} avec les filtres actifs.`;
+  }, [filteredItems.length, introText, selectedCity, selectedStyle]);
+
+  useEffect(() => {
+    if (lightboxIndex === null) return;
+    if (lightboxIndex >= filteredItems.length) {
+      setLightboxIndex(null);
+    }
+  }, [filteredItems.length, lightboxIndex]);
+
+  const handleCityChange = useCallback(
+    (city: string) => {
+      setSelectedCity(city);
+      updateFilterInUrl("city", city, cityMaps.labelToSlug);
+    },
+    [cityMaps.labelToSlug, updateFilterInUrl],
+  );
+
+  const handleStyleChange = useCallback(
+    (style: string) => {
+      setSelectedStyle(style);
+      updateFilterInUrl("style", style, styleMaps.labelToSlug);
+    },
+    [styleMaps.labelToSlug, updateFilterInUrl],
+  );
+
+  const clearAllFilters = useCallback(() => {
+    setSelectedCity("");
+    setSelectedStyle("");
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("city");
+    params.delete("style");
+    const query = params.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname, {
+      scroll: false,
+    });
+  }, [pathname, router, searchParams]);
+
+  const activeItem =
+    lightboxIndex !== null ? filteredItems[lightboxIndex] : null;
+  const artistInstagramProfile = normalizeInstagramProfile(
+    activeItem?.artistInstagram,
+  );
+  const salonInstagramProfile = normalizeInstagramProfile(
+    activeItem?.salonInstagram,
+  );
 
   return (
     <section className="space-y-6 font-one">
@@ -270,17 +435,97 @@ export default function InspirationMosaicFeed() {
           <h1 className="text-2xl font-semibold text-white sm:text-3xl lg:text-4xl tracking-wide">
             Mosaïque de tatouages
           </h1>
-          <p className="shrink-0 text-sm text-white/70 sm:text-base">{introText}</p>
+          <p className="shrink-0 text-sm text-white/70 sm:text-base">{filteredIntroText}</p>
         </div>
-        <p className="text-xs text-white/70">Ces images sont présentées en guise d'exemple. Les noms et informations des artistes et salons sont fictifs.</p>
+        {isUsingMockData ? (
+          <p className="text-xs text-white/70">
+            Ces images sont présentées en guise d'exemple. Les noms et informations des artistes et salons sont fictifs.
+          </p>
+        ) : (
+          <p className="text-xs text-white/70">
+            Explore les portfolios des salons partenaires et laisse défiler pour charger davantage d'inspirations.
+          </p>
+        )}
       </header>
 
+      <div className="flex flex-col gap-4 rounded-3xl border border-white/10 bg-white/5 p-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
+          <div className="flex flex-col gap-2 font-one">
+            <label className="text-xs text-white/80" htmlFor="inspiration-city-select">
+              Par ville
+            </label>
+            <select
+              id="inspiration-city-select"
+              className="w-full rounded-2xl border border-white/10 bg-black/20 px-3 py-2 text-xs text-white transition focus:outline-none focus:ring-2 focus:ring-tertiary-500 sm:w-64"
+              value={selectedCity}
+              onChange={(e) => handleCityChange(e.target.value)}
+            >
+              <option value="" className="bg-noir-500">
+                Toutes les villes
+              </option>
+              {availableCities.map((city) => (
+                <option key={city} value={city} className="bg-noir-500">
+                  {city}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex flex-col gap-2 font-one">
+            <label className="text-xs text-white/80" htmlFor="inspiration-style-select">
+              Par style
+            </label>
+            <select
+              id="inspiration-style-select"
+              className="w-full rounded-2xl border border-white/10 bg-black/20 px-3 py-2 text-xs text-white transition focus:outline-none focus:ring-2 focus:ring-tertiary-500 sm:w-64"
+              value={selectedStyle}
+              onChange={(e) => handleStyleChange(e.target.value)}
+            >
+              <option value="" className="bg-noir-500">
+                Tous les styles
+              </option>
+              {availableStyles.map((style) => (
+                <option key={style} value={style} className="bg-noir-500">
+                  {style}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {(selectedCity || selectedStyle) && (
+          <div className="flex flex-wrap items-center gap-2">
+            {selectedCity && (
+              <span className="inline-flex items-center rounded-full border border-cyan-300/30 bg-cyan-400/15 px-3 py-1 text-xs text-cyan-100">
+                ville: {selectedCity}
+              </span>
+            )}
+            {selectedStyle && (
+              <span className="inline-flex items-center rounded-full border border-tertiary-300/30 bg-tertiary-400/15 px-3 py-1 text-xs text-tertiary-100">
+                style: {selectedStyle}
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={clearAllFilters}
+              className="cursor-pointer rounded-2xl border border-white/10 px-3 py-1.5 text-xs text-white/70 transition hover:bg-white/5 hover:text-white"
+            >
+              Réinitialiser
+            </button>
+          </div>
+        )}
+      </div>
+
       <div className="columns-2 gap-3 sm:columns-3 sm:gap-3 xl:columns-4 2xl:columns-5">
-        {items.map((item, index) => (
+        {filteredItems.map((item, index) => (
           <article
             key={item.key}
-            className="group mb-3 break-inside-avoid overflow-hidden rounded-2xl border border-white/10 bg-noir-700 shadow-xl"
+            className="group relative mb-3 break-inside-avoid overflow-hidden rounded-2xl border border-white/10 bg-noir-700 shadow-xl"
           >
+            <div className="absolute top-3 right-3 z-20">
+              <FavoritePortfolioBtn portfolioId={item.key} variant="icon-only" />
+            </div>
+
             <button
               type="button"
               className="block w-full cursor-zoom-in text-left"
@@ -313,13 +558,21 @@ export default function InspirationMosaicFeed() {
         <div className="py-3 text-center text-sm text-white/60">Chargement des prochaines photos...</div>
       )}
 
-      {!isLoading && items.length === 0 && (
+      {!isLoading && filteredItems.length === 0 && (
         <div className="rounded-2xl border border-white/12 bg-white/5 py-10 text-center text-sm text-white/65">
-          Aucune photo de portfolio disponible pour le moment.
+          {selectedCity || selectedStyle
+            ? "Aucune photo ne correspond aux filtres sélectionnés pour le moment."
+            : "Aucune photo de portfolio disponible pour le moment."}
         </div>
       )}
 
-      {!hasMore && items.length > 0 && (
+      {loadError && (
+        <div className="rounded-2xl border border-red-300/20 bg-red-400/10 px-4 py-3 text-center text-sm text-red-100">
+          {loadError}
+        </div>
+      )}
+
+      {!hasMore && filteredItems.length > 0 && (
         <div className="py-2 text-center text-xs text-white/45">Tu as atteint la fin de la mosaïque.</div>
       )}
 
@@ -380,7 +633,7 @@ export default function InspirationMosaicFeed() {
 
               {/* Compteur */}
               <div className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-2xl bg-black/40 px-3 py-1 text-[11px] text-white/70 font-one">
-                {lightboxIndex + 1} / {items.length}
+                {lightboxIndex + 1} / {filteredItems.length}
               </div>
             </div>
 
@@ -397,19 +650,47 @@ export default function InspirationMosaicFeed() {
                     {activeItem.salonName} · {activeItem.city}
                     {activeItem.artistName ? ` · ${activeItem.artistName}` : ""}
                   </p>
+                  <div className="mt-1 flex flex-wrap items-center gap-2">
+                    {salonInstagramProfile && (
+                      <a
+                        href={salonInstagramProfile.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-[11px] text-tertiary-300 hover:text-tertiary-100 transition"
+                      >
+                        <FaInstagram size={14} />
+                        Salon {salonInstagramProfile.label}
+                      </a>
+                    )}
+                    {artistInstagramProfile && (
+                      <a
+                        href={artistInstagramProfile.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-[11px] text-tertiary-300 hover:text-tertiary-100 transition"
+                      >
+                        <FaInstagram size={14} />
+                        Artiste {artistInstagramProfile.label}
+                      </a>
+                    )}
+                  </div>
                 </div>
                 <div className="flex shrink-0 items-center gap-3">
-                  {activeItem.instagram && (
+                  {artistInstagramProfile && (
                     <a
-                      href={`https://instagram.com/${activeItem.instagram.replace("@", "")}`}
+                      href={artistInstagramProfile.href}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1 text-xs text-tertiary-300 hover:text-tertiary-100 transition"
                     >
                       <FaInstagram size={20} />
-                      <span className="hidden sm:inline">{activeItem.instagram}</span>
+                      <span className="hidden sm:inline">{artistInstagramProfile.label}</span>
                     </a>
                   )}
+                  <FavoritePortfolioBtn
+                    portfolioId={activeItem.key}
+                    variant="icon-only"
+                  />
                   <Link
                     href={activeItem.href}
                     onClick={closeLightbox}
@@ -433,36 +714,55 @@ export default function InspirationMosaicFeed() {
 
                   <div className="space-y-1 rounded-2xl border border-white/10 bg-white/5 p-3">
                     <p className="text-[11px] uppercase tracking-[0.14em] text-white/45 font-one">Salon</p>
-                    <p className="text-sm font-semibold text-white font-one">{activeItem.salonName}</p>
-                    <p className="text-xs text-white/60 font-one">{activeItem.city}</p>
-                    {activeItem.instagram && (
+                    <p className="text-base tracking-widest font-semibold text-white font-one">{activeItem.salonName}</p>
+                    <p className="text-sm text-white/60 font-one">{activeItem.city}</p>
+                    {salonInstagramProfile && (
                       <a
-                        href={`https://instagram.com/${activeItem.instagram.replace("@", "")}`}
+                        href={salonInstagramProfile.href}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="mt-1 inline-flex items-center gap-1.5 text-xs text-tertiary-300 hover:text-tertiary-100 transition"
                       >
-                        <FaInstagram className="h-3 w-3" />
-                        {activeItem.instagram}
+                        <FaInstagram className="h-5 w-5" />
+                        {salonInstagramProfile.label}
                       </a>
                     )}
                   </div>
 
                   {activeItem.artistName && (
                     <div className="space-y-1 rounded-2xl border border-white/10 bg-white/5 p-3">
-                      <p className="text-[11px] uppercase tracking-[0.14em] text-white/45 font-one">Tatoueur</p>
+                      <p className="text-[11px] uppercase tracking-[0.14em] text-white/45 font-one">Artiste</p>
                       <p className="text-sm font-semibold text-white font-one">{activeItem.artistName}</p>
+                      {artistInstagramProfile && (
+                        <a
+                          href={artistInstagramProfile.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="mt-1 inline-flex items-center gap-1.5 text-xs text-tertiary-300 hover:text-tertiary-100 transition"
+                        >
+                          <FaInstagram className="h-4 w-4" />
+                          {artistInstagramProfile.label}
+                        </a>
+                      )}
                     </div>
                   )}
                 </div>
 
-                <Link
-                  href={activeItem.href}
-                  onClick={closeLightbox}
-                  className="mt-4 inline-flex w-full items-center justify-center rounded-2xl bg-linear-to-r from-tertiary-400 to-tertiary-500 px-4 py-2.5 text-sm font-one text-white transition hover:from-tertiary-500 hover:to-tertiary-600"
-                >
-                  Voir le salon →
-                </Link>
+                <div className="mt-4 flex flex-col gap-2">
+                  <FavoritePortfolioBtn
+                    portfolioId={activeItem.key}
+                    variant="default"
+                    className="w-full"
+                  />
+                  <AppButton
+                    href={activeItem.href}
+                    onClick={closeLightbox}
+                    variant="primary"
+                    fullWidth
+                  >
+                    Voir le profil →
+                  </AppButton>
+                </div>
               </div>
             </aside>
           </div>,

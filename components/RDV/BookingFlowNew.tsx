@@ -1,7 +1,8 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { FormProvider } from "react-hook-form";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   StepIndicator,
   PrestationSelector,
@@ -20,12 +21,16 @@ export default function BookingFlow({
   flashes = [],
   defaultFlashId,
 }: Props) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   const {
     methods,
     watch,
     handleSubmit,
     isSubmitting,
     step,
+    setStep,
     confirmDisabled,
     appointmentCreated,
     prestation,
@@ -71,6 +76,27 @@ export default function BookingFlow({
     flashes,
     defaultFlashId,
   });
+
+  // Initialise l'étape depuis l'URL au premier rendu (uniquement étapes 1-4)
+  // Sync URL quand l'étape change (push pour ajouter une entrée dans l'historique)
+  useEffect(() => {
+    if (step >= 1 && step <= 4) {
+      const urlStep = parseInt(searchParams.get("step") ?? "1", 10);
+      if (urlStep !== step) {
+        router.push(`?step=${step}`, { scroll: false });
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step, router]);
+
+  // Retour/avant navigateur : met à jour le step depuis l'URL
+  useEffect(() => {
+    const urlStep = parseInt(searchParams.get("step") ?? "1", 10);
+    if (urlStep >= 1 && urlStep <= 4 && urlStep !== step) {
+      setStep(urlStep);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   const steps = ["Prestation", "Infos", "Disponibilité", "Récap"];
 

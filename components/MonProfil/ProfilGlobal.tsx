@@ -4,6 +4,7 @@ import { getClientProfile } from "@/lib/actions/user.action";
 import { User } from "@/lib/type";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import InfosTab from "./InfosTab";
 import FavorisTab from "./FavorisTab";
 import RendezVousTab from "./RendezVousTab";
@@ -21,10 +22,25 @@ import {
 import Image from "next/image";
 import { LogoutBtn } from "../Auth/LogoutBtn";
 
+type TabKey = "rdv" | "moodboard" | "favoris" | "mesavis" | "infos";
+const VALID_TABS: TabKey[] = ["rdv", "moodboard", "favoris", "mesavis", "infos"];
+
 export default function ProfilGlobal(user: User) {
-  const [activeTab, setActiveTab] = useState<
-    "rdv" | "moodboard" | "favoris"  | "mesavis" | "infos"
-  >("rdv");
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const tabFromUrl = searchParams.get("tab") as TabKey | null;
+  const initialTab: TabKey =
+    tabFromUrl && VALID_TABS.includes(tabFromUrl) ? tabFromUrl : "rdv";
+
+  const [activeTab, setActiveTab] = useState<TabKey>(initialTab);
+
+  const handleTabChange = (key: TabKey) => {
+    setActiveTab(key);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("tab", key);
+    router.replace(`?${params.toString()}`, { scroll: false });
+  };
 
   // État pour les données complètes du profil avec type explicite
   const [profileData, setProfileData] = useState<User | null>(null);
@@ -229,7 +245,7 @@ export default function ProfilGlobal(user: User) {
                 ).map(({ key, icon: Icon, label }) => (
                   <button
                     key={key}
-                    onClick={() => setActiveTab(key as any)}
+                    onClick={() => handleTabChange(key)}
                     className={`group relative flex shrink-0 cursor-pointer items-center gap-2 rounded-2xl border px-3 py-2 text-sm font-medium transition-all duration-300 font-one sm:rounded-none sm:border-transparent sm:px-0 sm:py-3 ${
                       activeTab === key
                         ? "border-tertiary-400/20 bg-tertiary-400/15 text-white shadow-[inset_0_-2px_0_0_var(--color-tertiary-400)] sm:border-transparent sm:bg-transparent"
