@@ -251,6 +251,16 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
     return bLinked - aLinked;
   });
 
+  const getTatoueurDisplayName = (tatoueur: SalonTatoueur) => {
+    if (tatoueur.isLinkedUser === true) {
+      const linkedSalonName =
+        typeof tatoueur.salonName === "string" ? tatoueur.salonName.trim() : "";
+      if (linkedSalonName) return linkedSalonName;
+    }
+
+    return tatoueur.name;
+  };
+
   const linkedProfileHref = (tatoueur: SalonTatoueur) => {
     if (tatoueur.isLinkedUser !== true || !tatoueur.profileUserId) return null;
 
@@ -1023,9 +1033,13 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
               products={salon.ProductSalon ?? []}
               flashes={flashes}
               salonName={salon.salonName}
+              salonUserId={salon.id}
               bookingPath={`/salon/${resolvedParams.slug}/${resolvedParams.loc}/reserver`}
               canBookFlashes={!isFree}
-              tatoueurs={sortedTatoueurs.map((t) => ({ id: t.id, name: t.name }))}
+              tatoueurs={sortedTatoueurs.map((t) => ({
+                id: t.id,
+                name: getTatoueurDisplayName(t),
+              }))}
             />
 
             {/* Équipe */}
@@ -1051,7 +1065,7 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
                   {sortedTatoueurs.map((t) => (
                     <div key={t.id}>
                       <TeamCard
-                        name={t.name}
+                        name={getTatoueurDisplayName(t)}
                         img={t.img}
                         description={t.description}
                         instagram={t.instagram}

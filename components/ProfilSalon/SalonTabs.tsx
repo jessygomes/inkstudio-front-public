@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useMemo, useRef, useState, useCallback, useEffect } from "react";
 import { createPortal } from "react-dom";
 import type { FlashProps, PortfolioProps, ProductSalonProps } from "@/lib/type";
+import { getPortfolioPhotosAction } from "@/lib/actions/portfolio.action";
 
 type Tatoueur = {
   id: string;
@@ -17,6 +18,7 @@ type Props = {
   photos: string[];
   flashes?: FlashProps[];
   salonName?: string;
+  salonUserId?: string;
   bookingPath?: string;
   canBookFlashes?: boolean;
   tatoueurs?: Tatoueur[];
@@ -96,12 +98,18 @@ export default function SalonTabs({
   photos,
   flashes = [],
   salonName,
+  salonUserId,
   bookingPath,
   canBookFlashes = true,
   tatoueurs = [],
 }: Props) {
   const [flashSort, setFlashSort] = useState<FlashSort>("default");
   const [portfolioTatoueurFilter, setPortfolioTatoueurFilter] = useState<string | null>(null);
+  const [portfolioApiItems, setPortfolioApiItems] = useState<PortfolioProps[] | null>(null);
+  const [portfolioApiMeta, setPortfolioApiMeta] = useState<{
+    total: number;
+    totalPages: number;
+  } | null>(null);
 
   const availableFlashes = useMemo(
     () =>
@@ -142,20 +150,27 @@ export default function SalonTabs({
     });
   }, [availableFlashes, flashSort]);
 
-  const filteredPortfolio = useMemo(() => {
+  const fallbackFilteredPortfolio = useMemo(() => {
     const base = portfolio?.filter((p) => !!p.imageUrl) ?? [];
     if (!portfolioTatoueurFilter) return base;
     return base.filter((p) => p.tatoueurId === portfolioTatoueurFilter);
   }, [portfolio, portfolioTatoueurFilter]);
 
+  const hasPortfolioApiData = portfolioApiItems !== null;
+
+  const filteredPortfolio = useMemo(
+    () => portfolioApiItems ?? fallbackFilteredPortfolio,
+    [portfolioApiItems, fallbackFilteredPortfolio],
+  );
+
   const counts = useMemo(
     () => ({
       photos: photos?.filter(Boolean).length ?? 0,
-      portfolio: filteredPortfolio.length,
+      portfolio: portfolioApiMeta?.total ?? fallbackFilteredPortfolio.length,
       flashes: sortedFlashes.length,
       products: products?.length ?? 0,
     }),
-    [filteredPortfolio, products, photos, sortedFlashes],
+    [fallbackFilteredPortfolio.length, photos, portfolioApiMeta?.total, products, sortedFlashes.length],
   );
 
   // Priorité d’onglet: photos > portfolio > flash > produits
@@ -175,7 +190,9 @@ export default function SalonTabs({
 
   const portfolioTotalPages = Math.max(
     1,
-    Math.ceil(counts.portfolio / PER_PAGE) || 1,
+    hasPortfolioApiData
+      ? (portfolioApiMeta?.totalPages ?? 1)
+      : (Math.ceil(fallbackFilteredPortfolio.length / PER_PAGE) || 1),
   );
   const productsTotalPages = Math.max(
     1,
@@ -187,10 +204,9 @@ export default function SalonTabs({
   );
 
   const portfolioStart = (portfolioPage - 1) * PER_PAGE;
-  const portfolioPageItems = filteredPortfolio.slice(
-    portfolioStart,
-    portfolioStart + PER_PAGE,
-  );
+  const portfolioPageItems = hasPortfolioApiData
+    ? filteredPortfolio
+    : fallbackFilteredPortfolio.slice(portfolioStart, portfolioStart + PER_PAGE);
 
   const productsStart = (productsPage - 1) * PER_PAGE;
   const productsPageItems = products.slice(
@@ -229,6 +245,49 @@ export default function SalonTabs({
   }, [portfolioTatoueurFilter]);
 
   useEffect(() => {
+    let isCancelled = false;
+
+    const loadPortfolioPhotos = async () => {
+      if (!salonUserId) {
+        setPortfolioApiItems(null);
+        setPortfolioApiMeta(null);
+        return;
+      }
+
+      try {
+        const result = await getPortfolioPhotosAction(salonUserId, {
+          tatoueurId: portfolioTatoueurFilter,
+          page: portfolioPage,
+        });
+
+        if (isCancelled) return;
+
+        if (!result.ok || !result.data) {
+          setPortfolioApiItems(null);
+          setPortfolioApiMeta(null);
+          return;
+        }
+
+        setPortfolioApiItems(result.data.photos ?? []);
+        setPortfolioApiMeta({
+          total: result.data.pagination?.total ?? 0,
+          totalPages: result.data.pagination?.totalPages ?? 1,
+        });
+      } catch {
+        if (isCancelled) return;
+        setPortfolioApiItems(null);
+        setPortfolioApiMeta(null);
+      }
+    };
+
+    loadPortfolioPhotos();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [salonUserId, portfolioTatoueurFilter, portfolioPage]);
+
+  useEffect(() => {
     setFlashesPage(1);
   }, [flashSort]);
 
@@ -249,13 +308,13 @@ export default function SalonTabs({
   const activeImages = useMemo<string[]>(() => {
     if (active === "photos") return (photos ?? []).filter(Boolean);
     if (active === "portfolio")
-      return filteredPortfolio.map((p) => p.imageUrl).filter(Boolean);
+      return portfolioPageItems.map((p) => p.imageUrl).filter(Boolean);
     if (active === "flashes")
       return (sortedFlashes ?? [])
         .map((f) => f.imageUrl)
         .filter(Boolean) as string[];
     return [];
-  }, [active, photos, filteredPortfolio, sortedFlashes]);
+  }, [active, photos, portfolioPageItems, sortedFlashes]);
 
   const showSortControl = active === "flashes" && counts.flashes > 0;
   const showExpandControl =
@@ -565,7 +624,7 @@ export default function SalonTabs({
             <>
               <ul className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {portfolioPageItems.map((item, idx) => {
-                  const globalIndex = portfolioStart + idx;
+                  const imageIndex = hasPortfolioApiData ? idx : portfolioStart + idx;
                   return (
                     <li
                       key={item.id}
@@ -573,7 +632,7 @@ export default function SalonTabs({
                     >
                       <button
                         className="relative aspect-4/3 w-full cursor-zoom-in"
-                        onClick={() => openLightbox(globalIndex)}
+                        onClick={() => openLightbox(imageIndex)}
                         aria-label={`Agrandir ${item.title}`}
                       >
                         <Image
