@@ -6,8 +6,10 @@ import {
   type InspirationPhoto,
   type InspirationPhotosResponse,
 } from "@/lib/actions/inspiration.action";
+import { getFavoritePortfolioImages } from "@/lib/actions/user.action";
 import AppButton from "@/components/Shared/AppButton";
 import FavoritePortfolioBtn from "@/components/Shared/FavoritePortfolioBtn";
+import { useUser } from "@/components/Context/UserContext";
 import { toSlug } from "@/lib/utils";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
@@ -168,6 +170,7 @@ export default function InspirationMosaicFeed({
   initialData,
   initialFilters,
 }: InspirationMosaicFeedProps) {
+  const { isAuthenticated, isClient } = useUser();
   const [items, setItems] = useState<PortfolioFeedItem[]>(() =>
     initialData.photos.map(mapPhotoToFeedItem),
   );
@@ -182,6 +185,9 @@ export default function InspirationMosaicFeed({
   const [loadError, setLoadError] = useState<string | null>(null);
   const [selectedCity, setSelectedCity] = useState("");
   const [selectedStyle, setSelectedStyle] = useState("");
+  const [favoritePortfolioIds, setFavoritePortfolioIds] = useState<Set<string>>(
+    () => new Set(),
+  );
 
   const router = useRouter();
   const pathname = usePathname();
@@ -193,6 +199,53 @@ export default function InspirationMosaicFeed({
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    if (!isAuthenticated || !isClient) {
+      setFavoritePortfolioIds(new Set());
+      return;
+    }
+
+    const loadFavoritePortfolioIds = async () => {
+      try {
+        const result = await getFavoritePortfolioImages();
+        if (!result.ok || !result.data) {
+          if (!isCancelled) {
+            setFavoritePortfolioIds(new Set());
+          }
+          return;
+        }
+
+        const rawFavorites = (result.data as { favoritePortfolioImages?: unknown })
+          .favoritePortfolioImages;
+        const favoriteImages = Array.isArray(rawFavorites) ? rawFavorites : [];
+
+        const ids = favoriteImages
+          .map((image) => {
+            if (typeof image !== "object" || image === null) return "";
+            const maybeId = (image as { id?: unknown }).id;
+            return typeof maybeId === "string" ? maybeId : "";
+          })
+          .filter(Boolean);
+
+        if (!isCancelled) {
+          setFavoritePortfolioIds(new Set(ids));
+        }
+      } catch {
+        if (!isCancelled) {
+          setFavoritePortfolioIds(new Set());
+        }
+      }
+    };
+
+    void loadFavoritePortfolioIds();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [isAuthenticated, isClient]);
 
   // Bloquer le scroll quand lightbox ouvert
   useEffect(() => {
@@ -416,6 +469,21 @@ export default function InspirationMosaicFeed({
     });
   }, [pathname, router, searchParams]);
 
+  const handleFavoriteToggle = useCallback(
+    (portfolioId: string, isFavorite: boolean) => {
+      setFavoritePortfolioIds((prev) => {
+        const next = new Set(prev);
+        if (isFavorite) {
+          next.add(portfolioId);
+        } else {
+          next.delete(portfolioId);
+        }
+        return next;
+      });
+    },
+    [],
+  );
+
   const activeItem =
     lightboxIndex !== null ? filteredItems[lightboxIndex] : null;
   const artistInstagramProfile = normalizeInstagramProfile(
@@ -448,7 +516,7 @@ export default function InspirationMosaicFeed({
         )}
       </header>
 
-      <div className="flex flex-col gap-4 rounded-3xl border border-white/10 bg-white/5 p-4 sm:flex-row sm:items-end sm:justify-between">
+      <div className="flex flex-col gap-4 rounded-3xl sm:flex-row sm:items-end sm:justify-between">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
           <div className="flex flex-col gap-2 font-one">
             <label className="text-xs text-white/80" htmlFor="inspiration-city-select">
@@ -523,7 +591,12 @@ export default function InspirationMosaicFeed({
             className="group relative mb-3 break-inside-avoid overflow-hidden rounded-2xl border border-white/10 bg-noir-700 shadow-xl"
           >
             <div className="absolute top-3 right-3 z-20">
-              <FavoritePortfolioBtn portfolioId={item.key} variant="icon-only" />
+              <FavoritePortfolioBtn
+                portfolioId={item.key}
+                initialFavorite={favoritePortfolioIds.has(item.key)}
+                variant="icon-only"
+                onToggle={(isFavorite) => handleFavoriteToggle(item.key, isFavorite)}
+              />
             </div>
 
             <button
@@ -689,7 +762,11 @@ export default function InspirationMosaicFeed({
                   )}
                   <FavoritePortfolioBtn
                     portfolioId={activeItem.key}
+                    initialFavorite={favoritePortfolioIds.has(activeItem.key)}
                     variant="icon-only"
+                    onToggle={(isFavorite) =>
+                      handleFavoriteToggle(activeItem.key, isFavorite)
+                    }
                   />
                   <Link
                     href={activeItem.href}
@@ -751,8 +828,12 @@ export default function InspirationMosaicFeed({
                 <div className="mt-4 flex flex-col gap-2">
                   <FavoritePortfolioBtn
                     portfolioId={activeItem.key}
+                    initialFavorite={favoritePortfolioIds.has(activeItem.key)}
                     variant="default"
                     className="w-full"
+                    onToggle={(isFavorite) =>
+                      handleFavoriteToggle(activeItem.key, isFavorite)
+                    }
                   />
                   <AppButton
                     href={activeItem.href}

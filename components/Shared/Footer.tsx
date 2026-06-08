@@ -14,7 +14,7 @@ export default function Footer() {
       </div> */}
 
       {/* Grid modernisée avec cartes */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 text-white mb-8 sm:mb-12">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 text-white mb-8 sm:mb-12">
         {/* Navigation */}
         <div className="bg-linear-to-br from-noir-500/20 to-noir-700/30 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-white/10 hover:border-tertiary-400/30 transition-colors duration-300">
           <ul className="font-two flex flex-col gap-3 sm:gap-4 text-sm">
@@ -65,7 +65,7 @@ export default function Footer() {
         </div>
 
         {/* Qui sommes-nous */}
-        <div className="bg-linear-to-br from-noir-500/20 to-noir-700/30 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-white/10 hover:border-tertiary-400/30 transition-colors duration-300">
+        {/* <div className="bg-linear-to-br from-noir-500/20 to-noir-700/30 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-white/10 hover:border-tertiary-400/30 transition-colors duration-300">
           <ul className="font-two flex flex-col gap-3 sm:gap-4 text-sm">
             <li className="bg-linear-to-l from-tertiary-400 to-tertiary-500 bg-clip-text text-transparent uppercase font-bold text-base mb-2">
               Qui sommes-nous ?
@@ -80,7 +80,7 @@ export default function Footer() {
               </Link>
             </li>
           </ul>
-        </div>
+        </div> */}
 
         {/* Légales */}
         <div className="bg-linear-to-br from-noir-500/20 to-noir-700/30 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-white/10 hover:border-tertiary-400/30 transition-colors duration-300">
@@ -167,7 +167,10 @@ export default function Footer() {
       <div className="border-t border-white/10 pt-6 sm:pt-8">
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="text-white/60 font-one text-xs sm:text-sm text-center sm:text-left">
-            © {new Date().getFullYear()} Inkera. Tous droits réservés.
+            © {new Date().getFullYear()} Inkera. Tous droits réservés. Project by <Link href={"https://www.inthegleam.com"} target="_blank" className="text-white/80">inTheGleam</Link>
+          </p>
+          <p className="text-white/60 font-one text-xs sm:text-sm text-center sm:text-left">
+          
           </p>
           <div className="flex justify-center">
             <div className="h-1 w-16 bg-linear-to-r from-tertiary-400 to-tertiary-500 rounded-full opacity-60"></div>

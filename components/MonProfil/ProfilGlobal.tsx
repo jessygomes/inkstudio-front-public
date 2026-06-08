@@ -35,6 +35,13 @@ export default function ProfilGlobal(user: User) {
 
   const [activeTab, setActiveTab] = useState<TabKey>(initialTab);
 
+  useEffect(() => {
+    const nextTab: TabKey =
+      tabFromUrl && VALID_TABS.includes(tabFromUrl) ? tabFromUrl : "rdv";
+
+    setActiveTab((prev) => (prev === nextTab ? prev : nextTab));
+  }, [tabFromUrl]);
+
   const handleTabChange = (key: TabKey) => {
     setActiveTab(key);
     const params = new URLSearchParams(searchParams.toString());
@@ -208,7 +215,7 @@ export default function ProfilGlobal(user: User) {
                       <FaEdit className="h-3 w-3" />
                       Modifier le profil
                     </Link>
-                    <LogoutBtn>Déconnexion</LogoutBtn>
+                    {/* <LogoutBtn>Déconnexion</LogoutBtn> */}
                   </div>
                 </div>
               </div>

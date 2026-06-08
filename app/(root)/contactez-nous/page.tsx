@@ -188,7 +188,7 @@ export default function ContactPage() {
                           href="mailto:contact@inkera-studio.com"
                           className="text-tertiary-400 hover:text-tertiary-300 transition-colors font-semibold underline"
                         >
-                          contact@inkera-studio.com
+                          contact.inkera@gmail.com
                         </a>
                         <p className="text-sm text-white/60 mt-1">
                           Pour les problèmes techniques
@@ -208,7 +208,7 @@ export default function ContactPage() {
                           href="mailto:contact@inkera-studio.com"
                           className="text-tertiary-400 hover:text-tertiary-300 transition-colors font-semibold underline"
                         >
-                          contact@inkera-studio.com
+                          contact.inkera@gmail.com
                         </a>
                         <p className="text-sm text-white/60 mt-1">
                           Collaborations et partenariats

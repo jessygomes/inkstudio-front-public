@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
 import { toast } from "sonner";
 import { toggleFavoritePortfolio } from "@/lib/actions/user.action";
@@ -24,6 +24,10 @@ export default function FavoritePortfolioBtn({
   const { isAuthenticated, isClient } = useUser();
   const [favorite, setFavorite] = useState(initialFavorite);
   const [isPending, startTransition] = useTransition();
+
+  useEffect(() => {
+    setFavorite(initialFavorite);
+  }, [initialFavorite, portfolioId]);
 
   const handleToggle = () => {
     if (!isAuthenticated) {
