@@ -22,6 +22,8 @@ export async function getTimeslots(date: string, tatoueurId: string) {
     }
 
     const data = await res.json();
+
+    console.log("Fetched timeslots:", data);
     return { ok: true, data };
   } catch (error) {
     console.error("Erreur server action timeslots:", error);

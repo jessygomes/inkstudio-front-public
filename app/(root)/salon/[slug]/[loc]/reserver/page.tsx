@@ -134,6 +134,7 @@ export default async function ReserverPage({
   const requestedFlashId = normalizeFlashId(resolvedSearchParams?.flashId);
 
   const salon = await getSalon(slug, loc);
+
   if (!salon) notFound();
   const flashes = await getAvailableFlashes(salon.id);
   const availableFlashes = flashes.filter(
