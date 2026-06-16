@@ -1,5 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
+import {
+  addMinutesToTime,
+  formatDateKeyForDisplay,
+  getIsoTimePart,
+} from "@/lib/utils/date";
 import Section from "./Section";
 import ReferenceImages from "./ReferenceImages";
 import { SkinToneOption } from "./types";
@@ -292,30 +297,19 @@ export default function RecapStep({
             <div>
               <p className="text-white/60 font-one text-sm mb-0.5">Date</p>
               <p className="text-white font-one">
-                {new Date(selectedDate).toLocaleDateString("fr-FR", {
-                  weekday: "long",
-                  day: "numeric",
-                  month: "long",
-                  year: "numeric",
-                })}
+                {formatDateKeyForDisplay(selectedDate)}
               </p>
             </div>
 
             <div>
               <p className="text-white/60 font-one text-sm mb-0.5">Horaire</p>
               <p className="text-white font-one">
-                {new Date(selectedSlots[0]).toLocaleTimeString("fr-FR", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}{" "}
+                {getIsoTimePart(selectedSlots[0])}{" "}
                 -{" "}
-                {new Date(
-                  new Date(selectedSlots[selectedSlots.length - 1]).getTime() +
-                    30 * 60 * 1000,
-                ).toLocaleTimeString("fr-FR", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
+                {addMinutesToTime(
+                  getIsoTimePart(selectedSlots[selectedSlots.length - 1]),
+                  30,
+                )}
               </p>
             </div>
 

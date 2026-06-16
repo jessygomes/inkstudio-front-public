@@ -93,6 +93,36 @@ export function toDateInputValue(value: Date | string) {
     .slice(0, 10);
 }
 
+export function getIsoDatePart(iso: string) {
+  return iso.slice(0, 10);
+}
+
+export function getIsoTimePart(iso: string) {
+  return iso.slice(11, 16);
+}
+
+export function addMinutesToTime(time: string, minutesToAdd: number) {
+  const [hours, minutes] = time.split(":").map(Number);
+  const totalMinutes = hours * 60 + minutes + minutesToAdd;
+  const normalizedMinutes = ((totalMinutes % (24 * 60)) + 24 * 60) % (24 * 60);
+  const nextHours = String(Math.floor(normalizedMinutes / 60)).padStart(2, "0");
+  const nextMinutes = String(normalizedMinutes % 60).padStart(2, "0");
+
+  return `${nextHours}:${nextMinutes}`;
+}
+
+export function formatDateKeyForDisplay(date: string, locale = "fr-FR") {
+  const [year, month, day] = date.split("-").map(Number);
+
+  return new Intl.DateTimeFormat(locale, {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(new Date(Date.UTC(year, month - 1, day, 12, 0, 0)));
+}
+
 export function getDayRangeForTimeZone(
   date: string,
   timeZone = DEFAULT_BUSINESS_TIME_ZONE,

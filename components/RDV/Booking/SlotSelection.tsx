@@ -2,7 +2,13 @@
 import React from "react";
 import { useFormContext } from "react-hook-form";
 
-import { toDateInputValue } from "@/lib/utils/date";
+import {
+  addMinutesToTime,
+  formatDateKeyForDisplay,
+  getIsoDatePart,
+  getIsoTimePart,
+  toDateInputValue,
+} from "@/lib/utils/date";
 import Section from "./Section";
 import { TimeSlot } from "./types";
 
@@ -80,13 +86,6 @@ export default function SlotSelection({
     });
   };
 
-  const toDateKey = (date: Date) => {
-    const y = date.getFullYear();
-    const m = String(date.getMonth() + 1).padStart(2, "0");
-    const d = String(date.getDate()).padStart(2, "0");
-    return `${y}-${m}-${d}`;
-  };
-
   const buildSlotsFromRanges = (
     ranges: any[],
     startKey: "start" | "startDate",
@@ -137,8 +136,8 @@ export default function SlotSelection({
     );
 
     return merged
-      .filter((slotStart) => toDateKey(new Date(slotStart)) === selectedDate)
-      .sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
+      .filter((slotStart) => getIsoDatePart(slotStart) === selectedDate)
+      .sort((a, b) => a.localeCompare(b));
   }, [timeSlots, occupiedSlots, blockedSlots, selectedSlots, selectedDate]);
 
   return (
@@ -294,21 +293,9 @@ export default function SlotSelection({
                       </p>
                       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
                         {displayedSlotStarts.map((slotStartIso) => {
-                          const slotStart = new Date(slotStartIso);
-                          const slotEnd = new Date(
-                            slotStart.getTime() + 30 * 60 * 1000,
-                          );
-                          const startTime = slotStart.toLocaleTimeString(
-                            "fr-FR",
-                            {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            },
-                          );
-                          const endTime = slotEnd.toLocaleTimeString("fr-FR", {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          });
+                          const startTime = isoTimePart(slotStartIso);
+                          const startTime = getIsoTimePart(slotStartIso);
+                          const endTime = addMinutesToTime(startTime, 30);
 
                           const isSelected =
                             selectedSlots.includes(slotStartIso);
@@ -416,15 +403,7 @@ export default function SlotSelection({
                                   Date
                                 </p>
                                 <p className="text-white font-one text-sm">
-                                  {new Date(selectedDate).toLocaleDateString(
-                                    "fr-FR",
-                                    {
-                                      weekday: "long",
-                                      day: "numeric",
-                                      month: "long",
-                                      year: "numeric",
-                                    },
-                                  )}
+                                  {formatDateKeyForDisplay(selectedDate)}
                                 </p>
                               </div>
                               <div className="bg-white/5 rounded-2xl p-2 border border-white/10">
@@ -432,22 +411,14 @@ export default function SlotSelection({
                                   Horaire
                                 </p>
                                 <p className="text-white font-one text-sm">
-                                  {new Date(
-                                    selectedSlots[0],
-                                  ).toLocaleTimeString("fr-FR", {
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                  })}{" "}
+                                  {getIsoTimePart(selectedSlots[0])}{" "}
                                   -{" "}
-                                  {new Date(
-                                    new Date(
+                                  {addMinutesToTime(
+                                    getIsoTimePart(
                                       selectedSlots[selectedSlots.length - 1],
-                                    ).getTime() +
-                                      30 * 60 * 1000,
-                                  ).toLocaleTimeString("fr-FR", {
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                  })}
+                                    ),
+                                    30,
+                                  )}
                                 </p>
                               </div>
                               <div className="bg-white/5 rounded-2xl p-2 border border-white/10">

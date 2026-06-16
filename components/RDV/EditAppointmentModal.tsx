@@ -8,7 +8,11 @@ import {
   getTimeslots,
 } from "@/lib/actions/timeslot.action";
 import { modifyAppointmentByClient } from "@/lib/actions/appointment.action";
-import { toDateInputValue } from "@/lib/utils/date";
+import {
+  addMinutesToTime,
+  getIsoTimePart,
+  toDateInputValue,
+} from "@/lib/utils/date";
 import { toSlug } from "@/lib/utils";
 import { Appointment } from "@/components/MonProfil/RendezVousTab";
 import { useSession } from "next-auth/react";
@@ -45,14 +49,8 @@ type EditAppointmentModalProps = {
 };
 
 const formatTimeRange = (start: string, end: string) => {
-  const startTime = new Date(start).toLocaleTimeString("fr-FR", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-  const endTime = new Date(end).toLocaleTimeString("fr-FR", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  const startTime = getIsoTimePart(start);
+  const endTime = end ? getIsoTimePart(end) : addMinutesToTime(startTime, 30);
   return `${startTime} - ${endTime}`;
 };
 
