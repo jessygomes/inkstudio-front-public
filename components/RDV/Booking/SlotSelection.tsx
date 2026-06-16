@@ -3,12 +3,10 @@ import React from "react";
 import { useFormContext } from "react-hook-form";
 
 import {
-  addMinutesToIsoInTimeZone,
-  DEFAULT_BUSINESS_TIME_ZONE,
+  addMinutesToTime,
   formatDateKeyForDisplay,
-  getDateKeyInTimeZone,
-  getDayRangeForTimeZone,
-  getTimeInTimeZone,
+  getIsoDatePart,
+  getIsoTimePart,
   toDateInputValue,
 } from "@/lib/utils/date";
 import Section from "./Section";
@@ -95,10 +93,8 @@ export default function SlotSelection({
   ) => {
     if (!selectedDate) return [] as string[];
 
-    const { start: dayStart, end: dayEnd } = getDayRangeForTimeZone(
-      selectedDate,
-      DEFAULT_BUSINESS_TIME_ZONE,
-    );
+    const dayStart = new Date(`${selectedDate}T00:00:00.000Z`);
+    const dayEnd = new Date(`${selectedDate}T23:59:59.999Z`);
     const slots: string[] = [];
 
     ranges.forEach((range) => {
@@ -140,15 +136,9 @@ export default function SlotSelection({
     );
 
     return merged
-      .filter(
-        (slotStart) =>
-          getDateKeyInTimeZone(slotStart, DEFAULT_BUSINESS_TIME_ZONE) ===
-          selectedDate,
-      )
+      .filter((slotStart) => getIsoDatePart(slotStart) === selectedDate)
       .sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
   }, [timeSlots, occupiedSlots, blockedSlots, selectedSlots, selectedDate]);
-
-  console.log("Displayed slots:", displayedSlotStarts);
 
   return (
     <Section title="Choisir le tatoueur et les créneaux">
@@ -303,15 +293,8 @@ export default function SlotSelection({
                       </p>
                       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
                         {displayedSlotStarts.map((slotStartIso) => {
-                          const startTime = getTimeInTimeZone(
-                            slotStartIso,
-                            DEFAULT_BUSINESS_TIME_ZONE,
-                          );
-                          const endTime = addMinutesToIsoInTimeZone(
-                            slotStartIso,
-                            30,
-                            DEFAULT_BUSINESS_TIME_ZONE,
-                          );
+                          const startTime = getIsoTimePart(slotStartIso);
+                          const endTime = addMinutesToTime(startTime, 30);
 
                           const isSelected =
                             selectedSlots.includes(slotStartIso);
@@ -427,15 +410,13 @@ export default function SlotSelection({
                                   Horaire
                                 </p>
                                 <p className="text-white font-one text-sm">
-                                  {getTimeInTimeZone(
-                                    selectedSlots[0],
-                                    DEFAULT_BUSINESS_TIME_ZONE,
-                                  )}{" "}
+                                  {getIsoTimePart(selectedSlots[0])}{" "}
                                   -{" "}
-                                  {addMinutesToIsoInTimeZone(
-                                    selectedSlots[selectedSlots.length - 1],
+                                  {addMinutesToTime(
+                                    getIsoTimePart(
+                                      selectedSlots[selectedSlots.length - 1],
+                                    ),
                                     30,
-                                    DEFAULT_BUSINESS_TIME_ZONE,
                                   )}
                                 </p>
                               </div>

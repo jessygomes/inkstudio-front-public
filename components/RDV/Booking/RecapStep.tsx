@@ -1,10 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
 import {
-  addMinutesToIsoInTimeZone,
-  DEFAULT_BUSINESS_TIME_ZONE,
+  addMinutesToTime,
   formatDateKeyForDisplay,
-  getTimeInTimeZone,
+  getIsoTimePart,
 } from "@/lib/utils/date";
 import Section from "./Section";
 import ReferenceImages from "./ReferenceImages";
@@ -305,15 +304,11 @@ export default function RecapStep({
             <div>
               <p className="text-white/60 font-one text-sm mb-0.5">Horaire</p>
               <p className="text-white font-one">
-                {getTimeInTimeZone(
-                  selectedSlots[0],
-                  DEFAULT_BUSINESS_TIME_ZONE,
-                )}{" "}
+                {getIsoTimePart(selectedSlots[0])}{" "}
                 -{" "}
-                {addMinutesToIsoInTimeZone(
-                  selectedSlots[selectedSlots.length - 1],
+                {addMinutesToTime(
+                  getIsoTimePart(selectedSlots[selectedSlots.length - 1]),
                   30,
-                  DEFAULT_BUSINESS_TIME_ZONE,
                 )}
               </p>
             </div>
