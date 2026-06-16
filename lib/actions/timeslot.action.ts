@@ -1,5 +1,7 @@
 "use server";
 
+import { getDayRangeForTimeZone } from "@/lib/utils/date";
+
 //! Fetch timeslots for a given date and tatoueur
 export async function getTimeslots(date: string, tatoueurId: string) {
   try {
@@ -23,7 +25,6 @@ export async function getTimeslots(date: string, tatoueurId: string) {
 
     const data = await res.json();
 
-    console.log("Fetched timeslots:", data);
     return { ok: true, data };
   } catch (error) {
     console.error("Erreur server action timeslots:", error);
@@ -70,12 +71,9 @@ export async function getTimeslotBySalon(date: string, salonId: string) {
 //! Fetch occupied slots for a given salon
 export async function getOccupiedSlotsBySalon(date: string, salonId: string) {
   try {
-    const startOfDay = new Date(date);
-    startOfDay.setHours(0, 0, 0, 0);
-    const endOfDay = new Date(date);
-    endOfDay.setHours(23, 59, 59, 999);
+    const { start, end } = getDayRangeForTimeZone(date);
 
-    const url = `${process.env.NEXT_PUBLIC_BACK_URL}/appointments/salon/${salonId}/range?start=${startOfDay.toISOString()}&end=${endOfDay.toISOString()}`;
+    const url = `${process.env.NEXT_PUBLIC_BACK_URL}/appointments/salon/${salonId}/range?start=${start.toISOString()}&end=${end.toISOString()}`;
 
     const res = await fetch(url, {
       method: "GET",
@@ -107,16 +105,12 @@ export async function getOccupiedSlotsBySalon(date: string, salonId: string) {
 //! Fetch occupied slots for a given date and tatoueur
 export async function getOccupiedSlots(date: string, tatoueurId: string) {
   try {
-    const startOfDay = new Date(date);
-    startOfDay.setHours(0, 0, 0, 0);
-
-    const endOfDay = new Date(date);
-    endOfDay.setHours(23, 59, 59, 999);
+    const { start, end } = getDayRangeForTimeZone(date);
 
     const res = await fetch(
       `${
         process.env.NEXT_PUBLIC_BACK_URL
-      }/appointments/tatoueur-range?tatoueurId=${tatoueurId}&start=${startOfDay.toISOString()}&end=${endOfDay.toISOString()}`,
+      }/appointments/tatoueur-range?tatoueurId=${tatoueurId}&start=${start.toISOString()}&end=${end.toISOString()}`,
       {
         method: "GET",
         headers: {

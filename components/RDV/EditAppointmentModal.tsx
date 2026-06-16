@@ -8,6 +8,7 @@ import {
   getTimeslots,
 } from "@/lib/actions/timeslot.action";
 import { modifyAppointmentByClient } from "@/lib/actions/appointment.action";
+import { toDateInputValue } from "@/lib/utils/date";
 import { toSlug } from "@/lib/utils";
 import { Appointment } from "@/components/MonProfil/RendezVousTab";
 import { useSession } from "next-auth/react";
@@ -43,13 +44,6 @@ type EditAppointmentModalProps = {
   onUpdated: () => void;
 };
 
-const formatDateInput = (value: string) => {
-  const d = new Date(value);
-  return new Date(d.getTime() - d.getTimezoneOffset() * 60000)
-    .toISOString()
-    .slice(0, 10);
-};
-
 const formatTimeRange = (start: string, end: string) => {
   const startTime = new Date(start).toLocaleTimeString("fr-FR", {
     hour: "2-digit",
@@ -77,7 +71,7 @@ const EditAppointmentModal: React.FC<EditAppointmentModalProps> = ({
     appointment.tatoueur?.id || "",
   );
   const [selectedDate, setSelectedDate] = useState(
-    formatDateInput(appointment.start),
+    toDateInputValue(appointment.start),
   );
   const [selectedSlot, setSelectedSlot] = useState<string>(appointment.start);
 

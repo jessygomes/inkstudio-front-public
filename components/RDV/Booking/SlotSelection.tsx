@@ -2,6 +2,7 @@
 import React from "react";
 import { useFormContext } from "react-hook-form";
 
+import { toDateInputValue } from "@/lib/utils/date";
 import Section from "./Section";
 import { TimeSlot } from "./types";
 
@@ -229,7 +230,7 @@ export default function SlotSelection({
                   type="date"
                   value={selectedDate}
                   onChange={(e) => onDateChange(e.target.value)}
-                  min={new Date().toISOString().split("T")[0]}
+                  min={toDateInputValue(new Date())}
                   className="w-full max-w-xs p-2.5 bg-white/2 border border-white/10 rounded-2xl font-one text-white text-sm focus:outline-none focus:border-tertiary-400 focus:ring-1 focus:ring-tertiary-400/30 transition-all"
                 />
               </div>

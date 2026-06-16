@@ -1,0 +1,110 @@
+const DEFAULT_BUSINESS_TIME_ZONE = "Europe/Paris";
+
+type TimeZoneParts = {
+  year: number;
+  month: number;
+  day: number;
+  hour: number;
+  minute: number;
+  second: number;
+};
+
+function getTimeZoneParts(date: Date, timeZone: string): TimeZoneParts {
+  const formatter = new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hourCycle: "h23",
+  });
+
+  const parts = formatter.formatToParts(date);
+  const getPart = (type: Intl.DateTimeFormatPartTypes) => {
+    const value = parts.find((part) => part.type === type)?.value;
+
+    if (!value) {
+      throw new Error(`Missing ${type} for timezone conversion`);
+    }
+
+    return Number(value);
+  };
+
+  return {
+    year: getPart("year"),
+    month: getPart("month"),
+    day: getPart("day"),
+    hour: getPart("hour"),
+    minute: getPart("minute"),
+    second: getPart("second"),
+  };
+}
+
+function getTimeZoneOffsetMs(date: Date, timeZone: string) {
+  const parts = getTimeZoneParts(date, timeZone);
+  const asUtc = Date.UTC(
+    parts.year,
+    parts.month - 1,
+    parts.day,
+    parts.hour,
+    parts.minute,
+    parts.second,
+    0,
+  );
+
+  return asUtc - date.getTime();
+}
+
+function zonedWallTimeToUtc(
+  date: string,
+  time: string,
+  timeZone: string,
+) {
+  const [year, month, day] = date.split("-").map(Number);
+  const [hour, minute, second = 0] = time.split(":").map(Number);
+
+  const utcGuess = new Date(
+    Date.UTC(year, month - 1, day, hour, minute, second, 0),
+  );
+  const firstOffset = getTimeZoneOffsetMs(utcGuess, timeZone);
+  let result = new Date(utcGuess.getTime() - firstOffset);
+
+  const refinedOffset = getTimeZoneOffsetMs(result, timeZone);
+  if (refinedOffset !== firstOffset) {
+    result = new Date(utcGuess.getTime() - refinedOffset);
+  }
+
+  return result;
+}
+
+function addOneDay(date: string) {
+  const [year, month, day] = date.split("-").map(Number);
+  const next = new Date(Date.UTC(year, month - 1, day + 1));
+
+  return `${next.getUTCFullYear()}-${String(next.getUTCMonth() + 1).padStart(2, "0")}-${String(next.getUTCDate()).padStart(2, "0")}`;
+}
+
+export function toDateInputValue(value: Date | string) {
+  const date = typeof value === "string" ? new Date(value) : value;
+  return new Date(date.getTime() - date.getTimezoneOffset() * 60000)
+    .toISOString()
+    .slice(0, 10);
+}
+
+export function getDayRangeForTimeZone(
+  date: string,
+  timeZone = DEFAULT_BUSINESS_TIME_ZONE,
+) {
+  const start = zonedWallTimeToUtc(date, "00:00:00", timeZone);
+  const nextDayStart = zonedWallTimeToUtc(addOneDay(date), "00:00:00", timeZone);
+  const end = new Date(nextDayStart.getTime() - 1);
+
+  return {
+    start,
+    end,
+  };
+}
+
+export { DEFAULT_BUSINESS_TIME_ZONE };

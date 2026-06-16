@@ -18,6 +18,7 @@ import {
 import { getPiercingPrice } from "@/lib/actions/piercingPrice.action";
 import { createAppointmentByClient, getSkinTones } from "@/lib/actions/appointment.action";
 import { getMyMoodboardsAction } from "@/lib/actions/moodboard.action";
+import { toDateInputValue } from "@/lib/utils/date";
 import { uploadFiles } from "@/lib/utils/uploadthing";
 import imageCompression from "browser-image-compression";
 import { FlashProps, PiercingService, PiercingZone } from "@/lib/type";
@@ -123,7 +124,7 @@ export function useBookingLogic({
       prestation: (initialPrestation as never) ?? (undefined as never),
       tatoueurId: defaultTatoueurId || "",
       availability: {
-        date: new Date().toISOString().slice(0, 10),
+        date: toDateInputValue(new Date()),
         from: "11:00",
         to: "15:00",
         alt: { date: "", from: "", to: "" },
@@ -135,7 +136,7 @@ export function useBookingLogic({
         phone: isAuthenticated && sessionUser ? sessionUser.phone : "",
         birthDate:
           isAuthenticated && effectiveBirthDate
-            ? new Date(effectiveBirthDate).toISOString().split("T")[0]
+            ? toDateInputValue(effectiveBirthDate)
             : "",
       },
       details: {},
@@ -154,9 +155,7 @@ export function useBookingLogic({
     methods.setValue("client.phone", sessionPhone || "");
     methods.setValue(
       "client.birthDate",
-      effectiveBirthDate
-        ? new Date(effectiveBirthDate).toISOString().split("T")[0]
-        : "",
+      effectiveBirthDate ? toDateInputValue(effectiveBirthDate) : "",
     );
   }, [
     isAuthenticated,
@@ -236,7 +235,7 @@ export function useBookingLogic({
   //! États pour les créneaux
   const [selectedTatoueur, setSelectedTatoueur] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<string>(
-    new Date().toISOString().slice(0, 10),
+    toDateInputValue(new Date()),
   );
   const [timeSlots, setTimeSlots] = useState<{ start: string; end: string }[]>(
     [],
