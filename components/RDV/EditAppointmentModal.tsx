@@ -9,8 +9,9 @@ import {
 } from "@/lib/actions/timeslot.action";
 import { modifyAppointmentByClient } from "@/lib/actions/appointment.action";
 import {
-  addMinutesToTime,
-  getIsoTimePart,
+  DEFAULT_BUSINESS_TIME_ZONE,
+  addMinutesToIsoInTimeZone,
+  getTimeInTimeZone,
   toDateInputValue,
 } from "@/lib/utils/date";
 import { toSlug } from "@/lib/utils";
@@ -49,8 +50,10 @@ type EditAppointmentModalProps = {
 };
 
 const formatTimeRange = (start: string, end: string) => {
-  const startTime = getIsoTimePart(start);
-  const endTime = end ? getIsoTimePart(end) : addMinutesToTime(startTime, 30);
+  const startTime = getTimeInTimeZone(start, DEFAULT_BUSINESS_TIME_ZONE);
+  const endTime = end
+    ? getTimeInTimeZone(end, DEFAULT_BUSINESS_TIME_ZONE)
+    : addMinutesToIsoInTimeZone(start, 30, DEFAULT_BUSINESS_TIME_ZONE);
   return `${startTime} - ${endTime}`;
 };
 

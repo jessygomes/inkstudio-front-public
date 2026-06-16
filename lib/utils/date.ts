@@ -101,6 +101,35 @@ export function getIsoTimePart(iso: string) {
   return iso.slice(11, 16);
 }
 
+export function getDateKeyInTimeZone(
+  value: Date | string,
+  timeZone = DEFAULT_BUSINESS_TIME_ZONE,
+) {
+  const date = typeof value === "string" ? new Date(value) : value;
+  const parts = getTimeZoneParts(date, timeZone);
+
+  return `${parts.year}-${String(parts.month).padStart(2, "0")}-${String(parts.day).padStart(2, "0")}`;
+}
+
+export function getTimeInTimeZone(
+  value: Date | string,
+  timeZone = DEFAULT_BUSINESS_TIME_ZONE,
+) {
+  const date = typeof value === "string" ? new Date(value) : value;
+  const parts = getTimeZoneParts(date, timeZone);
+
+  return `${String(parts.hour).padStart(2, "0")}:${String(parts.minute).padStart(2, "0")}`;
+}
+
+export function addMinutesToIsoInTimeZone(
+  iso: string,
+  minutesToAdd: number,
+  timeZone = DEFAULT_BUSINESS_TIME_ZONE,
+) {
+  const shifted = new Date(new Date(iso).getTime() + minutesToAdd * 60000);
+  return getTimeInTimeZone(shifted, timeZone);
+}
+
 export function addMinutesToTime(time: string, minutesToAdd: number) {
   const [hours, minutes] = time.split(":").map(Number);
   const totalMinutes = hours * 60 + minutes + minutesToAdd;
