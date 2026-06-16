@@ -16,7 +16,7 @@ import {
   getBlockedSlotsBySalon,
 } from "@/lib/actions/timeslot.action";
 import { getPiercingPrice } from "@/lib/actions/piercingPrice.action";
-import { createAppointmentByClient } from "@/lib/actions/appointment.action";
+import { createAppointmentByClient, getSkinTones } from "@/lib/actions/appointment.action";
 import { getMyMoodboardsAction } from "@/lib/actions/moodboard.action";
 import { uploadFiles } from "@/lib/utils/uploadthing";
 import imageCompression from "browser-image-compression";
@@ -25,6 +25,7 @@ import { BookingMoodboardOption, SkinToneOption } from "./types";
 
 type AppointmentRequestForm = z.infer<typeof appointmentRequestSchema>;
 
+//! Types pour les props du hook
 interface UseBookingLogicProps {
   salon: any;
   defaultTatoueurId?: string | null;
@@ -33,6 +34,7 @@ interface UseBookingLogicProps {
   defaultFlashId?: string | null;
 }
 
+//! Fonction utilitaire pour obtenir les dimensions d'un flash
 function getFlashDimensions(flash?: FlashProps): string {
   if (!flash) return "";
 
@@ -46,7 +48,7 @@ function getFlashDimensions(flash?: FlashProps): string {
 
   return "";
 }
-
+//! Fonction utilitaire pour extraire les zones de piercing d'une réponse API
 function extractPiercingZones(payload: unknown): PiercingZone[] {
   if (Array.isArray(payload)) {
     return payload as PiercingZone[];
@@ -69,6 +71,9 @@ function extractPiercingZones(payload: unknown): PiercingZone[] {
   return Array.isArray(firstArray) ? (firstArray as PiercingZone[]) : [];
 }
 
+//! -------------------------------------------------
+//! HOOK PRINCIPAL POUR LA LOGIQUE DE RÉSERVATION
+//! -------------------------------------------------
 export function useBookingLogic({
   salon,
   defaultTatoueurId,
@@ -76,7 +81,7 @@ export function useBookingLogic({
   flashes = [],
   defaultFlashId,
 }: UseBookingLogicProps) {
-  const MAX_CLIENT_SLOTS = 2;
+  const MAX_CLIENT_SLOTS = 2; // Limite de créneaux sélectionnables par le client (1h = 2 créneaux de 30 min)
   const initialPrestation =
     defaultPrestation &&
     ["TATTOO", "PIERCING", "PROJET", "RETOUCHE"].includes(defaultPrestation)
@@ -110,7 +115,7 @@ export function useBookingLogic({
   const effectiveBirthDate =
     sessionBirthDate || clientProfile?.birthDate || undefined;
 
-  // Form setup
+  //! Form setup
   const methods = useForm<AppointmentRequestForm>({
     resolver: zodResolver(appointmentRequestSchema),
     mode: "onBlur",
@@ -139,7 +144,7 @@ export function useBookingLogic({
     },
   });
 
-  // Préremplir quand la session est disponible
+  //! Préremplir quand la session est disponible
   useEffect(() => {
     if (!isAuthenticated) return;
 
@@ -163,6 +168,7 @@ export function useBookingLogic({
     methods,
   ]);
 
+  //! Déstructurer les méthodes du formulaire
   const {
     watch,
     setValue,
@@ -171,12 +177,12 @@ export function useBookingLogic({
     formState: { errors, isSubmitting },
   } = methods;
 
-  // États
+  //! États
   const [step, setStep] = useState(1);
   const [confirmDisabled, setConfirmDisabled] = useState(false);
   const [appointmentCreated, setAppointmentCreated] = useState(false);
 
-  // Prestation et artistes
+  //! Prestation et artistes
   const prestation = watch("prestation");
   const artists = useMemo(
     () =>
@@ -186,27 +192,25 @@ export function useBookingLogic({
     [salon.tatoueurs],
   );
 
+  // Préremplir le tatoueur par défaut si fourni
   useEffect(() => {
     if (defaultTatoueurId) setValue("tatoueurId", defaultTatoueurId);
   }, [defaultTatoueurId, setValue]);
 
+  //! Fetch des teintes de peau disponibles pour le salon
   useEffect(() => {
     let isMounted = true;
 
     const fetchSkinTones = async () => {
       try {
         setIsLoadingSkinTones(true);
-        const backUrl = process.env.NEXT_PUBLIC_BACK_URL || "";
-        const response = await fetch(`${backUrl}/appointments/skin-tones`, {
-          method: "GET",
-          cache: "no-store",
-        });
+        const response = await getSkinTones();
 
         if (!response.ok) {
           throw new Error(`Erreur lors du chargement (${response.status})`);
         }
 
-        const data = (await response.json()) as SkinToneOption[];
+        const data = response.data as SkinToneOption[];
         if (isMounted) {
           setSkinToneOptions(Array.isArray(data) ? data : []);
         }
@@ -229,7 +233,7 @@ export function useBookingLogic({
     };
   }, []);
 
-  // États pour les créneaux
+  //! États pour les créneaux
   const [selectedTatoueur, setSelectedTatoueur] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<string>(
     new Date().toISOString().slice(0, 10),
@@ -242,7 +246,7 @@ export function useBookingLogic({
   const [blockedSlots, setBlockedSlots] = useState<any[]>([]);
   const [isLoadingSlots, setIsLoadingSlots] = useState(false);
 
-  // États pour piercing
+  //! États pour piercing
   const [piercingZones, setPiercingZones] = useState<PiercingZone[]>([]);
   const [selectedPiercingZone, setSelectedPiercingZone] = useState<string>("");
   const [selectedPiercingService, setSelectedPiercingService] =
@@ -255,13 +259,14 @@ export function useBookingLogic({
   const [selectedMoodboardId, setSelectedMoodboardId] = useState("");
   const [isLoadingMoodboards, setIsLoadingMoodboards] = useState(false);
 
-  // États pour les images
+  //! États pour les images
   const [sketchFile, setSketchFile] = useState<File | null>(null);
   const [referenceFile, setReferenceFile] = useState<File | null>(null);
   const [existingImages, setExistingImages] = useState<string[]>([]);
   const [placementImageUrl, setPlacementImageUrl] = useState<string>("");
   const [selectedFlashId, setSelectedFlashId] = useState<string>("");
 
+  //! Fetch des moodboards de l'utilisateur
   useEffect(() => {
     let active = true;
 
@@ -317,6 +322,7 @@ export function useBookingLogic({
     };
   }, [isAuthenticated, selectedMoodboardId, setValue]);
 
+  //! flashes disponibles
   const availableFlashes = useMemo(
     () =>
       (flashes ?? []).filter(
@@ -325,6 +331,8 @@ export function useBookingLogic({
     [flashes],
   );
 
+  //! Préremplir le flash par défaut si fourni ET disponible
+  // Ce useEffect s'exécute lorsqu'un defaultFlashId est passé en props
   useEffect(() => {
     if (!defaultFlashId) return;
     if (initialPrestation !== "TATTOO") return;
@@ -334,6 +342,7 @@ export function useBookingLogic({
     setSelectedFlashId(defaultFlashId);
   }, [defaultFlashId, availableFlashes, initialPrestation]);
 
+  // Mettre à jour les dimensions du formulaire quand le flash change
   useEffect(() => {
     if (prestation !== "TATTOO") return;
 
@@ -350,7 +359,7 @@ export function useBookingLogic({
     }
   }, [selectedFlashId, prestation, availableFlashes, setValue]);
 
-  // Navigation entre étapes
+  //! Navigation entre étapes
   const goNext = async () => {
     const fieldsByStep: Record<
       number,
@@ -399,7 +408,9 @@ export function useBookingLogic({
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Fetch des créneaux
+  //! -------------------------------------------------
+  //! Fetch des créneaux
+  //! -------------------------------------------------
   useEffect(() => {
     if (!selectedDate) return;
     if (!salon.appointmentBookingEnabled && !selectedTatoueur) return;
@@ -462,7 +473,7 @@ export function useBookingLogic({
     salon.id,
   ]);
 
-  // Vérifier si un créneau est bloqué
+  //! Vérifier si un créneau est bloqué
   const isSlotBlocked = (slotStart: string, slotEnd?: string) => {
     if (!selectedTatoueur && !salon.appointmentBookingEnabled) return false;
 
@@ -488,7 +499,7 @@ export function useBookingLogic({
     });
   };
 
-  // Vérifier si un créneau est occupé
+  //! Vérifier si un créneau est occupé
   const isSlotOccupied = (start: string) => {
     const sStart = new Date(start);
     const sEnd = new Date(sStart.getTime() + 30 * 60 * 1000);
@@ -500,7 +511,7 @@ export function useBookingLogic({
     });
   };
 
-  // Sélection de créneaux
+  //! Sélection de créneaux
   const handleSlotSelection = (slotStart: string) => {
     if (isSlotBlocked(slotStart)) {
       toast.error("Ce créneau est indisponible (période bloquée)");
@@ -512,7 +523,7 @@ export function useBookingLogic({
       return;
     }
 
-    // Toggle
+    //! Toggle
     if (selectedSlots.includes(slotStart)) {
       const newSelection = selectedSlots.filter((s) => s !== slotStart);
       const times = newSelection
@@ -536,7 +547,7 @@ export function useBookingLogic({
       return;
     }
 
-    // Ajouter le créneau
+    //! Ajouter le créneau
     const newSelection = [...selectedSlots, slotStart]
       .filter((s, i, arr) => arr.indexOf(s) === i)
       .sort();
@@ -553,7 +564,9 @@ export function useBookingLogic({
     }
   };
 
-  // Gestion des fichiers images
+  //! -------------------------------------------------
+  //! Gestion des fichiers images
+  //! -------------------------------------------------
   useEffect(() => {
     if (sketchFile) {
       const url = URL.createObjectURL(sketchFile);
@@ -586,7 +599,9 @@ export function useBookingLogic({
     }
   }, [prestation, setValue]);
 
-  // Charger les zones de piercing configurées pour le salon.
+  //! -------------------------------------------------
+  //! Charger les zones de piercing configurées pour le salon.
+  //! -------------------------------------------------
   useEffect(() => {
     if (prestation !== "PIERCING") {
       setPiercingZones([]);
@@ -598,6 +613,7 @@ export function useBookingLogic({
 
     let isMounted = true;
 
+    //! Fetch des zones de piercing
     const fetchPiercingZones = async () => {
       try {
         setIsLoadingPiercingZones(true);
@@ -634,7 +650,7 @@ export function useBookingLogic({
     };
   }, [prestation, salon.id]);
 
-  // Nettoyer le service choisi si la zone change ou n'existe plus.
+  //! Nettoyer le service choisi si la zone change ou n'existe plus.
   useEffect(() => {
     const zone = piercingZones.find((z) => z.id === selectedPiercingZone);
 
@@ -654,7 +670,7 @@ export function useBookingLogic({
     }
   }, [piercingZones, selectedPiercingZone, selectedPiercingService]);
 
-  // Gestion du prix du piercing
+  //! Gestion du prix du piercing
   useEffect(() => {
     if (prestation !== "PIERCING") {
       setPiercingPrice(null);
@@ -674,7 +690,9 @@ export function useBookingLogic({
     selectedPiercingService,
   ]);
 
-  // Soumission du formulaire
+  //! -------------------------------------------------
+  //! Soumission du formulaire
+  //! -------------------------------------------------
   const onSubmit = async (data: AppointmentRequestForm) => {
     if (selectedSlots.length === 0) {
       toast.error("Veuillez sélectionner au moins un créneau");
@@ -805,6 +823,7 @@ export function useBookingLogic({
     }
   };
 
+  //! -------------------------------------------------
   const clearSelectedSlots = () => {
     setSelectedSlots([]);
   };

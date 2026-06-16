@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { FormProvider } from "react-hook-form";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
@@ -77,8 +77,8 @@ export default function BookingFlow({
     defaultFlashId,
   });
 
-  // Initialise l'étape depuis l'URL au premier rendu (uniquement étapes 1-4)
-  // Sync URL quand l'étape change (push pour ajouter une entrée dans l'historique)
+  //! Initialise l'étape depuis l'URL au premier rendu (uniquement étapes 1-4)
+  //! Sync URL quand l'étape change (push pour ajouter une entrée dans l'historique)
   useEffect(() => {
     if (step >= 1 && step <= 4) {
       const urlStep = parseInt(searchParams.get("step") ?? "1", 10);

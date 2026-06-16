@@ -11,7 +11,7 @@ import {
   FaChevronLeft,
   FaChevronRight,
 } from "react-icons/fa";
-import { getAllRdvClient } from "@/lib/actions/user.action";
+import { getAllRdvClient } from "@/lib/actions/appointment.action";
 import { toast } from "sonner";
 import Image from "next/image";
 import { cancelAppointmentByClient } from "@/lib/actions/appointment.action";

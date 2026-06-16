@@ -3,6 +3,49 @@
 import { getAuthHeaders } from "../session";
 
 //! ----------------------------------------------------------------------------
+//!  Récupérer tous les RDV d'un client avec pagination et filtres
+//! ----------------------------------------------------------------------------
+export const getAllRdvClient = async (options?: {
+  status?: string;
+  page?: number;
+  limit?: number;
+}) => {
+  try {
+    const headers = await getAuthHeaders();
+
+    // Construction des paramètres de requête
+    const params = new URLSearchParams();
+    if (options?.status) params.append("status", options.status);
+    if (options?.page) params.append("page", options.page.toString());
+    if (options?.limit) params.append("limit", options.limit.toString());
+
+    const queryString = params.toString();
+    const url = `${process.env.NEXT_PUBLIC_BACK_URL}/appointments/rdv-client${
+      queryString ? `?${queryString}` : ""
+    }`;
+
+    const response = await fetch(url, {
+      method: "GET",
+      headers,
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || (data && data.error)) {
+      const message =
+        data?.message ||
+        `Erreur lors de la récupération des rdv (${response.status})`;
+      return { ok: false, error: true, status: response.status, message, data };
+    }
+
+    return { ok: true, error: false, status: response.status, data };
+  } catch (error) {
+    console.error("Erreur lors de la récupération des rdv :", error);
+    throw error;
+  }
+};
+
+//! ----------------------------------------------------------------------------
 //!  RECUPERER UN RDV PAR ID
 //! ----------------------------------------------------------------------------
 export const fetchAppointmentById = async (appointmentId: string) => {
@@ -160,6 +203,35 @@ export const createAppointmentByClient = async (
     return json;
   } catch (error) {
     console.error("Erreur lors de la création du rendez-vous :", error);
+    throw error;
+  }
+};
+
+//! ----------------------------------------------------------------------------
+//!  RECUPERER LES TEINTES DE PEAUX
+//! ----------------------------------------------------------------------------
+export const getSkinTones = async () => {
+  try {
+    const headers = await getAuthHeaders();
+    const backUrl = process.env.NEXT_PUBLIC_BACK_URL || "";
+
+    const response = await fetch(`${backUrl}/appointments/skin-tones`, {
+      method: "GET",
+      headers,
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || (data && data.error)) {
+      const message =
+        data?.message ||
+        `Erreur lors du chargement des teintes de peau (${response.status})`;
+      return { ok: false, error: true, status: response.status, message, data };
+    }
+
+    return { ok: true, error: false, status: response.status, data };
+  } catch (error) {
+    console.error("Erreur lors du chargement des teintes de peau :", error);
     throw error;
   }
 };
