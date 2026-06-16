@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
-import Link from "next/link";
 import { toSlug } from "@/lib/utils";
+import AppButton from "@/components/Shared/AppButton";
 
 interface ConfirmationStepProps {
   salon: any;
@@ -17,14 +17,14 @@ export default function ConfirmationStep({
   const postalCode = salon.postalCode;
 
   return (
-    <div className="min-h-[500px] flex flex-col items-center justify-center px-4 py-12">
+    <div className="min-h-125 flex flex-col items-center justify-center px-4 py-12">
       {addConfirmationEnabled ? (
         /* Mode avec confirmation requise */
         <div className="max-w-2xl w-full space-y-8 text-center">
           {/* Icône de succès */}
           <div className="relative mx-auto w-24 h-24">
-            <div className="absolute inset-0 bg-gradient-to-br from-tertiary-400 to-tertiary-600 rounded-full animate-pulse opacity-30"></div>
-            <div className="relative w-24 h-24 bg-gradient-to-br from-tertiary-500 to-tertiary-600 rounded-full flex items-center justify-center shadow-2xl shadow-tertiary-500/50">
+            <div className="absolute inset-0 bg-linear-to-br from-tertiary-400 to-tertiary-600 rounded-full animate-pulse opacity-30"></div>
+            <div className="relative w-24 h-24 bg-linear-to-br from-tertiary-500 to-tertiary-600 rounded-full flex items-center justify-center shadow-2xl shadow-tertiary-500/50">
               <svg
                 className="w-12 h-12 text-white"
                 fill="none"
@@ -55,9 +55,9 @@ export default function ConfirmationStep({
           </div>
 
           {/* Informations */}
-          <div className="bg-gradient-to-br from-white/[0.08] to-white/[0.02] p-8 rounded-2xl border border-white/10 backdrop-blur-sm space-y-6">
+          <div className="bg-linear-to-br from-noir-500 to-noir-700 p-8 rounded-2xl border border-white/10 backdrop-blur-sm space-y-6">
             <div className="flex items-start gap-4">
-              <div className="flex-shrink-0 w-12 h-12 bg-tertiary-500/20 rounded-full flex items-center justify-center">
+              <div className="shrink-0 w-12 h-12 bg-tertiary-500/20 rounded-full flex items-center justify-center">
                 <svg
                   className="w-6 h-6 text-tertiary-400"
                   fill="none"
@@ -78,7 +78,7 @@ export default function ConfirmationStep({
                 </h3>
                 <ul className="space-y-3 text-sm text-white/80 font-one">
                   <li className="flex items-start gap-3">
-                    <span className="flex-shrink-0 w-6 h-6 bg-tertiary-500/20 rounded-full flex items-center justify-center text-tertiary-400 text-xs font-semibold">
+                    <span className="shrink-0 w-6 h-6 bg-tertiary-500/20 rounded-full flex items-center justify-center text-tertiary-400 text-xs font-semibold">
                       1
                     </span>
                     <span>
@@ -87,7 +87,7 @@ export default function ConfirmationStep({
                     </span>
                   </li>
                   <li className="flex items-start gap-3">
-                    <span className="flex-shrink-0 w-6 h-6 bg-tertiary-500/20 rounded-full flex items-center justify-center text-tertiary-400 text-xs font-semibold">
+                    <span className="shrink-0 w-6 h-6 bg-tertiary-500/20 rounded-full flex items-center justify-center text-tertiary-400 text-xs font-semibold">
                       2
                     </span>
                     <span>
@@ -96,7 +96,7 @@ export default function ConfirmationStep({
                     </span>
                   </li>
                   <li className="flex items-start gap-3">
-                    <span className="flex-shrink-0 w-6 h-6 bg-tertiary-500/20 rounded-full flex items-center justify-center text-tertiary-400 text-xs font-semibold">
+                    <span className="shrink-0 w-6 h-6 bg-tertiary-500/20 rounded-full flex items-center justify-center text-tertiary-400 text-xs font-semibold">
                       3
                     </span>
                     <span>
@@ -111,7 +111,7 @@ export default function ConfirmationStep({
 
           {/* Contact du salon */}
           {(salon.salonEmail || salon.salonPhone) && (
-            <div className="bg-gradient-to-br from-white/[0.05] to-transparent p-6 rounded-2xl border border-white/10">
+            <div className="bg-linear-to-br from-noir-500 to-noir-700 p-6 rounded-2xl border border-white/10">
               <h3 className="text-white font-one font-semibold text-lg mb-4">
                 Besoin de nous contacter ?
               </h3>
@@ -164,44 +164,48 @@ export default function ConfirmationStep({
 
           {/* Boutons d'action */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
+            <AppButton
+              variant="secondary"
               href={`/salon/${salonSlug}/${citySlug}-${postalCode}`}
-              className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-tertiary-500 to-tertiary-600 text-white rounded-xl font-one font-semibold hover:from-tertiary-600 hover:to-tertiary-700 transition-all duration-300 shadow-lg hover:shadow-tertiary-500/50 transform hover:-translate-y-0.5"
+              icon={
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                  />
+                </svg>
+              }
             >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M10 19l-7-7m0 0l7-7m-7 7h18"
-                />
-              </svg>
               Retour au salon
-            </Link>
-            <Link
+            </AppButton>
+            <AppButton
+              variant="primary"
               href="/mon-profil"
-              className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-br from-white/[0.08] to-white/[0.02] border border-white/20 text-white rounded-xl font-one font-semibold hover:bg-white/[0.12] transition-all duration-300 backdrop-blur-sm"
+              icon={
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M14 5l7 7m0 0l-7 7m7-7H3"
+                  />
+                </svg>
+              }
             >
               Voir mes rendez-vous
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M14 5l7 7m0 0l-7 7m7-7H3"
-                />
-              </svg>
-            </Link>
+            </AppButton>
           </div>
         </div>
       ) : (
@@ -209,8 +213,8 @@ export default function ConfirmationStep({
         <div className="max-w-2xl w-full space-y-8 text-center">
           {/* Icône de succès */}
           <div className="relative mx-auto w-24 h-24">
-            <div className="absolute inset-0 bg-gradient-to-br from-green-400 to-green-600 rounded-full animate-pulse opacity-30"></div>
-            <div className="relative w-24 h-24 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center shadow-2xl shadow-green-500/50">
+            <div className="absolute inset-0 bg-linear-to-br from-green-400 to-green-600 rounded-full animate-pulse opacity-30"></div>
+            <div className="relative w-24 h-24 bg-linear-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center shadow-2xl shadow-green-500/50">
               <svg
                 className="w-12 h-12 text-white"
                 fill="none"
@@ -241,9 +245,9 @@ export default function ConfirmationStep({
           </div>
 
           {/* Informations */}
-          <div className="bg-gradient-to-br from-white/[0.08] to-white/[0.02] p-8 rounded-2xl border border-white/10 backdrop-blur-sm space-y-6">
+          <div className="bg-linear-to-br from-noir-500 to-noir-700 p-8 rounded-2xl border border-white/10 backdrop-blur-sm space-y-6">
             <div className="flex items-start gap-4">
-              <div className="flex-shrink-0 w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center">
+              <div className="shrink-0 w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center">
                 <svg
                   className="w-6 h-6 text-green-400"
                   fill="none"
@@ -270,10 +274,10 @@ export default function ConfirmationStep({
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-orange-500/10 to-orange-600/5 border border-orange-500/30 rounded-xl p-4">
+            <div className="bg-linear-to-br from-orange-500/10 to-orange-600/5 border border-orange-500/30 rounded-xl p-4">
               <div className="flex items-start gap-3">
                 <svg
-                  className="w-5 h-5 text-orange-400 flex-shrink-0 mt-0.5"
+                  className="w-5 h-5 text-orange-400 shrink-0 mt-0.5"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -300,7 +304,7 @@ export default function ConfirmationStep({
 
           {/* Contact du salon */}
           {(salon.salonEmail || salon.salonPhone) && (
-            <div className="bg-gradient-to-br from-white/[0.05] to-transparent p-6 rounded-2xl border border-white/10">
+            <div className="bg-linear-to-br from-white/[0.05] to-transparent p-6 rounded-2xl border border-white/10">
               <h3 className="text-white font-one font-semibold text-lg mb-4">
                 Contact du salon
               </h3>
@@ -353,44 +357,48 @@ export default function ConfirmationStep({
 
           {/* Boutons d'action */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
+            <AppButton
+              variant="secondary"
               href={`/salon/${salonSlug}/${citySlug}-${postalCode}`}
-              className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-tertiary-500 to-tertiary-600 text-white rounded-xl font-one font-semibold hover:from-tertiary-600 hover:to-tertiary-700 transition-all duration-300 shadow-lg hover:shadow-tertiary-500/50 transform hover:-translate-y-0.5"
+              icon={
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                  />
+                </svg>
+              }
             >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M10 19l-7-7m0 0l7-7m-7 7h18"
-                />
-              </svg>
               Retour au salon
-            </Link>
-            <Link
+            </AppButton>
+            <AppButton
+              variant="primary"
               href="/mon-profil"
-              className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-br from-white/[0.08] to-white/[0.02] border border-white/20 text-white rounded-xl font-one font-semibold hover:bg-white/[0.12] transition-all duration-300 backdrop-blur-sm"
+              icon={
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M14 5l7 7m0 0l-7 7m7-7H3"
+                  />
+                </svg>
+              }
             >
               Voir mes rendez-vous
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M14 5l7 7m0 0l-7 7m7-7H3"
-                />
-              </svg>
-            </Link>
+            </AppButton>
           </div>
         </div>
       )}

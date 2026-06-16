@@ -186,7 +186,7 @@ export default async function ReserverPage({
   // const directionsHref = `https://www.google.com/maps/search/?api=1&query=${mapsQuery}`;
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-noir-700 via-noir-500 to-noir-700 pt-20">
+    <div className="min-h-screen bg-linear-to-br from-noir-700  to-noir-700 pt-6">
       <section className="px-4 sm:px-6 lg:px-8 xl:px-16 py-4">
         <div className="mx-auto max-w-7xl">
           {/* Header ultra-compact */}

@@ -807,8 +807,13 @@ export function useBookingLogic({
         isAuthenticated ? sessionUserId : undefined,
       );
 
-      if (result.ok) {
-        toast.success("Demande de rendez-vous envoyée !");
+      if (result.error === false) {
+        toast.success(
+          result.message ||
+            (result.status === "PENDING"
+              ? "Demande de rendez-vous envoyée !"
+              : "Rendez-vous confirmé !"),
+        );
         setAppointmentCreated(true);
         setStep(5);
         window.scrollTo({ top: 0, behavior: "smooth" });
