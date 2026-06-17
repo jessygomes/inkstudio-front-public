@@ -82,7 +82,7 @@ const EditAppointmentModal: React.FC<EditAppointmentModalProps> = ({
   const [blockedSlots, setBlockedSlots] = useState<BlockedSlot[]>([]);
 
   const parsedSalonHours = useMemo(
-    () => parseSalonHours(appointment.salon.salonHours),
+    () => parseSalonHours(appointment.salon.salonHours ?? null),
     [appointment.salon.salonHours],
   );
 

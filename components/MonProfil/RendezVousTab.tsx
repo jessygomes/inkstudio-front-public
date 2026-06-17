@@ -51,6 +51,7 @@ export type Appointment = {
     phone?: string;
     website?: string;
     instagram?: string;
+    salonHours?: string | null;
   };
   tatoueur?: {
     id: string;
