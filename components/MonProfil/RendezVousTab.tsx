@@ -60,6 +60,12 @@ export type Appointment = {
     phone?: string;
     instagram?: string;
   } | null;
+  performerUser?: {
+    id: string;
+    firstName?: string;
+    lastName?: string;
+    salonName?: string;
+  } | null;
   prestationDetails?: {
     id: string;
     description?: string;
@@ -158,7 +164,40 @@ export default function RendezVousTab() {
       const result = await getAllRdvClient(options);
 
       if (result.ok) {
-        setRdvData(result.data);
+        const normalizedData = result.data as RdvResponse;
+        const normalizedAppointments = (normalizedData?.appointments || []).map(
+          (appointment: Appointment) => {
+            if (appointment.tatoueur && appointment.tatoueur.name) {
+              return appointment;
+            }
+
+            const performer = appointment.performerUser;
+            if (!performer?.id) {
+              return appointment;
+            }
+
+            const performerName =
+              (typeof performer.salonName === "string" &&
+                performer.salonName.trim()) ||
+              [performer.firstName, performer.lastName]
+                .filter((part) => typeof part === "string" && part.trim() !== "")
+                .join(" ") ||
+              "Tatoueur";
+
+            return {
+              ...appointment,
+              tatoueur: {
+                id: performer.id,
+                name: performerName,
+              },
+            };
+          },
+        );
+
+        setRdvData({
+          ...normalizedData,
+          appointments: normalizedAppointments,
+        });
       } else {
         console.error("Erreur récupération RDV:", result.message);
         setRdvData(null);
