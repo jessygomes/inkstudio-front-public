@@ -174,11 +174,21 @@ type RdvBody = {
   moodboardId?: string;
 };
 
+type CreateAppointmentByClientResult = {
+  ok: boolean;
+  error: boolean;
+  status: number;
+  message?: string;
+  code?: string;
+  performerUserId?: string;
+  data?: unknown;
+};
+
 export const createAppointmentByClient = async (
   salonId: string,
   rdvBody: RdvBody,
   clientUserId?: string,
-) => {
+) : Promise<CreateAppointmentByClientResult> => {
   try {
     const headers = await getAuthHeaders();
 
@@ -188,6 +198,7 @@ export const createAppointmentByClient = async (
       method: "POST",
       headers,
       body: JSON.stringify({
+        salonId,
         userId: salonId,
         rdvBody: rdvBody,
         clientUserId,
@@ -197,13 +208,32 @@ export const createAppointmentByClient = async (
     const json = await response.json();
 
     if (!response.ok || (json && json.error)) {
-      throw new Error(json?.message || "Échec de la création du rendez-vous");
+      return {
+        ok: false,
+        error: true,
+        status: response.status,
+        message: json?.message || "Échec de la création du rendez-vous",
+        code: json?.code,
+        performerUserId: json?.performerUserId,
+        data: json,
+      };
     }
 
-    return json;
+    return {
+      ok: true,
+      error: false,
+      status: response.status,
+      message: json?.message,
+      data: json,
+    };
   } catch (error) {
     console.error("Erreur lors de la création du rendez-vous :", error);
-    throw error;
+    return {
+      ok: false,
+      error: true,
+      status: 500,
+      message: "Erreur lors de la création du rendez-vous",
+    };
   }
 };
 

@@ -254,6 +254,22 @@ export function useBookingLogic({
   const [blockedSlots, setBlockedSlots] = useState<any[]>([]);
   const [isLoadingSlots, setIsLoadingSlots] = useState(false);
 
+  useEffect(() => {
+    if (selectedTatoueur) return;
+    if (artists.length === 0) return;
+
+    const defaultArtistExists =
+      typeof defaultTatoueurId === "string" &&
+      artists.some((artist: any) => artist.id === defaultTatoueurId);
+
+    const nextTatoueurId = defaultArtistExists
+      ? (defaultTatoueurId as string)
+      : artists[0].id;
+
+    setSelectedTatoueur(nextTatoueurId);
+    setValue("tatoueurId", nextTatoueurId, { shouldValidate: false });
+  }, [artists, defaultTatoueurId, selectedTatoueur, setValue]);
+
   //! États pour piercing
   const [piercingZones, setPiercingZones] = useState<PiercingZone[]>([]);
   const [selectedPiercingZone, setSelectedPiercingZone] = useState<string>("");
@@ -783,6 +799,28 @@ export function useBookingLogic({
       const shouldSendSkin = ["TATTOO", "PROJET", "RETOUCHE"].includes(
         data.prestation,
       );
+      const selectedArtist = artists.find(
+        (artist: any) => artist.id === selectedTatoueur,
+      );
+      const isUserTatoueurAccount =
+        !isParTatoueurMode &&
+        (!Array.isArray(artists) || artists.length === 0) &&
+        typeof salon.id === "string" &&
+        salon.id.trim() !== "";
+      const performerTatoueurId =
+        typeof selectedArtist?.profileUserId === "string" &&
+        selectedArtist.profileUserId.trim() !== ""
+          ? selectedArtist.profileUserId
+          : selectedTatoueur ||
+            defaultTatoueurId ||
+            (isUserTatoueurAccount ? salon.id : "");
+
+      if (!performerTatoueurId) {
+        toast.error(
+          "Veuillez sélectionner un tatoueur avant de confirmer votre rendez-vous.",
+        );
+        return;
+      }
 
       const payload = {
         title: `${data.prestation} - ${data.client.firstName} ${data.client.lastName}`,
@@ -796,9 +834,7 @@ export function useBookingLogic({
         clientBirthdate: data.client.birthDate
           ? new Date(data.client.birthDate).toISOString()
           : "",
-        tatoueurId: salon.appointmentBookingEnabled
-          ? ""
-          : selectedTatoueur || "",
+        tatoueurId: performerTatoueurId,
         visio: data.visio || false,
         description: `${baseDescription}${flashNote}`.trim(),
         zone: data.details?.zone || "",
@@ -820,10 +856,35 @@ export function useBookingLogic({
         isAuthenticated ? sessionUserId : undefined,
       );
 
+      if (
+        result.error === true &&
+        result.code === "LINKED_BOOKING_REDIRECT"
+      ) {
+        const linkedArtist = artists.find(
+          (artist: any) => artist.profileUserId === result.performerUserId,
+        );
+        const redirectHref =
+          linkedArtist && typeof linkedArtist.bookingHref === "string"
+            ? linkedArtist.bookingHref
+            : result.performerUserId
+              ? `/mon-profil/${encodeURIComponent(result.performerUserId)}`
+              : "";
+
+        toast.info(
+          result.message ||
+            "Ce tatoueur est réservable uniquement depuis son profil personnel.",
+        );
+
+        if (redirectHref) {
+          router.push(redirectHref);
+        }
+        return;
+      }
+
       if (result.error === false) {
         toast.success(
           result.message ||
-            (result.status === "PENDING"
+            ((result.data as any)?.status === "PENDING"
               ? "Demande de rendez-vous envoyée !"
               : "Rendez-vous confirmé !"),
         );

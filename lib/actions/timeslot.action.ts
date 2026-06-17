@@ -1,6 +1,7 @@
 "use server";
 
 import { getDayRangeForTimeZone } from "@/lib/utils/date";
+import { getAuthHeaders } from "@/lib/session";
 
 //! Fetch timeslots for a given date and tatoueur
 export async function getTimeslots(date: string, tatoueurId: string) {
@@ -72,14 +73,13 @@ export async function getTimeslotBySalon(date: string, salonId: string) {
 export async function getOccupiedSlotsBySalon(date: string, salonId: string) {
   try {
     const { start, end } = getDayRangeForTimeZone(date);
+    const headers = await getAuthHeaders();
 
     const url = `${process.env.NEXT_PUBLIC_BACK_URL}/appointments/salon/${salonId}/range?start=${start.toISOString()}&end=${end.toISOString()}`;
 
     const res = await fetch(url, {
       method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers,
       cache: "no-store",
     });
 
@@ -106,6 +106,7 @@ export async function getOccupiedSlotsBySalon(date: string, salonId: string) {
 export async function getOccupiedSlots(date: string, tatoueurId: string) {
   try {
     const { start, end } = getDayRangeForTimeZone(date);
+    const headers = await getAuthHeaders();
 
     const res = await fetch(
       `${
@@ -113,9 +114,7 @@ export async function getOccupiedSlots(date: string, tatoueurId: string) {
       }/appointments/tatoueur-range?tatoueurId=${tatoueurId}&start=${start.toISOString()}&end=${end.toISOString()}`,
       {
         method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers,
         cache: "no-store",
       },
     );
