@@ -35,6 +35,7 @@ export default function BookingFlow({
     appointmentCreated,
     prestation,
     artists,
+    isParTatoueurMode,
     selectedTatoueur,
     selectedDate,
     timeSlots,
@@ -132,7 +133,40 @@ export default function BookingFlow({
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* Étape 1: Choix de la prestation */}
             {step === 1 && (
-              <PrestationSelector prestations={salon.prestations} />
+              <div className="space-y-4">
+                {isParTatoueurMode && (
+                  <div className="rounded-2xl border border-white/10 bg-white/3 p-4">
+                    <h3 className="text-white font-one mb-2">
+                      1. Choisissez votre tatoueur
+                    </h3>
+                    <p className="text-xs text-white/60 font-one mb-3">
+                      Si un tatoueur dispose d'un compte personnel, vous serez
+                      redirigé vers sa page de réservation.
+                    </p>
+                    <select
+                      className="w-full p-2.5 bg-white/2 border border-white/10 rounded-2xl font-one text-white text-sm focus:outline-none focus:border-tertiary-400"
+                      value={selectedTatoueur || ""}
+                      onChange={(e) => handleTatoueurChange(e.target.value)}
+                    >
+                      <option value="" className="bg-noir-500">
+                        -- Choisissez un tatoueur --
+                      </option>
+                      {artists.map((tatoueur: any) => (
+                        <option
+                          key={tatoueur.id}
+                          value={tatoueur.id}
+                          className="bg-noir-500"
+                        >
+                          {tatoueur.name}
+                          {tatoueur.isLinkedUser ? " (compte personnel)" : ""}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                <PrestationSelector prestations={salon.prestations} />
+              </div>
             )}
 
             {/* Étape 2: Informations client */}
@@ -169,8 +203,8 @@ export default function BookingFlow({
                 prestation={prestation}
                 salon={salon}
                 artists={artists}
+                isParTatoueurMode={isParTatoueurMode}
                 selectedTatoueur={selectedTatoueur}
-                onTatoueurChange={handleTatoueurChange}
                 selectedDate={selectedDate}
                 onDateChange={handleDateChange}
                 timeSlots={timeSlots}

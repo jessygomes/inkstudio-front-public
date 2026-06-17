@@ -93,6 +93,8 @@ export function useBookingLogic({
   const { data: session, status } = useSession();
   const isAuthenticated = status === "authenticated";
 
+  console.log("SALON BOOKING LOGIC", salon);
+
   const sessionUser = (session?.user || {}) as {
     id?: string;
     firstName?: string;
@@ -183,10 +185,17 @@ export function useBookingLogic({
 
   //! Prestation et artistes
   const prestation = watch("prestation");
+  const normalizedAgendaMode =
+    typeof salon.agendaMode === "string" ? salon.agendaMode.toUpperCase() : null;
+  const isParTatoueurMode =
+    normalizedAgendaMode !== null
+      ? normalizedAgendaMode === "PAR_TATOUEUR"
+      : !salon.appointmentBookingEnabled;
   const artists = useMemo(
     () =>
       (salon.tatoueurs ?? []).filter(
-        (tatoueur: any) => tatoueur.rdvBookingEnabled,
+        (tatoueur: any) =>
+          tatoueur.rdvBookingEnabled || tatoueur.isLinkedUser === true,
       ),
     [salon.tatoueurs],
   );
@@ -377,8 +386,13 @@ export function useBookingLogic({
       4: [],
     };
 
+    if (step === 1 && isParTatoueurMode && !selectedTatoueur) {
+      alert("Veuillez sélectionner un tatoueur avant de continuer.");
+      return;
+    }
+
     if (step === 3) {
-      if (!salon.appointmentBookingEnabled && !selectedTatoueur) {
+      if (isParTatoueurMode && !selectedTatoueur) {
         alert("Veuillez sélectionner un tatoueur");
         return;
       }
@@ -468,7 +482,7 @@ export function useBookingLogic({
   }, [
     selectedDate,
     selectedTatoueur,
-    salon.appointmentBookingEnabled,
+    isParTatoueurMode,
     salon.id,
   ]);
 
@@ -834,6 +848,22 @@ export function useBookingLogic({
 
   // Handler pour changement de tatoueur
   const handleTatoueurChange = (tatoueurId: string) => {
+    const selectedArtist = artists.find(
+      (artist: any) => artist.id === tatoueurId,
+    );
+
+    if (
+      selectedArtist?.isLinkedUser === true &&
+      typeof selectedArtist.bookingHref === "string" &&
+      selectedArtist.bookingHref.trim() !== ""
+    ) {
+      toast.info(
+        "Ce tatoueur possède son propre compte. Redirection vers sa page de réservation.",
+      );
+      router.push(selectedArtist.bookingHref);
+      return;
+    }
+
     setSelectedTatoueur(tatoueurId);
     setValue("tatoueurId", tatoueurId);
     setSelectedSlots([]);
@@ -895,6 +925,7 @@ export function useBookingLogic({
     appointmentCreated,
     prestation,
     artists,
+    isParTatoueurMode,
 
     // Créneaux
     selectedTatoueur,

@@ -11,8 +11,12 @@ import { modifyAppointmentByClient } from "@/lib/actions/appointment.action";
 import {
   addMinutesToTime,
   getIsoTimePart,
+  getTimeInTimeZone,
+  getWeekdayKeyFromDate,
+  resolveSlotDisplayMode,
   toDateInputValue,
 } from "@/lib/utils/date";
+import { parseSalonHours } from "@/lib/horaireHelper";
 import { toSlug } from "@/lib/utils";
 import { Appointment } from "@/components/MonProfil/RendezVousTab";
 import { useSession } from "next-auth/react";
@@ -76,6 +80,27 @@ const EditAppointmentModal: React.FC<EditAppointmentModalProps> = ({
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
   const [occupiedSlots, setOccupiedSlots] = useState<OccupiedSlot[]>([]);
   const [blockedSlots, setBlockedSlots] = useState<BlockedSlot[]>([]);
+
+  const parsedSalonHours = useMemo(
+    () => parseSalonHours(appointment.salon.salonHours),
+    [appointment.salon.salonHours],
+  );
+
+  const openingForSelectedDate = useMemo(() => {
+    if (!selectedDate || !parsedSalonHours) return null;
+
+    const weekdayKey = getWeekdayKeyFromDate(selectedDate);
+    return parsedSalonHours[weekdayKey] ?? null;
+  }, [parsedSalonHours, selectedDate]);
+
+  const slotDisplayMode = useMemo(
+    () =>
+      resolveSlotDisplayMode(
+        timeSlots.map((slot) => slot.start),
+        openingForSelectedDate,
+      ),
+    [openingForSelectedDate, timeSlots],
+  );
 
   const durationMinutes = useMemo(() => {
     if (appointment.duration) return appointment.duration;
@@ -351,7 +376,10 @@ const EditAppointmentModal: React.FC<EditAppointmentModalProps> = ({
               {timeSlots.map((slot) => {
                 const available = isSlotAvailable(slot.start);
                 const selected = selectedSlot === slot.start;
-                const label = formatTimeRange(slot.start, slot.end);
+                const label =
+                  slotDisplayMode === "timezone"
+                    ? `${getTimeInTimeZone(slot.start)} - ${getTimeInTimeZone(slot.end)}`
+                    : formatTimeRange(slot.start, slot.end);
 
                 return (
                   <button

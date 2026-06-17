@@ -50,7 +50,14 @@ export interface SalonSummary {
     id: string;
     name: string;
     rdvBookingEnabled: boolean;
+    isLinkedUser?: boolean | null;
+    profileUserId?: string | null;
+    salonName?: string | null;
+    city?: string | null;
+    postalCode?: string | null;
+    bookingHref?: string | null;
   }>;
   appointmentBookingEnabled?: boolean;
   addConfirmationEnabled?: boolean;
+  agendaMode?: string | null;
 }

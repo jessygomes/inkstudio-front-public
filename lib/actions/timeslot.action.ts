@@ -128,6 +128,7 @@ export async function getOccupiedSlots(date: string, tatoueurId: string) {
     }
 
     const data = await res.json();
+
     return { ok: true, data };
   } catch (error) {
     console.error("Erreur server action occupied slots:", error);

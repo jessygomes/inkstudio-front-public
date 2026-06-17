@@ -3,8 +3,14 @@ import React from "react";
 import {
   addMinutesToTime,
   formatDateKeyForDisplay,
+  getDateKeyInTimeZone,
   getIsoTimePart,
+  getTimeInTimeZone,
+  getWeekdayKeyFromDate,
+  resolveSlotDisplayMode,
+  addMinutesToIsoInTimeZone,
 } from "@/lib/utils/date";
+import { parseSalonHours } from "@/lib/horaireHelper";
 import Section from "./Section";
 import ReferenceImages from "./ReferenceImages";
 import { SkinToneOption } from "./types";
@@ -42,6 +48,23 @@ export default function RecapStep({
 }: RecapStepProps) {
   // Trouver le nom du tatoueur
   const tatoueur = artists.find((a) => a.id === selectedTatoueur);
+  const parsedSalonHours = React.useMemo(
+    () => parseSalonHours(salon.salonHours),
+    [salon.salonHours],
+  );
+
+  const openingForSelectedDate = React.useMemo(() => {
+    if (!selectedDate || !parsedSalonHours) return null;
+
+    const weekdayKey = getWeekdayKeyFromDate(selectedDate);
+    return parsedSalonHours[weekdayKey] ?? null;
+  }, [parsedSalonHours, selectedDate]);
+
+  const slotDisplayMode = React.useMemo(
+    () =>
+      resolveSlotDisplayMode(selectedSlots, openingForSelectedDate),
+    [openingForSelectedDate, selectedSlots],
+  );
 
   // Trouver la zone de piercing
   const piercingZone = piercingZones.find((pz) => pz.id === pierc);
@@ -304,12 +327,16 @@ export default function RecapStep({
             <div>
               <p className="text-white/60 font-one text-sm mb-0.5">Horaire</p>
               <p className="text-white font-one">
-                {getIsoTimePart(selectedSlots[0])}{" "}
+                {slotDisplayMode === "timezone"
+                  ? getTimeInTimeZone(selectedSlots[0])
+                  : getIsoTimePart(selectedSlots[0])}{" "}
                 -{" "}
-                {addMinutesToTime(
-                  getIsoTimePart(selectedSlots[selectedSlots.length - 1]),
-                  30,
-                )}
+                {slotDisplayMode === "timezone"
+                  ? addMinutesToIsoInTimeZone(selectedSlots[selectedSlots.length - 1], 30)
+                  : addMinutesToTime(
+                      getIsoTimePart(selectedSlots[selectedSlots.length - 1]),
+                      30,
+                    )}
               </p>
             </div>
 

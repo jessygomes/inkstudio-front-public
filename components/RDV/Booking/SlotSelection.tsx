@@ -5,10 +5,16 @@ import { useFormContext } from "react-hook-form";
 import {
   addMinutesToTime,
   formatDateKeyForDisplay,
+  getDateKeyInTimeZone,
   getIsoDatePart,
   getIsoTimePart,
+  getTimeInTimeZone,
+  getWeekdayKeyFromDate,
+  resolveSlotDisplayMode,
+  addMinutesToIsoInTimeZone,
   toDateInputValue,
 } from "@/lib/utils/date";
+import { parseSalonHours } from "@/lib/horaireHelper";
 import Section from "./Section";
 import { TimeSlot } from "./types";
 
@@ -19,8 +25,8 @@ interface SlotSelectionProps {
   prestation: string;
   salon: any;
   artists: any[];
+  isParTatoueurMode: boolean;
   selectedTatoueur: string | null;
-  onTatoueurChange: (tatoueurId: string) => void;
   selectedDate: string;
   onDateChange: (date: string) => void;
   timeSlots: TimeSlot[];
@@ -36,8 +42,8 @@ export default function SlotSelection({
   prestation,
   salon,
   artists,
+  isParTatoueurMode,
   selectedTatoueur,
-  onTatoueurChange,
   selectedDate,
   onDateChange,
   timeSlots,
@@ -49,10 +55,35 @@ export default function SlotSelection({
   isLoadingSlots,
 }: SlotSelectionProps) {
   const { register } = useFormContext();
+  const parsedSalonHours = React.useMemo(
+    () => parseSalonHours(salon.salonHours),
+    [salon.salonHours],
+  );
+
+  const openingForSelectedDate = React.useMemo(() => {
+    if (!selectedDate || !parsedSalonHours) return null;
+
+    const weekdayKey = getWeekdayKeyFromDate(selectedDate);
+    return parsedSalonHours[weekdayKey] ?? null;
+  }, [parsedSalonHours, selectedDate]);
+
+  const slotDisplayMode = React.useMemo(
+    () =>
+      resolveSlotDisplayMode(
+        timeSlots.map((slot) => slot.start),
+        openingForSelectedDate,
+      ),
+    [openingForSelectedDate, timeSlots],
+  );
+
+  const selectedArtist = React.useMemo(
+    () => artists.find((artist) => artist.id === selectedTatoueur) || null,
+    [artists, selectedTatoueur],
+  );
 
   // Vérifier si un créneau est bloqué
   const isSlotBlocked = (slotStart: string) => {
-    if (!selectedTatoueur && !salon.appointmentBookingEnabled) return false;
+    if (!selectedTatoueur && isParTatoueurMode) return false;
 
     const slotStartDate = new Date(slotStart);
     const slotEndDate = new Date(slotStartDate.getTime() + 30 * 60 * 1000);
@@ -69,7 +100,7 @@ export default function SlotSelection({
         blocked.tatoueurId === selectedTatoueur || blocked.tatoueurId === null;
 
       return (
-        hasOverlap && (salon.appointmentBookingEnabled || concernsTatoueur)
+        hasOverlap && (!isParTatoueurMode || concernsTatoueur)
       );
     });
   };
@@ -136,9 +167,23 @@ export default function SlotSelection({
     );
 
     return merged
-      .filter((slotStart) => getIsoDatePart(slotStart) === selectedDate)
+      .filter((slotStart) => {
+        const slotDateKey =
+          slotDisplayMode === "timezone"
+            ? getDateKeyInTimeZone(slotStart)
+            : getIsoDatePart(slotStart);
+
+        return slotDateKey === selectedDate;
+      })
       .sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
-  }, [timeSlots, occupiedSlots, blockedSlots, selectedSlots, selectedDate]);
+  }, [
+    timeSlots,
+    occupiedSlots,
+    blockedSlots,
+    selectedSlots,
+    selectedDate,
+    slotDisplayMode,
+  ]);
 
   return (
     <Section title="Choisir le tatoueur et les créneaux">
@@ -165,7 +210,7 @@ export default function SlotSelection({
       )}
 
       {/* Vérification si des tatoueurs sont disponibles */}
-      {artists.length === 0 && !salon.appointmentBookingEnabled ? (
+      {artists.length === 0 && isParTatoueurMode ? (
         <div className="bg-orange-500/10 border border-orange-500/30 rounded-md p-4 text-center">
           <div className="w-10 h-10 bg-orange-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
             <svg
@@ -191,36 +236,26 @@ export default function SlotSelection({
         </div>
       ) : (
         <>
-          {/* Sélection du tatoueur ou date directe */}
+          {/* Tatoueur choisi + date */}
           <div className="mb-4 flex flex-col sm:flex-row sm:items-end sm:gap-4">
-            {!salon.appointmentBookingEnabled && (
-              <div className="mb-3 sm:mb-0">
-                <label className="text-xs text-white/80 font-one mb-2 block uppercase tracking-wide">
-                  Tatoueur souhaité
-                </label>
-                <select
-                  className="w-full max-w-xs p-2.5 bg-white/2 border border-white/10 rounded-2xl font-one text-white text-sm focus:outline-none focus:border-tertiary-400 focus:ring-1 focus:ring-tertiary-400/30 transition-all"
-                  value={selectedTatoueur || ""}
-                  onChange={(e) => onTatoueurChange(e.target.value)}
-                >
-                  <option value="" className="bg-noir-500">
-                    -- Choisissez un tatoueur --
-                  </option>
-                  {artists.map((tatoueur) => (
-                    <option
-                      key={tatoueur.id}
-                      value={tatoueur.id}
-                      className="bg-noir-500"
-                    >
-                      {tatoueur.name}
-                    </option>
-                  ))}
-                </select>
+            {isParTatoueurMode && selectedArtist && (
+              <div className="mb-3 sm:mb-0 max-w-sm rounded-2xl border border-white/10 bg-white/3 px-4 py-3">
+                <p className="text-[11px] uppercase tracking-wide text-white/60 font-one">
+                  Agenda affiché
+                </p>
+                <p className="text-white font-one text-sm mt-0.5">
+                  {selectedArtist.name}
+                </p>
+                {selectedArtist.isLinkedUser && (
+                  <p className="text-xs text-tertiary-300 mt-1.5 font-one">
+                    Tatoueur avec compte personnel
+                  </p>
+                )}
               </div>
             )}
 
             {/* Sélection de date */}
-            {(salon.appointmentBookingEnabled || selectedTatoueur) && (
+            {!isParTatoueurMode || selectedTatoueur ? (
               <div>
                 <label className="text-xs text-white/80 font-one mb-2 block uppercase tracking-wide">
                   Date souhaitée
@@ -233,12 +268,12 @@ export default function SlotSelection({
                   className="w-full max-w-xs p-2.5 bg-white/2 border border-white/10 rounded-2xl font-one text-white text-sm focus:outline-none focus:border-tertiary-400 focus:ring-1 focus:ring-tertiary-400/30 transition-all"
                 />
               </div>
-            )}
+            ) : null}
           </div>
 
           {/* Créneaux disponibles */}
           {selectedDate &&
-            (salon.appointmentBookingEnabled || selectedTatoueur) && (
+            (!isParTatoueurMode || selectedTatoueur) && (
               <div className="space-y-4">
                 <div>
                   <h3 className="text-white font-one mb-1">Créneaux</h3>
@@ -293,8 +328,14 @@ export default function SlotSelection({
                       </p>
                       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
                         {displayedSlotStarts.map((slotStartIso) => {
-                          const startTime = getIsoTimePart(slotStartIso);
-                          const endTime = addMinutesToTime(startTime, 30);
+                          const startTime =
+                            slotDisplayMode === "timezone"
+                              ? getTimeInTimeZone(slotStartIso)
+                              : getIsoTimePart(slotStartIso);
+                          const endTime =
+                            slotDisplayMode === "timezone"
+                              ? addMinutesToIsoInTimeZone(slotStartIso, 30)
+                              : addMinutesToTime(startTime, 30);
 
                           const isSelected =
                             selectedSlots.includes(slotStartIso);

@@ -1,5 +1,9 @@
 const DEFAULT_BUSINESS_TIME_ZONE = "Europe/Paris";
 
+export type SlotDisplayMode = "raw" | "timezone";
+
+type OpeningWindow = { start?: string; end?: string } | null | undefined;
+
 type TimeZoneParts = {
   year: number;
   month: number;
@@ -121,6 +125,11 @@ export function getTimeInTimeZone(
   return `${String(parts.hour).padStart(2, "0")}:${String(parts.minute).padStart(2, "0")}`;
 }
 
+function timeToMinutes(value: string) {
+  const [hours, minutes] = value.split(":").map(Number);
+  return (hours || 0) * 60 + (minutes || 0);
+}
+
 export function addMinutesToIsoInTimeZone(
   iso: string,
   minutesToAdd: number,
@@ -128,6 +137,73 @@ export function addMinutesToIsoInTimeZone(
 ) {
   const shifted = new Date(new Date(iso).getTime() + minutesToAdd * 60000);
   return getTimeInTimeZone(shifted, timeZone);
+}
+
+export function getWeekdayKeyFromDate(
+  date: string,
+  timeZone = DEFAULT_BUSINESS_TIME_ZONE,
+) {
+  const [year, month, day] = date.split("-").map(Number);
+  return new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    weekday: "long",
+  })
+    .format(new Date(Date.UTC(year, month - 1, day, 12, 0, 0)))
+    .toLowerCase();
+}
+
+function getCandidateWindow(
+  firstSlot: string,
+  lastSlot: string,
+  mode: SlotDisplayMode,
+  timeZone = DEFAULT_BUSINESS_TIME_ZONE,
+) {
+  const start =
+    mode === "timezone"
+      ? getTimeInTimeZone(firstSlot, timeZone)
+      : getIsoTimePart(firstSlot);
+  const end =
+    mode === "timezone"
+      ? addMinutesToIsoInTimeZone(lastSlot, 30, timeZone)
+      : addMinutesToTime(getIsoTimePart(lastSlot), 30);
+
+  return { start, end };
+}
+
+export function resolveSlotDisplayMode(
+  slotStarts: string[],
+  opening: OpeningWindow,
+  timeZone = DEFAULT_BUSINESS_TIME_ZONE,
+): SlotDisplayMode {
+  if (!opening?.start || !opening?.end || slotStarts.length === 0) return "raw";
+
+  const firstSlot = slotStarts[0];
+  const lastSlot = slotStarts[slotStarts.length - 1];
+  const rawWindow = getCandidateWindow(firstSlot, lastSlot, "raw", timeZone);
+  const zonedWindow = getCandidateWindow(
+    firstSlot,
+    lastSlot,
+    "timezone",
+    timeZone,
+  );
+
+  const openingStart = timeToMinutes(opening.start);
+  const openingEnd = timeToMinutes(opening.end);
+  const rawStart = timeToMinutes(rawWindow.start);
+  const rawEnd = timeToMinutes(rawWindow.end);
+  const zonedStart = timeToMinutes(zonedWindow.start);
+  const zonedEnd = timeToMinutes(zonedWindow.end);
+
+  const rawExact = rawStart === openingStart && rawEnd === openingEnd;
+  const zonedExact = zonedStart === openingStart && zonedEnd === openingEnd;
+  if (rawExact && !zonedExact) return "raw";
+  if (zonedExact && !rawExact) return "timezone";
+
+  const rawDiff = Math.abs(rawStart - openingStart) + Math.abs(rawEnd - openingEnd);
+  const zonedDiff =
+    Math.abs(zonedStart - openingStart) + Math.abs(zonedEnd - openingEnd);
+
+  return rawDiff <= zonedDiff ? "raw" : "timezone";
 }
 
 export function addMinutesToTime(time: string, minutesToAdd: number) {

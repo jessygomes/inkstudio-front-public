@@ -9,6 +9,7 @@ import { PiTiktokLogoThin } from "react-icons/pi";
 import { TfiWorld } from "react-icons/tfi";
 import { parseSalonHours, hoursToLines } from "@/lib/horaireHelper";
 import { FlashProps } from "@/lib/type";
+import { toSlug } from "@/lib/utils";
 
 type PageParams = {
   params: Promise<{ slug: string; loc: string }>;
@@ -38,6 +39,36 @@ function normalizeFlashId(value?: string | string[]): string | undefined {
   const raw = Array.isArray(value) ? value[0] : value;
   const normalized = raw?.trim();
   return normalized ? normalized : undefined;
+}
+
+type BookingTatoueur = {
+  id: string;
+  name: string;
+  rdvBookingEnabled?: boolean;
+  isLinkedUser?: boolean | null;
+  profileUserId?: string | null;
+  salonName?: string | null;
+  city?: string | null;
+  postalCode?: string | null;
+  bookingHref?: string | null;
+};
+
+function getLinkedBookingHref(tatoueur: BookingTatoueur): string | null {
+  if (tatoueur.isLinkedUser !== true || !tatoueur.profileUserId) return null;
+
+  const nameSource =
+    typeof tatoueur.salonName === "string" ? tatoueur.salonName.trim() : "";
+  const city = typeof tatoueur.city === "string" ? tatoueur.city.trim() : "";
+  const postalCode =
+    typeof tatoueur.postalCode === "string" ? tatoueur.postalCode.trim() : "";
+
+  if (!nameSource || !city || !postalCode) return null;
+
+  const nameSlug = toSlug(nameSource);
+  const locSlug = toSlug(`${city}-${postalCode}`);
+  if (!nameSlug || !locSlug) return null;
+
+  return `/salon/${nameSlug}/${locSlug}/reserver`;
 }
 
 async function getSalon(slug: string, loc: string) {
@@ -144,6 +175,25 @@ export default async function ReserverPage({
     ? requestedFlashId
     : undefined;
 
+  const tatoueurs = (Array.isArray(salon.Tatoueur)
+    ? salon.Tatoueur
+    : salon.Tatoueur
+      ? [salon.Tatoueur]
+      : []) as BookingTatoueur[];
+
+  const bookingTatoueurs = tatoueurs.map((tatoueur) => ({
+    ...tatoueur,
+    rdvBookingEnabled: tatoueur.rdvBookingEnabled === true,
+    bookingHref: getLinkedBookingHref(tatoueur),
+  }));
+
+  const resolvedAgendaMode =
+    typeof salon?.saasPlanDetails?.agendaMode === "string"
+      ? salon.saasPlanDetails.agendaMode.toUpperCase()
+      : typeof salon?.agendaMode === "string"
+        ? salon.agendaMode.toUpperCase()
+        : null;
+
   // résumé salon
   const salonSummary = {
     id: salon.id,
@@ -153,7 +203,8 @@ export default async function ReserverPage({
     city: salon.city ?? null,
     postalCode: salon.postalCode ?? null,
     phone: salon.phone ?? null,
-    tatoueurs: salon.Tatoueur || [],
+    salonHours: salon.salonHours ?? null,
+    tatoueurs: bookingTatoueurs,
     prestations: Array.from(
       new Set([
         ...(salon.prestations || []),
@@ -161,6 +212,7 @@ export default async function ReserverPage({
       ]),
     ),
     appointmentBookingEnabled: salon.appointmentBookingEnabled,
+    agendaMode: resolvedAgendaMode,
     addConfirmationEnabled: salon.addConfirmationEnabled,
   };
 

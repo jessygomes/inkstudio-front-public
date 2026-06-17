@@ -327,6 +327,12 @@ export type Tatoueur = {
   img?: string | null;
   instagram?: string | null;
   rdvBookingEnabled: boolean;
+  isLinkedUser?: boolean | null;
+  profileUserId?: string | null;
+  salonName?: string | null;
+  city?: string | null;
+  postalCode?: string | null;
+  bookingHref?: string | null;
 };
 
 export type SalonSummary = {
@@ -336,10 +342,12 @@ export type SalonSummary = {
   address?: string | null;
   city?: string | null;
   postalCode?: string | null;
+  salonHours?: string | null;
   tatoueurs?: Tatoueur[] | null;
   prestations: string[];
   addConfirmationEnabled: boolean;
   appointmentBookingEnabled?: boolean; // Changé de requireConfirmation à appointmentBookingEnabled
+  agendaMode?: string | null;
 };
 
 export type Props = {
