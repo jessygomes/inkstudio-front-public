@@ -186,7 +186,7 @@ export default function SlotSelection({
   ]);
 
   return (
-    <Section title="Choisir le tatoueur et les créneaux">
+    <Section title="Choisir ses créneaux">
       {/* Champ Visio pour prestation PROJET */}
       {prestation === "PROJET" && (
         <div className="mb-4 bg-white/5 p-3 rounded-2xl border border-white/10">

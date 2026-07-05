@@ -199,6 +199,14 @@ export function useBookingLogic({
       ),
     [salon.tatoueurs],
   );
+  const isStandaloneTatoueurAccount = useMemo(
+    () =>
+      !isParTatoueurMode &&
+      artists.length === 0 &&
+      typeof salon.id === "string" &&
+      salon.id.trim() !== "",
+    [isParTatoueurMode, artists.length, salon.id],
+  );
 
   // Préremplir le tatoueur par défaut si fourni
   useEffect(() => {
@@ -256,7 +264,13 @@ export function useBookingLogic({
 
   useEffect(() => {
     if (selectedTatoueur) return;
-    if (artists.length === 0) return;
+    if (artists.length === 0) {
+      if (isStandaloneTatoueurAccount) {
+        setSelectedTatoueur(salon.id);
+        setValue("tatoueurId", salon.id, { shouldValidate: false });
+      }
+      return;
+    }
 
     const defaultArtistExists =
       typeof defaultTatoueurId === "string" &&
@@ -268,7 +282,14 @@ export function useBookingLogic({
 
     setSelectedTatoueur(nextTatoueurId);
     setValue("tatoueurId", nextTatoueurId, { shouldValidate: false });
-  }, [artists, defaultTatoueurId, selectedTatoueur, setValue]);
+  }, [
+    artists,
+    defaultTatoueurId,
+    isStandaloneTatoueurAccount,
+    salon.id,
+    selectedTatoueur,
+    setValue,
+  ]);
 
   //! États pour piercing
   const [piercingZones, setPiercingZones] = useState<PiercingZone[]>([]);
@@ -441,8 +462,13 @@ export function useBookingLogic({
   //! Fetch des créneaux
   //! -------------------------------------------------
   useEffect(() => {
+    const effectiveTatoueurId =
+      selectedTatoueur || (isStandaloneTatoueurAccount ? salon.id : null);
+    const shouldFetchBySalon =
+      salon.appointmentBookingEnabled && !isStandaloneTatoueurAccount;
+
     if (!selectedDate) return;
-    if (!salon.appointmentBookingEnabled && !selectedTatoueur) return;
+    if (!shouldFetchBySalon && !effectiveTatoueurId) return;
 
     const fetchAllSlotData = async () => {
       try {
@@ -450,7 +476,7 @@ export function useBookingLogic({
 
         let timeslotsResult, occupiedResult, blockedResult;
 
-        if (salon.appointmentBookingEnabled) {
+        if (shouldFetchBySalon) {
           [timeslotsResult, occupiedResult, blockedResult] = await Promise.all([
             getTimeslotBySalon(selectedDate, salon.id),
             getOccupiedSlotsBySalon(selectedDate, salon.id),
@@ -458,9 +484,9 @@ export function useBookingLogic({
           ]);
         } else {
           [timeslotsResult, occupiedResult, blockedResult] = await Promise.all([
-            getTimeslots(selectedDate, selectedTatoueur!),
-            getOccupiedSlots(selectedDate, selectedTatoueur!),
-            getBlockedSlots(selectedTatoueur!),
+            getTimeslots(selectedDate, effectiveTatoueurId!),
+            getOccupiedSlots(selectedDate, effectiveTatoueurId!),
+            getBlockedSlots(effectiveTatoueurId!),
           ]);
         }
 
@@ -498,13 +524,19 @@ export function useBookingLogic({
   }, [
     selectedDate,
     selectedTatoueur,
-    isParTatoueurMode,
+    isStandaloneTatoueurAccount,
     salon.id,
+    salon.appointmentBookingEnabled,
   ]);
 
   //! Vérifier si un créneau est bloqué
   const isSlotBlocked = (slotStart: string, slotEnd?: string) => {
-    if (!selectedTatoueur && !salon.appointmentBookingEnabled) return false;
+    const effectiveTatoueurId =
+      selectedTatoueur || (isStandaloneTatoueurAccount ? salon.id : null);
+    const shouldFetchBySalon =
+      salon.appointmentBookingEnabled && !isStandaloneTatoueurAccount;
+
+    if (!effectiveTatoueurId && !shouldFetchBySalon) return false;
 
     const slotStartDate = new Date(slotStart);
     const slotEndDate = slotEnd
@@ -520,11 +552,9 @@ export function useBookingLogic({
         slotEndDate.getTime() > blockedStart.getTime();
 
       const concernsTatoueur =
-        blocked.tatoueurId === selectedTatoueur || blocked.tatoueurId === null;
+        blocked.tatoueurId === effectiveTatoueurId || blocked.tatoueurId === null;
 
-      return (
-        hasOverlap && (salon.appointmentBookingEnabled || concernsTatoueur)
-      );
+      return hasOverlap && (shouldFetchBySalon || concernsTatoueur);
     });
   };
 
@@ -802,11 +832,7 @@ export function useBookingLogic({
       const selectedArtist = artists.find(
         (artist: any) => artist.id === selectedTatoueur,
       );
-      const isUserTatoueurAccount =
-        !isParTatoueurMode &&
-        (!Array.isArray(artists) || artists.length === 0) &&
-        typeof salon.id === "string" &&
-        salon.id.trim() !== "";
+      const isUserTatoueurAccount = isStandaloneTatoueurAccount;
       const performerTatoueurId =
         typeof selectedArtist?.profileUserId === "string" &&
         selectedArtist.profileUserId.trim() !== ""
