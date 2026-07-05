@@ -18,6 +18,7 @@ import HoursCard from "@/components/ProfilSalon/HoursCard";
 import FavoriteBtn from "@/components/Shared/FavoriteBtn";
 import SalonReviews from "@/components/ProfilSalon/SalonReviews";
 import { SalonProfileViewTracker } from "@/components/Shared/SalonProfileViewTracker";
+import PublicProfileContactForm from "@/components/Contact/PublicProfileContactForm";
 
 type PageParams = {
   params: Promise<{ slug: string; loc: string }>;
@@ -1026,6 +1027,8 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
               </p>
             </div>
 
+          
+
             {/* Tabs : Photos → Portfolio → Produits */}
             <SalonTabs
               photos={salon.salonPhotos ?? []}
@@ -1110,6 +1113,11 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
 
             {/* Avis */}
             <SalonReviews salonId={salon.id} salonName={salon.salonName} />
+
+            <PublicProfileContactForm
+              targetUserId={salon.id}
+              recipientName={salon.salonName || "ce profil"}
+            />
           </div>
         </div>
       </section>

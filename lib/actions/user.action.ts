@@ -247,3 +247,62 @@ export const getFavoritePortfolioImages = async () => {
     throw error;
   }
 };
+
+//! ----------------------------------------------------------------------------
+//!  ENVOI D'UN MESSAGE DE CONTACT DEPUIS LE PROFIL PUBLIC
+//! ----------------------------------------------------------------------------
+type PublicProfileContactPayload = {
+  firstName: string;
+  lastName: string;
+  bodyPart: string;
+  projectDescription: string;
+  email: string;
+};
+
+export const sendPublicProfileContact = async (
+  userId: string,
+  payload: PublicProfileContactPayload,
+) => {
+  try {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BACK_URL}/users/${userId}/contact`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      },
+    );
+
+    const data = await response.json();
+
+    if (!response.ok || (data && data.error)) {
+      const message =
+        data?.message || `Erreur lors de l'envoi du message (${response.status})`;
+      return {
+        ok: false,
+        error: true,
+        status: response.status,
+        message,
+        data,
+      };
+    }
+
+    return {
+      ok: true,
+      error: false,
+      status: response.status,
+      message: data?.message || "Votre message a ete envoye avec succes.",
+      data,
+    };
+  } catch (error) {
+    console.error("Erreur lors de l'envoi du message de contact public :", error);
+    return {
+      ok: false,
+      error: true,
+      status: 500,
+      message: "Envoi impossible pour le moment.",
+    };
+  }
+};
