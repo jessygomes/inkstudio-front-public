@@ -39,7 +39,7 @@ type SalonTatoueur = {
   profileUserId?: string | null;
 };
 
-// --- data
+//! --- data
 async function getSalon(slug: string, loc: string) {
   const base = process.env.NEXT_PUBLIC_BACK_URL!;
   const url = `${base}/users/${encodeURIComponent(slug)}/${encodeURIComponent(
@@ -328,6 +328,26 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
   const PREST_MAX = 8;
   const prestationsVisibles = prestations.slice(0, PREST_MAX);
   const prestationsRestantes = Math.max(0, prestations.length - PREST_MAX);
+
+  // Styles (dedupliques, insensibles a la casse) — compat `style` ou `styles`
+  const stylesRaw =
+    (Array.isArray((salon as any).style) && (salon as any).style) ||
+    (Array.isArray((salon as any).styles) && (salon as any).styles) ||
+    [];
+
+  const stylesCleaned = stylesRaw
+    .map((s: unknown) => (typeof s === "string" ? s.trim() : ""))
+    .filter(Boolean);
+
+  const styleSeen = new Set<string>();
+  const styles: string[] = [];
+  for (const s of stylesCleaned) {
+    const key = s.toLowerCase();
+    if (!styleSeen.has(key)) {
+      styleSeen.add(key);
+      styles.push(s);
+    }
+  }
 
   // Enhanced JSON-LD with more complete schema
   const ld = {
@@ -992,39 +1012,69 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
 
             {/* Présentation */}
             <div className="rounded-3xl border border-white/10 bg-linear-to-br from-noir-500 to-noir-700 p-6 backdrop-blur-lg shadow-xl">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
+              <div className="mb-5">
                 <h2 className="text-white/95 font-one text-sm tracking-wider uppercase">
                   Présentation
                 </h2>
-                <div className="flex flex-wrap gap-2">
-                  {prestationsVisibles.length > 0 ? (
-                    <>
-                      {prestationsVisibles.map((p, idx) => (
-                        <span
-                          key={`${p}-${idx}`}
-                          className="px-3 py-1 rounded-2xl bg-linear-to-br from-noir-500/8 to-noir-700/2 text-white/80 border border-white/10 text-xs font-one backdrop-blur-sm"
-                          title={p}
-                        >
-                          {p}
-                        </span>
-                      ))}
-                      {prestationsRestantes > 0 && (
-                        <span className="px-3 py-1 rounded-2xl bg-linear-to-br from-noir-500/8 to-noir-700/2 text-white/80 border border-white/10 text-xs font-one backdrop-blur-sm">
-                          +{prestationsRestantes}
-                        </span>
-                      )}
-                    </>
-                  ) : (
-                    <span className="text-white/50 text-xs font-one">
-                      Aucune prestation renseignée
-                    </span>
-                  )}
-                </div>
               </div>
 
               <p className="text-white/85 text-sm font-one leading-relaxed">
                 {salon.description || "Aucune description disponible."}
               </p>
+
+              <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <h3 className="text-white/70 text-xs uppercase tracking-wide font-one mb-2">
+                    Prestations
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {prestationsVisibles.length > 0 ? (
+                      <>
+                        {prestationsVisibles.map((p, idx) => (
+                          <span
+                            key={`${p}-${idx}`}
+                            className="px-3 py-1 rounded-2xl bg-linear-to-br from-noir-500/8 to-noir-700/2 text-white/80 border border-white/10 text-xs font-one backdrop-blur-sm"
+                            title={p}
+                          >
+                            {p}
+                          </span>
+                        ))}
+                        {prestationsRestantes > 0 && (
+                          <span className="px-3 py-1 rounded-2xl bg-linear-to-br from-noir-500/8 to-noir-700/2 text-white/80 border border-white/10 text-xs font-one backdrop-blur-sm">
+                            +{prestationsRestantes}
+                          </span>
+                        )}
+                      </>
+                    ) : (
+                      <span className="text-white/50 text-xs font-one">
+                        Aucune prestation renseignée
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-white/70 text-xs uppercase tracking-wide font-one mb-2">
+                    Styles
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {styles.length > 0 ? (
+                      styles.map((style, idx) => (
+                        <span
+                          key={`${style}-${idx}`}
+                          className="px-3 py-1 rounded-2xl bg-linear-to-br from-tertiary-500/15 to-tertiary-400/10 text-white/85 border border-tertiary-400/25 text-xs font-one"
+                        >
+                          {style}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-white/50 text-xs font-one">
+                        Aucun style renseigné
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
 
           

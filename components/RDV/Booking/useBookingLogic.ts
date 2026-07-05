@@ -439,6 +439,13 @@ export function useBookingLogic({
       }
     }
 
+    if (step === 2 && prestation === "TATTOO" && !selectedFlashId) {
+      alert(
+        "Pour une prestation tattoo, veuillez sélectionner un flash avant de continuer.",
+      );
+      return;
+    }
+
     const ok = await trigger(fieldsByStep[step] as any);
     if (!ok) return;
 
@@ -755,6 +762,13 @@ export function useBookingLogic({
   const onSubmit = async (data: AppointmentRequestForm) => {
     if (selectedSlots.length === 0) {
       toast.error("Veuillez sélectionner au moins un créneau");
+      return;
+    }
+
+    if (data.prestation === "TATTOO" && !selectedFlashId) {
+      toast.error(
+        "La réservation tattoo via client est disponible uniquement avec un flash sélectionné.",
+      );
       return;
     }
 

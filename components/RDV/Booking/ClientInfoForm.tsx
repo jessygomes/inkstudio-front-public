@@ -182,14 +182,14 @@ export default function ClientInfoForm({
             {showFlashSelector && (
               <div className="space-y-3">
                 <label className="text-xs text-white/80 font-one uppercase tracking-wide">
-                  Choix du flash (optionnel)
+                  Choix du flash (obligatoire pour un tattoo)
                 </label>
                 <select
                   value={selectedFlashId}
                   onChange={(e) => onFlashChange?.(e.target.value)}
                   className="w-full p-2.5 bg-white/5 border border-white/10 rounded-2xl text-white font-one text-sm focus:outline-none focus:border-tertiary-400 focus:ring-1 focus:ring-tertiary-400/30 transition-all"
                 >
-                  <option value="" className="bg-noir-500">Aucun flash sélectionné</option>
+                  <option value="" className="bg-noir-500">Sélectionnez un flash</option>
                   {flashes.map((flash) => {
                     const label = flash.title || flash.name || "Flash";
                     const price =
@@ -207,6 +207,13 @@ export default function ClientInfoForm({
                     );
                   })}
                 </select>
+
+                {flashes.length === 0 && (
+                  <p className="text-xs text-orange-300 font-one bg-orange-500/10 border border-orange-500/20 rounded-lg px-3 py-2">
+                    Aucun flash n&apos;est disponible pour le moment. La réservation
+                    tattoo côté client est uniquement possible avec un flash.
+                  </p>
+                )}
 
                 {selectedFlash && selectedFlash.imageUrl && (
                   <div className="mx-auto w-full max-w-55 rounded-2xl overflow-hidden border border-white/10 bg-white/3 text-center">
