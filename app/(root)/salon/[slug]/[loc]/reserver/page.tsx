@@ -214,6 +214,18 @@ export default async function ReserverPage({
     appointmentBookingEnabled: salon.appointmentBookingEnabled,
     agendaMode: resolvedAgendaMode,
     addConfirmationEnabled: salon.addConfirmationEnabled,
+    projectAppointmentDurationMinutes:
+      typeof salon.projectAppointmentDurationMinutes === "number"
+        ? salon.projectAppointmentDurationMinutes
+        : 60,
+    projectAppointmentIsFree:
+      typeof salon.projectAppointmentIsFree === "boolean"
+        ? salon.projectAppointmentIsFree
+        : true,
+    projectAppointmentPrice:
+      typeof salon.projectAppointmentPrice === "number"
+        ? salon.projectAppointmentPrice
+        : null,
   };
 
   // horaires normalisés + statut

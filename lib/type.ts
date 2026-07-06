@@ -73,6 +73,7 @@ export type FlashProps = {
   width?: number | null;
   height?: number | null;
   unit?: string | null;
+  appointmentDurationMinutes?: number | null;
   isAvailable?: boolean;
   available?: boolean;
 };
@@ -348,6 +349,9 @@ export type SalonSummary = {
   addConfirmationEnabled: boolean;
   appointmentBookingEnabled?: boolean; // Changé de requireConfirmation à appointmentBookingEnabled
   agendaMode?: string | null;
+  projectAppointmentDurationMinutes?: number | null;
+  projectAppointmentIsFree?: boolean | null;
+  projectAppointmentPrice?: number | null;
 };
 
 export type Props = {

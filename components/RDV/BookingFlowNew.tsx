@@ -36,6 +36,11 @@ export default function BookingFlow({
     prestation,
     artists,
     isParTatoueurMode,
+    projectAppointmentDurationMinutes,
+    projectAppointmentIsFree,
+    projectAppointmentResolvedPrice,
+    selectedFlashDurationMinutes,
+    requiredTattooSlots,
     selectedTatoueur,
     selectedDate,
     timeSlots,
@@ -165,7 +170,12 @@ export default function BookingFlow({
                   </div>
                 )}
 
-                <PrestationSelector prestations={salon.prestations} />
+                <PrestationSelector
+                  prestations={salon.prestations}
+                  projectAppointmentDurationMinutes={projectAppointmentDurationMinutes}
+                  projectAppointmentIsFree={projectAppointmentIsFree}
+                  projectAppointmentPrice={projectAppointmentResolvedPrice}
+                />
               </div>
             )}
 
@@ -214,6 +224,9 @@ export default function BookingFlow({
                 occupiedSlots={occupiedSlots}
                 blockedSlots={blockedSlots}
                 isLoadingSlots={isLoadingSlots}
+                selectedFlashId={selectedFlashId}
+                selectedFlashDurationMinutes={selectedFlashDurationMinutes}
+                requiredTattooSlots={requiredTattooSlots}
               />
             )}
 

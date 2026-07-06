@@ -82,7 +82,7 @@ export function useBookingLogic({
   flashes = [],
   defaultFlashId,
 }: UseBookingLogicProps) {
-  const MAX_CLIENT_SLOTS = 2; // Limite de créneaux sélectionnables par le client (1h = 2 créneaux de 30 min)
+  const MAX_CLIENT_SLOTS = 2; // Limite standard hors PROJET (1h = 2 créneaux de 30 min)
   const initialPrestation =
     defaultPrestation &&
     ["TATTOO", "PIERCING", "PROJET", "RETOUCHE"].includes(defaultPrestation)
@@ -207,6 +207,24 @@ export function useBookingLogic({
       salon.id.trim() !== "",
     [isParTatoueurMode, artists.length, salon.id],
   );
+  const projectAppointmentDurationMinutes = useMemo(() => {
+    const raw = Number(salon?.projectAppointmentDurationMinutes);
+    if (Number.isFinite(raw) && raw > 0) return raw;
+    return 60;
+  }, [salon?.projectAppointmentDurationMinutes]);
+  const requiredProjectSlots = useMemo(
+    () => Math.max(1, Math.ceil(projectAppointmentDurationMinutes / 30)),
+    [projectAppointmentDurationMinutes],
+  );
+  const projectAppointmentIsFree =
+    typeof salon?.projectAppointmentIsFree === "boolean"
+      ? salon.projectAppointmentIsFree
+      : true;
+  const projectAppointmentResolvedPrice = projectAppointmentIsFree
+    ? 0
+    : typeof salon?.projectAppointmentPrice === "number"
+      ? salon.projectAppointmentPrice
+      : 0;
 
   // Préremplir le tatoueur par défaut si fourni
   useEffect(() => {
@@ -375,6 +393,19 @@ export function useBookingLogic({
       ),
     [flashes],
   );
+  const selectedFlash = useMemo(
+    () => availableFlashes.find((f) => f.id === selectedFlashId),
+    [availableFlashes, selectedFlashId],
+  );
+  const selectedFlashDurationMinutes = useMemo(() => {
+    const raw = Number(selectedFlash?.appointmentDurationMinutes);
+    if (Number.isFinite(raw) && raw > 0) return raw;
+    return 60;
+  }, [selectedFlash?.appointmentDurationMinutes]);
+  const requiredTattooSlots = useMemo(
+    () => Math.max(1, Math.ceil(selectedFlashDurationMinutes / 30)),
+    [selectedFlashDurationMinutes],
+  );
 
   //! Préremplir le flash par défaut si fourni ET disponible
   // Ce useEffect s'exécute lorsqu'un defaultFlashId est passé en props
@@ -424,23 +455,37 @@ export function useBookingLogic({
     };
 
     if (step === 1 && isParTatoueurMode && !selectedTatoueur) {
-      alert("Veuillez sélectionner un tatoueur avant de continuer.");
+      toast.error("Veuillez sélectionner un tatoueur avant de continuer.");
       return;
     }
 
     if (step === 3) {
       if (isParTatoueurMode && !selectedTatoueur) {
-        alert("Veuillez sélectionner un tatoueur");
+        toast.error("Veuillez sélectionner un tatoueur");
         return;
       }
       if (selectedSlots.length === 0) {
-        alert("Veuillez sélectionner au moins un créneau");
+        toast.error("Veuillez sélectionner au moins un créneau");
+        return;
+      }
+
+      if (prestation === "PROJET" && selectedSlots.length !== requiredProjectSlots) {
+        toast.error(
+          `Pour un rendez-vous projet, vous devez sélectionner exactement ${requiredProjectSlots} créneau(x), soit ${projectAppointmentDurationMinutes} minutes.`,
+        );
+        return;
+      }
+
+      if (prestation === "TATTOO" && selectedSlots.length !== requiredTattooSlots) {
+        toast.error(
+          `Pour ce flash, vous devez sélectionner exactement ${requiredTattooSlots} créneau(x), soit ${selectedFlashDurationMinutes} minutes.`,
+        );
         return;
       }
     }
 
     if (step === 2 && prestation === "TATTOO" && !selectedFlashId) {
-      alert(
+      toast.error(
         "Pour une prestation tattoo, veuillez sélectionner un flash avant de continuer.",
       );
       return;
@@ -601,15 +646,32 @@ export function useBookingLogic({
       if (consecutive || newSelection.length <= 1) {
         setSelectedSlots(newSelection);
       } else {
-        alert("Les créneaux restants ne sont plus consécutifs.");
+        toast.error("Les créneaux restants ne sont plus consécutifs.");
       }
       return;
     }
 
-    if (selectedSlots.length >= MAX_CLIENT_SLOTS) {
-      toast.error(
-        "Vous pouvez sélectionner au maximum 1h (2 créneaux de 30 minutes).",
-      );
+    const maxSelectableSlots =
+      prestation === "PROJET"
+        ? requiredProjectSlots
+        : prestation === "TATTOO" && selectedFlashId
+          ? requiredTattooSlots
+          : MAX_CLIENT_SLOTS;
+
+    if (selectedSlots.length >= maxSelectableSlots) {
+      if (prestation === "PROJET") {
+        toast.error(
+          `Un rendez-vous projet dure ${projectAppointmentDurationMinutes} minutes (${requiredProjectSlots} créneau(x)).`,
+        );
+      } else if (prestation === "TATTOO" && selectedFlashId) {
+        toast.error(
+          `Ce flash dure ${selectedFlashDurationMinutes} minutes (${requiredTattooSlots} créneau(x)).`,
+        );
+      } else {
+        toast.error(
+          "Vous pouvez sélectionner au maximum 1h (2 créneaux de 30 minutes).",
+        );
+      }
       return;
     }
 
@@ -626,7 +688,7 @@ export function useBookingLogic({
     if (consecutive) {
       setSelectedSlots(newSelection);
     } else {
-      alert("Les créneaux doivent être consécutifs.");
+      toast.error("Les créneaux doivent être consécutifs.");
     }
   };
 
@@ -772,6 +834,20 @@ export function useBookingLogic({
       return;
     }
 
+    if (data.prestation === "TATTOO" && selectedSlots.length !== requiredTattooSlots) {
+      toast.error(
+        `Le rendez-vous tattoo avec flash doit contenir exactement ${requiredTattooSlots} créneau(x) (${selectedFlashDurationMinutes} min).`,
+      );
+      return;
+    }
+
+    if (data.prestation === "PROJET" && selectedSlots.length !== requiredProjectSlots) {
+      toast.error(
+        `Le rendez-vous projet doit contenir exactement ${requiredProjectSlots} créneau(x) (${projectAppointmentDurationMinutes} min).`,
+      );
+      return;
+    }
+
     try {
       // Upload des fichiers
       const uploadedFileUrls: { sketch?: string; reference?: string } = {};
@@ -888,6 +964,14 @@ export function useBookingLogic({
         reference: uploadedFileUrls.reference || data.details?.reference || "",
         sketch: uploadedFileUrls.sketch || data.details?.sketch || "",
         piercingZone: selectedPiercingZone || undefined,
+        price:
+          data.prestation === "PROJET"
+            ? projectAppointmentResolvedPrice
+            : undefined,
+        estimatedPrice:
+          data.prestation === "PROJET"
+            ? projectAppointmentResolvedPrice
+            : undefined,
       };
 
       const result = await createAppointmentByClient(
@@ -1027,6 +1111,11 @@ export function useBookingLogic({
     prestation,
     artists,
     isParTatoueurMode,
+    projectAppointmentDurationMinutes,
+    projectAppointmentIsFree,
+    projectAppointmentResolvedPrice,
+    selectedFlashDurationMinutes,
+    requiredTattooSlots,
 
     // Créneaux
     selectedTatoueur,

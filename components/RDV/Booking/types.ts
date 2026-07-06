@@ -60,4 +60,7 @@ export interface SalonSummary {
   appointmentBookingEnabled?: boolean;
   addConfirmationEnabled?: boolean;
   agendaMode?: string | null;
+  projectAppointmentDurationMinutes?: number | null;
+  projectAppointmentIsFree?: boolean | null;
+  projectAppointmentPrice?: number | null;
 }

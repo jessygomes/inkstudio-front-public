@@ -73,6 +73,20 @@ export default function RecapStep({
   const selectedSkinTone = skinToneOptions.find(
     (option) => option.value === formData?.details?.skin,
   );
+  const projectAppointmentDurationMinutes = React.useMemo(() => {
+    const raw = Number(salon?.projectAppointmentDurationMinutes);
+    if (Number.isFinite(raw) && raw > 0) return raw;
+    return 60;
+  }, [salon?.projectAppointmentDurationMinutes]);
+  const projectAppointmentIsFree =
+    typeof salon?.projectAppointmentIsFree === "boolean"
+      ? salon.projectAppointmentIsFree
+      : true;
+  const projectAppointmentPrice = projectAppointmentIsFree
+    ? 0
+    : typeof salon?.projectAppointmentPrice === "number"
+      ? salon.projectAppointmentPrice
+      : 0;
 
   return (
     <Section title="Récapitulatif de votre demande">
@@ -192,6 +206,26 @@ export default function RecapStep({
               prestation === "PROJET" ||
               prestation === "RETOUCHE") && (
               <>
+                {prestation === "PROJET" && (
+                  <>
+                    <div>
+                      <p className="text-white/60 font-one text-xs mb-0.5">
+                        Durée du rendez-vous projet
+                      </p>
+                      <p className="text-white font-one">
+                        {projectAppointmentDurationMinutes} min
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-white/60 font-one text-xs mb-0.5">
+                        Prix du rendez-vous projet
+                      </p>
+                      <p className="text-white font-one">
+                        {projectAppointmentPrice}€
+                      </p>
+                    </div>
+                  </>
+                )}
                 {formData?.details?.zone && (
                   <div>
                     <p className="text-white/60 font-one text-xs mb-0.5">

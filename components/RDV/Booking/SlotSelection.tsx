@@ -36,6 +36,9 @@ interface SlotSelectionProps {
   occupiedSlots: any[];
   blockedSlots: any[];
   isLoadingSlots: boolean;
+  selectedFlashId?: string;
+  selectedFlashDurationMinutes?: number;
+  requiredTattooSlots?: number;
 }
 
 export default function SlotSelection({
@@ -53,6 +56,9 @@ export default function SlotSelection({
   occupiedSlots,
   blockedSlots,
   isLoadingSlots,
+  selectedFlashId,
+  selectedFlashDurationMinutes = 60,
+  requiredTattooSlots = 2,
 }: SlotSelectionProps) {
   const { register } = useFormContext();
   const parsedSalonHours = React.useMemo(
@@ -79,6 +85,15 @@ export default function SlotSelection({
   const selectedArtist = React.useMemo(
     () => artists.find((artist) => artist.id === selectedTatoueur) || null,
     [artists, selectedTatoueur],
+  );
+  const projectAppointmentDurationMinutes = React.useMemo(() => {
+    const raw = Number(salon?.projectAppointmentDurationMinutes);
+    if (Number.isFinite(raw) && raw > 0) return raw;
+    return 60;
+  }, [salon?.projectAppointmentDurationMinutes]);
+  const requiredProjectSlots = React.useMemo(
+    () => Math.max(1, Math.ceil(projectAppointmentDurationMinutes / 30)),
+    [projectAppointmentDurationMinutes],
   );
 
   // Vérifier si un créneau est bloqué
@@ -277,10 +292,22 @@ export default function SlotSelection({
               <div className="space-y-4">
                 <div>
                   <h3 className="text-white font-one mb-1">Créneaux</h3>
-                  <p className="text-sm text-white/60 font-one">
+                  <p className="text-xs text-white/60 font-one">
                     Les créneaux occupés et bloqués sont affichés mais non
                     sélectionnables
                   </p>
+                  {prestation === "PROJET" && (
+                    <p className="text-sm text-tertiary-400 font-one mt-1">
+                      Un rendez-vous projet dure {projectAppointmentDurationMinutes} min :
+                      sélectionnez exactement {requiredProjectSlots} créneau(x) de 30 min.
+                    </p>
+                  )}
+                  {prestation === "TATTOO" && selectedFlashId && (
+                    <p className="text-sm text-tertiary-400 font-one mt-1">
+                      Ce flash dure <strong>{selectedFlashDurationMinutes} min</strong> : sélectionnez
+                      exactement <strong>{requiredTattooSlots} créneaux de 30 min</strong>.
+                    </p>
+                  )}
                 </div>
 
                 {/* Légende */}
@@ -321,10 +348,11 @@ export default function SlotSelection({
                   <>
                     <div className="space-y-3">
                       <p className="text-xs text-white/50">
-                        Cliquez sur les créneaux pour les sélectionner (doivent
-                        être consécutifs). Maximum 1h par réservation (2
-                        créneaux de 30 min). Les créneaux occupés ou bloqués
-                        restent visibles.
+                        {prestation === "PROJET"
+                          ? `Cliquez sur les créneaux pour les sélectionner (ils doivent être consécutifs). Pour un projet, vous devez prendre exactement ${requiredProjectSlots} créneau(x), soit ${projectAppointmentDurationMinutes} min.`
+                          : prestation === "TATTOO" && selectedFlashId
+                            ? `Cliquez sur les créneaux pour les sélectionner (ils doivent être consécutifs). Pour ce flash, vous devez prendre exactement ${requiredTattooSlots} créneau(x), soit ${selectedFlashDurationMinutes} min.`
+                            : "Cliquez sur les créneaux pour les sélectionner (doivent être consécutifs). Maximum 1h par réservation (2 créneaux de 30 min). Les créneaux occupés ou bloqués restent visibles."}
                       </p>
                       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
                         {displayedSlotStarts.map((slotStartIso) => {
