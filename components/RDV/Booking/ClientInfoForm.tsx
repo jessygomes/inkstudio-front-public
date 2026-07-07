@@ -86,11 +86,12 @@ export default function ClientInfoForm({
     if (service.piercingZoneBouche) return service.piercingZoneBouche;
     if (service.piercingZoneCorps) return service.piercingZoneCorps;
     if (service.piercingZoneMicrodermal) return service.piercingZoneMicrodermal;
+    const specificZoneValue = serviceWithAliases.specificZone as unknown;
     if (
-      typeof serviceWithAliases.specificZone === "string" &&
-      serviceWithAliases.specificZone.trim()
+      typeof specificZoneValue === "string" &&
+      specificZoneValue.trim()
     ) {
-      return serviceWithAliases.specificZone.trim();
+      return specificZoneValue.trim();
     }
     if (serviceWithAliases.specificZoneLabel) return serviceWithAliases.specificZoneLabel;
     if (serviceWithAliases.zoneName) return serviceWithAliases.zoneName;
