@@ -51,8 +51,95 @@ function getFlashDimensions(flash?: FlashProps): string {
 }
 //! Fonction utilitaire pour extraire les zones de piercing d'une réponse API
 function extractPiercingZones(payload: unknown): PiercingZone[] {
+  const normalizeService = (service: unknown, index: number) => {
+    if (!service || typeof service !== "object") return null;
+    const source = service as Record<string, unknown>;
+
+    return {
+      id:
+        (typeof source.id === "string" && source.id) ||
+        (typeof source.serviceId === "string" && source.serviceId) ||
+        `service-${index}`,
+      price:
+        typeof source.price === "number"
+          ? source.price
+          : Number(source.price) || 0,
+      description:
+        (typeof source.description === "string" && source.description) ||
+        (typeof source.name === "string" && source.name) ||
+        (typeof source.label === "string" && source.label) ||
+        (typeof source.title === "string" && source.title) ||
+        null,
+      piercingZoneOreille:
+        (typeof source.piercingZoneOreille === "string" &&
+          source.piercingZoneOreille) ||
+        null,
+      piercingZoneVisage:
+        (typeof source.piercingZoneVisage === "string" &&
+          source.piercingZoneVisage) ||
+        null,
+      piercingZoneBouche:
+        (typeof source.piercingZoneBouche === "string" &&
+          source.piercingZoneBouche) ||
+        null,
+      piercingZoneCorps:
+        (typeof source.piercingZoneCorps === "string" &&
+          source.piercingZoneCorps) ||
+        null,
+      piercingZoneMicrodermal:
+        (typeof source.piercingZoneMicrodermal === "string" &&
+          source.piercingZoneMicrodermal) ||
+        null,
+      name:
+        (typeof source.name === "string" && source.name) ||
+        (typeof source.label === "string" && source.label) ||
+        (typeof source.title === "string" && source.title) ||
+        undefined,
+      label:
+        (typeof source.label === "string" && source.label) ||
+        (typeof source.name === "string" && source.name) ||
+        undefined,
+      specificZone:
+        typeof source.specificZone === "boolean" ? source.specificZone : false,
+      specificZoneLabel:
+        (typeof source.zone === "string" && source.zone) ||
+        (typeof source.zoneName === "string" && source.zoneName) ||
+        undefined,
+    };
+  };
+
+  const normalizeZone = (zone: unknown, index: number): PiercingZone | null => {
+    if (!zone || typeof zone !== "object") return null;
+    const source = zone as Record<string, unknown>;
+    const servicesRaw =
+      (Array.isArray(source.services) && source.services) ||
+      (Array.isArray(source.items) && source.items) ||
+      (Array.isArray(source.types) && source.types) ||
+      [];
+
+    const services = servicesRaw
+      .map((service, serviceIndex) => normalizeService(service, serviceIndex))
+      .filter(Boolean) as unknown as PiercingZone["services"];
+
+    return {
+      id:
+        (typeof source.id === "string" && source.id) ||
+        (typeof source.zoneId === "string" && source.zoneId) ||
+        `zone-${index}`,
+      piercingZone:
+        (typeof source.piercingZone === "string" && source.piercingZone) ||
+        (typeof source.zoneName === "string" && source.zoneName) ||
+        (typeof source.name === "string" && source.name) ||
+        (typeof source.label === "string" && source.label) ||
+        "Zone non spécifiée",
+      services,
+    } as PiercingZone;
+  };
+
   if (Array.isArray(payload)) {
-    return payload as PiercingZone[];
+    return payload
+      .map((zone, index) => normalizeZone(zone, index))
+      .filter(Boolean) as PiercingZone[];
   }
 
   if (!payload || typeof payload !== "object") {
@@ -66,10 +153,35 @@ function extractPiercingZones(payload: unknown): PiercingZone[] {
     source.piercingZones,
     source.configurations,
     source.items,
+    source.overview,
+    source.result,
+    source.payload,
   ];
 
   const firstArray = candidates.find((value) => Array.isArray(value));
-  return Array.isArray(firstArray) ? (firstArray as PiercingZone[]) : [];
+  if (Array.isArray(firstArray)) {
+    return firstArray
+      .map((zone, index) => normalizeZone(zone, index))
+      .filter(Boolean) as PiercingZone[];
+  }
+
+  const nestedArray = candidates
+    .filter((value) => value && typeof value === "object")
+    .map((value) => {
+      const nested = value as Record<string, unknown>;
+      return (
+        (Array.isArray(nested.zones) && nested.zones) ||
+        (Array.isArray(nested.piercingZones) && nested.piercingZones) ||
+        null
+      );
+    })
+    .find((value) => Array.isArray(value));
+
+  return Array.isArray(nestedArray)
+    ? (nestedArray
+        .map((zone, index) => normalizeZone(zone, index))
+        .filter(Boolean) as PiercingZone[])
+    : [];
 }
 
 //! -------------------------------------------------

@@ -63,13 +63,43 @@ export default function ClientInfoForm({
     (s) => s.id === selectedPiercingService,
   );
 
-  const getServiceZoneName = (service: PiercingService): string => {
+  const getServiceZoneName = (
+    service: PiercingService,
+    parentZoneName?: string,
+  ): string => {
+    const serviceWithAliases = service as PiercingService & {
+      name?: string;
+      label?: string;
+      title?: string;
+      specificZone?: string | boolean;
+      specificZoneLabel?: string;
+      zone?: string;
+      zoneName?: string;
+    };
+
+    if (service.description && service.description.trim()) {
+      return service.description.trim();
+    }
+
     if (service.piercingZoneOreille) return service.piercingZoneOreille;
     if (service.piercingZoneVisage) return service.piercingZoneVisage;
     if (service.piercingZoneBouche) return service.piercingZoneBouche;
     if (service.piercingZoneCorps) return service.piercingZoneCorps;
     if (service.piercingZoneMicrodermal) return service.piercingZoneMicrodermal;
-    return service.description || "Zone non spécifiée";
+    if (
+      typeof serviceWithAliases.specificZone === "string" &&
+      serviceWithAliases.specificZone.trim()
+    ) {
+      return serviceWithAliases.specificZone.trim();
+    }
+    if (serviceWithAliases.specificZoneLabel) return serviceWithAliases.specificZoneLabel;
+    if (serviceWithAliases.zoneName) return serviceWithAliases.zoneName;
+    if (serviceWithAliases.zone) return serviceWithAliases.zone;
+    if (serviceWithAliases.label) return serviceWithAliases.label;
+    if (serviceWithAliases.name) return serviceWithAliases.name;
+    if (serviceWithAliases.title) return serviceWithAliases.title;
+    if (parentZoneName) return parentZoneName;
+    return "Zone non spécifiée";
   };
 
   const getFlashDimensions = (flash?: FlashProps): string => {
@@ -316,7 +346,7 @@ export default function ClientInfoForm({
                       <option value="" className="bg-noir-500">Sélectionnez un type</option>
                       {selectedZoneServices.map((service: PiercingService) => (
                         <option key={service.id} value={service.id} className="bg-noir-500">
-                          {getServiceZoneName(service)} -{" "}
+                          {getServiceZoneName(service, selectedZone?.piercingZone)} -{" "}
                           {service.price
                             ? `${service.price}€`
                             : "Prix non défini"}
@@ -351,7 +381,7 @@ export default function ClientInfoForm({
             {selectedService && selectedService.price && (
               <div className="p-3 bg-tertiary-500/10 border border-tertiary-500/15 rounded-2xl flex items-center justify-between">
                 <span className="text-white/80 text-sm font-one">
-                  {getServiceZoneName(selectedService)}
+                  {getServiceZoneName(selectedService, selectedZone?.piercingZone)}
                 </span>
                 <span className="text-white font-one font-semibold text-md">
                   {selectedService.price}€
