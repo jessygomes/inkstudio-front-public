@@ -102,6 +102,7 @@ function extractPiercingZones(payload: unknown): PiercingZone[] {
       specificZone:
         typeof source.specificZone === "boolean" ? source.specificZone : false,
       specificZoneLabel:
+        (typeof source.specificZoneName === "string" && source.specificZoneName) ||
         (typeof source.zone === "string" && source.zone) ||
         (typeof source.zoneName === "string" && source.zoneName) ||
         undefined,

@@ -72,6 +72,7 @@ export default function ClientInfoForm({
       label?: string;
       title?: string;
       specificZone?: string | boolean;
+      specificZoneName?: string;
       specificZoneLabel?: string;
       zone?: string;
       zoneName?: string;
@@ -93,6 +94,7 @@ export default function ClientInfoForm({
     ) {
       return specificZoneValue.trim();
     }
+    if (serviceWithAliases.specificZoneName) return serviceWithAliases.specificZoneName;
     if (serviceWithAliases.specificZoneLabel) return serviceWithAliases.specificZoneLabel;
     if (serviceWithAliases.zoneName) return serviceWithAliases.zoneName;
     if (serviceWithAliases.zone) return serviceWithAliases.zone;
