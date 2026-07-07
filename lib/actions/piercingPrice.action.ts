@@ -3,7 +3,7 @@
 export async function getPiercingPrice({ salonId }: { salonId: string }) {
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACK_URL}/piercing-prices/configuration/${salonId}`,
+      `${process.env.NEXT_PUBLIC_BACK_URL}/piercing-prices/public/${salonId}/overview`,
       {
         method: "GET",
         headers: {
@@ -22,7 +22,7 @@ export async function getPiercingPrice({ salonId }: { salonId: string }) {
     }
 
     const result = await response.json();
-    console.log("Piercing zones result:", result);
+
     // Vérifier si le résultat est valide
     if (Array.isArray(result)) {
       return { ok: true, data: result };
