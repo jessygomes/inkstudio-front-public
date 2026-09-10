@@ -1,13 +1,14 @@
 import Link from "next/link";
 import React from "react";
 
-type AppButtonProps = {
+type AppButtonProps = React.AriaAttributes & {
   /** "primary" = gradient tertiary | "secondary" = ghost/outline */
   variant?: "primary" | "secondary";
   /** Rend un <Link> si fourni, sinon un <button> */
   href?: string;
   onClick?: () => void;
   disabled?: boolean;
+  type?: "button" | "submit" | "reset";
   fullWidth?: boolean;
   icon?: React.ReactNode;
   className?: string;
@@ -19,10 +20,12 @@ export default function AppButton({
   href,
   onClick,
   disabled = false,
+  type,
   fullWidth = false,
   icon,
   className = "",
   children,
+  ...ariaProps
 }: AppButtonProps) {
   const base =
     "inline-flex items-center justify-center gap-2 rounded-2xl px-8 py-2 text-sm font-one transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed";
@@ -40,7 +43,7 @@ export default function AppButton({
 
   if (href) {
     return (
-      <Link href={href} onClick={onClick} className={finalClass}>
+      <Link href={href} onClick={onClick} className={finalClass} {...ariaProps}>
         {icon}
         {children}
       </Link>
@@ -48,7 +51,7 @@ export default function AppButton({
   }
 
   return (
-    <button onClick={onClick} disabled={disabled} className={finalClass}>
+    <button type={type} onClick={onClick} disabled={disabled} className={finalClass} {...ariaProps}>
       {icon}
       {children}
     </button>

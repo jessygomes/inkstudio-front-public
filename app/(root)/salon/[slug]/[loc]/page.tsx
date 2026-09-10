@@ -1,5 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { ArrowLeft, ArrowUpRight, MapPin, CalendarDays, BadgeCheck } from "lucide-react";
+import SalonPresentation from "@/components/ProfilSalon/SalonPresentation";
+import SalonPracticalInfo from "@/components/ProfilSalon/SalonPracticalInfo";
 import SalonTabs from "@/components/ProfilSalon/SalonTabs";
+import AppButton from "@/components/Shared/AppButton";
+import DesktopSalonHeader from "@/components/ProfilSalon/DesktopSalonHeader";
+import SalonSectionNav from "@/components/ProfilSalon/SalonSectionNav";
 import { TeamCard } from "@/components/ProfilSalon/TeamCard";
 import { LinkedSalonCard } from "@/components/ProfilSalon/LinkedSalonCard";
 import { hoursToLines, parseSalonHours } from "@/lib/horaireHelper";
@@ -11,9 +17,6 @@ import { notFound } from "next/navigation";
 import Script from "next/script";
 import { Metadata } from "next";
 
-import { CiInstagram, CiFacebook } from "react-icons/ci";
-import { PiTiktokLogoThin } from "react-icons/pi";
-import { TfiWorld } from "react-icons/tfi";
 import HoursCard from "@/components/ProfilSalon/HoursCard";
 import FavoriteBtn from "@/components/Shared/FavoriteBtn";
 import SalonReviews from "@/components/ProfilSalon/SalonReviews";
@@ -225,7 +228,7 @@ function todayLabelFR() {
   }).formatToParts(new Date());
   return (p.find((x) => x.type === "weekday")?.value || "").toLowerCase();
 }
-const todayFR = todayLabelFR();
+
 
 //! PAGE
 export default async function ProfilPublicSalonPage({ params }: PageParams) {
@@ -298,6 +301,7 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
   const profileSrc = salon.profileImage || null;
   const rawHours = parseSalonHours(salon.salonHours as any);
   const hours = hoursToLines(rawHours);
+  const todayFR = todayLabelFR();
   const openNow = getOpenNow(salon.salonHours);
   const isVerifiedSalon = salon.verifiedSalon === true;
 
@@ -325,9 +329,6 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
       prestations.push(p);
     }
   }
-  const PREST_MAX = 8;
-  const prestationsVisibles = prestations.slice(0, PREST_MAX);
-  const prestationsRestantes = Math.max(0, prestations.length - PREST_MAX);
 
   // Styles (dedupliques, insensibles a la casse) — compat `style` ou `styles`
   const stylesRaw =
@@ -479,7 +480,6 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
   };
 
   const phoneDisplay = salon.phone ? formatPhone(salon.phone) : "";
-  const phoneHref = salon.phone ? salon.phone.replace(/\D/g, "") : "";
 
   // Gestion des couleurs personnalisées
   const useCustomColors =
@@ -502,582 +502,85 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
       loc={resolvedParams.loc}
     >
       <div
-        className="min-h-screen bg-noir-700 pt-2"
+        className="min-h-screen bg-noir-700 font-one pb-8 [&_a:focus-visible]:outline-2 [&_a:focus-visible]:outline-offset-4 [&_a:focus-visible]:outline-tertiary-400 [&_button:focus-visible]:outline-2 [&_button:focus-visible]:outline-offset-4 [&_button:focus-visible]:outline-tertiary-400"
         style={customStyle}
       >
-      {/* CONTENT */}
-      <section className="relative z-10 px-4 sm:px-6 lg:px-8 xl:px-16 py-6">
-        {/* Mobile Hero */}
-        <div className="mx-auto lg:hidden mb-6">
-          <div className="relative overflow-hidden rounded-2xl border border-white/10 shadow-xl">
-            <div className="relative h-64 bg-linear-to-br from-noir-500 to-noir-700">
-              {heroSrc ? (
-                <Image
-                  src={heroSrc}
-                  alt={`${salon.salonName} - banniere`}
-                  fill
-                  sizes="100vw"
-                  className="object-cover"
-                  priority
-                />
-              ) : profileSrc ? (
-                <Image
-                  src={profileSrc}
-                  alt={`${salon.salonName} - photo de profil en arrière-plan`}
-                  fill
-                  sizes="100vw"
-                  className="object-cover blur-2xl scale-110"
-                  priority
-                />
-              ) : (
-                <div className="w-full h-full grid place-items-center">
-                  <div className="text-center text-white/60">
-                    <div className="w-12 h-12 bg-white/10 rounded-full grid place-items-center mx-auto mb-2">
-                      <svg
-                        className="w-6 h-6"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={1.5}
-                          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                        />
-                      </svg>
-                    </div>
-                    <span className="text-xs font-one">
-                      Aucune image disponible
-                    </span>
-                  </div>
-                </div>
-              )}
-              <div className="absolute inset-0 bg-linear-to-b from-black/20 via-transparent to-black/80" />
 
-              {/* Status badges */}
-              <div className="absolute top-4 left-4 right-4 flex flex-wrap gap-2 z-10">
-                <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-noir-500/30 border border-white/20 text-white/90 text-xs font-one backdrop-blur-lg">
-                  <svg
-                    className="w-3 h-3"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                  {salon.city ?? "Ville inconnue"}
-                  {salon.postalCode && (
-                    <span className="opacity-70">• {salon.postalCode}</span>
-                  )}
-                </span>
-                <span
-                  className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-one border backdrop-blur-md ${
-                    openNow.open
-                      ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40"
-                      : "bg-red-500/20 text-red-300 border-red-500/40"
-                  }`}
-                >
-                  <span
-                    className={`h-1.5 w-1.5 rounded-full ${
-                      openNow.open ? "bg-emerald-400" : "bg-red-400"
-                    }`}
-                  />
-                  {openNow.open ? "Ouvert maintenant" : "Fermé"}
-                </span>
+      <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:max-w-none lg:px-8 lg:py-10 xl:px-16">
+        <Link href="/trouver-un-salon" className="mb-6 inline-flex min-h-10 items-center gap-2 text-sm text-white/65 transition hover:text-white">
+          <ArrowLeft size={16} /> Tous les salons
+        </Link>
+        <header className="overflow-hidden rounded-3xl border border-white/10 bg-noir-500 lg:hidden">
+          <div className="relative h-48 bg-linear-to-br from-tertiary-500/20 via-noir-500 to-noir-700 sm:h-64 lg:h-80">
+            {(heroSrc || profileSrc) && <Image src={(heroSrc || profileSrc)!} alt={`Le salon ${salon.salonName}`} fill sizes="(min-width:1280px) calc(100vw - 128px), (min-width:1024px) calc(100vw - 64px), 100vw" className={heroSrc ? "object-cover" : "object-cover blur-xl opacity-50"} priority />}
+            <div className="absolute inset-0 bg-linear-to-t from-noir-500 via-black/10 to-transparent" />
+            <div className="absolute right-4 top-4"><FavoriteBtn salonId={salon.id} variant="icon-only" /></div>
+          </div>
+          <div className="relative px-5 pb-6 sm:px-8 sm:pb-8">
+            <div className="-mt-12 mb-5 flex items-end justify-between gap-4">
+              <div className="relative grid h-24 w-24 shrink-0 place-items-center overflow-hidden rounded-2xl border-4 border-noir-500 bg-noir-700 text-3xl text-white sm:h-28 sm:w-28">
+                {profileSrc ? <Image src={profileSrc} alt={salon.salonName} fill sizes="112px" className="object-cover" /> : salon.salonName?.charAt(0)}
               </div>
-
-              {/* Title + Profile overlay */}
-              <div className="absolute bottom-0 left-0 right-0 p-4">
-                <div className="flex items-end gap-3">
-                  <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-full border border-white/10 bg-noir-700/80 shadow-lg backdrop-blur-sm">
-                    {profileSrc ? (
-                      <Image
-                        src={profileSrc}
-                        alt={`${salon.salonName} - photo de profil`}
-                        fill
-                        sizes="64px"
-                        className="object-cover"
-                      />
-                    ) : (
-                      <div className="grid h-full w-full place-items-center text-white/60">
-                        <svg
-                          className="h-6 w-6"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={1.5}
-                            d="M15.75 6.75a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.5 20.118a7.5 7.5 0 0115 0A17.933 17.933 0 0112 21.75a17.933 17.933 0 01-7.5-1.632z"
-                          />
-                        </svg>
-                      </div>
-                    )}
-                  </div>
-                  <div className="min-w-0">
-                    <div className="mb-1 flex items-center justify-between gap-2">
-                      <h1 className="text-2xl font-one text-white tracking-wide drop-shadow-lg">
-                        {salon.salonName}
-                      </h1>
-                      {isVerifiedSalon && (
-                        <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-emerald-300/30 bg-emerald-500/20 px-2 py-0.5 text-[10px] font-one uppercase tracking-wide text-emerald-200">
-                          <svg
-                            className="h-3 w-3"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M5 13l4 4L19 7"
-                            />
-                          </svg>
-                          Vérifié
-                        </span>
-                      )}
-                    </div>
-                    {openNow.today && (
-                      <p className="text-white/80 text-xs font-one">
-                        Aujourd&apos;hui: {openNow.today.start}–{openNow.today.end}
-                      </p>
-                    )}
-                  </div>
+              {isVerifiedSalon && <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-400/10 px-3 py-1.5 text-xs text-emerald-300"><BadgeCheck size={15} /> Profil vérifié</span>}
+            </div>
+            <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
+              <div className="min-w-0">
+                <p className="mb-2 text-xs tracking-[0.18em] text-tertiary-400 uppercase">{isTatoueurRole ? "Artiste tatoueur" : "Salon de tatouage"}</p>
+                <h1 className="break-words font-one text-3xl leading-tight text-white sm:text-4xl lg:text-5xl">{salon.salonName}</h1>
+                <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-white/70">
+                  {salon.city && <span className="inline-flex items-center gap-1.5"><MapPin size={16} />{salon.city} {salon.postalCode}</span>}
+                  {hours.length > 0 && <span className="inline-flex items-center gap-2"><span className={`h-2 w-2 rounded-full ${openNow.open ? "bg-emerald-400" : "bg-white/40"}`} />{openNow.open ? "Ouvert maintenant" : "Actuellement fermé"}</span>}
+                  {openNow.today && <span>{openNow.today.start} – {openNow.today.end}</span>}
                 </div>
               </div>
+              <Link href={isFree ? "#contact" : `/salon/${slug}/${loc}/reserver`} className="inline-flex min-h-12 shrink-0 items-center justify-center gap-3 rounded-xl bg-tertiary-500 px-6 py-3 text-sm font-semibold text-white transition hover:brightness-110">
+                <CalendarDays size={18} />{isFree ? "Parlons de votre projet" : "Prendre rendez-vous"}<ArrowUpRight size={17} />
+              </Link>
             </div>
           </div>
-        </div>
-
-        <div className="mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Sidebar */}
-          <aside className="lg:order-2 lg:sticky lg:top-24 h-fit space-y-3">
-            {/* Quick Actions */}
-              <div className="flex items-center gap-2.5">
-                <FavoriteBtn
-                  salonId={salon.id}
-                  variant="icon-only"
-                  className="hover:scale-110"
-                />
-
-                {!isFree && (
-                  <Link
-                    href={`/salon/${resolvedParams.slug}/${resolvedParams.loc}/reserver`}
-                    className="flex-1 inline-flex items-center justify-center gap-2 rounded-3xl px-4 py-2.5 text-sm font-one transition-all duration-300 bg-linear-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white shadow-lg shadow-tertiary-500/25 hover:shadow-tertiary-500/40 hover:-translate-y-0.5"
-                    title="Réserver un rendez-vous avec ce salon"
-                  >
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                      />
-                    </svg>
-                    Réserver
-                  </Link>
-                )}
-
-                <Link
-                  href={directionsHref}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`flex-1 group flex justify-center items-center gap-2 p-3 rounded-3xl bg-linear-to-br from-noir-500/8 to-white/2 hover:from-white/12 hover:to-white/6 text-white border border-white/20 hover:border-white/30 transition-all duration-300 text-sm tracking-widest font-one backdrop-blur-sm transform hover:scale-[1.02] ${
-                    isFree ? "flex-1" : "flex-1"
-                  }`}
-                  title="Voir l'emplacement du salon sur Google Maps" 
-                >
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                    />
-                  </svg>
-                  Itinéraire
-                </Link>
-              </div>
-
-            {/* Contact Info */}
-            <div className="rounded-3xl border border-white/10 bg-linear-to-br from-noir-500 to-white/2 p-5 backdrop-blur-lg shadow-xl">
-              <h3 className="text-white/95 text-sm font-one tracking-wider uppercase mb-4 flex items-center gap-2">
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-                Informations
-              </h3>
-
-              <div className="space-y-4 sm:flex sm:justify-between sm:gap-12 lg:flex-col lg:gap-0">
-                <div className="flex flex-col justify-start gap-6">
-                {salon.address && (
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-2xl bg-tertiary-500/30 flex items-center justify-center shrink-0 mt-0.5">
-                      <svg
-                        className="w-4 h-4 text-white"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                        />
-                      </svg>
-                    </div>
-                    <div className="">
-                      <p className="text-white/90 font-one text-sm leading-relaxed">
-                        {salon.address}
-                        {salon.city && (
-                          <>
-                            {", "}
-                            {salon.city}
-                          </>
-                        )}{" "}
-                        {salon.postalCode}
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {salon.phone && (
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-2xl bg-tertiary-500/30 flex items-center justify-center shrink-0">
-                      <svg
-                        className="w-4 h-4 text-white"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
-                        />
-                      </svg>
-                    </div>
-                    <a
-                      href={`tel:${phoneHref}`}
-                      className="text-white/90 font-one text-sm hover:text-tertiary-500 transition-colors"
-                    >
-                      {phoneDisplay}
-                    </a>
-                  </div>
-                )}
-                </div>
-
-                {/* Social Media */}
-                {(salon.instagram ||
-                  salon.facebook ||
-                  salon.tiktok ||
-                  salon.website) && (
-                  <div className="pt-2">
-                    <p className="hidden lg:block text-white/70 font-one text-xs mb-3 uppercase tracking-wider">
-                      Réseaux sociaux
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {salon.instagram && (
-                        <Link
-                          href={salon.instagram}
-                          target="_blank"
-                          className="group w-8 h-8 rounded-2xl bg-linear-to-br from-pink-500/20 to-purple-500/20 border border-pink-500/30 flex items-center justify-center hover:from-pink-500/30 hover:to-purple-500/30 hover:border-pink-400/50 transition-all duration-300 transform hover:scale-110"
-                        >
-                          <CiInstagram className="w-5 h-5 text-pink-400 group-hover:text-pink-300" />
-                        </Link>
-                      )}
-                      {salon.facebook && (
-                        <Link
-                          href={salon.facebook}
-                          target="_blank"
-                          className="group w-8 h-8 rounded-2xl bg-linear-to-br from-blue-500/20 to-blue-600/20 border border-blue-500/30 flex items-center justify-center hover:from-blue-500/30 hover:to-blue-600/30 hover:border-blue-400/50 transition-all duration-300 transform hover:scale-110"
-                        >
-                          <CiFacebook className="w-5 h-5 text-blue-400 group-hover:text-blue-300" />
-                        </Link>
-                      )}
-                      {salon.tiktok && (
-                        <Link
-                          href={salon.tiktok}
-                          target="_blank"
-                          className="group w-8 h-8 rounded-2xl bg-linear-to-br from-gray-500/20 to-gray-600/20 border border-gray-500/30 flex items-center justify-center hover:from-gray-500/30 hover:to-gray-600/30 hover:border-gray-400/50 transition-all duration-300 transform hover:scale-110"
-                        >
-                          <PiTiktokLogoThin className="w-5 h-5 text-gray-400 group-hover:text-gray-300" />
-                        </Link>
-                      )}
-                      {salon.website && (
-                        <Link
-                          href={salon.website}
-                          target="_blank"
-                          className="group w-8 h-8 rounded-2xl bg-linear-to-br from-emerald-500/20 to-emerald-600/20 border border-emerald-500/30 flex items-center justify-center hover:from-emerald-500/30 hover:to-emerald-600/30 hover:border-emerald-400/50 transition-all duration-300 transform hover:scale-110"
-                        >
-                          <TfiWorld className="w-4 h-4 text-emerald-400 group-hover:text-emerald-300" />
-                        </Link>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
+        </header>
+        <SalonSectionNav showTeam={shouldShowTeamSection && sortedTatoueurs.length > 0} className="my-6 lg:hidden" />
+        <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)] xl:gap-8">
+          <aside id="informations" className="order-2 min-w-0 scroll-mt-28 space-y-4 lg:sticky lg:top-24">
+            <div className="rounded-2xl border border-tertiary-400/20 bg-tertiary-400/5 p-6">
+              <p className="text-lg text-white">Votre prochain projet commence ici</p>
+              <p className="mt-2 text-sm leading-relaxed text-white/65">Échangez avec {salon.salonName} pour donner vie à vos idées.</p>
+              <AppButton href={isFree ? "#contact" : `/salon/${slug}/${loc}/reserver`} variant="primary" fullWidth className="mt-5 min-h-12">{isFree ? "Contacter le salon" : "Prendre rendez-vous"}<ArrowUpRight size={16} /></AppButton>
+              {!isFree && <a href="#contact" className="mt-2 flex min-h-11 items-center justify-center text-sm text-white/75 hover:text-white">Poser une question</a>}
             </div>
-
+            <SalonPracticalInfo
+              address={salon.address}
+              city={salon.city}
+              postalCode={salon.postalCode}
+              phone={salon.phone}
+              phoneDisplay={phoneDisplay}
+              directionsHref={directionsHref}
+              instagram={salon.instagram}
+              facebook={salon.facebook}
+              tiktok={salon.tiktok}
+              website={salon.website}
+            />
             {/* Horaires */}
             <HoursCard hours={hours} todayFR={todayFR} openNow={openNow} />
           </aside>
 
           {/* Main Content */}
-          <div className="lg:col-span-2 lg:order-1 space-y-6">
-            {/* Desktop Hero */}
-            <div className="hidden lg:block">
-              <div className="relative overflow-hidden rounded-3xl shadow-xl">
-                <div className="relative h-80 lg:h-96 bg-linear-to-br from-noir-500 to-noir-700">
-                  {heroSrc ? (
-                    <Image
-                      src={heroSrc}
-                      alt={`${salon.salonName} - banniere`}
-                      fill
-                      sizes="(min-width:1024px) 66vw, 100vw"
-                      className="object-cover"
-                      priority
-                    />
-                  ) : profileSrc ? (
-                    <Image
-                      src={profileSrc}
-                      alt={`${salon.salonName} - photo de profil en arrière-plan`}
-                      fill
-                      sizes="(min-width:1024px) 66vw, 100vw"
-                      className="object-cover blur-2xl scale-110"
-                      priority
-                    />
-                  ) : (
-                    <div className="w-full h-full grid place-items-center">
-                      <div className="text-center text-white/60">
-                        <div className="w-16 h-16 bg-white/10 rounded-full grid place-items-center mx-auto mb-3">
-                          <svg
-                            className="w-8 h-8"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={1.5}
-                              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                            />
-                          </svg>
-                        </div>
-                        <span className="text-base font-one">
-                          Aucune image disponible
-                        </span>
-                      </div>
-                    </div>
-                  )}
-                  <div className="absolute inset-0 bg-linear-to-b from-black/20 via-transparent to-black/80" />
-
-                  {/* Status badges */}
-                  <div className="absolute bottom-5 right-5 flex flex-wrap gap-3 z-10">
-                    <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-noir-500/30 border border-white/20 text-white/90 text-xs font-one backdrop-blur-lg">
-                      <svg
-                        className="w-4 h-4"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                      {salon.city ?? "Ville inconnue"}
-                      {salon.postalCode && (
-                        <span className="opacity-70">• {salon.postalCode}</span>
-                      )}
-                    </span>
-                    <span
-                      className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-one border backdrop-blur-lg ${
-                        openNow.open
-                          ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40"
-                          : "bg-red-500/20 text-red-300 border-red-500/40"
-                      }`}
-                    >
-                      <span
-                        className={`h-2 w-2 rounded-full ${
-                          openNow.open ? "bg-emerald-400" : "bg-red-400"
-                        }`}
-                      />
-                      {openNow.open ? "Ouvert maintenant" : "Fermé"}
-                    </span>
-                  </div>
-
-                  {/* Title + Profile overlay */}
-                  <div className="absolute bottom-0 left-0 right-0 p-6">
-                    <div className="flex items-end gap-4">
-                      <div className="relative h-32 w-32 shrink-0 overflow-hidden rounded-full border border-white/10 bg-noir-700/80 shadow-lg backdrop-blur-sm">
-                        {profileSrc ? (
-                          <Image
-                            src={profileSrc}
-                            alt={`${salon.salonName} - photo de profil`}
-                            fill
-                            sizes="128px"
-                            className="object-cover"
-                          />
-                        ) : (
-                          <div className="grid h-full w-full place-items-center text-white/60">
-                            <svg
-                              className="h-7 w-7"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={1.5}
-                                d="M15.75 6.75a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.5 20.118a7.5 7.5 0 0115 0A17.933 17.933 0 0112 21.75a17.933 17.933 0 01-7.5-1.632z"
-                              />
-                            </svg>
-                          </div>
-                        )}
-                      </div>
-                      <div className="min-w-0">
-                        <div className="mb-2 flex items-center justify-between gap-3">
-                          <h1 className="text-3xl lg:text-4xl font-one text-white tracking-wide drop-shadow-lg">
-                            {salon.salonName}
-                          </h1>
-                          {isVerifiedSalon && (
-                            <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-emerald-300/30 bg-emerald-500/20 px-3 py-1 text-xs font-one uppercase tracking-wide text-emerald-200">
-                              <svg
-                                className="h-3.5 w-3.5"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M5 13l4 4L19 7"
-                                />
-                              </svg>
-                              Vérifié
-                            </span>
-                          )}
-                        </div>
-                        {openNow.today && (
-                          <p className="text-white/80 text-base font-one">
-                            Aujourd&apos;hui: {openNow.today.start}–
-                            {openNow.today.end}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Présentation */}
-            <div className="rounded-3xl border border-white/10 bg-linear-to-br from-noir-500 to-noir-700 p-6 backdrop-blur-lg shadow-xl">
-              <div className="mb-5">
-                <h2 className="text-white/95 font-one text-sm tracking-wider uppercase">
-                  Présentation
-                </h2>
-              </div>
-
-              <p className="text-white/85 text-sm font-one leading-relaxed">
-                {salon.description || "Aucune description disponible."}
-              </p>
-
-              <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <h3 className="text-white/70 text-xs uppercase tracking-wide font-one mb-2">
-                    Prestations
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {prestationsVisibles.length > 0 ? (
-                      <>
-                        {prestationsVisibles.map((p, idx) => (
-                          <span
-                            key={`${p}-${idx}`}
-                            className="px-3 py-1 rounded-2xl bg-linear-to-br from-noir-500/8 to-noir-700/2 text-white/80 border border-white/10 text-xs font-one backdrop-blur-sm"
-                            title={p}
-                          >
-                            {p}
-                          </span>
-                        ))}
-                        {prestationsRestantes > 0 && (
-                          <span className="px-3 py-1 rounded-2xl bg-linear-to-br from-noir-500/8 to-noir-700/2 text-white/80 border border-white/10 text-xs font-one backdrop-blur-sm">
-                            +{prestationsRestantes}
-                          </span>
-                        )}
-                      </>
-                    ) : (
-                      <span className="text-white/50 text-xs font-one">
-                        Aucune prestation renseignée
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="text-white/70 text-xs uppercase tracking-wide font-one mb-2">
-                    Styles
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {styles.length > 0 ? (
-                      styles.map((style, idx) => (
-                        <span
-                          key={`${style}-${idx}`}
-                          className="px-3 py-1 rounded-2xl bg-linear-to-br from-tertiary-500/15 to-tertiary-400/10 text-white/85 border border-tertiary-400/25 text-xs font-one"
-                        >
-                          {style}
-                        </span>
-                      ))
-                    ) : (
-                      <span className="text-white/50 text-xs font-one">
-                        Aucun style renseigné
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-          
+          <div className="order-1 min-w-0 space-y-8">
+            <DesktopSalonHeader
+              salonId={salon.id}
+              name={salon.salonName}
+              cover={heroSrc}
+              portrait={profileSrc}
+              city={salon.city}
+              postalCode={salon.postalCode}
+              verified={isVerifiedSalon}
+              artist={isTatoueurRole}
+              hasHours={hours.length > 0}
+              open={openNow.open}
+              today={openNow.today}
+            />
+            <SalonSectionNav showTeam={shouldShowTeamSection && sortedTatoueurs.length > 0} className="hidden lg:flex" />
+            <SalonPresentation description={salon.description} prestations={prestations} styles={styles} />
 
             {/* Tabs : Photos → Portfolio → Produits */}
             <SalonTabs
@@ -1097,10 +600,10 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
 
             {/* Équipe */}
             {shouldShowTeamSection && sortedTatoueurs.length > 0 && (
-              <section className="">
+              <section id="equipe" className="scroll-mt-28">
                 <div className="flex items-center justify-between mb-5">
-                  <h3 className="text-white/95 font-one text-md tracking-wider uppercase">
-                    L&apos;équipe
+                  <h3 className="text-white/95 font-one text-xl">
+                    Les artistes du salon
                   </h3>
                   <span className="text-white/60 font-one text-sm">
                     {sortedTatoueurs.length}{" "}
@@ -1109,7 +612,7 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
                 </div>
 
                 <div
-                  className={`grid grid-cols-1 gap-5 ${
+                  className={`grid grid-cols-1 gap-4 ${
                     sortedTatoueurs.length > 1
                       ? "sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2"
                       : ""
@@ -1162,12 +665,14 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
             )}
 
             {/* Avis */}
-            <SalonReviews salonId={salon.id} salonName={salon.salonName} />
+            <section id="avis" className="scroll-mt-28"><SalonReviews salonId={salon.id} salonName={salon.salonName} /></section>
 
+            <section id="contact" className="scroll-mt-28">
             <PublicProfileContactForm
               targetUserId={salon.id}
               recipientName={salon.salonName || "ce profil"}
             />
+            </section>
           </div>
         </div>
       </section>

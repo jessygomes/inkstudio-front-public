@@ -1,127 +1,33 @@
-export default function LoadingSalonProfile() {
+﻿export default function LoadingSalonProfile() {
   return (
-    <div className="min-h-screen bg-noir-700 sm:px-8 lg:px-20 pt-24">
-      <section className="relative z-10 px-4 py-10 md:-mt-10">
-        {/* HERO mobile */}
-        <div className="mx-auto sm:hidden mb-4">
-          <div className="relative overflow-hidden rounded-xl border border-white/10 shadow-[0_10px_40px_rgba(0,0,0,0.35)]">
-            <div className="relative h-[300px] bg-white/5 animate-pulse" />
+    <div role="status" aria-label="Chargement du profil salon" className="min-h-screen bg-noir-700 px-4 py-10 sm:px-6 lg:px-8 xl:px-16">
+      <span className="sr-only">Chargement du profil salon…</span>
+      <div aria-hidden="true" className="mx-auto max-w-7xl lg:max-w-none motion-safe:animate-pulse">
+        <div className="mb-6 h-5 w-32 rounded bg-white/10" />
+        <div className="overflow-hidden rounded-3xl border border-white/10 bg-noir-500 lg:hidden">
+          <div className="h-48 bg-white/5 sm:h-64 lg:h-80" />
+          <div className="px-6 pb-8">
+            <div className="relative -mt-12 mb-5 h-24 w-24 rounded-2xl border-4 border-noir-500 bg-white/10" />
+            <div className="h-9 w-2/3 rounded bg-white/10" />
+            <div className="mt-4 h-4 w-1/3 rounded bg-white/5" />
           </div>
         </div>
-
-        <div className="mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Aside (sticky) */}
-          <aside className="space-y-4 md:order-2 md:sticky md:top-24 h-fit">
-            <div className="rounded-xl border border-white/10 bg-white/[0.06] p-5 backdrop-blur shadow-[0_6px_24px_rgba(0,0,0,0.25)]">
-              <div className="h-3 w-28 bg-white/10 rounded mb-4 animate-pulse" />
-
-              <ul className="space-y-3">
-                {[1, 2, 3].map((i) => (
-                  <li key={i} className="flex items-center gap-3">
-                    <span className="h-2 w-2 rounded-full bg-tertiary-400/60 mt-1" />
-                    <div className="h-3 w-48 bg-white/10 rounded animate-pulse" />
-                  </li>
-                ))}
-              </ul>
-
-              <div className="mt-5">
-                <div className="h-3 w-16 bg-white/10 rounded mb-3 animate-pulse" />
-                <div className="flex gap-2">
-                  {[1, 2, 3, 4].map((i) => (
-                    <div
-                      key={i}
-                      className="h-7 w-10 rounded-lg border border-white/10 bg-white/10 animate-pulse"
-                    />
-                  ))}
-                </div>
-              </div>
-
-              <div className="mt-4 flex gap-2">
-                <div className="h-9 flex-1 rounded-xl bg-gradient-to-r from-tertiary-400/40 to-tertiary-500/40 animate-pulse" />
-                <div className="h-9 flex-1 rounded-xl bg-white/10 border border-white/20 animate-pulse" />
-              </div>
-            </div>
-
-            {/* Horaires */}
-            <div className="rounded-xl border border-white/10 bg-white/[0.06] p-5 backdrop-blur">
-              <div className="h-3 w-20 bg-white/10 rounded mb-4 animate-pulse" />
-              <ul className="space-y-1.5">
-                {[...Array(7)].map((_, i) => (
-                  <li
-                    key={i}
-                    className="flex items-center justify-between text-sm rounded-xl px-4 py-2"
-                  >
-                    <div className="h-3 w-24 bg-white/10 rounded animate-pulse" />
-                    <div className="h-3 w-28 bg-white/10 rounded animate-pulse" />
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </aside>
-
-          {/* Col principale */}
-          <div className="md:col-span-2 space-y-6 md:order-1">
-            {/* HERO desktop */}
-            <div className="mx-auto hidden sm:block">
-              <div className="relative overflow-hidden rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.35)]">
-                <div className="relative h-[300px] md:h-[420px] bg-white/5 animate-pulse" />
-              </div>
-            </div>
-
-            {/* Présentation */}
-            <div className="rounded-xl border border-white/10 bg-white/[0.06] p-5">
-              <div className="flex items-center justify-between mb-3">
-                <div className="h-3 w-24 bg-white/10 rounded animate-pulse" />
-                <div className="flex gap-2">
-                  {[...Array(4)].map((_, i) => (
-                    <div
-                      key={i}
-                      className="h-6 w-16 bg-white/10 rounded animate-pulse"
-                    />
-                  ))}
-                </div>
-              </div>
-              <div className="space-y-2">
-                {[...Array(4)].map((_, i) => (
-                  <div
-                    key={i}
-                    className="h-3 bg-white/10 rounded animate-pulse"
-                  />
-                ))}
-              </div>
-            </div>
-
-            {/* Tabs (Photos / Portfolio / Produits) */}
-            <div className="rounded-xl border border-white/10 bg-white/[0.06] p-5">
-              <div className="h-8 w-56 bg-white/10 rounded mb-4 animate-pulse" />
-              <ul className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                {[...Array(6)].map((_, i) => (
-                  <li
-                    key={i}
-                    className="h-28 rounded-lg bg-white/10 animate-pulse"
-                  />
-                ))}
-              </ul>
-            </div>
-
-            {/* Équipe */}
-            <div className="rounded-xl border border-white/10 bg-white/[0.06] p-5">
-              <div className="flex items-center justify-between mb-4">
-                <div className="h-3 w-20 bg-white/10 rounded animate-pulse" />
-                <div className="h-3 w-16 bg-white/10 rounded animate-pulse" />
-              </div>
-              <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {[...Array(3)].map((_, i) => (
-                  <li
-                    key={i}
-                    className="rounded-xl border border-white/10 bg-white/10 h-28 animate-pulse"
-                  />
-                ))}
-              </ul>
+        <div className="my-6 h-12 rounded-xl bg-white/5 lg:hidden" />
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)] xl:gap-8">
+          <div className="space-y-6">
+            <div className="hidden min-h-96 rounded-3xl border border-white/10 bg-noir-500 lg:block xl:min-h-[440px]" />
+            <div className="hidden h-12 rounded-xl bg-white/5 lg:block" />
+            <div className="h-56 rounded-2xl border border-white/10 bg-noir-500" />
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+              {[0, 1, 2].map((i) => <div key={i} className="aspect-4/3 rounded-xl bg-white/5" />)}
             </div>
           </div>
+          <div className="space-y-4">
+            <div className="h-44 rounded-2xl border border-white/10 bg-noir-500" />
+            <div className="h-64 rounded-2xl border border-white/10 bg-noir-500" />
+          </div>
         </div>
-      </section>
+      </div>
     </div>
   );
 }

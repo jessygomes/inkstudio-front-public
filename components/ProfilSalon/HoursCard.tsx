@@ -16,10 +16,10 @@ export default function HoursCard({ hours, todayFR, openNow }: HoursCardProps) {
   if (hours.length === 0) return null;
 
   return (
-    <div className="rounded-3xl border border-white/10 bg-noir-700/90 p-3 sm:p-4 backdrop-blur-md shadow-xl">
+    <div className="rounded-2xl border border-white/10 bg-noir-500 p-6">
       {/* Header avec bouton d'expansion */}
       <div className="flex items-center justify-between mb-2">
-        <h3 className="text-white/90 font-one text-xs tracking-widest uppercase flex items-center gap-1">
+        <h3 className="text-white/90 font-one text-base flex items-center gap-1">
           <svg
             className="w-3.5 h-3.5 opacity-80"
             fill="none"
@@ -38,7 +38,8 @@ export default function HoursCard({ hours, todayFR, openNow }: HoursCardProps) {
         {/* Bouton d'expansion (mobile et tablette) */}
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="lg:hidden flex items-center justify-center w-7 h-7 rounded-2xl bg-white/10 hover:bg-white/20 text-white/70 hover:text-white transition-all"
+          className="lg:hidden flex items-center justify-center w-11 h-11 rounded-2xl bg-white/10 hover:bg-white/20 text-white/70 hover:text-white transition-all"
+          aria-expanded={isExpanded}
           aria-label={isExpanded ? "Réduire" : "Développer"}
         >
           <svg
@@ -63,7 +64,7 @@ export default function HoursCard({ hours, todayFR, openNow }: HoursCardProps) {
       {openNow.today && (
         <div className="mb-1 flex items-center gap-2 bg-noir-500 rounded-2xl">
           <span className="w-full inline-flex items-center justify-between gap-3 px-4 py-1 text-sm font-one text-white/90 ">
-            <span className="font-semibold tracking-widest">Aujourd'hui</span>
+            <span className="font-medium">Aujourd&apos;hui</span>
             <span className="text-white/70 font-one">{openNow.today.start}–{openNow.today.end}</span>
           </span>
         </div>
@@ -77,15 +78,15 @@ export default function HoursCard({ hours, todayFR, openNow }: HoursCardProps) {
           return (
             <div
               key={h.day}
-              className={`flex items-center justify-between py-1 px-2 rounded-xl transition-all duration-200 ${isToday ? "border border-tertiary-400/15 bg-tertiary-400/5" : ""}`}
+              className={`flex items-center justify-between py-2.5 px-2 rounded-xl transition-all duration-200 ${isToday ? "border border-tertiary-400/15 bg-tertiary-400/5" : ""}`}
             >
-              <span className={`font-one text-xs ${isToday ? "text-white" : "text-white/70"}`}>
+              <span className={`font-one text-sm ${isToday ? "text-white" : "text-white/70"}`}>
                 {h.day}
                 {isToday && (
-                  <span className="ml-1 text-[11px] text-tertiary-200">(Aujourd'hui)</span>
+                  <span className="ml-1 text-[11px] text-white/65">(Aujourd&apos;hui)</span>
                 )}
               </span>
-              <span className={`font-one text-xs ${isToday ? "text-white" : "text-white/80"}`}>{h.value}</span>
+              <span className={`font-one text-sm ${isToday ? "text-white" : "text-white/80"}`}>{h.value}</span>
             </div>
           );
         })}
