@@ -42,6 +42,8 @@ export default function MessageInput({
   });
 
   const handleFileSelect = (file: File) => {
+    if (disabled || sendingMessage || isUploading) return;
+
     // Vérifier que c'est une image
     if (!file.type.startsWith("image/")) {
       setCompressionError("Veuillez sélectionner une image valide");
@@ -147,7 +149,14 @@ export default function MessageInput({
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!messageInput.trim() && !selectedFile) return;
+    if (
+      disabled ||
+      sendingMessage ||
+      isUploading ||
+      (!messageInput.trim() && !selectedFile)
+    ) {
+      return;
+    }
 
     setSendingMessage(true);
     try {
@@ -158,18 +167,18 @@ export default function MessageInput({
         setUploadProgress(0);
         const uploadRes = await startUpload([selectedFile]);
 
-        if (uploadRes && uploadRes[0]) {
-          attachments = [
-            {
-              id: crypto.randomUUID(),
-              fileName: selectedFile.name,
-              fileUrl: uploadRes[0].url,
-              fileType: selectedFile.type,
-              fileSize: selectedFile.size,
-              uploadThingKey: uploadRes[0].key,
-            },
-          ];
-        }
+        if (!uploadRes?.[0]) throw new Error("Image non envoyée");
+
+        attachments = [
+          {
+            id: crypto.randomUUID(),
+            fileName: selectedFile.name,
+            fileUrl: uploadRes[0].url,
+            fileType: selectedFile.type,
+            fileSize: selectedFile.size,
+            uploadThingKey: uploadRes[0].key,
+          },
+        ];
       }
 
       // Envoyer le message avec les attachements
@@ -180,6 +189,7 @@ export default function MessageInput({
       removeImage();
     } catch (error) {
       console.error("Erreur lors de l'envoi du message:", error);
+      setCompressionError("Le message n'a pas pu être envoyé. Veuillez réessayer.");
     } finally {
       setSendingMessage(false);
       setUploadProgress(0);
@@ -191,11 +201,12 @@ export default function MessageInput({
       <form onSubmit={handleSendMessage} className="flex flex-col gap-2">
         {/* Aperçu de l'image ou message d'erreur */}
         {preview && !compressionError && (
-          <div className="relative w-20 h-20 rounded-2xl overflow-hidden bg-noir-700">
+          <div className="relative h-20 w-20 overflow-hidden rounded-lg border border-white/10 bg-noir-700">
             <Image src={preview} alt="Aperçu" fill className="object-cover" />
             <button
               type="button"
               onClick={removeImage}
+              aria-label="Retirer l'image"
               disabled={disabled || sendingMessage || isUploading}
               className="cursor-pointer absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs"
             >
@@ -228,6 +239,7 @@ export default function MessageInput({
             <button
               type="button"
               onClick={() => setCompressionError(null)}
+              aria-label="Fermer l'erreur"
               className="text-red-400 hover:text-red-300 shrink-0"
             >
               <MdClose className="w-4 h-4" />
@@ -247,7 +259,7 @@ export default function MessageInput({
 
         {/* Zone input */}
         <div
-          className="flex gap-2"
+          className="flex items-end gap-2 rounded-2xl border border-white/10 bg-noir-700/50 p-2 transition-colors focus-within:border-tertiary-400/50"
           onDragOver={handleDragOver}
           onDrop={handleDrop}
         >
@@ -256,7 +268,7 @@ export default function MessageInput({
             type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={disabled || sendingMessage || isUploading}
-            className="cursor-pointer bg-noir-700 border border-white/20 hover:border-tertiary-400 text-tertiary-500 hover:text-tertiary-300 px-2 py-1.5 rounded-xl transition-colors flex items-center justify-center text-xs shrink-0"
+            className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-white/20 bg-noir-700 text-xs text-tertiary-500 transition-colors hover:border-tertiary-400 hover:text-tertiary-300 disabled:cursor-not-allowed disabled:opacity-50"
             title="Ajouter une image"
           >
             <MdImage className="w-4 h-4" />
@@ -273,17 +285,32 @@ export default function MessageInput({
           />
 
           {/* Input texte */}
-          <input
-            type="text"
+          <textarea
+            rows={2}
+            aria-label="Votre message"
             value={messageInput}
+            onKeyDown={(event) => {
+              if (
+                event.key === "Enter" &&
+                !event.shiftKey &&
+                !event.nativeEvent.isComposing
+              ) {
+                event.preventDefault();
+                event.currentTarget.form?.requestSubmit();
+              }
+            }}
             onChange={(e) => {
               setMessageInput(e.target.value);
               onInputChange?.(e.target.value);
             }}
             placeholder={
-              preview ? "Votre message avec l'image..." : "Message..."
+              disabled
+                ? "En attente de connexion..."
+                : preview
+                ? "Accompagnez votre image..."
+                : "Ecrivez votre message..."
             }
-            className="flex-1 bg-noir-700 border border-white/20 rounded-2xl px-3 py-1.5 text-white placeholder-white/50 focus:outline-none focus:border-tertiary-400/50 transition-colors text-xs"
+            className="min-w-0 flex-1 resize-none bg-transparent px-2 py-2 text-sm leading-relaxed text-white placeholder-white/45 focus:outline-none disabled:opacity-50"
             disabled={disabled || sendingMessage || isUploading}
           />
 
@@ -296,7 +323,7 @@ export default function MessageInput({
               isUploading ||
               (!messageInput.trim() && !selectedFile)
             }
-            className="cursor-pointer bg-tertiary-500 hover:bg-tertiary-600 disabled:bg-tertiary-500/50 text-white px-3 py-1.5 rounded-2xl font-semibold transition-colors flex items-center gap-1 text-xs shrink-0"
+            className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-xl bg-tertiary-500 text-xs font-semibold text-white transition-colors hover:bg-tertiary-600 disabled:cursor-not-allowed disabled:bg-tertiary-500/50"
           >
             {sendingMessage || isUploading ? (
               <div className="w-3 h-3 border-2 border-white/50 rounded-full animate-spin border-t-white"></div>

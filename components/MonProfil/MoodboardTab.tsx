@@ -411,6 +411,7 @@ export default function MoodboardTab() {
     <div className="space-y-4">
       {selectedMoodboard ? (
         <MoodboardSelectedPanel
+          key={selectedMoodboard.id}
           selectedMoodboard={selectedMoodboard}
           editName={editName}
           editDescription={editDescription}
@@ -427,7 +428,7 @@ export default function MoodboardTab() {
           onDeleteImage={handleDeleteImage}
         />
       ) : (
-        <div className="rounded-3xl border border-white/10 bg-linear-to-br from-noir-700/6 to-noir-700 p-4 shadow-xl backdrop-blur-lg sm:p-6">
+        <div className="font-one">
           <div className="mb-5 flex items-center justify-between border-b border-white/10 pb-4">
             <div>
               <h3 className="font-one text-lg font-semibold text-white sm:text-xl">
@@ -442,32 +443,38 @@ export default function MoodboardTab() {
             </div>
           </div>
 
+          <details open={moodboards.length === 0} className="mb-5 rounded-xl border border-white/10 bg-noir-500"><summary className="flex min-h-12 cursor-pointer items-center gap-2 px-4 text-sm text-white/80"><FaPlus size={12} className="text-tertiary-400" />Créer un moodboard</summary>
           <form
             onSubmit={handleCreateMoodboard}
-            className="mb-6 grid grid-cols-1 gap-2 border-b border-white/10 pb-5 lg:grid-cols-[1fr_1fr_auto] font-one"
+            className="grid grid-cols-1 items-end gap-3 border-t border-white/10 p-4 lg:grid-cols-[1fr_1fr_auto] font-one"
           >
-            <input
+            <label className="text-xs text-white/60">Nom du moodboard<input
+              required
+              disabled={creating}
               type="text"
               value={createName}
               onChange={(e) => setCreateName(e.target.value)}
               placeholder="Nom du moodboard"
-              className="rounded-2xl border border-white/15 bg-white/5 px-3 py-1 text-sm text-white outline-none placeholder:text-white/35 focus:border-tertiary-400/40"
-            />
-            <input
+              className="mt-2 min-h-11 w-full rounded-xl border border-white/15 bg-noir-700 px-3 py-2 text-sm text-white outline-none placeholder:text-white/35 focus:border-tertiary-400/40"
+            /></label>
+            <label className="text-xs text-white/60">Description (facultative)<input
+              disabled={creating}
               type="text"
               value={createDescription}
               onChange={(e) => setCreateDescription(e.target.value)}
               placeholder="Description (optionnelle)"
-              className="rounded-2xl border border-white/15 bg-white/5 px-3 py-1 text-sm text-white outline-none placeholder:text-white/35 focus:border-tertiary-400/40"
-            />
+              className="mt-2 min-h-11 w-full rounded-xl border border-white/15 bg-noir-700 px-3 py-2 text-sm text-white outline-none placeholder:text-white/35 focus:border-tertiary-400/40"
+            /></label>
             <AppButton
               disabled={creating}
               icon={<FaPlus className="h-2 w-2" />}
-              className="text-xs cursor-pointer"
+              type="submit"
+              className="min-h-11 text-xs cursor-pointer"
             >
               {creating ? "Création..." : "Créer"}
             </AppButton>
           </form>
+          </details>
 
           {moodboards.length === 0 ? (
             <div className="rounded-2xl border border-white/10 bg-white/5 py-10 text-center">
@@ -476,7 +483,7 @@ export default function MoodboardTab() {
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
               {moodboards.map((moodboard) => (
                 <MoodboardCard
                   key={moodboard.id}

@@ -36,6 +36,11 @@ const STATUS_CONFIG = {
     dot: "bg-red-400",
     pill: "bg-red-500/12 text-red-300 border-red-400/25",
   },
+  CANCELED: {
+    label: "Annulé",
+    dot: "bg-red-400",
+    pill: "bg-red-500/12 text-red-300 border-red-400/25",
+  },
   RESCHEDULING: {
     label: "Reprogrammation",
     dot: "bg-blue-400 animate-pulse",
@@ -136,11 +141,13 @@ export default function ConversationRDVDetails({
   const clientImage = (conversation.client as { image?: string | null }).image;
 
   return (
-    <div className="h-full flex flex-col border border-white/15 bg-linear-to-b from-noir-700/95 via-noir-700/90 to-noir-800/95 shadow-2xl sm:rounded-2xl">
-      <div className="rounded-t-2xl border-b border-white/10 bg-linear-to-r from-noir-700/85 to-noir-600/70 px-4 pb-3 pt-4">
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex min-w-0 items-start gap-3">
-            <div className="relative shrink-0">
+    <div className="flex h-full min-h-0 flex-col overflow-hidden border border-white/15 bg-linear-to-b from-noir-700/95 via-noir-700/90 to-noir-800/95 shadow-2xl sm:rounded-3xl">
+      <div className="shrink-0 border-b border-white/10 bg-linear-to-r from-noir-700/85 to-noir-600/70 px-5 py-5 sm:rounded-t-3xl">
+        <h2 className="mb-4 text-xs font-semibold uppercase tracking-widest text-white/60 font-one">
+          Votre rendez-vous
+        </h2>
+        <div className="flex items-start gap-3">
+          <div className="relative shrink-0">
               {clientImage ? (
                 <div className="relative h-11 w-11 overflow-hidden rounded-2xl ring-1 ring-white/15">
                   <Image
@@ -161,47 +168,58 @@ export default function ConversationRDVDetails({
               <span
                 className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-noir-700 ${statusCfg.dot}`}
               />
-            </div>
+          </div>
 
-            <div className="min-w-0 flex-1">
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center justify-between gap-2">
               <h4 className="truncate text-base font-bold leading-tight text-white font-one">
                 {conversation.client.firstName} {conversation.client.lastName}
               </h4>
-              <p className="mt-0.5 truncate text-xs text-white/65 font-one">
-                {conversation.subject}
-              </p>
+              <span
+                className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-medium font-one ${statusCfg.pill}`}
+              >
+                <span className={`h-1.5 w-1.5 rounded-full ${statusCfg.dot}`} />
+                {statusCfg.label}
+              </span>
             </div>
+            <p className="mt-0.5 truncate text-xs text-white/65 font-one">
+              {conversation.subject}
+            </p>
           </div>
-
-          <span
-            className={`mt-0.5 inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-medium font-one ${statusCfg.pill}`}
-          >
-            <span className={`h-1.5 w-1.5 rounded-full ${statusCfg.dot}`} />
-            {statusCfg.label}
-          </span>
         </div>
       </div>
 
-      <div className="flex-1 space-y-3 overflow-y-auto px-3 py-3 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
-        <section className="rounded-3xl border border-white/10 bg-linear-to-b from-white/4 to-white/2 p-3">
-          <p className="mb-2.5 text-[9px] uppercase tracking-[0.14em] text-white/35 font-one">
-            Rendez-vous
-          </p>
+      <div className="flex-1 space-y-3 overflow-y-auto overscroll-contain px-3 py-3 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
+        <section className="overflow-hidden rounded-2xl border border-white/10 bg-linear-to-b from-white/4 to-white/2 p-3">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <div>
+              <p className="text-[9px] uppercase tracking-[0.14em] text-tertiary-400/80 font-one">
+                Rendez-vous
+              </p>
+              <p className="mt-1 text-[11px] text-white/40 font-one">
+                Planning et prestation
+              </p>
+            </div>
+            <span className="rounded-full border border-white/10 bg-white/5 px-2 py-1 text-[9px] text-white/45 font-one">
+              {appointment.prestation}
+            </span>
+          </div>
 
           <div className="grid grid-cols-2 gap-2">
-            <div className="flex items-center gap-2.5 rounded-xl border border-white/10 bg-white/4 px-2.5 py-2">
+            <div className="col-span-2 flex items-center gap-3 rounded-2xl border border-white/10 bg-linear-to-l from-noir-500 to-noir-700 px-3 py-2.5">
               <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl border border-blue-400/15 bg-blue-500/12">
                 <svg className="h-3.5 w-3.5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
               </div>
               <div className="min-w-0">
-                <p className="text-[9px] uppercase tracking-wider text-white/35 font-one">Date</p>
-                <p className="capitalize text-xs text-white font-one">{startDate}</p>
+                <p className="text-[9px] uppercase tracking-wider text-blue-200/55 font-one">Date et heure</p>
+                <p className="capitalize text-sm font-semibold text-white font-one">{startDate}</p>
+                <p className="text-[11px] text-white/55 font-one tabular-nums">{startTime} - {endTime}</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-2.5 rounded-xl border border-white/10 bg-white/4 px-2.5 py-2">
+            <div className="hidden">
               <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl border border-blue-400/15 bg-blue-500/12">
                 <svg className="h-3.5 w-3.5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -213,7 +231,7 @@ export default function ConversationRDVDetails({
               </div>
             </div>
 
-            <div className="flex items-center gap-2.5 rounded-xl border border-white/10 bg-white/4 px-2.5 py-2">
+            <div className="flex items-center gap-2.5 rounded-2xl border border-white/10 bg-linear-to-l from-noir-500 to-noir-700 px-2.5 py-2">
               <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl border border-purple-400/15 bg-purple-500/12">
                 <svg className="h-3.5 w-3.5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -225,7 +243,7 @@ export default function ConversationRDVDetails({
               </div>
             </div>
 
-            <div className="flex items-center gap-2.5 rounded-xl border border-white/10 bg-white/4 px-2.5 py-2">
+            <div className="flex items-center gap-2.5 rounded-2xl border border-white/10 bg-linear-to-l from-noir-500 to-noir-700 px-2.5 py-2">
               <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl border border-emerald-400/15 bg-emerald-500/12">
                 <svg className="h-3.5 w-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
@@ -238,7 +256,7 @@ export default function ConversationRDVDetails({
             </div>
 
             {appointment.tatoueur && (
-              <div className="col-span-2 flex items-center gap-2.5 rounded-xl border border-white/10 bg-white/4 px-2.5 py-2">
+              <div className="col-span-2 flex items-center gap-2.5 rounded-2xl border border-tertiary-400/15 bg-tertiary-500/[0.06] px-2.5 py-2">
                 <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl border border-tertiary-400/15 bg-tertiary-500/12">
                   <svg className="h-3.5 w-3.5 text-tertiary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />

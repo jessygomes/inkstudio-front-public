@@ -28,41 +28,59 @@ export default function MessageBubbles({
 
   return (
     <>
-      {messages.map((message) => {
+      {messages.map((message, index) => {
         const isOwnMessage = message.sender.id === currentUserId;
         const sender = message.sender;
 
         return (
-          <div
-            key={message.id}
-            className={`flex gap-2 group ${
-              isOwnMessage ? "justify-end" : "justify-start"
-            }`}
-          >
+          <React.Fragment key={message.id}>
+            {(index === 0 ||
+              new Date(messages[index - 1].createdAt).toDateString() !==
+                new Date(message.createdAt).toDateString()) && (
+              <div className="my-6 flex items-center gap-3">
+                <span className="h-px flex-1 bg-white/10" />
+                <time
+                  className="text-[11px] text-white/50 font-one"
+                  dateTime={message.createdAt}
+                >
+                  {new Date(message.createdAt).toLocaleDateString("fr-FR", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })}
+                </time>
+                <span className="h-px flex-1 bg-white/10" />
+              </div>
+            )}
+            <div
+              className={`group mb-5 flex gap-2 ${
+                isOwnMessage ? "justify-end" : "justify-start"
+              }`}
+            >
             {!isOwnMessage && (
               <Image
                 src={sender?.image || "/images/default-avatar.png"}
                 width={28}
                 height={28}
                 alt={sender?.firstName || "User"}
-                className="w-7 h-7 rounded-full object-cover shrink-0 border border-tertiary-400/20"
+                className="h-7 w-7 shrink-0 rounded-full border border-tertiary-400/20 object-cover"
               />
             )}
 
             <div
               className={`flex flex-col ${
                 isOwnMessage ? "items-end" : "items-start"
-              } max-w-xs`}
+              } min-w-0 max-w-[85%] sm:max-w-[78%]`}
             >
               <div className="flex items-start gap-1">
                 <div
-                  className={`px-3 py-2 rounded-2xl text-xs ${
+                  className={`min-w-0 rounded-2xl border px-4 py-3 text-[13px] ${
                     isOwnMessage
-                      ? "bg-linear-to-l from-secondary-500/80 to-secondary-600/80 text-white/90 rounded-br-none"
-                      : "bg-linear-to-l from-tertiary-400/80 to-tertiary-500/80 text-white rounded-bl-none"
+                      ? "rounded-br-md border-tertiary-400/25 bg-tertiary-500/25 text-white"
+                      : "rounded-bl-md border-white/10 bg-white/5 text-white/90"
                   }`}
                 >
-                  <p className="wrap-break-word font-one leading-tight">
+                  <p className="whitespace-pre-wrap break-words font-one leading-relaxed [overflow-wrap:anywhere]">
                     {message.content}
                   </p>
 
@@ -84,7 +102,7 @@ export default function MessageBubbles({
                               alt={attachment.fileName}
                               width={200}
                               height={200}
-                              className="w-full h-auto max-w-45 rounded"
+                              className="h-auto w-full max-w-[180px] rounded"
                             />
                           </a>
                         ))}
@@ -128,7 +146,7 @@ export default function MessageBubbles({
                 />
               </div>
 
-              <span className="text-[10px] text-white/40 mt-0.5 px-1">
+              <span className="mt-1.5 px-1 text-[11px] text-white/50 font-one">
                 {new Date(message.createdAt).toLocaleTimeString("fr-FR", {
                   hour: "2-digit",
                   minute: "2-digit",
@@ -148,10 +166,11 @@ export default function MessageBubbles({
                 width={28}
                 height={28}
                 alt={sender?.firstName || "You"}
-                className="w-7 h-7 rounded-full object-cover shrink-0 border border-tertiary-400/20"
+                className="h-7 w-7 shrink-0 rounded-full border border-tertiary-400/20 object-cover"
               />
             )}
-          </div>
+            </div>
+          </React.Fragment>
         );
       })}
     </>

@@ -1,116 +1,64 @@
-/* eslint-disable react/no-unescaped-entities */
-"use client";
+﻿import type { User } from "@/lib/type";
+import { Contact, Pencil, UserRound } from "lucide-react";
+import AppButton from "@/components/Shared/AppButton";
 
-import { User } from "@/lib/type";
-import React from "react";
-import {
-  FaEnvelope,
-  FaPhone,
-  FaBirthdayCake,
-  FaMapMarkerAlt,
-  FaUser,
-} from "react-icons/fa";
+type Props = { user: User };
 
-type Props = {
-  user: User;
-};
+function InfoRow({ label, value }: { label: string; value?: string | null }) {
+  const display = value?.trim();
+  return (
+    <div className="grid grid-cols-[minmax(0,2fr)_minmax(0,3fr)] items-baseline gap-3 py-2.5">
+      <dt className="text-xs leading-5 text-white/50">{label}</dt>
+      <dd className={`min-w-0 break-words text-sm leading-5 ${display ? "text-white/85" : "text-white/35"}`}>
+        {display || "Non renseigné"}
+      </dd>
+    </div>
+  );
+}
 
 export default function InfosTab({ user }: Props) {
-  const infoItems = [
-    {
-      label: "Pseudo",
-      value: user.clientProfile?.pseudo || "Non renseigné",
-      icon: <FaUser className="h-3 w-3 text-tertiary-400" />,
-      iconClassName: "bg-tertiary-500/15",
-    },
-    {
-      label: "Prénom",
-      value: user.firstName || "Non renseigné",
-      icon: <FaUser className="h-3 w-3 text-white/70" />,
-      iconClassName: "bg-white/10",
-    },
-    {
-      label: "Nom",
-      value: user.lastName || "Non renseigné",
-      icon: <FaUser className="h-3 w-3 text-white/70" />,
-      iconClassName: "bg-white/10",
-    },
-    {
-      label: "Email",
-      value: user.email || "Non renseigné",
-      icon: <FaEnvelope className="h-3 w-3 text-emerald-400" />,
-      iconClassName: "bg-emerald-500/15",
-    },
-    {
-      label: "Téléphone",
-      value: user.phone || "Non renseigné",
-      icon: <FaPhone className="h-3 w-3 text-amber-400" />,
-      iconClassName: "bg-amber-500/15",
-    },
-    {
-      label: "Date de naissance",
-      value: user.clientProfile?.birthDate
-        ? new Date(user.clientProfile.birthDate).toLocaleDateString("fr-FR", {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          })
-        : "Non renseignée",
-      icon: <FaBirthdayCake className="h-3 w-3 text-pink-400" />,
-      iconClassName: "bg-pink-500/15",
-    },
-    {
-      label: "Ville",
-      value: user.clientProfile?.city || "Non renseignée",
-      icon: <FaMapMarkerAlt className="h-3 w-3 text-purple-400" />,
-      iconClassName: "bg-purple-500/15",
-    },
-    {
-      label: "Code postal",
-      value: user.clientProfile?.postalCode || "Non renseigné",
-      icon: <FaMapMarkerAlt className="h-3 w-3 text-white/70" />,
-      iconClassName: "bg-white/10",
-    },
+  const rawBirthDate = user.clientProfile?.birthDate;
+  const birthDate = rawBirthDate && !Number.isNaN(Date.parse(rawBirthDate))
+    ? new Date(rawBirthDate).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" })
+    : null;
+  const identity = [
+    { label: "Pseudo", value: user.clientProfile?.pseudo },
+    { label: "Prénom", value: user.firstName },
+    { label: "Nom", value: user.lastName },
+    { label: "Date de naissance", value: birthDate },
+  ];
+  const contact = [
+    { label: "Email", value: user.email },
+    { label: "Téléphone", value: user.phone },
+    { label: "Ville", value: user.clientProfile?.city },
+    { label: "Code postal", value: user.clientProfile?.postalCode },
   ];
 
   return (
-    <div className="rounded-3xl border border-white/10 bg-linear-to-br from-noir-500/6 to-white/3 p-4 shadow-xl backdrop-blur-lg sm:p-5">
-      <div className="mb-5 flex items-center justify-between border-b border-white/10 pb-4">
+    <div className="space-y-4 font-one">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h3 className="mb-1 text-lg font-semibold text-white font-one sm:text-xl">
-            Mes informations
-          </h3>
-          <p className="text-white/60 font-one text-xs">
-            Profil et coordonnées
-          </p>
+          <h3 className="text-xl text-white">Mes informations</h3>
+          <p className="mt-1 text-xs text-white/50">Votre identité et vos coordonnées en un coup d’œil.</p>
         </div>
-        <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-tertiary-500/15 border border-tertiary-500/25">
-          <FaUser className="h-4 w-4 text-tertiary-400" />
-        </div>
+        <AppButton href="/mon-profil/modifier" variant="secondary" icon={<Pencil size={14} aria-hidden="true" />} className="min-h-11 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary-400">
+          Modifier
+        </AppButton>
       </div>
-
-      <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 xl:grid-cols-3">
-        {infoItems.map((item) => (
-          <div
-            key={item.label}
-            className="group rounded-2xl border border-white/10 bg-white/4 px-3.5 py-3 transition-all duration-300 hover:border-white/20 hover:bg-white/6"
-          >
-            <div className="flex items-start gap-3">
-              <div
-                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-white/10 ${item.iconClassName}`}
-              >
-                {item.icon}
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-[10px] uppercase tracking-[0.18em] text-white/45 font-one">
-                  {item.label}
-                </p>
-                <p className="mt-1 line-clamp-2 wrap-break-word text-sm text-white font-one">
-                  {item.value}
-                </p>
-              </div>
+      <div className="grid gap-3 lg:grid-cols-2">
+        {[
+          { title: "Mon identité", Icon: UserRound, items: identity },
+          { title: "Mes coordonnées", Icon: Contact, items: contact },
+        ].map(({ title, Icon, items }) => (
+          <section key={title} aria-label={title} className="min-w-0 rounded-2xl border border-white/10 bg-noir-500 px-4 py-3 sm:px-5">
+            <div className="mb-1 flex items-center gap-2 border-b border-white/8 pb-3">
+              <span className="grid h-7 w-7 place-items-center rounded-lg bg-tertiary-400/10 text-tertiary-400"><Icon size={15} aria-hidden="true" /></span>
+              <h4 className="text-sm font-medium text-white/90">{title}</h4>
             </div>
-          </div>
+            <dl className="divide-y divide-white/5">
+              {items.map((item) => <InfoRow key={item.label} {...item} />)}
+            </dl>
+          </section>
         ))}
       </div>
     </div>

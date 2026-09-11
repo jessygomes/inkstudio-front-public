@@ -1,16 +1,12 @@
-import React from "react";
+import React, { useId } from "react";
+import { Clock, MapPin, MessageSquare, ChevronDown, Video, Phone } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { toSlug } from "@/lib/utils";
 import AppButton from "@/components/Shared/AppButton";
 import {
-  FaCalendarAlt,
-  FaClock,
-  FaChevronDown,
-  FaChevronUp,
   FaStar,
   FaPalette,
-  FaRegCommentDots,
   FaStore,
 } from "react-icons/fa";
 import { CiInstagram } from "react-icons/ci";
@@ -73,223 +69,60 @@ export default function RendezVousCard({
   setHoverRating,
   setReviewForm,
 }: RendezVousCardProps) {
+  const detailsId = useId();
+  const date = new Date(appointment.start);
+  const validDate = !Number.isNaN(date.getTime());
+  const price = appointment.prestationDetails?.price;
+  const serviceType = appointment.prestation.toUpperCase();
+  const serviceLabel = ({ TATTOO: "TATOUAGE", PIERCING: "PIERCING", RETOUCHE: "RETOUCHE" } as Record<string, string>)[serviceType] || serviceType;
+  const isIndependentArtist =
+    appointment.salon.role?.toLowerCase() === "user_tatoueur" ||
+    appointment.performerUser?.id === appointment.salon.id ||
+    appointment.tatoueur?.id === appointment.salon.id;
+  const hasDistinctArtist = appointment.tatoueur &&
+    appointment.tatoueur.name.trim().toLocaleLowerCase("fr-FR") !== appointment.salon.salonName.trim().toLocaleLowerCase("fr-FR");
   return (
-    <div
-      className={`group relative overflow-hidden rounded-2xl border border-white/10 bg-white/4 transition-all duration-300 hover:border-white/25 hover:bg-white/6 ${
-        isExpanded ? "sm:col-span-2" : ""
-      }`}
-    >
-      <div
-        className={`absolute inset-y-0 left-0 w-1 ${
-          appointment.status === "CONFIRMED"
-            ? "bg-emerald-400"
-            : appointment.status === "PENDING"
-              ? "bg-orange-400"
-              : appointment.status === "COMPLETED"
-                ? "bg-blue-400"
-                : "bg-red-400"
-        }`}
-      />
-
-      <div className="bg-linear-to-b from-noir-700/55 to-noir-500/45 p-3 sm:p-3.5">
-        <div className="flex flex-col gap-2.5">
-          <div className="flex min-w-0 items-start gap-3">
-            <div className="relative shrink-0">
-              <div className="h-11 w-11 overflow-hidden rounded-xl border border-white/10 bg-linear-to-br from-tertiary-400/15 to-tertiary-500/15">
-                {appointment.salon.image ? (
-                  <Image
-                    src={appointment.salon.image}
-                    alt={appointment.salon.salonName}
-                    width={44}
-                    height={44}
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center text-sm font-bold text-tertiary-500">
-                    {appointment.salon.salonName.charAt(0)}
-                  </div>
-                )}
-              </div>
-            </div>
+    <div className={`overflow-hidden rounded-2xl border bg-noir-500 font-one transition-colors ${isExpanded ? "border-tertiary-400/30" : "border-white/10 hover:border-white/25"}`}>
+      <div className="p-4 sm:p-5">
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center lg:gap-6">
+          <div className="flex items-start gap-4 sm:gap-5">
+          <div className="flex w-14 shrink-0 flex-col items-center overflow-hidden rounded-xl border border-white/10 bg-white/4 text-white sm:w-16">
+            <span className="w-full bg-tertiary-400/10 py-1 text-center text-[11px] uppercase tracking-wider text-tertiary-400">{validDate ? date.toLocaleDateString("fr-FR", { month: "short" }) : "Date"}</span>
+            <span className="pt-0.5 text-2xl leading-tight">{validDate ? date.getDate() : "—"}</span>
+            <span className="pb-1 text-[11px] text-white/45">{validDate ? date.getFullYear() : ""}</span>
+          </div>
 
             <div className="min-w-0 flex-1">
-              <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0">
-                  <h4 className="line-clamp-1 text-sm font-semibold leading-tight text-white font-one">
-                    {appointment.prestation}
-                  </h4>
-                  <p className="mt-0.5 truncate text-xs text-white/60 font-one">
-                    {appointment.salon.salonName}
-                    {appointment.tatoueur && <> • {appointment.tatoueur.name}</>}
-                  </p>
-                </div>
-                <div className="shrink-0">{getStatusBadge(appointment.status)}</div>
-              </div>
-
-              <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[11px] text-white/70">
-                <span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/6 px-2 py-0.5 font-one">
-                  <FaCalendarAlt className="h-3 w-3 text-tertiary-400" />
-                  {formatDate(appointment.start)}
+              {appointment.title ? <><p className="mb-1 text-xs text-tertiary-400">{serviceLabel}</p><h4 className="break-words text-lg leading-snug text-white sm:text-xl">{appointment.title}</h4></> : <h4 className="text-base leading-snug text-tertiary-400">{serviceLabel}</h4>}
+              <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-sm text-white/75">
+                <span className="inline-flex min-w-0 items-center gap-2">
+                  {appointment.salon.image && <Image src={appointment.salon.image} alt="" width={24} height={24} className="h-6 w-6 shrink-0 rounded-full object-cover" />}
+                  <Link href={`/salon/${toSlug(appointment.salon.salonName)}/${toSlug(appointment.salon.city)}-${appointment.salon.postalCode}`} className="min-w-0 break-words text-white/80 underline-offset-4 hover:underline">{appointment.salon.salonName}</Link>
                 </span>
-                <span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/6 px-2 py-0.5 font-one">
-                  <FaClock className="h-3 w-3 text-tertiary-400" />
-                  {formatTime(appointment.start)}
-                </span>
-                {appointment.prestationDetails &&
-                  appointment.prestationDetails.price !== undefined &&
-                  (appointment.prestationDetails.price ?? 0) > 0 && (
-                    <span className="inline-flex items-center rounded-full border border-white/10 bg-white/10 px-2 py-0.5 font-semibold text-white font-one">
-                      {appointment.prestationDetails.price}€
-                    </span>
-                  )}
+                {!isIndependentArtist && hasDistinctArtist && <span className="break-words text-xs text-white/55">Avec {appointment.tatoueur!.name}</span>}
+                <span className="inline-flex shrink-0 items-center gap-1.5"><Clock size={14} className="text-white/40" />{formatTime(appointment.start)}{appointment.duration ? <span className="text-xs text-white/50">· {appointment.duration} min</span> : null}</span>
+                {appointment.visio ? <span className="inline-flex items-center gap-1.5"><Video size={14} className="shrink-0 text-white/40" />En visio</span> : appointment.salon.city && <span className="inline-flex min-w-0 items-center gap-1.5"><MapPin size={14} className="shrink-0 text-white/40" /><span className="break-words">{appointment.salon.city}</span></span>}
               </div>
             </div>
           </div>
-
-          <div className="grid grid-cols-2 gap-1.5 border-t border-white/10 pt-2 sm:flex sm:flex-wrap sm:items-center sm:gap-0">
-            <Link
-              href={`/salon/${toSlug(appointment.salon.salonName)}/${toSlug(appointment.salon.city)}-${appointment.salon.postalCode}`}
-              className="cursor-pointer inline-flex items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] text-tertiary-200 transition-all hover:bg-tertiary-500/20 font-one sm:rounded-none sm:border-0 sm:bg-transparent"
-            >
-              <FaStore size={10} />
-              Voir salon
-            </Link>
-
-            {appointment.conversation && (
-              <Link
-                href={`/mon-profil/messagerie/${appointment.conversation.id}`}
-                className="relative inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] text-white/85 transition-all hover:bg-white/10 font-one sm:rounded-none sm:border-0 sm:border-l sm:border-white/12 sm:bg-transparent"
-              >
-                <FaRegCommentDots size={10} />
-                Messagerie
-                {appointment.conversation.unreadCount > 0 && (
-                  <span className="absolute -right-2 -top-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-tertiary-500 px-1 text-[10px] font-semibold text-white">
-                    {appointment.conversation.unreadCount > 9
-                      ? "9+"
-                      : appointment.conversation.unreadCount}
-                  </span>
-                )}
-              </Link>
-            )}
-
-            {appointment.visio && appointment.status === "CONFIRMED" && (
-              <span className="inline-flex items-center justify-center rounded-xl border border-blue-400/30 bg-blue-500/10 px-2.5 py-1 text-[11px] text-blue-200 font-one sm:rounded-none sm:border-0 sm:border-l sm:border-white/12 sm:bg-transparent sm:text-blue-200">
-                📹 Visio
-              </span>
-            )}
-
-            {appointment.moodboard ? (
-              <button
-                onClick={() =>
-                  handleOpenMoodboard(
-                    appointment.moodboard!.id,
-                    appointment.moodboard!.name,
-                    appointment.id,
-                    appointment.status,
-                  )
-                }
-                className="cursor-pointer inline-flex items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] text-violet-200 transition-all hover:bg-violet-500/20 font-one sm:rounded-none sm:border-0 sm:border-l sm:border-white/12 sm:bg-transparent"
-              >
-                <FaPalette size={10} /> Moodboard {" "}
-                {appointment.moodboard.name}
-              </button>
-            ) : (
-              appointment.status !== "CANCELED" &&
-              appointment.status !== "COMPLETED" && (
-                <button
-                  onClick={() => handleOpenConnectModal(appointment.id)}
-                  className="cursor-pointer inline-flex items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] text-white/70 transition-all hover:bg-white/10 font-one sm:rounded-none sm:border-0 sm:border-l sm:border-white/12 sm:bg-transparent"
-                >
-                  + Lier un moodboard
-                </button>
-              )
-            )}
-
-            {appointment.status === "CONFIRMED" && (
-              <>
-                <button
-                  onClick={() => handleEditClick(appointment)}
-                  className="cursor-pointer rounded-xl border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] text-white/85 transition-all hover:bg-white/10 font-one sm:rounded-none sm:border-0 sm:border-l sm:border-white/12 sm:bg-transparent"
-                >
-                  Modifier
-                </button>
-                <button
-                  onClick={() => handleCancelClick(appointment.id)}
-                  disabled={cancelingAppointmentId === appointment.id}
-                  className="cursor-pointer rounded-xl border border-red-500/30 bg-red-500/10 px-2.5 py-1 text-[11px] text-red-200 transition-all hover:bg-red-500/20 disabled:opacity-50 font-one sm:rounded-none sm:border-0 sm:border-l sm:border-white/12 sm:bg-transparent"
-                >
-                  {cancelingAppointmentId === appointment.id ? "..." : "Annuler"}
-                </button>
-              </>
-            )}
-
-            {appointment.status === "COMPLETED" && (
-              <button
-                onClick={() => handleReviewClick(appointment.id)}
-                className="cursor-pointer rounded-xl border border-amber-400/30 bg-amber-500/10 px-2.5 py-1 text-[11px] text-amber-200 transition-all hover:bg-amber-500/20 font-one sm:rounded-none sm:border-0 sm:border-l sm:border-white/12 sm:bg-transparent"
-              >
-                ⭐ {hasReview ? "Voir l'avis" : "Donner un avis"}
-              </button>
-            )}
-
-            <button
-              onClick={() => toggleExpand(appointment.id)}
-              className="col-span-2 cursor-pointer inline-flex items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] text-white/90 transition-all hover:bg-white/12 font-one sm:col-auto sm:ml-auto sm:justify-start sm:rounded-none sm:border-0 sm:border-l sm:border-white/12 sm:bg-transparent"
-            >
-              {isExpanded ? "Réduire" : "Détails"}
-              {isExpanded ? (
-                <FaChevronUp className="h-3 w-3" />
-              ) : (
-                <FaChevronDown className="h-3 w-3" />
-              )}
-            </button>
+          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-white/8 pt-3 lg:flex-col lg:items-end lg:border-l lg:border-t-0 lg:pl-4 lg:pt-0">
+            {getStatusBadge(appointment.status)}
+            {typeof price === "number" && <span className="text-lg font-semibold tabular-nums text-white">{price.toLocaleString("fr-FR", { style: "currency", currency: "EUR" })}</span>}
+            <AppButton type="button" variant="secondary" onClick={() => toggleExpand(appointment.id)} aria-expanded={isExpanded} aria-controls={detailsId} className="min-h-11 cursor-pointer">{isExpanded ? "Fermer les détails" : "Voir le rendez-vous"}<ChevronDown size={15} className={isExpanded ? "rotate-180" : ""} /></AppButton>
           </div>
         </div>
-
+        {appointment.conversation && <Link href={`/mon-profil/messagerie/${appointment.conversation.id}`} className="mt-4 flex min-h-11 items-center gap-2 rounded-xl bg-white/4 px-3 text-xs text-white/65 transition hover:bg-white/8 hover:text-white"><MessageSquare size={15} />Échanger avec le salon{appointment.conversation.unreadCount > 0 ? <span className="ml-auto rounded-full bg-tertiary-400/15 px-2 py-1 text-tertiary-400">{appointment.conversation.unreadCount} non lu{appointment.conversation.unreadCount > 1 ? "s" : ""}</span> : <span className="ml-auto text-white/35">Ouvrir la conversation →</span>}</Link>}
         {isExpanded && (
-          <div className="mt-2 space-y-3 pt-2">
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-              <div className="rounded-2xl border border-white/10 bg-white/5 px-2.5 py-2">
-                <p className="text-[10px] uppercase tracking-wide text-white/45 font-one">
-                  Date
-                </p>
-                <p className="mt-0.5 text-xs text-white font-one">
-                  {formatDate(appointment.start)}
-                </p>
-              </div>
-              <div className="rounded-2xl border border-white/10 bg-white/5 px-2.5 py-2">
-                <p className="text-[10px] uppercase tracking-wide text-white/45 font-one">
-                  Heure
-                </p>
-                <p className="mt-0.5 text-xs text-white font-one">
-                  {formatTime(appointment.start)}
-                </p>
-              </div>
-              <div className="rounded-2xl border border-white/10 bg-white/5 px-2.5 py-2">
-                <p className="text-[10px] uppercase tracking-wide text-white/45 font-one">
-                  Durée
-                </p>
-                <p className="mt-0.5 text-xs text-white font-one">
-                  {appointment.duration ? `${appointment.duration} min` : "Non spécifié"}
-                </p>
-              </div>
-              <div className="rounded-2xl border border-white/10 bg-white/5 px-2.5 py-2">
-                <p className="text-[10px] uppercase tracking-wide text-white/45 font-one">
-                  Prix
-                </p>
-                <p className="mt-0.5 text-xs text-white font-one">
-                  {appointment.prestationDetails?.price && appointment.prestationDetails.price > 0
-                    ? `${appointment.prestationDetails.price}€`
-                    : "Non spécifié"}
-                </p>
-              </div>
+          <div id={detailsId} className="mt-5 space-y-5 border-t border-white/10 pt-5">
+            <div className="flex flex-wrap gap-x-5 gap-y-2 text-xs text-white/50">
+              <span>{formatDate(appointment.start)} · {formatTime(appointment.start)} – {formatTime(appointment.end)}</span>
+              {appointment.duration && <span>{appointment.duration} min</span>}
             </div>
-
-            <div className="grid gap-3 md:grid-cols-3">
-              <div className="space-y-2 rounded-2xl border border-white/10 bg-white/5 p-3">
+            <div className="grid gap-5 lg:grid-cols-3">
+              <div className={`min-w-0 space-y-4 rounded-xl bg-white/3 p-4 lg:order-2 ${appointment.prestationDetails ? "" : "lg:col-span-3"}`}>
                 <div className="flex items-center justify-between text-xs text-white/60">
-                  <span>Infos rendez-vous</span>
-                  {getStatusBadge(appointment.status)}
+                  <span className="text-sm font-semibold text-white">Le salon et votre artiste</span>
+
                 </div>
                 <div className="space-y-1 text-sm text-white font-one">
                   <p className="text-white/80 text-xs">Adresse du salon</p>
@@ -307,7 +140,7 @@ export default function RendezVousCard({
                         href={`tel:${appointment.salon.phone}`}
                         className="inline-flex items-center gap-2 px-3 py-1.5 rounded-2xl border border-white/10 text-white/80 text-xs font-one transition-all"
                       >
-                        <span>📞</span>
+                        <Phone size={14} aria-hidden="true" />
                         <span>{formatPhoneDisplay(appointment.salon.phone)}</span>
                       </a>
                     )}
@@ -316,7 +149,7 @@ export default function RendezVousCard({
                         href={appointment.salon.website}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="w-8 h-8 flex items-center justify-center bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl text-white/60 hover:text-tertiary-400 transition-all"
+                        className="w-11 h-11 flex items-center justify-center bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl text-white/60 hover:text-tertiary-400 transition-all"
                         title="Site web"
                       >
                         <span>
@@ -329,7 +162,7 @@ export default function RendezVousCard({
                         href={appointment.salon.instagram}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="w-8 h-8 flex items-center justify-center bg-white/5 hover:bg-pink-500/20 border border-white/10 hover:border-pink-500/30 rounded-2xl text-white/60 hover:text-pink-400 transition-all"
+                        className="w-11 h-11 flex items-center justify-center bg-white/5 hover:bg-pink-500/20 border border-white/10 hover:border-pink-500/30 rounded-2xl text-white/60 hover:text-pink-400 transition-all"
                         title="Instagram"
                       >
                         <span>
@@ -349,7 +182,7 @@ export default function RendezVousCard({
                           href={`tel:${appointment.tatoueur.phone}`}
                           className="inline-flex items-center gap-2 px-3 py-1.5 rounded-2xl border border-white/10 text-white/80 text-xs font-one transition-all"
                         >
-                          <span>📞</span>
+                          <Phone size={14} aria-hidden="true" />
                           <span>{formatPhoneDisplay(appointment.tatoueur.phone)}</span>
                         </a>
                       )}
@@ -358,7 +191,7 @@ export default function RendezVousCard({
                           href={appointment.tatoueur.instagram}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="w-8 h-8 flex items-center justify-center bg-white/5 hover:bg-pink-500/20 border border-white/10 hover:border-pink-500/30 rounded-2xl text-white/60 hover:text-pink-400 transition-all"
+                          className="w-11 h-11 flex items-center justify-center bg-white/5 hover:bg-pink-500/20 border border-white/10 hover:border-pink-500/30 rounded-2xl text-white/60 hover:text-pink-400 transition-all"
                           title="Instagram"
                         >
                           <span>
@@ -374,9 +207,9 @@ export default function RendezVousCard({
               </div>
 
               {appointment.prestationDetails && (
-                <div className="space-y-3 rounded-2xl font-one border border-white/10 bg-white/5 p-3 md:col-span-2">
+                <div className="min-w-0 space-y-4 lg:order-1 lg:col-span-2">
                   <div className="flex items-center justify-between text-xs text-white/60">
-                    <span>Brief</span>
+                    <span className="text-sm font-semibold text-white">Votre projet</span>
                   </div>
                   <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 text-xs text-white">
                     {appointment.prestationDetails.zone && (
@@ -419,7 +252,7 @@ export default function RendezVousCard({
                   </div>
 
                   {appointment.prestationDetails.description && (
-                    <div className="pt-2 border-t border-white/10 text-xs text-white/80 leading-relaxed">
+                    <div className="pt-3 border-t border-white/10 whitespace-pre-line break-words text-sm text-white/70 leading-7">
                       {appointment.prestationDetails.description}
                     </div>
                   )}
@@ -463,8 +296,79 @@ export default function RendezVousCard({
               )}
             </div>
 
+            <div className="border-t border-white/10 pt-4"><h5 className="mb-3 text-sm font-semibold text-white">Gérer mon rendez-vous</h5><div className="flex flex-wrap gap-2">
+            <Link
+              href={`/salon/${toSlug(appointment.salon.salonName)}/${toSlug(appointment.salon.city)}-${appointment.salon.postalCode}`}
+              className="cursor-pointer inline-flex items-center justify-center gap-1.5 min-h-11 sm:min-h-9 rounded-xl border border-white/10 bg-white/5 px-2.5 py-2 text-xs text-tertiary-200 transition-all hover:bg-tertiary-500/20 font-one"
+            >
+              <FaStore size={10} />
+              Voir salon
+            </Link>
+
+            {appointment.visio && appointment.status === "CONFIRMED" && (
+              <span className="inline-flex items-center justify-center min-h-11 sm:min-h-9 rounded-xl border border-blue-400/30 bg-blue-500/10 px-2.5 py-2 text-xs text-blue-200 font-one">
+                📹 Visio
+              </span>
+            )}
+
+            {appointment.moodboard ? (
+              <button
+                onClick={() =>
+                  handleOpenMoodboard(
+                    appointment.moodboard!.id,
+                    appointment.moodboard!.name,
+                    appointment.id,
+                    appointment.status,
+                  )
+                }
+                className="cursor-pointer inline-flex items-center justify-center gap-1.5 min-h-11 sm:min-h-9 rounded-xl border border-white/10 bg-white/5 px-2.5 py-2 text-xs text-violet-200 transition-all hover:bg-violet-500/20 font-one"
+              >
+                <FaPalette size={10} /> Moodboard {" "}
+                {appointment.moodboard.name}
+              </button>
+            ) : (
+              appointment.status !== "CANCELED" &&
+              appointment.status !== "COMPLETED" && (
+                <button
+                  onClick={() => handleOpenConnectModal(appointment.id)}
+                  className="cursor-pointer inline-flex items-center justify-center gap-1.5 min-h-11 sm:min-h-9 rounded-xl border border-white/10 bg-white/5 px-2.5 py-2 text-xs text-white/70 transition-all hover:bg-white/10 font-one"
+                >
+                  + Lier un moodboard
+                </button>
+              )
+            )}
+
+            {appointment.status === "CONFIRMED" && (
+              <>
+                <button
+                  onClick={() => handleEditClick(appointment)}
+                  className="cursor-pointer min-h-11 sm:min-h-9 rounded-xl border border-white/10 bg-white/5 px-2.5 py-2 text-xs text-white/85 transition-all hover:bg-white/10 font-one"
+                >
+                  Modifier
+                </button>
+                <button
+                  onClick={() => handleCancelClick(appointment.id)}
+                  disabled={cancelingAppointmentId === appointment.id}
+                  className="cursor-pointer min-h-11 sm:min-h-9 rounded-xl border border-red-500/30 bg-red-500/10 px-2.5 py-2 text-xs text-red-200 transition-all hover:bg-red-500/20 disabled:opacity-50 font-one"
+                >
+                  {cancelingAppointmentId === appointment.id ? "..." : "Annuler"}
+                </button>
+              </>
+            )}
+
             {appointment.status === "COMPLETED" && (
-              <div className="rounded-2xl border border-amber-400/30 bg-amber-500/5 p-3.5">
+              <button
+                onClick={() => handleReviewClick(appointment.id)}
+                className="cursor-pointer min-h-11 sm:min-h-9 rounded-xl border border-amber-400/30 bg-amber-500/10 px-2.5 py-2 text-xs text-amber-200 transition-all hover:bg-amber-500/20 font-one"
+              >
+                ⭐ {hasReview ? "Voir l'avis" : "Donner un avis"}
+              </button>
+            )}
+
+
+            </div></div>
+            {appointment.status === "COMPLETED" && (
+              <div id={`appointment-review-${appointment.id}`} className="scroll-mt-28 rounded-2xl border border-amber-400/30 bg-amber-500/5 p-3.5">
                 <div className="flex items-center gap-2 mb-3">
                   <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/15 text-lg">
                     ⭐

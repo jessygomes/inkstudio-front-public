@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useId, useState } from "react";
 import { createPortal } from "react-dom";
+import { Images, Pencil, Expand } from "lucide-react";
 import Image from "next/image";
 import { FaArrowLeft, FaPlus, FaSave, FaTrash } from "react-icons/fa";
 import { Moodboard } from "@/lib/actions/moodboard.action";
@@ -44,7 +45,9 @@ export default function MoodboardSelectedPanel({
   const [isAddImageModalOpen, setIsAddImageModalOpen] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
-  const [isMounted, setIsMounted] = useState(false);
+  const formId = useId();
+  const lightboxRef = useRef<HTMLDivElement>(null);
+  const hasChanges = editName !== selectedMoodboard.name || editDescription !== (selectedMoodboard.description || "");
 
   const activeImages = useMemo(
     () =>
@@ -55,18 +58,17 @@ export default function MoodboardSelectedPanel({
   );
 
   useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!isMounted || !lightboxOpen) return;
+    if (!lightboxOpen) return;
     const previousOverflow = document.body.style.overflow;
+    const previousFocus = document.activeElement as HTMLElement | null;
+    lightboxRef.current?.focus();
     document.body.style.overflow = "hidden";
 
     return () => {
       document.body.style.overflow = previousOverflow;
+      previousFocus?.focus();
     };
-  }, [isMounted, lightboxOpen]);
+  }, [lightboxOpen]);
 
   const openLightbox = useCallback(
     (startIndex = 0) => {
@@ -89,75 +91,34 @@ export default function MoodboardSelectedPanel({
 
   const onLightboxKey = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (!lightboxOpen) return;
+    if (e.key === "Tab") {
+      const buttons = Array.from(e.currentTarget.querySelectorAll<HTMLButtonElement>("button"));
+      const first = buttons[0];
+      const last = buttons[buttons.length - 1];
+      if (e.shiftKey && (document.activeElement === first || document.activeElement === e.currentTarget)) { e.preventDefault(); last?.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first?.focus(); }
+    }
     if (e.key === "Escape") closeLightbox();
     if (e.key === "ArrowLeft") prev();
     if (e.key === "ArrowRight") next();
   };
 
   return (
-    <div className="rounded-3xl border border-white/10 bg-linear-to-br from-noir-500/6 to-white/3 p-4 shadow-xl backdrop-blur-lg sm:p-6 font-one">
-      <div className="mb-5 flex flex-col gap-3 border-b border-white/10 pb-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-2.5">
-          <button
-            type="button"
-            onClick={onBack}
-            className="cursor-pointer inline-flex h-8 w-8 items-center justify-center rounded-2xl border border-white/15 bg-white/5 text-white/70 transition-all hover:bg-white/10 hover:text-white"
-            aria-label="Retour à la liste des moodboards"
-          >
-            <FaArrowLeft className="h-3 w-3" />
-          </button>
-          <h4 className="font-one text-base font-semibold text-white sm:text-lg">
-            Détails du moodboard
-          </h4>
-        </div>
-        <span className="w-fit rounded-xl border border-white/15 bg-white/5 px-2.5 py-1 text-[11px] text-white/70 font-one sm:ml-auto">
-          {selectedMoodboard.images?.length || 0} image
-          {(selectedMoodboard.images?.length || 0) > 1 ? "s" : ""}
-        </span>
+    <div className="space-y-5 font-one [&_button:focus-visible]:outline-2 [&_button:focus-visible]:outline-offset-2 [&_button:focus-visible]:outline-tertiary-400">
+      <button type="button" onClick={onBack} className="inline-flex min-h-11 cursor-pointer items-center gap-2 text-sm text-white/60 hover:text-white"><FaArrowLeft size={12} />Tous mes moodboards</button>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="min-w-0 flex-1"><p className="mb-1 text-xs text-tertiary-400">Mon carnet d’inspiration</p><h3 className="break-words text-2xl text-white">{selectedMoodboard.name}</h3>{selectedMoodboard.description && <p className="mt-2 max-w-prose whitespace-pre-line break-words text-sm leading-6 text-white/60">{selectedMoodboard.description}</p>}</div>
+        <AppButton type="button" onClick={() => setIsAddImageModalOpen(true)} icon={<FaPlus size={12} />} className="min-h-11 cursor-pointer">Ajouter une image</AppButton>
       </div>
-
-      <div className="mb-6 grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto_auto]">
-        <input
-          type="text"
-          value={editName}
-          onChange={(e) => onEditNameChange(e.target.value)}
-          placeholder="Nom"
-          className="min-w-0 rounded-2xl border border-white/15 bg-white/5 px-3 py-2 text-sm text-white outline-none placeholder:text-white/35 focus:border-tertiary-400/40"
-        />
-        <input
-          type="text"
-          value={editDescription}
-          onChange={(e) => onEditDescriptionChange(e.target.value)}
-          placeholder="Description"
-          className="min-w-0 rounded-2xl border border-white/15 bg-white/5 px-3 py-2 text-sm text-white outline-none placeholder:text-white/35 focus:border-tertiary-400/40"
-        />
-        <div className="grid grid-cols-2 gap-2 md:col-span-2 xl:col-auto">
-        <AppButton
-          variant="secondary"
-          disabled={savingInfos}
-          onClick={onSaveInfos}
-          icon={
-            savingInfos ? (
-              <span className="h-3 w-3 animate-spin rounded-full border border-white border-t-transparent"></span>
-            ) : (
-              <FaSave className="h-3 w-3" />
-            )
-          }
-          className="cursor-pointer py-2 text-xs md:w-full xl:w-auto"
-        >
-          Sauvegarder
-        </AppButton>
-
-        <AppButton
-          variant="secondary"
-          onClick={() => setIsAddImageModalOpen(true)}
-          icon={<FaPlus className="h-3 w-3" />}
-          className="cursor-pointer py-2 text-xs md:w-full xl:w-auto"
-        >
-          image
-        </AppButton>
-        </div>
-      </div>
+      <details className="rounded-xl border border-white/10 bg-noir-500">
+        <summary className="flex min-h-12 cursor-pointer items-center gap-2 px-4 text-sm text-white/70"><Pencil size={14} />Modifier les informations{hasChanges && <span className="ml-auto text-xs text-tertiary-400">Modifications non enregistrées</span>}</summary>
+        <form onSubmit={(event) => { event.preventDefault(); onSaveInfos(); }} className="grid gap-4 border-t border-white/8 p-4 sm:grid-cols-2">
+          <label htmlFor={`${formId}-name`} className="text-xs text-white/60">Nom du moodboard<input id={`${formId}-name`} value={editName} onChange={(event) => onEditNameChange(event.target.value)} required disabled={savingInfos} className="mt-2 min-h-11 w-full rounded-xl border border-white/15 bg-noir-700 px-3 text-sm text-white outline-none focus:border-tertiary-400" /></label>
+          <label htmlFor={`${formId}-description`} className="text-xs text-white/60">Description (facultative)<textarea id={`${formId}-description`} value={editDescription} onChange={(event) => onEditDescriptionChange(event.target.value)} rows={2} disabled={savingInfos} className="mt-2 w-full resize-y rounded-xl border border-white/15 bg-noir-700 px-3 py-2 text-sm text-white outline-none focus:border-tertiary-400" /></label>
+          <div className="flex justify-end sm:col-span-2"><AppButton type="submit" variant="secondary" disabled={savingInfos || !hasChanges || !editName.trim()} icon={<FaSave size={12} />} className="min-h-11 cursor-pointer">{savingInfos ? "Enregistrement…" : "Enregistrer"}</AppButton></div>
+        </form>
+      </details>
+      <div className="flex items-center gap-2 border-b border-white/10 pb-3 text-sm text-white/70"><Images size={16} /><h4>Mes inspirations</h4><span className="rounded-md bg-white/5 px-2 py-0.5 text-xs text-white/45">{selectedMoodboard.images?.length || 0}</span></div>
 
       <MoodboardAddImageModal
         isOpen={isAddImageModalOpen}
@@ -170,13 +131,13 @@ export default function MoodboardSelectedPanel({
       />
 
       {(selectedMoodboard.images || []).length === 0 ? (
-        <div className="rounded-2xl border border-white/10 bg-white/5 py-10 text-center">
+        <div className="rounded-2xl border border-dashed border-white/15 bg-noir-500 px-4 py-12 text-center">
           <p className="text-sm text-white/60 font-one">
-            Aucune image dans ce moodboard.
+            Votre moodboard attend ses premières inspirations.
           </p>
         </div>
       ) : (
-        <div className="grid gap-3 grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid items-start gap-4 grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {selectedMoodboard.images.map((image, index) => (
             <div
               key={image.id}
@@ -185,16 +146,17 @@ export default function MoodboardSelectedPanel({
               <button
                 type="button"
                 onClick={() => openLightbox(index)}
-                className="relative h-48 w-full cursor-zoom-in sm:h-44 lg:h-40"
+                className="relative block aspect-[4/5] w-full cursor-zoom-in bg-noir-700"
                 aria-label={`Agrandir l'image ${index + 1}`}
               >
                 <Image
                   src={image.url}
                   alt={image.caption || "Image moodboard"}
                   fill
-                  className="object-cover transition-transform duration-300 group-hover:scale-105"
+                  className="object-contain p-2 transition-transform duration-300 motion-safe:group-hover:scale-105"
                   sizes="(max-width: 640px) 50vw, (max-width: 1280px) 33vw, 25vw"
                 />
+                <span className="min-h-11 min-w-11 cursor-pointer absolute bottom-2 right-2 grid h-8 w-8 place-items-center rounded-lg bg-black/50 text-white"><Expand size={13} aria-hidden="true" /></span>
               </button>
               <div className="flex items-center justify-between gap-2 p-2.5 sm:p-3">
                 <p className="line-clamp-2 text-xs text-white/70 font-one sm:line-clamp-1">
@@ -203,7 +165,9 @@ export default function MoodboardSelectedPanel({
                 <button
                   type="button"
                   onClick={() => onDeleteImage(image.id)}
-                  className="cursor-pointer inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-xl border border-red-400/30 bg-red-500/10 text-red-300 transition-all hover:bg-red-500/20"
+                  disabled={deletingImageId !== null}
+                  aria-label={`Supprimer ${image.caption || `l’image ${index + 1}`}`}
+                  className="cursor-pointer inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-white/40 transition-all hover:bg-red-500/10 hover:text-red-300 disabled:opacity-50"
                 >
                   {deletingImageId === image.id ? (
                     <span className="h-3 w-3 animate-spin rounded-full border border-red-300 border-t-transparent"></span>
@@ -217,11 +181,12 @@ export default function MoodboardSelectedPanel({
         </div>
       )}
 
-      {isMounted &&
-        lightboxOpen &&
+      {lightboxOpen &&
         createPortal(
           <div
             role="dialog"
+            ref={lightboxRef}
+            aria-label={`Images de ${selectedMoodboard.name}`}
             aria-modal="true"
             className="fixed inset-0 z-100000 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
             onKeyDown={onLightboxKey}
@@ -246,7 +211,7 @@ export default function MoodboardSelectedPanel({
               <button
                 onClick={closeLightbox}
                 aria-label="Fermer"
-                className="absolute top-3 right-3 rounded-2xl border border-white/20 bg-white/10 px-2 py-0.5 text-white hover:bg-white/20"
+                className="min-h-11 min-w-11 cursor-pointer absolute top-3 right-3 rounded-2xl border border-white/20 bg-white/10 px-2 py-0.5 text-white hover:bg-white/20"
               >
                 ✕
               </button>
@@ -256,18 +221,18 @@ export default function MoodboardSelectedPanel({
                   <button
                     onClick={prev}
                     aria-label="Précédent"
-                    className="absolute left-3 top-1/2 rounded-2xl border border-white/20 bg-white/10 px-3 pb-0.5 text-2xl text-white -translate-y-1/2 hover:bg-white/20"
+                    className="min-h-11 min-w-11 cursor-pointer absolute left-3 top-1/2 rounded-2xl border border-white/20 bg-white/10 px-3 pb-0.5 text-2xl text-white -translate-y-1/2 hover:bg-white/20"
                   >
                     ‹
                   </button>
                   <button
                     onClick={next}
                     aria-label="Suivant"
-                    className="absolute right-3 top-1/2 rounded-2xl border border-white/20 bg-white/10 px-3 pb-0.5 text-2xl text-white -translate-y-1/2 hover:bg-white/20"
+                    className="min-h-11 min-w-11 cursor-pointer absolute right-3 top-1/2 rounded-2xl border border-white/20 bg-white/10 px-3 pb-0.5 text-2xl text-white -translate-y-1/2 hover:bg-white/20"
                   >
                     ›
                   </button>
-                  <div className="absolute bottom-3 left-1/2 rounded-2xl bg-black/30 px-2 py-1 text-[11px] text-white/80 font-one -translate-x-1/2">
+                  <div className="min-h-11 min-w-11 cursor-pointer absolute bottom-3 left-1/2 rounded-2xl bg-black/30 px-2 py-1 text-[11px] text-white/80 font-one -translate-x-1/2">
                     {lightboxIndex + 1} / {activeImages.length}
                   </div>
                 </>

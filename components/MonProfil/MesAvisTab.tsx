@@ -1,13 +1,14 @@
-/* eslint-disable react/no-unescaped-entities */
-"use client";
+﻿"use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useId, useState } from "react";
 import { getClientReviews, deleteReview } from "@/lib/actions/review.action";
 import { toast } from "sonner";
 import Image from "next/image";
 import Link from "next/link";
 import { toSlug } from "@/lib/utils";
-import { FaTrash, FaEye, FaExclamationTriangle } from "react-icons/fa";
+import { ArrowUpRight, BadgeCheck, ChevronDown, EyeOff, MessageSquare, Star, Trash2 } from "lucide-react";
+import AppButton from "@/components/Shared/AppButton";
+import ConfirmActionModal from "@/components/Shared/ConfirmActionModal";
 
 type Review = {
   id: string;
@@ -19,323 +20,97 @@ type Review = {
   createdAt?: string;
   salonResponse?: string | null;
   salonRespondedAt?: string | null;
-  salon?: {
-    id: string;
-    salonName: string;
-    city: string;
-    postalCode: string;
-    image?: string;
-  };
+  salon?: { id: string; salonName: string; city: string; postalCode: string; image?: string };
   appointment?: { prestation?: string; date?: string | null } | null;
 };
+
+function ReviewDate({ value }: { value?: string | null }) {
+  if (!value || Number.isNaN(Date.parse(value))) return null;
+  return <time dateTime={value}>{new Date(value).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" })}</time>;
+}
+
+function ClientReviewCard({ review, onDelete, deleting }: { review: Review; onDelete: () => void; deleting: boolean }) {
+  const [expanded, setExpanded] = useState(false);
+  const id = useId();
+  const salonHref = review.salon ? `/salon/${toSlug(review.salon.salonName)}/${toSlug([review.salon.city, review.salon.postalCode].filter(Boolean).join("-"))}` : null;
+  return (
+    <article className="min-w-0 rounded-2xl border border-white/10 bg-noir-500 p-3 sm:p-4">
+      <div className="flex items-start gap-3">
+        <div className="relative grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-xl bg-white/5 text-sm text-white/50">{review.salon?.image ? <Image src={review.salon.image} alt="" fill sizes="40px" className="object-cover" /> : review.salon?.salonName.charAt(0) || <Star size={16} />}</div>
+        <div className="min-w-0 flex-1">
+          <h4 className="break-words text-sm font-semibold text-white">{salonHref ? <Link href={salonHref} className="inline-flex items-start gap-1.5 hover:text-tertiary-400">{review.salon?.salonName}<ArrowUpRight size={13} className="mt-1 shrink-0 text-white/40" /></Link> : "Mon avis"}</h4>
+          <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-white/45">{review.salon?.city && <span>{review.salon.city}</span>}<ReviewDate value={review.createdAt} />{review.appointment?.prestation && <span>{review.appointment.prestation.toUpperCase()}</span>}</div>
+        </div>
+        <button type="button" onClick={onDelete} disabled={deleting} aria-label={`Supprimer mon avis${review.salon ? ` sur ${review.salon.salonName}` : ""}`} title="Supprimer cet avis" className="grid h-11 w-11 shrink-0 cursor-pointer place-items-center rounded-lg text-white/35 transition hover:bg-red-400/10 hover:text-red-300 disabled:opacity-40"><Trash2 size={15} /></button>
+      </div>
+      <div className="mt-2 flex flex-wrap items-center gap-2">
+        <span role="img" aria-label={`${review.rating} sur 5`} className="inline-flex items-center gap-0.5 text-amber-300">{[1,2,3,4,5].map((value) => <Star key={value} aria-hidden="true" size={13} className={value <= review.rating ? "fill-amber-300" : "text-white/20"} />)}</span>
+        <span className="text-xs text-white/65">{review.rating}/5</span>
+        {review.isVerified && <span className="inline-flex items-center gap-1 text-[11px] text-emerald-300"><BadgeCheck size={12} />Vérifié</span>}
+        {review.isVisible === false && <span className="inline-flex items-center gap-1 text-[11px] text-orange-300"><EyeOff size={12} />Masqué</span>}
+      </div>
+      {review.title && <p className="mt-2 break-words text-sm font-medium text-white/90">{review.title}</p>}
+      <div id={id}>
+        {review.comment && <p className={`mt-1 whitespace-pre-line break-words text-sm leading-6 text-white/65 ${expanded ? "" : "line-clamp-2"}`}>{review.comment}</p>}
+        {expanded && review.salonResponse && <div className="mt-3 rounded-r-lg border-l-2 border-tertiary-400/40 bg-white/3 p-3"><div className="mb-1 flex flex-wrap items-center justify-between gap-2"><span className="inline-flex items-center gap-1.5 text-xs text-white/75"><MessageSquare size={13} />Réponse du salon</span><span className="text-[11px] text-white/40"><ReviewDate value={review.salonRespondedAt} /></span></div><p className="whitespace-pre-line break-words text-sm leading-6 text-white/65">{review.salonResponse}</p></div>}
+      </div>
+      {(review.comment || review.salonResponse) && <div className="mt-1 flex flex-wrap items-center justify-between gap-2"><button type="button" aria-expanded={expanded} aria-controls={id} onClick={() => setExpanded((value) => !value)} className="inline-flex min-h-11 cursor-pointer items-center gap-1 text-xs text-white/65 hover:text-white">{expanded ? "Réduire" : "Lire en détail"}<ChevronDown size={13} className={expanded ? "rotate-180" : ""} /></button>{review.salonResponse && !expanded && <span className="inline-flex items-center gap-1 text-[11px] text-tertiary-400"><MessageSquare size={12} />Le salon a répondu</span>}</div>}
+    </article>
+  );
+}
 
 export default function MesAvisTab() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [page, setPage] = useState(1);
   const [hasNext, setHasNext] = useState(false);
   const [hasPrev, setHasPrev] = useState(false);
   const [totalReviews, setTotalReviews] = useState(0);
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [reviewToDelete, setReviewToDelete] = useState<Review | null>(null);
 
-  const load = async (p = 1) => {
+  const load = useCallback(async (requestedPage = 1) => {
     setLoading(true);
-    const res = await getClientReviews({ page: p, sortBy: "recent" });
-    if (res.ok) {
+    setError("");
+    try {
+      const res = await getClientReviews({ page: requestedPage, limit: 6, sortBy: "recent" });
+      if (!res.ok) throw new Error(res.message || "Impossible de charger vos avis.");
       setReviews(res.data.reviews || []);
       setTotalReviews(res.data.statistics?.totalReviews || 0);
       setHasNext(res.data.pagination?.hasNextPage || false);
       setHasPrev(res.data.pagination?.hasPreviousPage || false);
-      setPage(res.data.pagination?.currentPage || p);
-    } else {
-      toast.error(res.message || "Impossible de charger les avis");
+      setPage(res.data.pagination?.currentPage || requestedPage);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Impossible de charger vos avis. Réessayez dans un instant.");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    load(1);
   }, []);
-
-  const handleDeleteClick = (review: Review) => {
-    setReviewToDelete(review);
-    setShowDeleteModal(true);
-  };
+  useEffect(() => { void load(1); }, [load]);
 
   const handleConfirmDelete = async () => {
-    if (!reviewToDelete) return;
-
+    if (!reviewToDelete || deletingId) return;
     setDeletingId(reviewToDelete.id);
-    const res = await deleteReview(reviewToDelete.id);
-    if (res.ok) {
-      toast.success("Avis supprimé avec succès");
-      setShowDeleteModal(false);
+    try {
+      const res = await deleteReview(reviewToDelete.id);
+      if (!res.ok) throw new Error(res.message || "Impossible de supprimer cet avis.");
+      toast.success("Avis supprimé");
       setReviewToDelete(null);
-      load(page);
-    } else {
-      toast.error(res.message || "Erreur lors de la suppression");
-    }
-    setDeletingId(null);
-  };
-
-  const handleCloseModal = () => {
-    if (deletingId === null) {
-      setShowDeleteModal(false);
-      setReviewToDelete(null);
+      await load(reviews.length === 1 && page > 1 ? page - 1 : page);
+    } catch (cause) {
+      toast.error(cause instanceof Error ? cause.message : "La suppression a échoué. Vous pouvez réessayer.");
+    } finally {
+      setDeletingId(null);
     }
   };
 
   return (
-    <>
-      <div className="rounded-3xl border border-white/10 bg-linear-to-br from-noir-500/6 to-white/3 p-5 backdrop-blur-lg shadow-xl sm:p-6">
-        <div className="mb-5 flex items-center justify-between border-b border-white/10 pb-4">
-          <h3 className="text-white font-one font-semibold text-lg">
-            Mes avis
-          </h3>
-          <span className="text-white/60 font-one text-sm">
-            {totalReviews} avis
-          </span>
-        </div>
-
-        {loading ? (
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-2 border-tertiary-400 border-t-transparent mx-auto mb-4"></div>
-            <p className="text-white/60 font-one">Chargement...</p>
-          </div>
-        ) : reviews.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-white/60 font-one mb-4">
-              Vous n'avez pas encore laissé d'avis.
-            </p>
-            <Link
-              href="/trouver-un-salon"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-linear-to-br from-noir-500/6 to-white/3 hover:from-tertiary-500 hover:to-tertiary-600 text-white rounded-xl transition-all duration-300 font-one text-sm shadow-lg hover:scale-105"
-            >
-              Découvrir des salons
-            </Link>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {reviews.map((review) => (
-              <div
-                key={review.id}
-                className="rounded-2xl border border-white/10 bg-linear-to-br from-noir-500/6 to-white/3 p-3.5 sm:p-4"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0 flex-1">
-                    {/* Salon Info */}
-                    {review.salon && (
-                      <div className="mb-3 flex items-center gap-3">
-                        <div className="h-10 w-10 shrink-0 overflow-hidden rounded-xl border border-tertiary-400/30 bg-linear-to-br from-tertiary-400/20 to-tertiary-500/20">
-                          {review.salon.image ? (
-                            <Image
-                              src={review.salon.image}
-                              alt={review.salon.salonName}
-                              width={40}
-                              height={40}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-tertiary-400 text-xs font-bold">
-                              {review.salon.salonName.charAt(0)}
-                            </div>
-                          )}
-                        </div>
-                        <Link
-                          href={`/salon/${toSlug(review.salon.salonName)}/${toSlug(
-                            review.salon.city,
-                          )}-${review.salon.postalCode}`}
-                          className="min-w-0 flex-1 transition-opacity hover:opacity-80"
-                        >
-                          <p className="truncate text-sm font-semibold text-white font-one">
-                            {review.salon.salonName}
-                          </p>
-                          <p className="truncate text-xs text-white/60 font-one">
-                            {review.salon.city} ({review.salon.postalCode})
-                          </p>
-                        </Link>
-                      </div>
-                    )}
-
-                    <div className="space-y-2.5">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <div className="text-sm text-amber-300">
-                          {Array.from({ length: 5 }).map((_, i) => (
-                            <span key={i}>
-                              {i < (review.rating || 0) ? "★" : "☆"}
-                            </span>
-                          ))}
-                        </div>
-                        <span className="text-xs text-white/70 font-one">
-                          {review.rating}/5
-                        </span>
-
-                        <div className="flex flex-wrap items-center gap-1.5">
-                          {review.isVerified && (
-                            <span className="rounded-full border border-emerald-400/30 bg-emerald-500/10 px-2 py-0.5 text-[11px] text-emerald-300 font-one">
-                              ✓ Vérifié
-                            </span>
-                          )}
-                          {review.isVisible === false && (
-                            <span className="flex items-center gap-1 rounded-full border border-orange-400/30 bg-orange-500/10 px-2 py-0.5 text-[11px] text-orange-300 font-one">
-                              <FaEye className="h-2.5 w-2.5" />
-                              Caché
-                            </span>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-white/45 font-one">
-                        {review.appointment?.prestation && (
-                          <span>{review.appointment.prestation}</span>
-                        )}
-                        {review.createdAt && (
-                          <span>
-                            {new Date(review.createdAt).toLocaleDateString(
-                              "fr-FR",
-                            )}
-                          </span>
-                        )}
-                      </div>
-
-                      {review.title && (
-                        <p className="text-sm font-semibold text-white font-one">
-                          {review.title}
-                        </p>
-                      )}
-
-                      {review.comment && (
-                        <p className="line-clamp-3 text-sm leading-relaxed text-white/80 font-one">
-                          {review.comment}
-                        </p>
-                      )}
-
-                      {/* Réponse du salon */}
-                      {review.salonResponse && (
-                        <div className="border-t border-white/10 pt-3">
-                          <div className="rounded-xl border border-tertiary-500/20 bg-linear-to-br from-tertiary-500/10 to-tertiary-600/5 p-3">
-                            <div className="mb-2 flex items-center gap-2">
-                              <div className="flex h-5 w-5 items-center justify-center rounded-full bg-tertiary-500/20">
-                                <span className="text-xs">💬</span>
-                              </div>
-                              <span className="text-xs font-semibold text-tertiary-300 font-one">
-                                Réponse du salon
-                              </span>
-                              {review.salonRespondedAt && (
-                                <span className="ml-auto text-[11px] text-white/40 font-one">
-                                  {new Date(
-                                    review.salonRespondedAt,
-                                  ).toLocaleDateString("fr-FR")}
-                                </span>
-                              )}
-                            </div>
-                            <p className="text-xs leading-relaxed text-white/90 font-one">
-                              {review.salonResponse}
-                            </p>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Delete Button */}
-                  <button
-                    onClick={() => handleDeleteClick(review)}
-                    disabled={deletingId === review.id}
-                    className="flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-red-500/30 bg-red-500/15 text-red-300 transition-all duration-300 hover:border-red-400/50 hover:bg-red-500/25 hover:text-red-200 disabled:opacity-50"
-                    title="Supprimer cet avis"
-                  >
-                    {deletingId === review.id ? (
-                      <div className="w-3 h-3 border-2 border-red-300 border-t-transparent rounded-full animate-spin" />
-                    ) : (
-                      <FaTrash className="w-3 h-3" />
-                    )}
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Pagination */}
-        {totalReviews > 0 && (
-          <div className="flex items-center justify-between gap-3 mt-6 pt-6 border-t border-white/10">
-            <button
-              onClick={() => load(page - 1)}
-              disabled={!hasPrev || loading}
-              className="px-3 py-2 bg-white/5 border border-white/15 text-white/80 rounded-lg text-xs disabled:opacity-40 hover:bg-white/10 transition-colors"
-            >
-              Précédent
-            </button>
-            <span className="text-white/70 text-xs">Page {page}</span>
-            <button
-              onClick={() => load(page + 1)}
-              disabled={!hasNext || loading}
-              className="px-3 py-2 bg-white/5 border border-white/15 text-white/80 rounded-lg text-xs disabled:opacity-40 hover:bg-white/10 transition-colors"
-            >
-              Suivant
-            </button>
-          </div>
-        )}
-      </div>
-
-      {/* Modal de confirmation */}
-      {showDeleteModal && (
-        <div className="fixed inset-0 bg-noir-700/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-linear-to-br from-noir-500/6 to-white/3 backdrop-blur-xl border border-white/20 rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center shrink-0">
-                <FaExclamationTriangle className="w-6 h-6 text-red-400" />
-              </div>
-              <h3 className="text-white font-one font-semibold text-lg">
-                Supprimer cet avis ?
-              </h3>
-            </div>
-
-            {reviewToDelete && (
-              <div className="bg-white/5 rounded-lg p-3 border border-white/10">
-                <p className="text-white/80 font-one text-sm mb-2">
-                  <strong>{reviewToDelete.salon?.salonName}</strong>
-                </p>
-                <p className="text-white/60 font-one text-xs line-clamp-2">
-                  {reviewToDelete.title || reviewToDelete.comment || "Avis"}
-                </p>
-              </div>
-            )}
-
-            <p className="text-white/70 font-one text-sm">
-              Cette action est irréversible. Êtes-vous certain de vouloir
-              supprimer cet avis ?
-            </p>
-
-            <div className="flex gap-3 pt-2">
-              <button
-                onClick={handleCloseModal}
-                disabled={deletingId !== null}
-                className="cursor-pointer flex-1 px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white border border-white/20 hover:border-white/30 rounded-lg font-one text-sm transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Annuler
-              </button>
-              <button
-                onClick={handleConfirmDelete}
-                disabled={deletingId !== null}
-                className="cursor-pointer flex-1 px-4 py-2.5 bg-red-500/20 hover:bg-red-500/30 text-red-300 hover:text-red-200 border border-red-500/30 hover:border-red-400/50 rounded-lg font-one text-sm transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              >
-                {deletingId ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-red-300 border-t-transparent rounded-full animate-spin" />
-                    Suppression...
-                  </>
-                ) : (
-                  "Supprimer"
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </>
+    <div className="space-y-4 font-one [&_button:focus-visible]:outline-2 [&_button:focus-visible]:outline-offset-2 [&_button:focus-visible]:outline-tertiary-400 [&_a:focus-visible]:outline-2 [&_a:focus-visible]:outline-tertiary-400">
+      <div className="flex items-center justify-between gap-3 border-b border-white/10 pb-3"><div><h3 className="text-xl text-white">Mes avis</h3><p className="mt-1 text-xs text-white/50">Vos expériences et les réponses des salons.</p></div>{!loading && !error && <span className="shrink-0 rounded-lg bg-white/5 px-2.5 py-1.5 text-xs text-white/55">{totalReviews} avis</span>}</div>
+      {loading ? <div role="status" className="grid gap-3 xl:grid-cols-2"><span className="sr-only">Chargement des avis…</span>{[0,1].map((value) => <div key={value} aria-hidden="true" className="space-y-3 rounded-2xl border border-white/10 bg-noir-500 p-4 motion-safe:animate-pulse"><div className="h-9 w-40 rounded-lg bg-white/10" /><div className="h-3 w-24 rounded bg-white/5" /><div className="h-3 w-3/4 rounded bg-white/5" /></div>)}</div> : error ? <div role="alert" className="rounded-xl border border-white/10 p-5 text-center"><p className="mb-3 text-sm text-white/65">{error}</p><AppButton type="button" variant="secondary" onClick={() => void load(page)} className="min-h-11 cursor-pointer">Réessayer</AppButton></div> : reviews.length === 0 ? <div className="rounded-2xl border border-dashed border-white/15 bg-noir-500 px-4 py-6 text-center"><Star size={24} className="mx-auto mb-2 text-white/30" /><p className="mb-4 text-sm text-white/60">Vous n’avez pas encore partagé d’avis.</p><AppButton href="/trouver-un-salon" variant="secondary" className="min-h-11">Découvrir les salons</AppButton></div> : <div className="grid items-start gap-3 xl:grid-cols-2">{reviews.map((review) => <ClientReviewCard key={review.id} review={review} onDelete={() => setReviewToDelete(review)} deleting={deletingId !== null} />)}</div>}
+      {!error && (hasPrev || hasNext) && <nav aria-label="Pagination de mes avis" className="flex items-center justify-between gap-2 border-t border-white/10 pt-3"><AppButton type="button" variant="secondary" onClick={() => void load(page - 1)} disabled={!hasPrev || loading} className="min-h-11 cursor-pointer">Précédent</AppButton><span className="text-xs text-white/50">Page {page}</span><AppButton type="button" variant="secondary" onClick={() => void load(page + 1)} disabled={!hasNext || loading} className="min-h-11 cursor-pointer">Suivant</AppButton></nav>}
+      <ConfirmActionModal isOpen={reviewToDelete !== null} title="Supprimer cet avis ?" description={`Votre avis${reviewToDelete?.salon ? ` sur ${reviewToDelete.salon.salonName}` : ""} sera supprimé définitivement.`} confirmLabel="Supprimer" intent="danger" loading={deletingId !== null} onConfirm={handleConfirmDelete} onClose={() => { if (!deletingId) setReviewToDelete(null); }} />
+    </div>
   );
 }

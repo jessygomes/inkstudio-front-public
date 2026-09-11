@@ -1,4 +1,3 @@
-/* eslint-disable react/no-unescaped-entities */
 "use client";
 
 import { useEffect, useRef, useState } from "react";
@@ -41,6 +40,7 @@ export type Appointment = {
   visioRoom?: string | null;
   salon: {
     id: string;
+    role?: string;
     salonName: string;
     firstName: string;
     lastName: string;
@@ -118,6 +118,7 @@ type RdvResponse = {
 export default function RendezVousTab() {
   const [rdvData, setRdvData] = useState<RdvResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [statusFilter, setStatusFilter] = useState<string>("");
   const [currentPage, setCurrentPage] = useState(1);
   const [limit] = useState(10);
@@ -157,6 +158,7 @@ export default function RendezVousTab() {
   const fetchRdvClient = async (status?: string, page = 1, pageLimit = 10) => {
     try {
       setLoading(true);
+      setLoadError(false);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const options: any = { page, limit: pageLimit };
       if (status) options.status = status;
@@ -200,10 +202,12 @@ export default function RendezVousTab() {
         });
       } else {
         console.error("Erreur récupération RDV:", result.message);
+        setLoadError(true);
         setRdvData(null);
       }
     } catch (error) {
       console.error("Erreur fetch RDV:", error);
+      setLoadError(true);
       setRdvData(null);
     } finally {
       setLoading(false);
@@ -373,7 +377,8 @@ export default function RendezVousTab() {
   };
 
   const handleReviewClick = (appointmentId: string) => {
-    toggleExpand(appointmentId);
+    setExpandedAppointments((previous) => new Set(previous).add(appointmentId));
+    requestAnimationFrame(() => document.getElementById(`appointment-review-${appointmentId}`)?.scrollIntoView({ behavior: "smooth", block: "start" }));
   };
 
   //! Ouverture modal moodboard lié au RDV
@@ -481,34 +486,27 @@ export default function RendezVousTab() {
   return (
     <div
       ref={listTopRef}
-      className="rounded-3xl border border-white/10 bg-linear-to-br from-noir-500/6 to-white/3 p-4 shadow-xl sm:p-5"
+      className="scroll-mt-28 font-one [&_button:focus-visible]:outline-2 [&_button:focus-visible]:outline-offset-2 [&_button:focus-visible]:outline-tertiary-400 [&_a:focus-visible]:outline-2 [&_a:focus-visible]:outline-tertiary-400"
     >
       {/* Header */}
-      <div className="mb-5 flex items-start justify-between gap-3 border-b border-white/10 pb-4">
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <div className="min-w-0 flex-1 space-y-1">
           <h3 className="text-lg font-semibold text-white font-one sm:text-xl">
             Mes rendez-vous
           </h3>
           {rdvData && (
             <p className="truncate text-white/60 font-one text-xs">
-              {rdvData.pagination.totalAppointments} rendez-vous au total
+              {rdvData.pagination.totalAppointments} rendez-vous {statusFilter ? "dans cette catégorie" : "au total"}
             </p>
           )}
         </div>
 
-        <div className="flex shrink-0 items-center gap-2">
-          <div className="flex shrink-0 items-center gap-1.5 rounded-2xl border border-white/12 bg-white/6 px-3 py-1 text-xs text-white/70 font-one">
-            <FaCalendarAlt className="w-3.5 h-3.5 text-tertiary-300" />
-            {rdvData
-              ? `Page ${rdvData.pagination.currentPage}/${rdvData.pagination.totalPages}`
-              : ""}
-          </div>
-        </div>
+        <Link href="/trouver-un-salon" className="inline-flex min-h-11 shrink-0 items-center rounded-xl border border-white/15 px-3 text-xs text-white/75 transition hover:bg-white/5">Trouver un salon</Link>
       </div>
 
       {/* Filtres modernisés */}
       <div className="mb-5">
-        <div className="no-scrollbar -mx-1 flex gap-1.5 overflow-x-auto overflow-y-hidden px-1 py-1 [scrollbar-width:none] [-ms-overflow-style:none] sm:mx-0 sm:flex-wrap sm:gap-2 sm:overflow-visible sm:px-0 sm:py-0">
+        <div className="flex flex-wrap gap-1 border-b border-white/10 pb-2">
           {[
             { label: "Tous", value: "" },
             { label: "Confirmés", value: "CONFIRMED" },
@@ -520,11 +518,12 @@ export default function RendezVousTab() {
             return (
               <button
                 key={item.value || "all"}
+                aria-pressed={isActive}
                 onClick={() => handleStatusChange(item.value)}
-                className={`shrink-0 cursor-pointer rounded-full border px-3 py-1.5 text-xs font-medium transition-all duration-200 font-one ${
+                className={`shrink-0 min-h-11 cursor-pointer rounded-lg px-4 py-2 text-sm transition-colors font-one ${
                   isActive
-                    ? "border-transparent bg-linear-to-r from-tertiary-400 to-tertiary-500 text-white shadow-lg shadow-tertiary-500/30"
-                    : "border-white/12 bg-white/6 text-white/70 hover:border-white/25 hover:text-white"
+                    ? "bg-white/10 text-white"
+                    : "text-white/50 hover:bg-white/5 hover:text-white"
                 }`}
               >
                 {item.label}
@@ -555,12 +554,14 @@ export default function RendezVousTab() {
             Chargement des rendez-vous...
           </p>
         </div>
+      ) : loadError ? (
+        <div role="alert" className="rounded-xl border border-white/10 p-6 text-center"><p className="text-sm text-white/65">Impossible de charger vos rendez-vous.</p><button type="button" onClick={() => fetchRdvClient(statusFilter, currentPage, limit)} className="mt-3 min-h-11 cursor-pointer rounded-xl border border-white/15 px-4 text-sm text-white">Réessayer</button></div>
       ) : !rdvData || rdvData.appointments.length === 0 ? (
         <div className="text-center py-12">
           <FaCalendarAlt className="w-12 h-12 text-white/30 mx-auto mb-4" />
           <p className="text-white/60 font-one mb-4">
             {statusFilter
-              ? `Aucun rendez-vous ${statusFilter.toLowerCase()} trouvé`
+              ? "Aucun rendez-vous dans cette catégorie"
               : "Vous n'avez pas encore de rendez-vous"}
           </p>
           <Link
@@ -573,8 +574,8 @@ export default function RendezVousTab() {
       ) : (
         <>
           {/* Liste des rendez-vous modernisée */}
-          <div className="space-y-2.5 grid sm:grid-cols-2 gap-3">
-            {rdvData.appointments
+          <div className="grid grid-cols-1 gap-4">
+            {[...rdvData.appointments]
               .sort((a, b) => {
                 const aUnread = a.conversation?.unreadCount || 0;
                 const bUnread = b.conversation?.unreadCount || 0;
@@ -622,9 +623,10 @@ export default function RendezVousTab() {
 
               <div className="flex items-center gap-2 mx-auto sm:mx-0">
                 <button
+                  aria-label="Page précédente"
                   onClick={() => handlePageChange(currentPage - 1)}
                   disabled={currentPage === 1}
-                  className="cursor-pointer w-7 h-7 flex items-center justify-center bg-white/5 hover:bg-white/10 disabled:bg-white/5 text-white/80 disabled:text-white/30 border border-white/10 rounded-2xl transition-all disabled:cursor-not-allowed"
+                  className="cursor-pointer w-11 h-11 flex items-center justify-center bg-white/5 hover:bg-white/10 disabled:bg-white/5 text-white/80 disabled:text-white/30 border border-white/10 rounded-2xl transition-all disabled:cursor-not-allowed"
                 >
                   <FaChevronLeft className="w-3 h-3" />
                 </button>
@@ -650,8 +652,10 @@ export default function RendezVousTab() {
                       return (
                         <button
                           key={pageNum}
+                          aria-current={currentPage === pageNum ? "page" : undefined}
+                          aria-label={`Page ${pageNum}`}
                           onClick={() => handlePageChange(pageNum)}
-                          className={`cursor-pointer w-7 h-7 rounded-2xl text-xs font-one font-medium transition-all ${
+                          className={`cursor-pointer w-11 h-11 rounded-2xl text-xs font-one font-medium transition-all ${
                             currentPage === pageNum
                               ? "bg-tertiary-500 text-white shadow-lg shadow-tertiary-500/25"
                               : "bg-white/5 hover:bg-white/10 text-white/70"
@@ -665,9 +669,10 @@ export default function RendezVousTab() {
                 </div>
 
                 <button
+                  aria-label="Page suivante"
                   onClick={() => handlePageChange(currentPage + 1)}
                   disabled={currentPage === rdvData.pagination.totalPages}
-                  className="cursor-pointer w-7 h-7 flex items-center justify-center bg-white/5 hover:bg-white/10 disabled:bg-white/5 text-white/80 disabled:text-white/30 border border-white/10 rounded-2xl transition-all disabled:cursor-not-allowed"
+                  className="cursor-pointer w-11 h-11 flex items-center justify-center bg-white/5 hover:bg-white/10 disabled:bg-white/5 text-white/80 disabled:text-white/30 border border-white/10 rounded-2xl transition-all disabled:cursor-not-allowed"
                 >
                   <FaChevronRight className="w-3 h-3" />
                 </button>
