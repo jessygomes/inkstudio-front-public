@@ -167,7 +167,7 @@ SalonImageUploaderProps) {
   };
 
   return (
-    <div className={`w-full space-y-${compact ? "2" : "4"}`}>
+    <div className={`w-full ${compact ? "space-y-2" : "space-y-4"}`}>
       {/* Zone d'affichage et d'upload responsive */}
       <div
         className={compact ? "space-y-2" : "flex flex-col sm:flex-row gap-4"}
@@ -177,7 +177,7 @@ SalonImageUploaderProps) {
           <div
             className={`relative ${
               compact ? "w-24 h-24" : "w-48 h-48 sm:w-56 sm:h-56"
-            } rounded-${compact ? "lg" : "2xl"} overflow-hidden bg-white/10 ${
+            } ${compact ? "rounded-lg" : "rounded-2xl"} overflow-hidden bg-white/10 ${
               compact ? "" : "sm:flex-shrink-0"
             }`}
           >
@@ -189,10 +189,11 @@ SalonImageUploaderProps) {
             />
             <button
               type="button"
+              aria-label="Supprimer la photo de profil"
               onClick={handleImageRemove}
               disabled={isDeleting}
               className={`cursor-pointer absolute top-1 right-1 bg-red-500 hover:bg-red-600 disabled:bg-red-500/50 text-white rounded-full ${
-                compact ? "w-6 h-6 text-xs" : "w-7 h-7 sm:w-8 sm:h-8"
+                compact ? "w-11 h-11 text-sm" : "w-11 h-11"
               } flex items-center justify-center transition-colors z-10 disabled:cursor-not-allowed`}
             >
               {isDeleting ? (
@@ -219,8 +220,8 @@ SalonImageUploaderProps) {
 
         {/* Zone d'upload responsive */}
         <div
-          className={`relative border-2 border-dashed rounded-${
-            compact ? "lg" : "xl sm:rounded-[20px]"
+          className={`relative border-2 border-dashed focus-within:border-tertiary-400 ${
+            compact ? "rounded-lg" : "rounded-xl sm:rounded-[20px]"
           } ${compact ? "p-3" : "p-4 sm:p-6"} text-center transition-colors ${
             compact
               ? "flex-1 min-h-[80px]"
@@ -238,13 +239,14 @@ SalonImageUploaderProps) {
         >
           <input
             type="file"
+            aria-label={currentImage ? "Remplacer la photo de profil" : "Ajouter une photo de profil"}
             accept="image/*"
             onChange={(e) => handleFiles(e.target.files)}
             disabled={isUploading || isDeleting}
             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
           />
 
-          <div className={`space-y-${compact ? "1" : "2"}`}>
+          <div className={compact ? "space-y-1" : "space-y-2"}>
             <div className={compact ? "text-2xl" : "text-3xl sm:text-4xl"}>
               📸
             </div>

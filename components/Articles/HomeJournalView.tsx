@@ -3,26 +3,7 @@ import { ArrowUpRight } from "lucide-react";
 import AppButton from "@/components/Shared/AppButton";
 import type { PublicArticle } from "@/lib/actions/article.action";
 
-import { getLatestPublicArticlesAction } from "@/lib/actions/article.action";
-
-export default async function ArticleAccueil() {
-  let articles = [] as Awaited<ReturnType<typeof getLatestPublicArticlesAction>>;
-
-  try {
-    articles = await getLatestPublicArticlesAction();
-  } catch (error) {
-    console.error("Erreur chargement derniers articles:", error);
-  }
-
-  if (!articles.length) {
-    return null;
-  }
-
-  return <HomeJournalView articles={articles} />;
-}
-
-
-function HomeJournalView({ articles }: { articles: PublicArticle[] }) {
+export default function HomeJournalView({ articles }: { articles: PublicArticle[] }) {
   return (
     <section aria-labelledby="home-journal-title" className="bg-noir-700 py-16 font-one sm:py-24">
       <div className="mx-4 sm:mx-8 lg:mx-20">
@@ -46,3 +27,4 @@ function HomeJournalView({ articles }: { articles: PublicArticle[] }) {
     </section>
   );
 }
+

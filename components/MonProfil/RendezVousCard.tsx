@@ -3,6 +3,7 @@ import { Clock, MapPin, MessageSquare, ChevronDown, Video, Phone } from "lucide-
 import Link from "next/link";
 import Image from "next/image";
 import { toSlug } from "@/lib/utils";
+import AppointmentReview from "./AppointmentReview";
 import AppButton from "@/components/Shared/AppButton";
 import {
   FaStar,
@@ -19,7 +20,7 @@ type ReviewFormState = {
   comment: string;
 };
 
-type RendezVousCardProps = {
+export type RendezVousCardProps = {
   appointment: Appointment;
   isExpanded: boolean;
   hasReview: boolean;
@@ -357,161 +358,15 @@ export default function RendezVousCard({
             )}
 
             {appointment.status === "COMPLETED" && (
-              <button
-                onClick={() => handleReviewClick(appointment.id)}
-                className="cursor-pointer min-h-11 sm:min-h-9 rounded-xl border border-amber-400/30 bg-amber-500/10 px-2.5 py-2 text-xs text-amber-200 transition-all hover:bg-amber-500/20 font-one"
-              >
-                ⭐ {hasReview ? "Voir l'avis" : "Donner un avis"}
-              </button>
+              <AppButton type="button" variant="secondary" onClick={() => handleReviewClick(appointment.id)} icon={<FaStar aria-hidden="true" size={14} />} className="min-h-11 cursor-pointer">
+                {hasReview ? "Voir l'avis" : "Donner un avis"}
+              </AppButton>
             )}
 
 
             </div></div>
             {appointment.status === "COMPLETED" && (
-              <div id={`appointment-review-${appointment.id}`} className="scroll-mt-28 rounded-2xl border border-amber-400/30 bg-amber-500/5 p-3.5">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/15 text-lg">
-                    ⭐
-                  </span>
-                  <div>
-                    <p className="text-white font-one text-sm font-semibold">
-                      {hasReview ? "Votre avis" : "Donner votre avis"}
-                    </p>
-                    <p className="text-white/60 text-xs font-one">
-                      Partagez votre expérience avec le salon
-                    </p>
-                  </div>
-                </div>
-
-                {hasReview ? (
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2">
-                      <div className="text-amber-300 text-sm">
-                        {Array.from({ length: 5 }).map((_, i) => (
-                          <span key={i}>{i < (appointment.review?.rating || 0) ? "★" : "☆"}</span>
-                        ))}
-                      </div>
-                      <span className="text-white/70 text-xs">{appointment.review?.rating}/5</span>
-                      {appointment.review?.isVerified && (
-                        <span className="ml-auto px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-400/30 font-one text-emerald-200 text-[11px]">
-                          ✓ Vérifié
-                        </span>
-                      )}
-                    </div>
-
-                    {appointment.review?.title && (
-                      <p className="text-white font-semibold text-sm font-one">
-                        {appointment.review.title}
-                      </p>
-                    )}
-
-                    {appointment.review?.comment && (
-                      <p className="text-white/80 text-sm leading-relaxed font-one">
-                        {appointment.review.comment}
-                      </p>
-                    )}
-
-                    <p className="text-white/50 text-xs border-t border-white/10 pt-2 font-one">
-                      Publié le{" "}
-                      {appointment.review?.createdAt
-                        ? new Date(appointment.review.createdAt).toLocaleDateString("fr-FR")
-                        : ""}
-                    </p>
-
-                    {appointment.review?.salonResponse && (
-                      <div className="rounded-lg border border-white/10 bg-white/5 p-3">
-                        <p className="text-white/70 text-xs mb-1 font-one font-semibold">
-                          Réponse du salon
-                        </p>
-                        <p className="text-white/80 text-sm font-one">
-                          {appointment.review.salonResponse}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2">
-                      {Array.from({ length: 5 }).map((_, i) => {
-                        const value = i + 1;
-                        const active = (hoverRating ?? reviewForm.rating) >= value;
-                        return (
-                          <button
-                            key={value}
-                            type="button"
-                            onMouseEnter={() => setHoverRating(value)}
-                            onMouseLeave={() => setHoverRating(null)}
-                            onClick={() =>
-                              setReviewForm((f) => ({
-                                ...f,
-                                rating: value,
-                              }))
-                            }
-                            className="p-1"
-                          >
-                            <FaStar
-                              className={`w-5 h-5 transition-all ${
-                                active
-                                  ? "text-amber-300 scale-105 drop-shadow-[0_0_6px_rgba(251,191,36,0.5)]"
-                                  : "text-white/30 hover:text-white/60"
-                              }`}
-                            />
-                          </button>
-                        );
-                      })}
-                      <span className="text-white/70 text-xs ml-2">{reviewForm.rating}/5</span>
-                    </div>
-
-                    <div className="space-y-1 font-one">
-                      <label className="text-white/80 text-xs">Titre (optionnel)</label>
-                      <input
-                        type="text"
-                        value={reviewForm.title}
-                        onChange={(e) =>
-                          setReviewForm((f) => ({
-                            ...f,
-                            title: e.target.value,
-                          }))
-                        }
-                        maxLength={100}
-                        placeholder="Ex: Excellent travail"
-                        className="w-full px-3 py-2 rounded-2xl bg-white/5 border border-white/15 text-white text-xs focus:outline-none focus:border-tertiary-400 focus:ring-1 focus:ring-tertiary-400/30 placeholder:text-white/40"
-                      />
-                      <p className="text-white/40 text-[11px]">{reviewForm.title.length}/100</p>
-                    </div>
-
-                    <div className="space-y-1">
-                      <label className="text-white/80 text-xs">Votre avis</label>
-                      <textarea
-                        value={reviewForm.comment}
-                        onChange={(e) =>
-                          setReviewForm((f) => ({
-                            ...f,
-                            comment: e.target.value,
-                          }))
-                        }
-                        maxLength={500}
-                        rows={3}
-                        placeholder="Partagez votre expérience..."
-                        className="w-full px-3 py-2 rounded-2xl bg-white/5 border border-white/15 text-white text-xs focus:outline-none focus:border-tertiary-400 focus:ring-1 focus:ring-tertiary-400/30 placeholder:text-white/40 resize-none"
-                      />
-                      <p className="text-white/40 text-[11px]">{reviewForm.comment.length}/500</p>
-                    </div>
-
-                    <div className="flex justify-end">
-                      <AppButton
-                        onClick={() => handleSubmitReview(appointment)}
-                        disabled={reviewSubmitting}
-                        variant="primary"
-                        icon={reviewSubmitting ? <div className="animate-spin rounded-full h-3 w-3 border-2 border-white border-t-transparent" /> : undefined}
-                        className="text-xs py-2 cursor-pointer"
-                      >
-                        {reviewSubmitting ? "Publication..." : "Publier l'avis"}
-                      </AppButton>
-                    </div>
-                  </div>
-                )}
-              </div>
+              <AppointmentReview appointment={appointment} hasReview={hasReview} reviewForm={reviewForm} hoverRating={hoverRating} reviewSubmitting={reviewSubmitting} setHoverRating={setHoverRating} setReviewForm={setReviewForm} handleSubmitReview={handleSubmitReview} />
             )}
           </div>
         )}

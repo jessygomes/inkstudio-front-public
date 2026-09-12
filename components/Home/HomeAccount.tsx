@@ -4,7 +4,7 @@ import { useSession } from "next-auth/react";
 import { CalendarDays, Heart, Images, MessageCircle, UserPlus } from "lucide-react";
 import AppButton from "@/components/Shared/AppButton";
 
-export default function ClientAccountPromoSection() {
+export default function HomeAccount() {
   const { status } = useSession();
   if (status !== "unauthenticated") return null;
   return (
@@ -23,3 +23,4 @@ export default function ClientAccountPromoSection() {
     </section>
   );
 }
+
