@@ -22,16 +22,21 @@ export default async function ArticlesPage() {
     <>
     <section className="bg-noir-700 py-20 sm:py-0 sm:pt-10 sm:pb-24">
       <div className="mx-4 sm:mx-8 lg:mx-20">
-        <div className="mb-12 text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-tertiary-400 font-one">
+        <header className="pb-6 pt-3 font-one sm:pb-8 sm:pt-5">
+          <p className="mb-4 text-xs uppercase tracking-[0.2em] text-tertiary-400">
             Journal Inkera
           </p>
-          <h1 className="mt-3 text-4xl font-bold text-white font-two sm:text-5xl">
+          <h1 className="text-balance font-two text-3xl font-semibold leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl">
             Tous nos articles
           </h1>
-          <p className="mx-auto mt-3 max-w-2xl text-sm text-white/65 font-one sm:text-base">
+          <p className="mt-4 max-w-2xl text-base leading-7 text-white/60">
             Conseils, inspirations et tendances autour du tatouage.
           </p>
+        </header>
+
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border-y border-white/10 py-5 font-one">
+          <p className="text-sm font-medium text-white/85">À découvrir dans le journal</p>
+          {!errorMessage && <p role="status" className="text-sm text-white/60">{articles.length} article{articles.length > 1 ? "s" : ""} disponible{articles.length > 1 ? "s" : ""}</p>}
         </div>
 
         {errorMessage ? (

@@ -15,6 +15,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { MapPin, Palette, RotateCcw, SlidersHorizontal } from "lucide-react";
 import { createPortal } from "react-dom";
 import { FaInstagram } from "react-icons/fa";
 import { FaArrowLeft, FaArrowRight, FaXmark } from "react-icons/fa6";
@@ -495,36 +496,28 @@ export default function InspirationMosaicFeed({
 
   return (
     <section className="space-y-6 font-one">
-      <header className="space-y-2">
-        <p className="inline-flex items-center rounded-2xl border border-tertiary-400/30 bg-tertiary-500/15 px-3 py-1 text-[11px] tracking-[0.14em] text-tertiary-100 uppercase">
+      <header className="pb-2 pt-3 sm:pb-4 sm:pt-5">
+        <p className="mb-4 text-xs uppercase tracking-[0.2em] text-tertiary-400">
           Inspiration
         </p>
-        <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
-          <h1 className="text-2xl font-semibold text-white sm:text-3xl lg:text-4xl tracking-wide">
+        <div className="mb-4">
+          <h1 className="text-balance font-two text-3xl font-semibold leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl">
             Mosaïque de tatouages
           </h1>
-          <p className="shrink-0 text-sm text-white/70 sm:text-base">{filteredIntroText}</p>
         </div>
-        {isUsingMockData ? (
-          <p className="text-xs text-white/70">
-            Ces images sont présentées en guise d'exemple. Les noms et informations des artistes et salons sont fictifs.
-          </p>
-        ) : (
-          <p className="text-xs text-white/70">
-            Explore les portfolios des salons partenaires et laisse défiler pour charger davantage d'inspirations.
-          </p>
-        )}
+        <p className="max-w-2xl text-base leading-7 text-white/60">Explorez les univers des artistes et trouvez l’inspiration pour votre prochain projet.</p>
+        {isUsingMockData && <p className="mt-3 max-w-2xl text-xs leading-6 text-white/50">Ces images sont présentées à titre d’exemple. Les noms et informations des artistes et salons sont fictifs.</p>}
       </header>
 
-      <div className="flex flex-col gap-4 rounded-3xl sm:flex-row sm:items-end sm:justify-between">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
+      <div className="flex flex-col gap-5 border-y border-white/10 py-5 lg:flex-row lg:items-end lg:justify-between">
+        <div className="grid min-w-0 gap-4 sm:grid-cols-2 sm:gap-6 lg:flex lg:items-end">
           <div className="flex flex-col gap-2 font-one">
-            <label className="text-xs text-white/80" htmlFor="inspiration-city-select">
-              Par ville
+            <label className="flex items-center gap-2 text-sm text-white/75" htmlFor="inspiration-city-select">
+              <MapPin size={15} aria-hidden="true" className="text-tertiary-400" /> Ville
             </label>
             <select
               id="inspiration-city-select"
-              className="w-full rounded-2xl border border-white/10 bg-black/20 px-3 py-2 text-xs text-white transition focus:outline-none focus:ring-2 focus:ring-tertiary-500 sm:w-64"
+              className="min-h-12 w-full min-w-0 cursor-pointer rounded-lg border border-white/15 bg-noir-500 px-3 py-3 text-base text-white transition-colors [color-scheme:dark] hover:border-white/30 focus:outline-none focus:border-tertiary-400 focus:ring-2 focus:ring-tertiary-400/20 sm:text-sm lg:w-64"
               value={selectedCity}
               onChange={(e) => handleCityChange(e.target.value)}
             >
@@ -540,12 +533,12 @@ export default function InspirationMosaicFeed({
           </div>
 
           <div className="flex flex-col gap-2 font-one">
-            <label className="text-xs text-white/80" htmlFor="inspiration-style-select">
-              Par style
+            <label className="flex items-center gap-2 text-sm text-white/75" htmlFor="inspiration-style-select">
+              <Palette size={15} aria-hidden="true" className="text-tertiary-400" /> Style
             </label>
             <select
               id="inspiration-style-select"
-              className="w-full rounded-2xl border border-white/10 bg-black/20 px-3 py-2 text-xs text-white transition focus:outline-none focus:ring-2 focus:ring-tertiary-500 sm:w-64"
+              className="min-h-12 w-full min-w-0 cursor-pointer rounded-lg border border-white/15 bg-noir-500 px-3 py-3 text-base text-white transition-colors [color-scheme:dark] hover:border-white/30 focus:outline-none focus:border-tertiary-400 focus:ring-2 focus:ring-tertiary-400/20 sm:text-sm lg:w-64"
               value={selectedStyle}
               onChange={(e) => handleStyleChange(e.target.value)}
             >
@@ -561,27 +554,18 @@ export default function InspirationMosaicFeed({
           </div>
         </div>
 
-        {(selectedCity || selectedStyle) && (
-          <div className="flex flex-wrap items-center gap-2">
-            {selectedCity && (
-              <span className="inline-flex items-center rounded-full border border-cyan-300/30 bg-cyan-400/15 px-3 py-1 text-xs text-cyan-100">
-                ville: {selectedCity}
-              </span>
-            )}
-            {selectedStyle && (
-              <span className="inline-flex items-center rounded-full border border-tertiary-300/30 bg-tertiary-400/15 px-3 py-1 text-xs text-tertiary-100">
-                style: {selectedStyle}
-              </span>
-            )}
-            <button
-              type="button"
-              onClick={clearAllFilters}
-              className="cursor-pointer rounded-2xl border border-white/10 px-3 py-1.5 text-xs text-white/70 transition hover:bg-white/5 hover:text-white"
-            >
-              Réinitialiser
-            </button>
-          </div>
-        )}
+        <AppButton type="button" variant="secondary" onClick={clearAllFilters} disabled={!selectedCity && !selectedStyle} icon={<RotateCcw size={15} aria-hidden="true" />} className="min-h-12 self-start cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-tertiary-400 lg:self-end">
+          Réinitialiser
+        </AppButton>
+      </div>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <p role="status" className="text-sm text-white/60">{filteredIntroText}</p>
+        {(selectedCity || selectedStyle) && <div className="flex flex-wrap items-center gap-2 text-xs text-white/70">
+          <SlidersHorizontal size={14} aria-hidden="true" className="text-tertiary-400" />
+          <span>Filtres actifs :</span>
+          {selectedCity && <span className="max-w-full wrap-anywhere rounded-md bg-tertiary-400/10 px-2.5 py-1.5 text-tertiary-400">{selectedCity}</span>}
+          {selectedStyle && <span className="max-w-full wrap-anywhere rounded-md bg-tertiary-400/10 px-2.5 py-1.5 text-tertiary-400">{selectedStyle}</span>}
+        </div>}
       </div>
 
       <div className="columns-2 gap-3 sm:columns-3 sm:gap-3 xl:columns-4 2xl:columns-5">
