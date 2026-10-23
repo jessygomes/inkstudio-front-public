@@ -45,6 +45,7 @@ export default function Navbar({ showLogo = false }: NavbarProps) {
 
   const profileTabLinks = [
     { href: "/mon-profil?tab=rdv", label: "Rendez-vous" },
+    { href: "/mon-profil?tab=messagerie", label: "Messagerie" },
     { href: "/mon-profil?tab=moodboard", label: "Moodboard" },
     { href: "/mon-profil?tab=favoris", label: "Favoris" },
     { href: "/mon-profil?tab=mesavis", label: "Mes avis" },
@@ -183,9 +184,10 @@ export default function Navbar({ showLogo = false }: NavbarProps) {
                     key={link.href}
                     href={link.href}
                     onClick={() => setIsProfileMenuOpen(false)}
-                    className="block rounded-xl px-3 py-2 text-xs font-two tracking-wide text-white/75 transition hover:bg-white/10 hover:text-white"
+                    className="flex cursor-pointer items-center justify-between gap-3 rounded-xl px-3 py-2 text-xs font-two tracking-wide text-white/75 transition hover:bg-white/10 hover:text-white"
                   >
                     {link.label}
+                    {link.href === "/mon-profil?tab=messagerie" && unreadCount > 0 && <span aria-label={`${unreadCount} messages non lus`} className="flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-[10px] font-bold text-white">{unreadCount > 99 ? "99+" : unreadCount}</span>}
                   </Link>
                 ))}
                 <div className="my-1 h-px bg-white/10" />

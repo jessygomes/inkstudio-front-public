@@ -90,7 +90,7 @@ export default function ProfilGlobal(user: User) {
   if (loading) {
     return (
       <div className="">
-        <div className="mx-auto px-4 sm:px-6 py-8 lg:px-20">
+        <div className="mx-auto px-4 sm:px-6 py-6 lg:px-8 xl:px-12">
           {/* Header skeleton */}
           <div className="border-b border-white/10 pb-6 mb-8 animate-pulse">
             <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
@@ -152,7 +152,7 @@ export default function ProfilGlobal(user: User) {
 
   if (!profileData) {
     return (
-      <div className="min-h-screen bg-linear-to-b from-noir-700 via-noir-500 to-noir-700 pt-20 flex items-center justify-center">
+      <div className="min-h-screen bg-noir-700 pt-20 flex items-center justify-center">
         <div className="text-center">
           <p className="text-white/60 font-one mb-4">
             Erreur lors du chargement du profil
@@ -167,10 +167,10 @@ export default function ProfilGlobal(user: User) {
   return (
     <div className="relative">
     
-      <div className="relative mx-auto px-4 sm:px-6 py-8 lg:px-20">
-        <section aria-label="Mon profil" className="mb-8">
-          <div className="border-b border-white/10 lg:flex lg:items-end lg:gap-6 bg-linear-to-l from-noir-700 via-noir-500 to-noir-700 pt-5 px-5 rounded-t-2xl">
-            <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between lg:w-64 lg:shrink-0 lg:pb-3 xl:w-72">
+      <div className="relative mx-auto px-4 sm:px-6 py-6 lg:px-8 xl:px-12">
+        <section aria-label="Mon profil" className={activeTab === "messagerie" ? "mb-0" : "mb-6"}>
+          <div className="border-b border-white/10 lg:flex lg:items-end lg:gap-6 bg-noir-700 pt-5 px-5 rounded-t-2xl">
+            <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between lg:max-w-sm lg:shrink-0 lg:pb-4">
               <div className="flex min-w-0 items-center gap-4 sm:gap-6 lg:gap-3">
                 <div className="relative flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/5 sm:h-20 sm:w-20 lg:h-12 lg:w-12">
                   {profileData.image ? (
@@ -181,9 +181,9 @@ export default function ProfilGlobal(user: User) {
                 </div>
                 <div className="min-w-0">
                   <p className="mb-2 font-one text-xs uppercase tracking-[0.2em] text-tertiary-400">Mon espace Inkera</p>
-                  <h1 className="wrap-anywhere font-two text-3xl font-semibold leading-tight tracking-tight text-white sm:text-4xl lg:text-3xl">
+                  <div className="flex items-center gap-2"><h1 className="wrap-anywhere font-two text-3xl font-semibold leading-tight tracking-tight text-white sm:text-4xl lg:text-3xl">
                     {profileData.firstName} {profileData.lastName}
-                  </h1>
+                  </h1><Link href="/mon-profil/modifier" aria-label="Modifier le profil" title="Modifier le profil" className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-white/10 text-white/50 transition hover:border-tertiary-400/40 hover:bg-tertiary-400/10 hover:text-tertiary-400 focus-visible:outline-2 focus-visible:outline-tertiary-400"><FaEdit className="h-4 w-4" /></Link></div>
                 </div>
               </div>
             </div>
@@ -197,17 +197,12 @@ export default function ProfilGlobal(user: User) {
                   { key: "favoris", icon: FaHeart, label: "Favoris" },
                   { key: "mesavis", icon: Star, label: "Mes avis" },
                   { key: "infos", icon: FaUser, label: "Mes informations" },
-                  { key: "modifier", icon: FaEdit, label: "Modifier le profil", href: "/mon-profil/modifier" },
                 ] as const).map((item) => {
                   const Icon = item.icon;
                   const className = `flex min-h-12 shrink-0 whitespace-nowrap cursor-pointer items-center gap-2 border-b-2 py-3 text-sm font-medium transition-colors font-one focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary-400 ${activeTab === item.key ? "border-tertiary-400 text-tertiary-400" : "border-transparent text-white/60 hover:border-white/30 hover:text-white"}`;
                   const content = <><Icon aria-hidden="true" className="h-4 w-4 shrink-0" /><span>{item.label}</span></>;
 
-                  return "href" in item ? (
-                    <Link key={item.key} href={item.href} className={className}>
-                      {content}
-                    </Link>
-                  ) : (
+                  return (
                     <button
                       key={item.key}
                       type="button"

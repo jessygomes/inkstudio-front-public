@@ -285,6 +285,10 @@ export default function NavbarMobile() {
                         </div>
                       </div>
                     </Link>
+                    <Link href="/mon-profil?tab=messagerie" onClick={handleClose} className="flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-one text-white/85 transition hover:bg-white/10">
+                      <span>Messagerie</span>
+                      {unreadCount > 0 && <span aria-label={`${unreadCount} messages non lus`} className="flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-[10px] font-bold text-white">{unreadCount > 99 ? "99+" : unreadCount}</span>}
+                    </Link>
                   </div>
                 ) : (
                   <div className="flex flex-col gap-4">

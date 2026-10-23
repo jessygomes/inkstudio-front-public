@@ -17,12 +17,14 @@ interface MessageBubblesProps {
   messages: ConversationMessageDto[];
   currentUserId?: string;
   onDeleteMessage?: (messageId: string) => void;
+  compact?: boolean;
 }
 
 export default function MessageBubbles({
   messages,
   currentUserId,
   onDeleteMessage,
+  compact = false,
 }: MessageBubblesProps) {
   if (!messages || messages.length === 0) {
     return (
@@ -84,7 +86,7 @@ export default function MessageBubbles({
             >
               <div className="flex items-start gap-1">
                 <div
-                  className={`min-w-0 rounded-2xl border px-4 py-3 text-[13px] ${
+                  className={`min-w-0 rounded-2xl border px-4 py-3 ${compact ? "text-xs" : "text-[13px]"} ${
                     isOwnMessage
                       ? "rounded-br-md border-tertiary-400/25 bg-tertiary-500/25 text-white"
                       : "rounded-bl-md border-white/10 bg-white/5 text-white/90"

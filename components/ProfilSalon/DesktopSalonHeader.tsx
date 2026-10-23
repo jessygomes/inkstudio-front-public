@@ -1,5 +1,6 @@
 import Image from "next/image";
-import { BadgeCheck, MapPin } from "lucide-react";
+import { MapPin } from "lucide-react";
+import VerifiedProfileBadge from "@/components/Shared/VerifiedProfileBadge";
 import FavoriteBtn from "@/components/Shared/FavoriteBtn";
 
 type Props = {
@@ -33,7 +34,7 @@ export default function DesktopSalonHeader({ salonId, name, cover, portrait, cit
             {portrait ? <Image src={portrait} alt={name} fill sizes="112px" className="object-cover" /> : name?.charAt(0)}
           </div>
           <div className="min-w-0">
-            {verified && <span className="mb-3 inline-flex items-center gap-1.5 text-xs text-emerald-300"><BadgeCheck size={16} /> Profil vérifié</span>}
+            {verified && <VerifiedProfileBadge className="mb-3" iconSize={16} />}
             <h1 className="break-words text-3xl leading-tight text-white xl:text-4xl 2xl:text-5xl">{name}</h1>
             <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-white/80">
               {city && <span className="inline-flex items-center gap-2"><MapPin size={16} />{city} {postalCode}</span>}

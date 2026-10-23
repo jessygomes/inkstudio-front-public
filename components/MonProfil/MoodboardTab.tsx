@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
+import { ChevronDown } from "lucide-react";
 import {
   addMoodboardImageAction,
   createMoodboardAction,
@@ -13,7 +14,6 @@ import {
   updateMoodboardAction,
 } from "@/lib/actions/moodboard.action";
 import {
-  FaImages,
   FaPlus,
 } from "react-icons/fa";
 import AppButton from "../Shared/AppButton";
@@ -182,12 +182,12 @@ export default function MoodboardTab() {
     }
   };
 
-  const handleSaveInfos = async () => {
-    if (!selectedMoodboard) return;
+  const handleSaveInfos = async (): Promise<boolean> => {
+    if (!selectedMoodboard) return false;
 
     if (!editName.trim()) {
       toast.error("Le nom du moodboard est obligatoire");
-      return;
+      return false;
     }
 
     try {
@@ -199,7 +199,7 @@ export default function MoodboardTab() {
 
       if (!result.ok || !result.data) {
         toast.error(result.message || "Impossible de modifier le moodboard");
-        return;
+        return false;
       }
 
       setMoodboards((prev) =>
@@ -210,9 +210,11 @@ export default function MoodboardTab() {
         ),
       );
       toast.success("Informations du moodboard mises à jour");
+      return true;
     } catch (error) {
       console.error("Erreur update moodboard:", error);
       toast.error("Erreur lors de la modification");
+      return false;
     } finally {
       setSavingInfos(false);
     }
@@ -429,47 +431,33 @@ export default function MoodboardTab() {
         />
       ) : (
         <div className="font-one">
-          <div className="mb-5 flex items-center justify-between border-b border-white/10 pb-4">
-            <div>
-              <h3 className="font-one text-lg font-semibold text-white sm:text-xl">
-                Mes moodboards
-              </h3>
-              <p className="text-xs text-white/60 font-one">
-                {moodboards.length} moodboard{moodboards.length > 1 ? "s" : ""}
-              </p>
-            </div>
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-tertiary-500/25 bg-tertiary-500/15">
-              <FaImages className="h-4 w-4 text-tertiary-400" />
-            </div>
-          </div>
-
-          <details open={moodboards.length === 0} className="mb-5 rounded-xl border border-white/10 bg-noir-500"><summary className="flex min-h-12 cursor-pointer items-center gap-2 px-4 text-sm text-white/80"><FaPlus size={12} className="text-tertiary-400" />Créer un moodboard</summary>
+          <details open={moodboards.length === 0} className="group mb-4 overflow-hidden rounded-xl border border-white/10 bg-white/2 transition-colors open:border-white/15"><summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 px-3 text-xs font-medium text-white/80 transition hover:bg-white/3 focus-visible:outline-2 focus-visible:outline-tertiary-400 [&::-webkit-details-marker]:hidden"><span className="grid h-6 w-6 shrink-0 place-items-center rounded-md bg-tertiary-400/10 text-tertiary-400"><FaPlus size={10} /></span>Créer un moodboard<ChevronDown size={14} aria-hidden="true" className="text-white/40 transition-transform group-open:rotate-180" /><span className="ml-auto rounded-md bg-white/5 px-2 py-1 text-[11px] font-normal text-white/50">{moodboards.length} moodboard{moodboards.length > 1 ? "s" : ""}</span></summary>
           <form
             onSubmit={handleCreateMoodboard}
-            className="grid grid-cols-1 items-end gap-3 border-t border-white/10 p-4 lg:grid-cols-[1fr_1fr_auto] font-one"
+            className="grid grid-cols-1 items-end gap-2.5 border-t border-white/8 p-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] font-one"
           >
-            <label className="text-xs text-white/60">Nom du moodboard<input
+            <label className="min-w-0 text-[11px] text-white/55">Nom du moodboard<input
               required
               disabled={creating}
               type="text"
               value={createName}
               onChange={(e) => setCreateName(e.target.value)}
-              placeholder="Nom du moodboard"
-              className="mt-2 min-h-11 w-full rounded-xl border border-white/15 bg-noir-700 px-3 py-2 text-sm text-white outline-none placeholder:text-white/35 focus:border-tertiary-400/40"
+              placeholder="Mon prochain tatouage"
+              className="mt-1 h-9 w-full rounded-lg border border-white/10 bg-noir-700 px-2.5 text-xs text-white outline-none transition placeholder:text-white/30 focus:border-tertiary-400/50 disabled:opacity-50"
             /></label>
-            <label className="text-xs text-white/60">Description (facultative)<input
+            <label className="min-w-0 text-[11px] text-white/55">Description <span className="text-white/30">(facultative)</span><input
               disabled={creating}
               type="text"
               value={createDescription}
               onChange={(e) => setCreateDescription(e.target.value)}
-              placeholder="Description (optionnelle)"
-              className="mt-2 min-h-11 w-full rounded-xl border border-white/15 bg-noir-700 px-3 py-2 text-sm text-white outline-none placeholder:text-white/35 focus:border-tertiary-400/40"
+              placeholder="Une idée, un style, une envie…"
+              className="mt-1 h-9 w-full rounded-lg border border-white/10 bg-noir-700 px-2.5 text-xs text-white outline-none transition placeholder:text-white/30 focus:border-tertiary-400/50 disabled:opacity-50"
             /></label>
             <AppButton
               disabled={creating}
-              icon={<FaPlus className="h-2 w-2" />}
+              icon={<FaPlus className="h-2.5 w-2.5" />}
               type="submit"
-              className="min-h-11 text-xs cursor-pointer"
+              className="h-9 cursor-pointer !rounded-lg !px-4 !py-0 !text-xs !shadow-none"
             >
               {creating ? "Création..." : "Créer"}
             </AppButton>

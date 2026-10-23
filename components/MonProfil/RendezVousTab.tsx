@@ -117,6 +117,17 @@ type RdvResponse = {
 
 export default function RendezVousTab() {
   const [rdvData, setRdvData] = useState<RdvResponse | null>(null);
+  const [filterCounts, setFilterCounts] = useState<Record<string, number>>({});
+  useEffect(() => {
+    let active = true;
+    void Promise.all(["", "CONFIRMED", "PENDING", "COMPLETED", "CANCELED"].map(async (status) => {
+      const result = await getAllRdvClient({ page: 1, limit: 1, ...(status ? { status } : {}) });
+      if (active && result.ok) {
+        setFilterCounts((counts) => ({ ...counts, [status]: (result.data as RdvResponse).pagination.totalAppointments }));
+      }
+    })).catch(() => undefined);
+    return () => { active = false; };
+  }, []);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
   const [statusFilter, setStatusFilter] = useState<string>("");
@@ -167,6 +178,7 @@ export default function RendezVousTab() {
 
       if (result.ok) {
         const normalizedData = result.data as RdvResponse;
+        setFilterCounts((counts) => ({ ...counts, [status || ""]: normalizedData.pagination.totalAppointments }));
         const normalizedAppointments = (normalizedData?.appointments || []).map(
           (appointment: Appointment) => {
             if (appointment.tatoueur && appointment.tatoueur.name) {
@@ -235,13 +247,7 @@ export default function RendezVousTab() {
 
   //! Expansion détails rendez-vous
   const toggleExpand = (appointmentId: string) => {
-    const newExpanded = new Set(expandedAppointments);
-    if (newExpanded.has(appointmentId)) {
-      newExpanded.delete(appointmentId);
-    } else {
-      newExpanded.add(appointmentId);
-    }
-    setExpandedAppointments(newExpanded);
+    setExpandedAppointments((previous) => previous.has(appointmentId) ? new Set() : new Set([appointmentId]));
   };
 
   //! Ouverture modal modification rendez-vous
@@ -488,25 +494,8 @@ export default function RendezVousTab() {
       ref={listTopRef}
       className="scroll-mt-28 font-one [&_button:focus-visible]:outline-2 [&_button:focus-visible]:outline-offset-2 [&_button:focus-visible]:outline-tertiary-400 [&_a:focus-visible]:outline-2 [&_a:focus-visible]:outline-tertiary-400"
     >
-      {/* Header */}
-      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-        <div className="min-w-0 flex-1 space-y-1">
-          <h3 className="text-lg font-semibold text-white font-one sm:text-xl">
-            Mes rendez-vous
-          </h3>
-          {rdvData && (
-            <p className="truncate text-white/60 font-one text-xs">
-              {rdvData.pagination.totalAppointments} rendez-vous {statusFilter ? "dans cette catégorie" : "au total"}
-            </p>
-          )}
-        </div>
-
-        <Link href="/trouver-un-salon" className="inline-flex min-h-11 shrink-0 items-center rounded-xl border border-white/15 px-3 text-xs text-white/75 transition hover:bg-white/5">Trouver un salon</Link>
-      </div>
-
-      {/* Filtres modernisés */}
-      <div className="mb-5">
-        <div className="flex flex-wrap gap-1 border-b border-white/10 pb-2">
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap gap-1" role="group" aria-label="Filtrer les rendez-vous">
           {[
             { label: "Tous", value: "" },
             { label: "Confirmés", value: "CONFIRMED" },
@@ -526,11 +515,12 @@ export default function RendezVousTab() {
                     : "text-white/50 hover:bg-white/5 hover:text-white"
                 }`}
               >
-                {item.label}
+                {item.label}{filterCounts[item.value] !== undefined && <span className="ml-2 rounded-md bg-white/5 px-1.5 py-0.5 text-xs text-white/55">{filterCounts[item.value]}</span>}
               </button>
             );
           })}
         </div>
+        <Link href="/trouver-un-salon" className="inline-flex min-h-11 shrink-0 items-center rounded-xl border border-white/15 px-3 text-xs text-white/75 transition hover:bg-white/5">Trouver un salon</Link>
       </div>
 
       {/* Modal d'annulation */}
@@ -574,7 +564,7 @@ export default function RendezVousTab() {
       ) : (
         <>
           {/* Liste des rendez-vous modernisée */}
-          <div className="grid grid-cols-1 gap-4">
+          <div className="grid grid-cols-1 gap-3">
             {[...rdvData.appointments]
               .sort((a, b) => {
                 const aUnread = a.conversation?.unreadCount || 0;
@@ -691,7 +681,7 @@ export default function RendezVousTab() {
         typeof window !== "undefined" &&
         createPortal(
           <div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            className="fixed inset-0 z-10000 flex items-center justify-center p-4"
             onClick={() => setMoodboardModal(null)}
           >
             <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" />
@@ -795,7 +785,7 @@ export default function RendezVousTab() {
         typeof window !== "undefined" &&
         createPortal(
           <div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            className="fixed inset-0 z-10000 flex items-center justify-center p-4"
             onClick={() => setConnectModal(null)}
           >
             <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" />

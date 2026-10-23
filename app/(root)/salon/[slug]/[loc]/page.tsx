@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ArrowLeft, ArrowUpRight, MapPin, CalendarDays, BadgeCheck } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, MapPin, CalendarDays } from "lucide-react";
 import SalonPresentation from "@/components/ProfilSalon/SalonPresentation";
 import SalonPracticalInfo from "@/components/ProfilSalon/SalonPracticalInfo";
 import SalonTabs from "@/components/ProfilSalon/SalonTabs";
 import AppButton from "@/components/Shared/AppButton";
+import VerifiedProfileBadge from "@/components/Shared/VerifiedProfileBadge";
 import DesktopSalonHeader from "@/components/ProfilSalon/DesktopSalonHeader";
 import SalonSectionNav from "@/components/ProfilSalon/SalonSectionNav";
 import { TeamCard } from "@/components/ProfilSalon/TeamCard";
@@ -522,7 +523,7 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
               <div className="relative grid h-24 w-24 shrink-0 place-items-center overflow-hidden rounded-2xl border-4 border-noir-500 bg-noir-700 text-3xl text-white sm:h-28 sm:w-28">
                 {profileSrc ? <Image src={profileSrc} alt={salon.salonName} fill sizes="112px" className="object-cover" /> : salon.salonName?.charAt(0)}
               </div>
-              {isVerifiedSalon && <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-400/10 px-3 py-1.5 text-xs text-emerald-300"><BadgeCheck size={15} /> Profil vérifié</span>}
+              {isVerifiedSalon && <VerifiedProfileBadge className="rounded-full bg-emerald-400/10 px-3 py-1.5" />}
             </div>
             <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
               <div className="min-w-0">

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useId, useState } from "react";
 import { createPortal } from "react-dom";
-import { Images, Pencil, Expand } from "lucide-react";
+import { Pencil, Expand } from "lucide-react";
 import Image from "next/image";
 import { FaArrowLeft, FaPlus, FaSave, FaTrash } from "react-icons/fa";
 import { Moodboard } from "@/lib/actions/moodboard.action";
@@ -16,7 +16,7 @@ type MoodboardSelectedPanelProps = {
   onEditNameChange: (value: string) => void;
   onEditDescriptionChange: (value: string) => void;
   savingInfos: boolean;
-  onSaveInfos: () => void;
+  onSaveInfos: () => Promise<boolean>;
   onBack: () => void;
   imageCaption: string;
   onImageCaptionChange: (value: string) => void;
@@ -42,6 +42,7 @@ export default function MoodboardSelectedPanel({
   deletingImageId,
   onDeleteImage,
 }: MoodboardSelectedPanelProps) {
+  const [isEditing, setIsEditing] = useState(false);
   const [isAddImageModalOpen, setIsAddImageModalOpen] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
@@ -105,20 +106,34 @@ export default function MoodboardSelectedPanel({
 
   return (
     <div className="space-y-5 font-one [&_button:focus-visible]:outline-2 [&_button:focus-visible]:outline-offset-2 [&_button:focus-visible]:outline-tertiary-400">
-      <button type="button" onClick={onBack} className="inline-flex min-h-11 cursor-pointer items-center gap-2 text-sm text-white/60 hover:text-white"><FaArrowLeft size={12} />Tous mes moodboards</button>
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="min-w-0 flex-1"><p className="mb-1 text-xs text-tertiary-400">Mon carnet d’inspiration</p><h3 className="break-words text-2xl text-white">{selectedMoodboard.name}</h3>{selectedMoodboard.description && <p className="mt-2 max-w-prose whitespace-pre-line break-words text-sm leading-6 text-white/60">{selectedMoodboard.description}</p>}</div>
-        <AppButton type="button" onClick={() => setIsAddImageModalOpen(true)} icon={<FaPlus size={12} />} className="min-h-11 cursor-pointer">Ajouter une image</AppButton>
+      <div className="border-b border-white/10 pb-3">
+        {isEditing ? (
+          <form onSubmit={async (event) => { event.preventDefault(); if (!savingInfos && await onSaveInfos()) setIsEditing(false); }} className="space-y-2.5" aria-busy={savingInfos}>
+            <div className="flex flex-wrap items-center gap-2">
+              <button type="button" onClick={onBack} aria-label="Tous mes moodboards" title="Tous mes moodboards" className="grid h-8 w-8 shrink-0 cursor-pointer place-items-center rounded-lg text-white/60 transition hover:bg-white/5 hover:text-white"><FaArrowLeft size={13} /></button>
+              <label htmlFor={`${formId}-name`} className="sr-only">Nom du moodboard</label>
+              <input autoFocus id={`${formId}-name`} value={editName} onChange={(event) => onEditNameChange(event.target.value)} required disabled={savingInfos} className="h-9 min-w-0 flex-1 rounded-lg border border-white/15 bg-noir-700 px-3 text-sm text-white outline-none focus:border-tertiary-400" />
+              <span className="shrink-0 rounded-md bg-white/5 px-2 py-0.5 text-xs text-white/45">{selectedMoodboard.images?.length || 0}</span>
+              <button type="button" disabled={savingInfos} onClick={() => { onEditNameChange(selectedMoodboard.name); onEditDescriptionChange(selectedMoodboard.description || ""); setIsEditing(false); }} className="h-9 cursor-pointer rounded-lg border border-white/10 px-3 text-xs text-white/60 hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-50">Annuler</button>
+              <AppButton type="submit" variant="secondary" disabled={savingInfos || !editName.trim()} icon={<FaSave size={12} />} className="h-9 cursor-pointer !rounded-lg !px-3 !py-0 !text-xs">{savingInfos ? "Enregistrement…" : "Valider"}</AppButton>
+            </div>
+            <label htmlFor={`${formId}-description`} className="sr-only">Description (facultative)</label>
+            <textarea id={`${formId}-description`} value={editDescription} onChange={(event) => onEditDescriptionChange(event.target.value)} rows={2} placeholder="Description (facultative)" disabled={savingInfos} className="w-full resize-y rounded-lg border border-white/15 bg-noir-700 px-3 py-2 text-xs text-white outline-none placeholder:text-white/35 focus:border-tertiary-400" />
+            {hasChanges && <p className="text-[11px] text-white/45">Modifications non enregistrées</p>}
+          </form>
+        ) : (
+          <>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex min-w-0 items-center gap-2"><button type="button" onClick={onBack} aria-label="Tous mes moodboards" title="Tous mes moodboards" className="grid h-8 w-8 shrink-0 cursor-pointer place-items-center rounded-lg text-white/60 transition hover:bg-white/5 hover:text-white"><FaArrowLeft size={13} /></button><h3 className="break-words text-base font-medium text-white">{selectedMoodboard.name}</h3><span className="shrink-0 rounded-md bg-white/5 px-2 py-0.5 text-xs text-white/45">{selectedMoodboard.images?.length || 0}</span></div>
+              <div className="flex shrink-0 items-center gap-2">
+                <button type="button" onClick={() => { onEditNameChange(selectedMoodboard.name); onEditDescriptionChange(selectedMoodboard.description || ""); setIsEditing(true); }} className="inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-lg border border-white/10 px-2.5 text-xs text-white/60 transition hover:bg-white/5 hover:text-white"><Pencil size={12} />Modifier</button>
+                <AppButton type="button" onClick={() => setIsAddImageModalOpen(true)} icon={<FaPlus size={11} />} className="h-8 cursor-pointer !rounded-lg !px-3 !py-0 !text-xs">Ajouter une image</AppButton>
+              </div>
+            </div>
+            {selectedMoodboard.description && <p className="mt-2 whitespace-pre-line break-words text-xs leading-5 text-white/55">{selectedMoodboard.description}</p>}
+          </>
+        )}
       </div>
-      <details className="rounded-xl border border-white/10 bg-noir-500">
-        <summary className="flex min-h-12 cursor-pointer items-center gap-2 px-4 text-sm text-white/70"><Pencil size={14} />Modifier les informations{hasChanges && <span className="ml-auto text-xs text-tertiary-400">Modifications non enregistrées</span>}</summary>
-        <form onSubmit={(event) => { event.preventDefault(); onSaveInfos(); }} className="grid gap-4 border-t border-white/8 p-4 sm:grid-cols-2">
-          <label htmlFor={`${formId}-name`} className="text-xs text-white/60">Nom du moodboard<input id={`${formId}-name`} value={editName} onChange={(event) => onEditNameChange(event.target.value)} required disabled={savingInfos} className="mt-2 min-h-11 w-full rounded-xl border border-white/15 bg-noir-700 px-3 text-sm text-white outline-none focus:border-tertiary-400" /></label>
-          <label htmlFor={`${formId}-description`} className="text-xs text-white/60">Description (facultative)<textarea id={`${formId}-description`} value={editDescription} onChange={(event) => onEditDescriptionChange(event.target.value)} rows={2} disabled={savingInfos} className="mt-2 w-full resize-y rounded-xl border border-white/15 bg-noir-700 px-3 py-2 text-sm text-white outline-none focus:border-tertiary-400" /></label>
-          <div className="flex justify-end sm:col-span-2"><AppButton type="submit" variant="secondary" disabled={savingInfos || !hasChanges || !editName.trim()} icon={<FaSave size={12} />} className="min-h-11 cursor-pointer">{savingInfos ? "Enregistrement…" : "Enregistrer"}</AppButton></div>
-        </form>
-      </details>
-      <div className="flex items-center gap-2 border-b border-white/10 pb-3 text-sm text-white/70"><Images size={16} /><h4>Mes inspirations</h4><span className="rounded-md bg-white/5 px-2 py-0.5 text-xs text-white/45">{selectedMoodboard.images?.length || 0}</span></div>
 
       <MoodboardAddImageModal
         isOpen={isAddImageModalOpen}

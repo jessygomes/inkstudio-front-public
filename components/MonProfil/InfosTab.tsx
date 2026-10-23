@@ -36,15 +36,6 @@ export default function InfosTab({ user }: Props) {
 
   return (
     <div className="space-y-4 font-one">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h3 className="text-xl text-white">Mes informations</h3>
-          <p className="mt-1 text-xs text-white/50">Votre identité et vos coordonnées en un coup d’œil.</p>
-        </div>
-        <AppButton href="/mon-profil/modifier" variant="secondary" icon={<Pencil size={14} aria-hidden="true" />} className="min-h-11 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary-400">
-          Modifier
-        </AppButton>
-      </div>
       <div className="grid gap-3 lg:grid-cols-2">
         {[
           { title: "Mon identité", Icon: UserRound, items: identity },
@@ -61,6 +52,9 @@ export default function InfosTab({ user }: Props) {
           </section>
         ))}
       </div>
+      <div className="flex justify-end"><AppButton href="/mon-profil/modifier" variant="secondary" icon={<Pencil size={14} aria-hidden="true" />} className="min-h-11 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary-400">
+          Modifier
+        </AppButton></div>
     </div>
   );
 }

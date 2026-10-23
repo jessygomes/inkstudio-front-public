@@ -3,11 +3,14 @@
 
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
+import { ArrowLeft } from "lucide-react";
 import { AppointmentProps, ConversationDto } from "@/lib/type";
 import { fetchAppointmentById } from "@/lib/actions/appointment.action";
 
 interface ConversationRDVDetailsProps {
   conversation: ConversationDto;
+  embedded?: boolean;
+  onBack?: () => void;
 }
 
 const STATUS_CONFIG = {
@@ -50,6 +53,8 @@ const STATUS_CONFIG = {
 
 export default function ConversationRDVDetails({
   conversation,
+  embedded = false,
+  onBack,
 }: ConversationRDVDetailsProps) {
   const [appointment, setAppointment] = useState<AppointmentProps | null>(null);
   const [loading, setLoading] = useState(true);
@@ -82,7 +87,7 @@ export default function ConversationRDVDetails({
 
   if (loading) {
     return (
-      <div className="h-full flex items-center justify-center rounded-2xl border border-white/20 bg-linear-to-br from-noir-500/10 to-noir-500/5 backdrop-blur-lg shadow-2xl">
+      <div className={`h-full min-h-0 w-full flex items-center justify-center bg-linear-to-br from-noir-500/10 to-noir-500/5 ${embedded ? "" : "rounded-2xl border border-white/20 backdrop-blur-lg shadow-2xl"}`}>
         <div className="flex flex-col items-center gap-3">
           <div className="h-10 w-10 animate-spin rounded-full border-4 border-tertiary-500/50 border-t-tertiary-400" />
           <p className="text-sm text-white/50 font-one">Chargement...</p>
@@ -93,7 +98,7 @@ export default function ConversationRDVDetails({
 
   if (error || !appointment) {
     return (
-      <div className="h-full flex items-center justify-center rounded-2xl border border-white/20 bg-linear-to-br from-noir-500/10 to-noir-500/5 backdrop-blur-lg shadow-2xl">
+      <div className={`h-full min-h-0 w-full flex items-center justify-center bg-linear-to-br from-noir-500/10 to-noir-500/5 ${embedded ? "" : "rounded-2xl border border-white/20 backdrop-blur-lg shadow-2xl"}`}>
         <div className="p-6 text-center">
           <p className="text-sm text-white/50 font-one">
             Aucun rendez-vous associé
@@ -141,15 +146,18 @@ export default function ConversationRDVDetails({
   const clientImage = (conversation.client as { image?: string | null }).image;
 
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden border border-white/15 bg-linear-to-b from-noir-700/95 via-noir-700/90 to-noir-800/95 shadow-2xl sm:rounded-3xl">
-      <div className="shrink-0 border-b border-white/10 bg-linear-to-r from-noir-700/85 to-noir-600/70 px-5 py-5 sm:rounded-t-3xl">
-        <h2 className="mb-4 text-xs font-semibold uppercase tracking-widest text-white/60 font-one">
+    <div className={`flex h-full min-h-0 w-full flex-col overflow-hidden bg-linear-to-b from-noir-700/95 via-noir-700/90 to-noir-800/95 ${embedded ? "" : "border border-white/15 shadow-2xl sm:rounded-3xl"}`}>
+      <div className={`shrink-0 border-b border-white/10 bg-linear-to-r from-noir-700/85 to-noir-600/70 ${embedded ? "px-4 py-3" : "px-5 py-5 sm:rounded-t-3xl"}`}>
+        <div className={`${embedded ? "mb-2" : "mb-4"} flex items-center gap-2`}>
+          {onBack && <button type="button" onClick={onBack} aria-label="Retour aux rendez-vous" title="Retour aux rendez-vous" className="cursor-pointer disabled:cursor-not-allowed grid h-8 w-8 shrink-0 place-items-center rounded-lg text-white/60 transition hover:bg-white/10 hover:text-white focus-visible:outline-2 focus-visible:outline-tertiary-400"><ArrowLeft size={17} /></button>}
+        <h2 className="text-xs font-semibold uppercase tracking-widest text-white/60 font-one">
           Votre rendez-vous
         </h2>
+        </div>
         <div className="flex items-start gap-3">
           <div className="relative shrink-0">
               {clientImage ? (
-                <div className="relative h-11 w-11 overflow-hidden rounded-2xl ring-1 ring-white/15">
+                <div className="relative h-9 w-9 overflow-hidden rounded-2xl ring-1 ring-white/15">
                   <Image
                     src={clientImage}
                     alt={`${conversation.client.firstName} ${conversation.client.lastName}`}
@@ -159,7 +167,7 @@ export default function ConversationRDVDetails({
                   />
                 </div>
               ) : (
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-linear-to-br from-tertiary-500 to-primary-500 shadow-lg">
+                <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-linear-to-br from-tertiary-500 to-primary-500 shadow-lg">
                   <span className="text-base font-bold leading-none text-white">
                     {conversation.client.firstName.charAt(0).toUpperCase()}
                   </span>
@@ -189,7 +197,7 @@ export default function ConversationRDVDetails({
         </div>
       </div>
 
-      <div className="flex-1 space-y-3 overflow-y-auto overscroll-contain px-3 py-3 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
+      <div className="min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain px-3 py-3 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
         <section className="overflow-hidden rounded-2xl border border-white/10 bg-linear-to-b from-white/4 to-white/2 p-3">
           <div className="mb-3 flex items-center justify-between gap-3">
             <div>

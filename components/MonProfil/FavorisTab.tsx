@@ -248,16 +248,12 @@ export default function FavorisTab() {
   }
 
   return (
-    <div className="space-y-4 font-one [&_button:focus-visible]:outline-2 [&_button:focus-visible]:outline-offset-2 [&_button:focus-visible]:outline-tertiary-400 [&_a:focus-visible]:outline-2 [&_a:focus-visible]:outline-tertiary-400">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div><h3 className="text-xl text-white">Mes favoris</h3><p className="mt-1 text-xs text-white/50">Les profils et les créations qui vous inspirent.</p></div>
-        <AppButton href={activeView === "salons" ? "/trouver-un-salon" : "/inspiration"} variant="secondary" className="min-h-11" icon={<ArrowUpRight size={16} />}>Explorer</AppButton>
-      </div>
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-2">
+    <div className="space-y-3 font-one [&_button:focus-visible]:outline-2 [&_button:focus-visible]:outline-offset-2 [&_button:focus-visible]:outline-tertiary-400 [&_a:focus-visible]:outline-2 [&_a:focus-visible]:outline-tertiary-400">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap gap-1 rounded-xl bg-noir-500 p-1" role="group" aria-label="Type de favoris">
           {([{ key: "salons", label: "Salons & artistes", count: favoriteSalons.length, Icon: Store }, { key: "images", label: "Inspirations", count: favoritePortfolioImages.length, Icon: Images }] as const).map(({key,label,count,Icon}) => <button key={key} type="button" aria-pressed={activeView === key} onClick={() => { setActiveView(key); closeLightbox(); }} className={`inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-lg px-3 text-sm transition ${activeView === key ? "bg-white/10 text-white" : "text-white/50 hover:text-white"}`}><Icon size={15} className={activeView === key ? "text-tertiary-400" : ""} /><span>{label}</span><span className="rounded-md bg-white/5 px-1.5 py-0.5 text-[10px] text-white/50">{count}</span></button>)}
         </div>
-        <span className="text-xs text-white/45">{activeCount} favori{activeCount > 1 ? "s" : ""}</span>
+        <AppButton href={activeView === "salons" ? "/trouver-un-salon" : "/inspiration"} variant="secondary" className="min-h-11" icon={<ArrowUpRight size={16} />}>Explorer</AppButton>
       </div>
       {activeCount === 0 ? (
         <div className="rounded-2xl border border-dashed border-white/15 bg-noir-500 px-5 py-6 text-center">

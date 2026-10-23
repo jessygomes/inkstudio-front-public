@@ -13,6 +13,7 @@ interface MessageInputProps {
   className?: string;
   onInputChange?: (value: string) => void;
   disabled?: boolean;
+  compact?: boolean;
 }
 
 export default function MessageInput({
@@ -20,6 +21,7 @@ export default function MessageInput({
   className = "",
   onInputChange,
   disabled = false,
+  compact = false,
 }: MessageInputProps) {
   const [messageInput, setMessageInput] = useState("");
   const [sendingMessage, setSendingMessage] = useState(false);
@@ -271,7 +273,7 @@ export default function MessageInput({
 
         {/* Zone input */}
         <div
-          className="flex items-end gap-2 rounded-2xl border border-white/10 bg-noir-700/50 p-2 transition-colors focus-within:border-tertiary-400/50"
+          className={`flex items-end gap-2 rounded-xl border border-white/10 bg-noir-700/50 ${compact ? "p-1.5" : "p-2"} transition-colors focus-within:border-tertiary-400/50`}
           onDragOver={handleDragOver}
           onDrop={handleDrop}
         >
@@ -280,7 +282,7 @@ export default function MessageInput({
             type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={disabled || sendingMessage || isUploading}
-            className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-white/20 bg-noir-700 text-xs text-tertiary-500 transition-colors hover:border-tertiary-400 hover:text-tertiary-300 disabled:cursor-not-allowed disabled:opacity-50"
+            className={`${compact ? "h-8 w-8" : "h-10 w-10"} flex shrink-0 cursor-pointer items-center justify-center rounded-xl border border-white/20 bg-noir-700 text-xs text-tertiary-500 transition-colors hover:border-tertiary-400 hover:text-tertiary-300 disabled:cursor-not-allowed disabled:opacity-50`}
             title="Ajouter une image"
           >
             <MdImage className="w-4 h-4" />
@@ -323,7 +325,7 @@ export default function MessageInput({
                 ? "Accompagnez votre image..."
                 : "Ecrivez votre message..."
             }
-            className="min-w-0 flex-1 resize-none bg-transparent px-2 py-2 text-sm leading-[22px] text-white placeholder-white/45 focus:outline-none disabled:opacity-50"
+            className={`min-w-0 flex-1 resize-none bg-transparent px-2 ${compact ? "py-1.5 text-xs leading-5" : "py-2 text-sm leading-[22px]"} text-white placeholder-white/45 focus:outline-none disabled:opacity-50`}
             disabled={disabled || sendingMessage || isUploading}
           />
 
@@ -336,7 +338,7 @@ export default function MessageInput({
               isUploading ||
               (!messageInput.trim() && !selectedFile)
             }
-            className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-xl bg-tertiary-500 text-xs font-semibold text-white transition-colors hover:bg-tertiary-600 disabled:cursor-not-allowed disabled:bg-tertiary-500/50"
+            className={`${compact ? "h-8 w-8" : "h-10 w-10"} flex shrink-0 cursor-pointer items-center justify-center rounded-xl bg-tertiary-500 text-xs font-semibold text-white transition-colors hover:bg-tertiary-600 disabled:cursor-not-allowed disabled:bg-tertiary-500/50`}
           >
             {sendingMessage || isUploading ? (
               <div className="w-3 h-3 border-2 border-white/50 rounded-full animate-spin border-t-white"></div>

@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowLeft, CalendarDays, ChevronLeft, ChevronRight, ExternalLink, Info, MapPin, MessageCircle, RefreshCw, Search } from "lucide-react";
+import { ArrowLeft, CalendarDays, ChevronLeft, ChevronRight, ExternalLink, Info, MapPin, MessageCircle, RefreshCw, Search, PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen } from "lucide-react";
 import { toSlug } from "@/lib/utils";
 import type { AttachmentDto, ConversationDto, ConversationMessageDto } from "@/lib/type";
 import {
@@ -42,6 +42,8 @@ export default function PeopleInboxWorkspace() {
   const [totalPages, setTotalPages] = useState(1);
   const [loadingList, setLoadingList] = useState(true);
   const [listError, setListError] = useState("");
+  const [listCollapsed, setListCollapsed] = useState(false);
+  const [detailsCollapsed, setDetailsCollapsed] = useState(false);
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const selectedIdRef = useRef<string | null>(null);
@@ -118,7 +120,7 @@ export default function PeopleInboxWorkspace() {
   useEffect(() => {
     if (!selectedId || !liveMessages.length) return;
     // Une conversation ouverte est lue dès l'arrivée du message (pas uniquement au rechargement).
-    const incoming = liveMessages.filter((msg) => msg.sender?.id !== session?.user?.id && !msg.isRead);
+    const incoming = liveMessages.filter((msg) => msg.conversationId === selectedId && msg.sender?.id !== session?.user?.id && !msg.isRead);
     incoming.forEach((msg) => markAsRead(msg.id));
     if (incoming.length) {
       void markConversationAsReadAction(selectedId).then(() => {
@@ -205,38 +207,40 @@ export default function PeopleInboxWorkspace() {
     : null;
 
   return (
-    <section aria-label="Messagerie Inkera People" className="h-[min(78dvh,800px)] min-h-[510px] overflow-hidden rounded-2xl border border-white/10 bg-noir-700 text-white font-one shadow-xl">
-      <div className="grid h-full min-h-0 grid-cols-1 lg:grid-cols-[250px_minmax(0,1fr)_290px] xl:grid-cols-[290px_minmax(0,1fr)_330px]">
+    <section aria-label="Messagerie Inkera People" className="relative h-[calc(100dvh-220px)] min-h-[520px] overflow-hidden rounded-b-2xl border border-t-0 border-white/10 bg-noir-700 text-white font-one shadow-xl">
+      <div className={`grid h-full min-h-0 grid-cols-1 ${listCollapsed ? "lg:grid-cols-[56px_minmax(0,1fr)]" : "lg:grid-cols-[300px_minmax(0,1fr)]"} ${detailsCollapsed ? (listCollapsed ? "xl:grid-cols-[56px_minmax(0,1fr)]" : "xl:grid-cols-[340px_minmax(0,1fr)]") : listCollapsed ? "xl:grid-cols-[56px_minmax(0,1fr)_340px]" : "xl:grid-cols-[320px_minmax(0,1fr)_340px] 2xl:grid-cols-[360px_minmax(0,1fr)_380px]"}`}>
         <aside className={`${mobilePane === "list" ? "flex" : "hidden"} min-h-0 min-w-0 flex-col border-r border-white/10 bg-noir-600 lg:flex`}>
-          <div className="border-b border-white/10 p-4"><div className="flex items-center justify-between gap-2"><h2 className="text-sm font-semibold">Conversations</h2><button onClick={() => void refreshThreads()} aria-label="Actualiser les conversations" className="rounded-lg p-2 text-white/60 hover:bg-white/10 hover:text-white"><RefreshCw size={16}/></button></div>
+          {listCollapsed && <button type="button" aria-label="Afficher les conversations" aria-expanded={false} onClick={() => setListCollapsed(false)} className="cursor-pointer disabled:cursor-not-allowed hidden h-12 shrink-0 items-center justify-center text-white/60 hover:bg-white/5 lg:flex"><PanelLeftOpen size={18}/></button>}
+          <div className={listCollapsed ? "flex min-h-0 flex-1 flex-col lg:hidden" : "flex min-h-0 flex-1 flex-col"}><div className="border-b border-white/10 p-4"><div className="flex items-center justify-between gap-2"><h2 className="text-sm font-semibold">Conversations</h2><div className="flex items-center gap-1"><button type="button" onClick={() => void refreshThreads()} aria-label="Actualiser les conversations" className="cursor-pointer disabled:cursor-not-allowed rounded-lg p-2 text-white/60 hover:bg-white/10 hover:text-white"><RefreshCw size={16}/></button><button type="button" aria-label="Replier les conversations" aria-expanded={true} onClick={() => setListCollapsed(true)} className="cursor-pointer disabled:cursor-not-allowed hidden rounded-lg p-2 text-white/60 hover:bg-white/10 hover:text-white lg:inline-flex"><PanelLeftClose size={18}/></button></div></div>
             <label className="relative mt-3 block"><Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={15}/><input aria-label="Rechercher une conversation" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Rechercher un salon…" className="w-full rounded-xl border border-white/10 bg-white/5 py-2 pl-9 pr-3 text-xs outline-none focus:border-tertiary-400"/></label>
           </div>
           <div className="min-h-0 flex-1 overflow-y-auto p-2">
             {loadingList && <p className="p-3 text-xs text-white/55">Chargement des conversations…</p>}
             {listError && <p role="alert" className="p-3 text-xs text-red-300">{listError}</p>}
             {!loadingList && !listError && visibleConversations.length === 0 && <div className="px-5 py-12 text-center text-white/45"><MessageCircle className="mx-auto mb-3" size={24}/><p className="text-xs">Aucune conversation. Vous pouvez contacter un tatoueur depuis son profil public.</p></div>}
-            {visibleConversations.map((item) => <button type="button" key={item.id} onClick={() => selectConversation(item.id)} className={`mb-1 flex w-full items-center gap-3 rounded-xl border-l-2 p-3 text-left transition ${selectedId === item.id ? "border-tertiary-400 bg-tertiary-400/15" : (item.unreadCount || 0) > 0 ? "border-tertiary-400 bg-tertiary-400/10" : "border-transparent hover:bg-white/5"}`}>
+            {visibleConversations.map((item) => <button type="button" key={item.id} onClick={() => selectConversation(item.id)} className={`cursor-pointer disabled:cursor-not-allowed mb-1 flex w-full items-center gap-3 rounded-xl border-l-2 p-3 text-left transition ${selectedId === item.id ? "border-tertiary-400 bg-tertiary-400/15" : (item.unreadCount || 0) > 0 ? "border-tertiary-400 bg-tertiary-400/10" : "border-transparent hover:bg-white/5"}`}>
               <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-xl bg-white/10"><Image src={item.salon.image || "/images/default-avatar.png"} alt="" fill sizes="40px" className="object-cover"/></div>
               <div className="min-w-0 flex-1"><div className="flex items-center gap-2"><span className={`truncate text-xs ${(item.unreadCount || 0) > 0 ? "font-bold" : "font-medium"}`}>{professionalName(item)}</span>{(item.unreadCount || 0) > 0 && <span className="ml-auto shrink-0 rounded-full bg-tertiary-400 px-1.5 py-0.5 text-[10px] font-bold">{item.unreadCount}</span>}</div><p className="mt-1 truncate text-[11px] text-white/45">{item.lastMessage?.content || item.subject || "Ouvrir la conversation"}</p><span className="mt-1 block text-[10px] text-white/35">{relativeDate(item.lastMessageAt)}</span></div>
             </button>)}
           </div>
-          {totalPages > 1 && <div className="flex shrink-0 items-center justify-between border-t border-white/10 p-3 text-xs text-white/55"><button type="button" aria-label="Conversations précédentes" disabled={listPage <= 1} onClick={() => setListPage((v) => v - 1)} className="p-2 disabled:opacity-30"><ChevronLeft size={16}/></button>{listPage} / {totalPages}<button type="button" aria-label="Conversations suivantes" disabled={listPage >= totalPages} onClick={() => setListPage((v) => v + 1)} className="p-2 disabled:opacity-30"><ChevronRight size={16}/></button></div>}
+          {totalPages > 1 && <div className="flex shrink-0 items-center justify-between border-t border-white/10 p-3 text-xs text-white/55"><button type="button" aria-label="Conversations précédentes" disabled={listPage <= 1} onClick={() => setListPage((v) => v - 1)} className="cursor-pointer disabled:cursor-not-allowed p-2 disabled:opacity-30"><ChevronLeft size={16}/></button>{listPage} / {totalPages}<button type="button" aria-label="Conversations suivantes" disabled={listPage >= totalPages} onClick={() => setListPage((v) => v + 1)} className="cursor-pointer disabled:cursor-not-allowed p-2 disabled:opacity-30"><ChevronRight size={16}/></button></div>}
+          </div>
         </aside>
 
         <div className={`${mobilePane === "chat" ? "flex" : "hidden"} min-h-0 min-w-0 flex-col bg-noir-700 lg:flex`}>
           {!selectedId ? <div className="m-auto px-6 text-center text-white/45"><MessageCircle className="mx-auto mb-3 text-tertiary-400/50" size={34}/><p className="text-sm">Choisissez une conversation</p></div> : <>
-            <div className="flex shrink-0 items-center gap-2 border-b border-white/10 p-3 sm:p-4"><button type="button" aria-label="Retour aux conversations" onClick={() => setMobilePane("list")} className="rounded-lg p-2 hover:bg-white/10 lg:hidden"><ArrowLeft size={17}/></button><div className="min-w-0 flex-1"><p className="truncate text-sm font-semibold">{conversation ? name : "Conversation"}</p><p className="mt-0.5 text-[11px] text-white/50">{isConnected ? "En ligne" : "Reconnexion…"}</p></div><button type="button" onClick={() => setMobilePane("details")} className="inline-flex items-center gap-1.5 rounded-xl border border-white/15 px-3 py-2 text-xs hover:bg-white/10 lg:hidden"><Info size={15}/> Afficher les détails</button></div>
-            {loadingDetail ? <p className="m-auto text-xs text-white/50">Chargement des messages…</p> : detailError ? <div className="m-auto px-4 text-center text-xs text-red-300">{detailError}<button onClick={() => void loadDetail(selectedId)} className="mt-3 block underline">Réessayer</button></div> : <>
-              <div ref={messagesScrollRef} className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 py-4 sm:px-5"><MessageBubbles messages={displayedMessages} currentUserId={session?.user?.id}/>{typingUsers.size > 0 && <p className="text-xs italic text-white/40">En train d’écrire…</p>}</div>
-              <div className="shrink-0 border-t border-white/10 p-2 sm:p-3"><MessageInput key={selectedId} onSendMessage={handleSendMessage} disabled={!isConnected}/></div>
+            <div className="flex shrink-0 items-center gap-2 border-b border-white/10 px-3 py-2 sm:px-4"><button type="button" aria-label="Retour aux conversations" onClick={() => setMobilePane("list")} className="cursor-pointer disabled:cursor-not-allowed rounded-lg p-2 hover:bg-white/10 lg:hidden"><ArrowLeft size={17}/></button><div className="flex min-w-0 flex-1 items-center gap-3"><p className="truncate text-sm font-semibold">{conversation ? name : "Conversation"}</p><p className="shrink-0 text-[11px] text-white/50">{isConnected ? "En ligne" : "Reconnexion…"}</p></div><button type="button" onClick={() => setMobilePane("details")} className="cursor-pointer disabled:cursor-not-allowed inline-flex items-center gap-1.5 rounded-xl border border-white/15 px-3 py-2 text-xs hover:bg-white/10 xl:hidden"><Info size={15}/> Afficher les détails</button><button type="button" aria-label={detailsCollapsed ? "Afficher les détails" : "Replier les détails"} aria-expanded={!detailsCollapsed} onClick={() => setDetailsCollapsed((v) => !v)} className="cursor-pointer disabled:cursor-not-allowed hidden h-8 w-8 shrink-0 items-center justify-center text-white/60 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-tertiary-400 xl:flex">{detailsCollapsed ? <PanelRightOpen size={18}/> : <PanelRightClose size={18}/>}</button></div>
+            {loadingDetail ? <p className="m-auto text-xs text-white/50">Chargement des messages…</p> : detailError ? <div className="m-auto px-4 text-center text-xs text-red-300">{detailError}<button onClick={() => void loadDetail(selectedId)} className="cursor-pointer disabled:cursor-not-allowed mt-3 block underline">Réessayer</button></div> : <>
+              <div ref={messagesScrollRef} role="log" aria-label="Messages de la conversation" className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-6 sm:px-8"><MessageBubbles compact messages={displayedMessages} currentUserId={session?.user?.id}/>{typingUsers.size > 0 && <p className="text-xs italic text-white/40">En train d’écrire…</p>}</div>
+              <div className="shrink-0 border-t border-white/10 bg-noir-700 p-2 sm:px-3 sm:py-2"><MessageInput compact key={selectedId} onSendMessage={handleSendMessage} disabled={!isConnected}/></div>
             </>}
           </>}
         </div>
 
-        <aside className={`${mobilePane === "details" ? "flex" : "hidden"} min-h-0 min-w-0 flex-col overflow-hidden border-l border-white/10 bg-noir-600 lg:flex`}>
+        <aside className={`${mobilePane === "details" ? "flex" : "hidden"} absolute inset-0 z-10 min-h-0 min-w-0 flex-col overflow-hidden xl:static xl:z-auto border-l border-white/10 bg-noir-600 ${detailsCollapsed ? "xl:hidden" : "xl:flex"}`}>
           {!conversation ? <div className="m-auto px-4 text-center text-xs text-white/40">Sélectionnez une conversation pour consulter les informations du professionnel et vos rendez-vous.</div> : <>
-            {activeRDV ? <div className="flex min-h-0 flex-1 flex-col"><div className="shrink-0 border-b border-white/10 p-3"><button type="button" onClick={() => setActiveRDV(null)} className="inline-flex items-center gap-2 rounded-xl px-2 py-2 text-xs text-white/70 hover:bg-white/10"><ArrowLeft size={15}/> Retour aux rendez-vous</button></div><div className="min-h-0 flex-1 overflow-y-auto"><ConversationRDVDetails key={activeRDV.id} conversation={{...conversation, appointmentId: activeRDV.id}}/></div></div> : <div className="min-h-0 flex-1 overflow-y-auto p-4">
-              <button type="button" onClick={() => setMobilePane("chat")} className="mb-4 inline-flex items-center gap-2 rounded-lg p-2 text-xs text-white/65 hover:bg-white/10 lg:hidden"><ArrowLeft size={15}/> Retour aux messages</button>
+            {activeRDV ? <ConversationRDVDetails key={activeRDV.id} embedded onBack={() => setActiveRDV(null)} conversation={{...conversation, appointmentId: activeRDV.id}}/> : <div className="min-h-0 flex-1 overflow-y-auto p-4">
+              <button type="button" onClick={() => setMobilePane("chat")} className="cursor-pointer disabled:cursor-not-allowed mb-4 inline-flex items-center gap-2 rounded-lg p-2 text-xs text-white/65 hover:bg-white/10 xl:hidden"><ArrowLeft size={15}/> Retour aux messages</button>
               <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-white/55">Salon / artiste</h3>
               <div className="rounded-xl border border-white/10 bg-white/5 p-3"><div className="flex items-center gap-3"><div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-white/10"><Image src={salon?.image || "/images/default-avatar.png"} fill sizes="48px" className="object-cover" alt="Photo du professionnel"/></div><div className="min-w-0"><p className="truncate text-sm font-semibold">{name}</p><p className="mt-1 flex items-start gap-1 text-[11px] text-white/50"><MapPin size={12} className="mt-0.5 shrink-0"/>{[salon?.city, salon?.postalCode].filter(Boolean).join(" ") || "Lieu non renseigné"}</p></div></div>
                 {profileLink ? <Link href={profileLink} className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-tertiary-400/40 bg-tertiary-400/10 px-3 py-2.5 text-xs font-semibold text-tertiary-300 hover:bg-tertiary-400/20"><ExternalLink size={13}/> Voir le profil</Link> : <span className="mt-3 block text-center text-[11px] text-white/35">Profil public indisponible</span>}
@@ -245,8 +249,19 @@ export default function PeopleInboxWorkspace() {
                 {rdvLoading && <p className="text-xs text-white/45">Chargement…</p>}
                 {rdvError && <p role="alert" className="text-xs text-red-300">{rdvError}</p>}
                 {!rdvLoading && !rdvError && appointments.length === 0 && <p className="text-xs text-white/45">Aucun rendez-vous avec ce professionnel.</p>}
-                <div className="space-y-2">{appointments.map((item) => <button type="button" key={item.id} onClick={() => setActiveRDV(item)} className="block w-full rounded-xl border border-white/10 bg-white/5 p-3 text-left transition hover:border-tertiary-400/35 hover:bg-white/10"><span className="block truncate text-xs font-semibold">{item.title}</span><span className="mt-1 block truncate text-[11px] text-white/55">{item.prestation.replaceAll("_", " ")} · {relativeDate(item.start)}</span></button>)}</div>
-                {rdvPages > 1 && <div className="mt-3 flex items-center justify-between gap-2 text-xs text-white/50"><button type="button" disabled={rdvPage <= 1} onClick={() => setRdvPage((v) => v - 1)} className="rounded-lg border border-white/10 px-2 py-2 disabled:opacity-30"><ChevronLeft size={15}/></button>{rdvPage} / {rdvPages}<button type="button" disabled={rdvPage >= rdvPages} onClick={() => setRdvPage((v) => v + 1)} className="rounded-lg border border-white/10 px-2 py-2 disabled:opacity-30"><ChevronRight size={15}/></button></div>}
+                <div className="space-y-1.5">{appointments.map((item) => {
+                  const date = new Date(item.start);
+                  return <button type="button" key={item.id} onClick={() => setActiveRDV(item)} className="cursor-pointer disabled:cursor-not-allowed flex w-full items-center gap-2.5 rounded-xl border border-white/10 bg-white/5 px-2.5 py-2 text-left transition hover:border-tertiary-400/35 hover:bg-white/10">
+                    <time dateTime={item.start} className="flex w-11 shrink-0 flex-col items-center rounded-lg bg-white/5 px-1 py-1 tabular-nums">
+                      <span className="text-lg font-semibold leading-none text-white">{date.toLocaleDateString("fr-FR", { day: "2-digit" })}</span>
+                      <span className="mt-0.5 text-[9px] uppercase text-white/60">{date.toLocaleDateString("fr-FR", { month: "short" })}</span>
+                      <span className="mt-0.5 text-[9px] text-white/40">{date.getFullYear()}</span>
+                    </time>
+                    <span className="min-w-0 flex-1"><span className="block truncate text-xs font-semibold">{item.title}</span><span className="mt-1 flex items-center gap-2 text-[11px] text-white/50"><span className="min-w-0 truncate">{item.prestation.replaceAll("_", " ")}</span><span className="shrink-0 text-white/35">{date.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}</span></span></span>
+                    <ChevronRight size={15} className="shrink-0 text-white/35"/>
+                  </button>;
+                })}</div>
+                {rdvPages > 1 && <div className="mt-3 flex items-center justify-between gap-2 text-xs text-white/50"><button type="button" disabled={rdvPage <= 1} onClick={() => setRdvPage((v) => v - 1)} className="cursor-pointer disabled:cursor-not-allowed rounded-lg border border-white/10 px-2 py-2 disabled:opacity-30"><ChevronLeft size={15}/></button>{rdvPage} / {rdvPages}<button type="button" disabled={rdvPage >= rdvPages} onClick={() => setRdvPage((v) => v + 1)} className="cursor-pointer disabled:cursor-not-allowed rounded-lg border border-white/10 px-2 py-2 disabled:opacity-30"><ChevronRight size={15}/></button></div>}
               </div>
             </div>}
           </>}
