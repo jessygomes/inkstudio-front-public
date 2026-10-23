@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { MdSend, MdImage, MdClose } from "react-icons/md";
 import { useUploadThing } from "@/lib/utils/uploadthing";
 import Image from "next/image";
@@ -28,6 +28,18 @@ export default function MessageInput({
   const [uploadProgress, setUploadProgress] = useState(0);
   const [compressionError, setCompressionError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+    textarea.style.height = "auto";
+    const style = getComputedStyle(textarea);
+    const lineHeight = Number.parseFloat(style.lineHeight) || 22;
+    const maxHeight = lineHeight * 6 + Number.parseFloat(style.paddingTop) + Number.parseFloat(style.paddingBottom);
+    textarea.style.height = `${Math.min(textarea.scrollHeight, maxHeight)}px`;
+    textarea.style.overflowY = textarea.scrollHeight > maxHeight ? "auto" : "hidden";
+  }, [messageInput]);
 
   const { startUpload, isUploading } = useUploadThing("imageUploader", {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -286,7 +298,8 @@ export default function MessageInput({
 
           {/* Input texte */}
           <textarea
-            rows={2}
+            ref={textareaRef}
+            rows={1}
             aria-label="Votre message"
             value={messageInput}
             onKeyDown={(event) => {
@@ -310,7 +323,7 @@ export default function MessageInput({
                 ? "Accompagnez votre image..."
                 : "Ecrivez votre message..."
             }
-            className="min-w-0 flex-1 resize-none bg-transparent px-2 py-2 text-sm leading-relaxed text-white placeholder-white/45 focus:outline-none disabled:opacity-50"
+            className="min-w-0 flex-1 resize-none bg-transparent px-2 py-2 text-sm leading-[22px] text-white placeholder-white/45 focus:outline-none disabled:opacity-50"
             disabled={disabled || sendingMessage || isUploading}
           />
 

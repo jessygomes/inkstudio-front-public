@@ -2,6 +2,7 @@
 
 import { ConversationDto } from "@/lib/type";
 import { getUnreadMessagesCountAction } from "@/lib/actions/conversation.action";
+import { useSession } from "next-auth/react";
 import React, {
   createContext,
   useContext,
@@ -42,24 +43,34 @@ interface MessagingProviderProps {
 
 export const MessagingProvider = ({ children }: MessagingProviderProps) => {
   const [unreadCount, setUnreadCount] = useState<number>(0);
+  const { status } = useSession();
   const [conversations, setConversations] = useState<ConversationDto[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  // Charger le nombre de messages non lus au montage du composant
+  // Charger le nombre de messages non lus uniquement pour un utilisateur connecté
   useEffect(() => {
+    if (status !== "authenticated") {
+      setUnreadCount(0);
+      return;
+    }
+
+    let active = true;
     const loadUnreadCount = async () => {
       try {
         const count = await getUnreadMessagesCountAction();
-        setUnreadCount(count);
+        if (active) setUnreadCount(count);
       } catch (error) {
-        console.error("❌ Failed to load unread count:", error);
-      } finally {
-        setIsLoading(false);
+        console.warn("Failed to load unread count:", error);
       }
     };
-
-    loadUnreadCount();
-  }, []);
+    void loadUnreadCount();
+    const interval = window.setInterval(() => void loadUnreadCount(), 15000);
+    window.addEventListener("unreadCountRefresh", loadUnreadCount);
+    return () => {
+      active = false;
+      window.clearInterval(interval);
+      window.removeEventListener("unreadCountRefresh", loadUnreadCount);
+    };
+  }, [status]);
 
   // Fonction pour mettre à jour le unreadCount d'une conversation spécifique
   const updateConversationUnreadCount = useCallback(
@@ -84,17 +95,8 @@ export const MessagingProvider = ({ children }: MessagingProviderProps) => {
     [] // setConversations est stable, pas besoin de le mettre en dépendance
   );
 
-  // Recalculer automatiquement le total quand conversations change
-  // (mais seulement si elle n'est pas vide, pour éviter d'écraser avec 0)
-  useEffect(() => {
-    if (conversations.length > 0) {
-      const totalUnread = conversations.reduce(
-        (count, convo) => count + (convo.unreadCount || 0),
-        0
-      );
-      setUnreadCount(totalUnread);
-    }
-  }, [conversations]);
+  // Le compteur global provient du serveur. Une page partielle de conversations
+  // ne doit jamais écraser ce total avec sa propre somme.
 
   // Écouter les événements globaux - une seule fois au montage
   useEffect(() => {

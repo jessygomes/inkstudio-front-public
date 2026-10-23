@@ -10,6 +10,7 @@ import FavorisTab from "./FavorisTab";
 import RendezVousTab from "./RendezVousTab";
 import MesAvisTab from "./MesAvisTab";
 import MoodboardTab from "./MoodboardTab";
+import PeopleInboxWorkspace from "./PeopleInboxWorkspace";
 
 import {
   FaUser,
@@ -19,10 +20,10 @@ import {
   FaPalette,
 } from "react-icons/fa";
 import Image from "next/image";
-import { Star } from "lucide-react";
+import { MessageCircle, Star } from "lucide-react";
 
-type TabKey = "rdv" | "moodboard" | "favoris" | "mesavis" | "infos";
-const VALID_TABS: TabKey[] = ["rdv", "moodboard", "favoris", "mesavis", "infos"];
+type TabKey = "rdv" | "messagerie" | "moodboard" | "favoris" | "mesavis" | "infos";
+const VALID_TABS: TabKey[] = ["rdv", "messagerie", "moodboard", "favoris", "mesavis", "infos"];
 
 export default function ProfilGlobal(user: User) {
   const router = useRouter();
@@ -45,6 +46,7 @@ export default function ProfilGlobal(user: User) {
     setActiveTab(key);
     const params = new URLSearchParams(searchParams.toString());
     params.set("tab", key);
+    params.delete("conversation");
     router.replace(`?${params.toString()}`, { scroll: false });
   };
 
@@ -190,6 +192,7 @@ export default function ProfilGlobal(user: User) {
               <nav aria-label="Rubriques du profil" className="-mb-px flex overflow-x-auto gap-x-5 sm:gap-x-8 lg:justify-end-safe lg:gap-x-4 xl:gap-x-6">
                 {([
                   { key: "rdv", icon: FaCalendarAlt, label: "Rendez-vous" },
+                  { key: "messagerie", icon: MessageCircle, label: "Messagerie" },
                   { key: "moodboard", icon: FaPalette, label: "Moodboard" },
                   { key: "favoris", icon: FaHeart, label: "Favoris" },
                   { key: "mesavis", icon: Star, label: "Mes avis" },
@@ -227,6 +230,7 @@ export default function ProfilGlobal(user: User) {
           {activeTab === "moodboard" && <MoodboardTab />}
           {activeTab === "favoris" && <FavorisTab />}
           {activeTab === "rdv" && <RendezVousTab />}
+          {activeTab === "messagerie" && <PeopleInboxWorkspace />}
           {activeTab === "mesavis" && <MesAvisTab />}
         </div>
       </div>

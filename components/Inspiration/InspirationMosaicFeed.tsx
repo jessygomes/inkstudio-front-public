@@ -9,16 +9,24 @@ import {
 import { getFavoritePortfolioImages } from "@/lib/actions/user.action";
 import AppButton from "@/components/Shared/AppButton";
 import FavoritePortfolioBtn from "@/components/Shared/FavoritePortfolioBtn";
+import StartInkeraConversationButton from "@/components/Contact/StartInkeraConversationButton";
 import { useUser } from "@/components/Context/UserContext";
 import { toSlug } from "@/lib/utils";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { MapPin, Palette, RotateCcw, SlidersHorizontal } from "lucide-react";
+import { Hash, MapPin, Palette, Ruler, RotateCcw, SlidersHorizontal, Tags } from "lucide-react";
 import { createPortal } from "react-dom";
 import { FaInstagram } from "react-icons/fa";
-import { FaArrowLeft, FaArrowRight, FaXmark } from "react-icons/fa6";
+import { FaArrowLeft, FaArrowRight, FaChevronDown, FaXmark } from "react-icons/fa6";
+import {
+  EMPTY_INSPIRATION_SELECTION,
+  PIECE_SIZE_OPTIONS,
+  buildInspirationQuery,
+  hasActiveInspirationFilters,
+  parseHashtagInput,
+  type InspirationSelection,
+} from "./inspirationFilters";
 
 type PortfolioFeedItem = {
   key: string;
@@ -26,9 +34,23 @@ type PortfolioFeedItem = {
   title: string;
   description: string;
   salonName: string;
+  salonUserId: string;
+  canMessageSalon: boolean;
+  isTatoueurAccount: boolean;
+  authorAvatar?: string;
+  parentSalonName?: string;
+  parentSalonCity?: string;
+  parentSalonUserId?: string;
+  canMessageParentSalon: boolean;
+  parentSalonAvatar?: string;
+  parentSalonHref?: string;
+  artistAvatar?: string;
   city: string;
   href: string;
   styles: string[];
+  pieceSize?: string;
+  categories: string[];
+  hashtags: string[];
   artistName?: string;
   artistInstagram?: string;
   salonInstagram?: string;
@@ -42,6 +64,7 @@ type InstagramProfile = {
 type InspirationMosaicFeedProps = {
   initialData: InspirationPhotosResponse;
   initialFilters: InspirationFilterOptions;
+  initialSelection: InspirationSelection;
 };
 
 const PAGE_SIZE = 12;
@@ -78,20 +101,6 @@ const getUniqueSortedValues = (values: Array<string | undefined>) => {
   );
 
   return uniqueValues.sort((first, second) => first.localeCompare(second, "fr"));
-};
-
-const createSlugLabelMaps = (values: string[]) => {
-  const entries = values
-    .map((label) => {
-      const cleaned = label.trim();
-      return { slug: toSlug(cleaned), label: cleaned };
-    })
-    .filter((entry) => entry.slug && entry.label);
-
-  return {
-    slugToLabel: new Map(entries.map((entry) => [entry.slug, entry.label])),
-    labelToSlug: new Map(entries.map((entry) => [entry.label, entry.slug])),
-  };
 };
 
 const normalizeInstagramProfile = (
@@ -155,21 +164,152 @@ const mapPhotoToFeedItem = (photo: InspirationPhoto): PortfolioFeedItem => ({
   title: photo.title,
   description: photo.description,
   salonName: photo.user.salonName || "Salon Inkera",
-  city: photo.user.city || "France",
+  salonUserId: photo.user.id,
+  canMessageSalon: Boolean(photo.user.saasPlan) && photo.user.saasPlan !== "FREE",
+  isTatoueurAccount: photo.user.role === "user_tatoueur",
+  authorAvatar: photo.user.profileImage || undefined,
+  parentSalonName: photo.user.salon?.salonName || undefined,
+  parentSalonUserId: photo.user.salon?.id,
+  parentSalonCity: photo.user.salon?.city?.toUpperCase() || undefined,
+  canMessageParentSalon:
+    Boolean(photo.user.salon) &&
+    photo.user.saasPlan === "FREE" &&
+    Boolean(photo.user.salon?.saasPlan) &&
+    photo.user.salon?.saasPlan !== "FREE",
+  parentSalonAvatar: photo.user.salon?.profileImage || undefined,
+  parentSalonHref: photo.user.salon?.salonName
+    ? buildSalonHref(
+        photo.user.salon.salonName,
+        photo.user.salon.city || "",
+        photo.user.salon.postalCode || undefined,
+      )
+    : undefined,
+  artistAvatar: photo.tatoueur?.img || undefined,
+  city: (photo.user.city || "France").toUpperCase(),
   href: buildSalonHref(
     photo.user.salonName || "salon",
     photo.user.city || "",
     photo.user.postalCode || undefined,
   ),
   styles: photo.style,
+  pieceSize: photo.pieceSize || undefined,
+  categories: (photo.categories ?? []).map((category) => category.name),
+  hashtags: photo.hashtags ?? [],
   artistName: photo.tatoueur?.name || undefined,
   artistInstagram: photo.tatoueur?.instagram || undefined,
   salonInstagram: photo.user.instagram || undefined,
 });
 
+function Avatar({ src, name, size }: { src?: string; name: string; size: number }) {
+  return (
+    <div
+      className="relative shrink-0 overflow-hidden rounded-full border border-white/15 bg-white/10"
+      style={{ width: size, height: size }}
+    >
+      {src ? (
+        <Image src={src} alt={name} fill sizes={`${size}px`} className="object-cover" unoptimized />
+      ) : (
+        <span className="flex h-full w-full items-center justify-center text-xs font-semibold uppercase text-white/70 font-one">
+          {name.charAt(0)}
+        </span>
+      )}
+    </div>
+  );
+}
+
+function FilterChipGroup({
+  label,
+  icon,
+  options,
+  selected,
+  onToggle,
+}: {
+  label: string;
+  icon: React.ReactNode;
+  options: Array<{ value: string; label: string }>;
+  selected: string[];
+  onToggle: (value: string) => void;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const onPointerDown = (e: MouseEvent) => {
+      if (!containerRef.current?.contains(e.target as Node)) setIsOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setIsOpen(false);
+    };
+    document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [isOpen]);
+
+  const summary =
+    selected.length === 0
+      ? "Tous"
+      : selected.length === 1
+        ? (options.find((option) => option.value === selected[0])?.label ?? selected[0])
+        : `${selected.length} sélectionnés`;
+
+  return (
+    <div ref={containerRef} className="relative flex flex-col gap-2 font-one">
+      <span className="flex items-center gap-2 text-sm text-white/75">
+        {icon} {label}
+      </span>
+      <button
+        type="button"
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
+        onClick={() => setIsOpen((open) => !open)}
+        className="flex min-h-12 w-full min-w-0 cursor-pointer items-center justify-between gap-2 rounded-lg border border-white/15 bg-noir-500 px-3 py-3 text-left text-base text-white transition-colors hover:border-white/30 focus:outline-none focus:border-tertiary-400 focus:ring-2 focus:ring-tertiary-400/20 sm:text-sm"
+      >
+        <span className="truncate">{summary}</span>
+        <FaChevronDown
+          aria-hidden="true"
+          className={`h-3 w-3 shrink-0 text-white/60 transition-transform ${isOpen ? "rotate-180" : ""}`}
+        />
+      </button>
+      {isOpen && (
+        <ul
+          role="listbox"
+          aria-multiselectable="true"
+          aria-label={label}
+          className="absolute left-0 top-full z-30 mt-1 max-h-64 min-w-full overflow-y-auto rounded-lg border border-white/15 bg-noir-500 py-1 shadow-xl"
+        >
+          {options.length === 0 && (
+            <li className="px-3 py-2 text-sm text-white/50">Aucune option</li>
+          )}
+          {options.map((option) => {
+            const isActive = selected.includes(option.value);
+            return (
+              <li key={option.value} role="option" aria-selected={isActive}>
+                <label className="flex cursor-pointer items-center gap-2 whitespace-nowrap px-3 py-2 text-sm text-white/85 hover:bg-white/10">
+                  <input
+                    type="checkbox"
+                    checked={isActive}
+                    onChange={() => onToggle(option.value)}
+                    className="h-4 w-4 cursor-pointer accent-tertiary-400"
+                  />
+                  {option.label}
+                </label>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 export default function InspirationMosaicFeed({
   initialData,
   initialFilters,
+  initialSelection,
 }: InspirationMosaicFeedProps) {
   const { isAuthenticated, isClient } = useUser();
   const [items, setItems] = useState<PortfolioFeedItem[]>(() =>
@@ -177,25 +317,29 @@ export default function InspirationMosaicFeed({
   );
   const [page, setPage] = useState(initialData.pagination.page);
   const [isLoading, setIsLoading] = useState(false);
+  const [isFiltering, setIsFiltering] = useState(false);
   const [hasMore, setHasMore] = useState(initialData.pagination.hasNextPage);
+  const [total, setTotal] = useState(initialData.pagination.total);
   const [isMounted, setIsMounted] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [isUsingMockData, setIsUsingMockData] = useState(
     initialData.source === "mock",
   );
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [selectedCity, setSelectedCity] = useState("");
-  const [selectedStyle, setSelectedStyle] = useState("");
+  const [selection, setSelection] =
+    useState<InspirationSelection>(initialSelection);
+  const [hashtagInput, setHashtagInput] = useState(
+    initialSelection.hashtag.map((tag) => `#${tag}`).join(" "),
+  );
   const [favoritePortfolioIds, setFavoritePortfolioIds] = useState<Set<string>>(
     () => new Set(),
   );
 
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-
   const observerRef = useRef<IntersectionObserver | null>(null);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
+  const requestIdRef = useRef(0);
+  const selectionRef = useRef(selection);
+  selectionRef.current = selection;
 
   useEffect(() => {
     setIsMounted(true);
@@ -265,6 +409,7 @@ export default function InspirationMosaicFeed({
   const loadNextPage = useCallback(async () => {
     if (isLoading || !hasMore) return;
 
+    const requestId = requestIdRef.current;
     setIsLoading(true);
     setLoadError(null);
 
@@ -273,7 +418,9 @@ export default function InspirationMosaicFeed({
       const response = await getInspirationPortfolioPhotosAction({
         page: nextPage,
         limit: PAGE_SIZE,
+        ...selectionRef.current,
       });
+      if (requestId !== requestIdRef.current) return;
 
       setItems((prev) => [
         ...prev,
@@ -281,8 +428,10 @@ export default function InspirationMosaicFeed({
       ]);
       setPage(response.pagination.page);
       setHasMore(response.pagination.hasNextPage);
+      setTotal(response.pagination.total);
       setIsUsingMockData((prev) => prev || response.source === "mock");
     } catch (error) {
+      if (requestId !== requestIdRef.current) return;
       const message =
         error instanceof Error
           ? error.message
@@ -290,9 +439,67 @@ export default function InspirationMosaicFeed({
       setLoadError(message);
       setHasMore(false);
     } finally {
-      setIsLoading(false);
+      if (requestId === requestIdRef.current) setIsLoading(false);
     }
   }, [hasMore, isLoading, page]);
+
+  // Applique de nouveaux filtres : recharge la page 1 et synchronise l'URL
+  const applySelection = useCallback(async (next: InspirationSelection) => {
+    const requestId = ++requestIdRef.current;
+    setSelection(next);
+    setLightboxIndex(null);
+    setIsLoading(true);
+    setIsFiltering(true);
+    setLoadError(null);
+
+    const query = buildInspirationQuery(next);
+    window.history.replaceState(
+      null,
+      "",
+      query ? `${window.location.pathname}?${query}` : window.location.pathname,
+    );
+
+    try {
+      const response = await getInspirationPortfolioPhotosAction({
+        page: 1,
+        limit: PAGE_SIZE,
+        ...next,
+      });
+      if (requestId !== requestIdRef.current) return;
+
+      setItems(response.photos.map(mapPhotoToFeedItem));
+      setPage(response.pagination.page);
+      setHasMore(response.pagination.hasNextPage);
+      setTotal(response.pagination.total);
+      setIsUsingMockData(response.source === "mock");
+    } catch (error) {
+      if (requestId !== requestIdRef.current) return;
+      setItems([]);
+      setHasMore(false);
+      setTotal(0);
+      setLoadError(
+        error instanceof Error
+          ? error.message
+          : "Impossible de charger les images pour le moment.",
+      );
+    } finally {
+      if (requestId === requestIdRef.current) {
+        setIsLoading(false);
+        setIsFiltering(false);
+      }
+    }
+  }, []);
+
+  // Le hashtag est appliqué après une courte pause de saisie
+  useEffect(() => {
+    const parsed = parseHashtagInput(hashtagInput);
+    if (parsed.join(",") === selectionRef.current.hashtag.join(",")) return;
+
+    const timer = window.setTimeout(() => {
+      void applySelection({ ...selectionRef.current, hashtag: parsed });
+    }, 500);
+    return () => window.clearTimeout(timer);
+  }, [hashtagInput, applySelection]);
 
   useEffect(() => {
     if (!sentinelRef.current) return;
@@ -314,18 +521,18 @@ export default function InspirationMosaicFeed({
     };
   }, [hasMore, isLoading, loadNextPage]);
 
-  const introText = useMemo(() => {
-    if (items.length === 0) return "Découvre les portfolios des salons partenaires.";
-    return `${items.length} photo${items.length > 1 ? "s" : ""} de tatouage chargée${items.length > 1 ? "s" : ""}.`;
-  }, [items.length]);
+  const hasActiveFilters = hasActiveInspirationFilters(selection);
 
   const availableCities = useMemo(
     () =>
-      getUniqueSortedValues([
-        ...initialFilters.cities,
-        ...items.map((item) => item.city),
-      ]),
-    [initialFilters.cities, items],
+      Array.from(
+        new Set(
+          [...initialFilters.cities, ...(selection.city ? [selection.city] : [])]
+            .map((city) => city.trim().toUpperCase())
+            .filter(Boolean),
+        ),
+      ).sort((first, second) => first.localeCompare(second, "fr")),
+    [initialFilters.cities, selection.city],
   );
 
   const availableStyles = useMemo(
@@ -333,62 +540,27 @@ export default function InspirationMosaicFeed({
     [initialFilters.styles],
   );
 
-  const cityMaps = useMemo(
-    () => createSlugLabelMaps(availableCities),
-    [availableCities],
+  const availableCategories = initialFilters.categories;
+
+  const categoryLabelBySlug = useMemo(
+    () =>
+      new Map(availableCategories.map((category) => [category.slug, category.name])),
+    [availableCategories],
   );
-  const styleMaps = useMemo(
-    () => createSlugLabelMaps(availableStyles),
-    [availableStyles],
-  );
 
-  useEffect(() => {
-    const cityParam = (searchParams.get("city") || "").trim();
-    const styleParam = (searchParams.get("style") || "").trim();
+  // Les photos sont déjà filtrées par l'API
+  const filteredItems = items;
 
-    const resolvedCity =
-      cityMaps.slugToLabel.get(toSlug(cityParam)) ||
-      availableCities.find((city) => city === cityParam) ||
-      "";
-    const resolvedStyle =
-      styleMaps.slugToLabel.get(toSlug(styleParam)) ||
-      availableStyles.find((style) => style === styleParam) ||
-      "";
-
-    setSelectedCity(resolvedCity);
-    setSelectedStyle(resolvedStyle);
-  }, [searchParams, cityMaps.slugToLabel, styleMaps.slugToLabel, availableCities, availableStyles]);
-
-  const updateFilterInUrl = useCallback(
-    (key: "city" | "style", value: string, slugMap: Map<string, string>) => {
-      const params = new URLSearchParams(searchParams.toString());
-      if (value.trim()) {
-        params.set(key, slugMap.get(value) || toSlug(value));
-      } else {
-        params.delete(key);
-      }
-
-      const query = params.toString();
-      router.replace(query ? `${pathname}?${query}` : pathname, {
-        scroll: false,
-      });
+  const toggleInList = useCallback(
+    (key: "pieceSize" | "category" | "style", value: string) => {
+      const current = selectionRef.current[key];
+      const next = current.includes(value)
+        ? current.filter((entry) => entry !== value)
+        : [...current, value];
+      void applySelection({ ...selectionRef.current, [key]: next });
     },
-    [pathname, router, searchParams],
+    [applySelection],
   );
-
-  const filteredItems = useMemo(() => {
-    return items.filter((item) => {
-      const matchesCity = !selectedCity || item.city === selectedCity;
-      const normalizedStyle = selectedStyle.trim().toLowerCase();
-      const matchesStyle =
-        !normalizedStyle ||
-        item.styles.some((style) => style.toLowerCase() === normalizedStyle) ||
-        item.title.toLowerCase().includes(normalizedStyle) ||
-        item.description.toLowerCase().includes(normalizedStyle);
-
-      return matchesCity && matchesStyle;
-    });
-  }, [items, selectedCity, selectedStyle]);
 
   // Navigation lightbox
   const closeLightbox = useCallback(() => setLightboxIndex(null), []);
@@ -424,16 +596,16 @@ export default function InspirationMosaicFeed({
   }, [lightboxIndex, closeLightbox, prevImage, nextImage]);
 
   const filteredIntroText = useMemo(() => {
-    if (!selectedCity && !selectedStyle) {
-      return introText;
+    if (isLoading && items.length === 0) return "Chargement des inspirations...";
+
+    if (total === 0) {
+      return hasActiveFilters
+        ? "Aucune inspiration ne correspond aux filtres sélectionnés pour l'instant."
+        : "Découvre les portfolios des salons partenaires.";
     }
 
-    if (filteredItems.length === 0) {
-      return "Aucune inspiration ne correspond aux filtres sélectionnés pour l'instant.";
-    }
-
-    return `${filteredItems.length} inspiration${filteredItems.length > 1 ? "s" : ""} visible${filteredItems.length > 1 ? "s" : ""} avec les filtres actifs.`;
-  }, [filteredItems.length, introText, selectedCity, selectedStyle]);
+    return `${total} inspiration${total > 1 ? "s" : ""}${hasActiveFilters ? " avec les filtres actifs" : ""}.`;
+  }, [hasActiveFilters, isLoading, items.length, total]);
 
   useEffect(() => {
     if (lightboxIndex === null) return;
@@ -442,33 +614,10 @@ export default function InspirationMosaicFeed({
     }
   }, [filteredItems.length, lightboxIndex]);
 
-  const handleCityChange = useCallback(
-    (city: string) => {
-      setSelectedCity(city);
-      updateFilterInUrl("city", city, cityMaps.labelToSlug);
-    },
-    [cityMaps.labelToSlug, updateFilterInUrl],
-  );
-
-  const handleStyleChange = useCallback(
-    (style: string) => {
-      setSelectedStyle(style);
-      updateFilterInUrl("style", style, styleMaps.labelToSlug);
-    },
-    [styleMaps.labelToSlug, updateFilterInUrl],
-  );
-
   const clearAllFilters = useCallback(() => {
-    setSelectedCity("");
-    setSelectedStyle("");
-    const params = new URLSearchParams(searchParams.toString());
-    params.delete("city");
-    params.delete("style");
-    const query = params.toString();
-    router.replace(query ? `${pathname}?${query}` : pathname, {
-      scroll: false,
-    });
-  }, [pathname, router, searchParams]);
+    setHashtagInput("");
+    void applySelection(EMPTY_INSPIRATION_SELECTION);
+  }, [applySelection]);
 
   const handleFavoriteToggle = useCallback(
     (portfolioId: string, isFavorite: boolean) => {
@@ -509,20 +658,22 @@ export default function InspirationMosaicFeed({
         {isUsingMockData && <p className="mt-3 max-w-2xl text-xs leading-6 text-white/50">Ces images sont présentées à titre d’exemple. Les noms et informations des artistes et salons sont fictifs.</p>}
       </header>
 
-      <div className="flex flex-col gap-5 border-y border-white/10 py-5 lg:flex-row lg:items-end lg:justify-between">
-        <div className="grid min-w-0 gap-4 sm:grid-cols-2 sm:gap-6 lg:flex lg:items-end">
+      <div className="flex flex-col gap-4 border-y border-white/10 py-5 xl:flex-row xl:items-end">
+        <div className="grid min-w-0 flex-1 grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
           <div className="flex flex-col gap-2 font-one">
             <label className="flex items-center gap-2 text-sm text-white/75" htmlFor="inspiration-city-select">
               <MapPin size={15} aria-hidden="true" className="text-tertiary-400" /> Ville
             </label>
             <select
               id="inspiration-city-select"
-              className="min-h-12 w-full min-w-0 cursor-pointer rounded-lg border border-white/15 bg-noir-500 px-3 py-3 text-base text-white transition-colors [color-scheme:dark] hover:border-white/30 focus:outline-none focus:border-tertiary-400 focus:ring-2 focus:ring-tertiary-400/20 sm:text-sm lg:w-64"
-              value={selectedCity}
-              onChange={(e) => handleCityChange(e.target.value)}
+              className="min-h-12 w-full min-w-0 cursor-pointer rounded-lg border border-white/15 bg-noir-500 px-3 py-3 text-base uppercase text-white transition-colors [color-scheme:dark] hover:border-white/30 focus:outline-none focus:border-tertiary-400 focus:ring-2 focus:ring-tertiary-400/20 sm:text-sm"
+              value={selection.city}
+              onChange={(e) =>
+                void applySelection({ ...selection, city: e.target.value })
+              }
             >
               <option value="" className="bg-noir-500">
-                Toutes les villes
+                TOUTES LES VILLES
               </option>
               {availableCities.map((city) => (
                 <option key={city} value={city} className="bg-noir-500">
@@ -532,39 +683,71 @@ export default function InspirationMosaicFeed({
             </select>
           </div>
 
+          <FilterChipGroup
+            label="Taille de la pièce"
+            icon={<Ruler size={15} aria-hidden="true" className="text-tertiary-400" />}
+            options={PIECE_SIZE_OPTIONS.map((option) => ({
+              value: option.value,
+              label: option.label,
+            }))}
+            selected={selection.pieceSize}
+            onToggle={(value) => toggleInList("pieceSize", value)}
+          />
+
+          <FilterChipGroup
+            label="Catégories"
+            icon={<Tags size={15} aria-hidden="true" className="text-tertiary-400" />}
+            options={availableCategories.map((category) => ({
+              value: category.slug,
+              label: category.name,
+            }))}
+            selected={selection.category}
+            onToggle={(value) => toggleInList("category", value)}
+          />
+
+          <FilterChipGroup
+            label="Styles"
+            icon={<Palette size={15} aria-hidden="true" className="text-tertiary-400" />}
+            options={availableStyles.map((style) => ({ value: style, label: style }))}
+            selected={selection.style}
+            onToggle={(value) => toggleInList("style", value)}
+          />
+
           <div className="flex flex-col gap-2 font-one">
-            <label className="flex items-center gap-2 text-sm text-white/75" htmlFor="inspiration-style-select">
-              <Palette size={15} aria-hidden="true" className="text-tertiary-400" /> Style
+            <label className="flex items-center gap-2 text-sm text-white/75" htmlFor="inspiration-hashtag-input">
+              <Hash size={15} aria-hidden="true" className="text-tertiary-400" /> Hashtags
             </label>
-            <select
-              id="inspiration-style-select"
-              className="min-h-12 w-full min-w-0 cursor-pointer rounded-lg border border-white/15 bg-noir-500 px-3 py-3 text-base text-white transition-colors [color-scheme:dark] hover:border-white/30 focus:outline-none focus:border-tertiary-400 focus:ring-2 focus:ring-tertiary-400/20 sm:text-sm lg:w-64"
-              value={selectedStyle}
-              onChange={(e) => handleStyleChange(e.target.value)}
-            >
-              <option value="" className="bg-noir-500">
-                Tous les styles
-              </option>
-              {availableStyles.map((style) => (
-                <option key={style} value={style} className="bg-noir-500">
-                  {style}
-                </option>
-              ))}
-            </select>
+            <input
+              id="inspiration-hashtag-input"
+              type="text"
+              value={hashtagInput}
+              onChange={(e) => setHashtagInput(e.target.value)}
+              placeholder="#fleur #minimaliste"
+              className="min-h-12 w-full min-w-0 rounded-lg border border-white/15 bg-noir-500 px-3 py-3 text-base text-white transition-colors placeholder:text-white/35 hover:border-white/30 focus:outline-none focus:border-tertiary-400 focus:ring-2 focus:ring-tertiary-400/20 sm:text-sm"
+            />
           </div>
         </div>
 
-        <AppButton type="button" variant="secondary" onClick={clearAllFilters} disabled={!selectedCity && !selectedStyle} icon={<RotateCcw size={15} aria-hidden="true" />} className="min-h-12 self-start cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-tertiary-400 lg:self-end">
+        <AppButton type="button" variant="secondary" onClick={clearAllFilters} disabled={!hasActiveFilters && !hashtagInput} icon={<RotateCcw size={15} aria-hidden="true" />} className="min-h-12 cursor-pointer xl:self-end focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-tertiary-400">
           Réinitialiser
         </AppButton>
       </div>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p role="status" className="text-sm text-white/60">{filteredIntroText}</p>
-        {(selectedCity || selectedStyle) && <div className="flex flex-wrap items-center gap-2 text-xs text-white/70">
+        {hasActiveFilters && <div className="flex flex-wrap items-center gap-2 text-xs text-white/70">
           <SlidersHorizontal size={14} aria-hidden="true" className="text-tertiary-400" />
           <span>Filtres actifs :</span>
-          {selectedCity && <span className="max-w-full wrap-anywhere rounded-md bg-tertiary-400/10 px-2.5 py-1.5 text-tertiary-400">{selectedCity}</span>}
-          {selectedStyle && <span className="max-w-full wrap-anywhere rounded-md bg-tertiary-400/10 px-2.5 py-1.5 text-tertiary-400">{selectedStyle}</span>}
+          {[
+            ...(selection.city ? [selection.city] : []),
+            ...selection.pieceSize.map(
+              (size) => PIECE_SIZE_OPTIONS.find((option) => option.value === size)?.label ?? size,
+            ),
+            ...selection.category.map((slug) => categoryLabelBySlug.get(slug) ?? slug),
+            ...selection.style,
+            ...selection.hashtag.map((tag) => `#${tag}`),
+          ].map((label) => (
+            <span key={label} className="max-w-full wrap-anywhere rounded-md bg-tertiary-400/10 px-2.5 py-1.5 text-tertiary-400">{label}</span>
+          ))}
         </div>}
       </div>
 
@@ -598,12 +781,15 @@ export default function InspirationMosaicFeed({
                   sizes="(max-width:640px) 50vw, (max-width:1280px) 33vw, 20vw"
                 />
                 <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-                <div className="absolute bottom-0 left-0 right-0 translate-y-1 p-3 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
-                  <p className="line-clamp-1 text-sm font-semibold text-white drop-shadow">{item.title}</p>
+                <div className="absolute bottom-0 left-0 right-0 flex translate-y-1 items-center gap-2 p-3 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
+                  <Avatar src={item.authorAvatar} name={item.salonName} size={32} />
+                  <div className="min-w-0">
+                  <p className="line-clamp-1 text-sm font-semibold text-white drop-shadow">{item.salonName}</p>
                   <p className="text-[11px] text-white/80 drop-shadow">
                     {item.artistName ? `${item.artistName} · ` : ""}
-                    {item.salonName} · {item.city}
+                    {item.city}
                   </p>
+                  </div>
                 </div>
               </div>
             </button>
@@ -611,13 +797,15 @@ export default function InspirationMosaicFeed({
         ))}
       </div>
 
-      {isLoading && (
-        <div className="py-3 text-center text-sm text-white/60">Chargement des prochaines photos...</div>
+      {(isFiltering || (isLoading && hasMore)) && (
+        <div className="py-3 text-center text-sm text-white/60">
+          {isFiltering ? "Chargement..." : "Chargement des prochaines photos..."}
+        </div>
       )}
 
       {!isLoading && filteredItems.length === 0 && (
         <div className="rounded-2xl border border-white/12 bg-white/5 py-10 text-center text-sm text-white/65">
-          {selectedCity || selectedStyle
+          {hasActiveFilters
             ? "Aucune photo ne correspond aux filtres sélectionnés pour le moment."
             : "Aucune photo de portfolio disponible pour le moment."}
         </div>
@@ -629,7 +817,7 @@ export default function InspirationMosaicFeed({
         </div>
       )}
 
-      {!hasMore && filteredItems.length > 0 && (
+      {!hasMore && !isFiltering && !loadError && filteredItems.length > 0 && (
         <div className="py-2 text-center text-xs text-white/45">Tu as atteint la fin de la mosaïque.</div>
       )}
 
@@ -701,10 +889,15 @@ export default function InspirationMosaicFeed({
             >
               {/* Mobile/tablette : layout horizontal compact */}
               <div className="flex items-start justify-between gap-4 lg:hidden">
+                <div className="flex min-w-0 flex-1 items-start gap-3">
+                <Avatar src={activeItem.authorAvatar} name={activeItem.salonName} size={40} />
                 <div className="min-w-0 flex-1 space-y-0.5">
-                  <p className="truncate text-sm font-semibold text-white font-one">{activeItem.title}</p>
+                  <p className="truncate text-sm font-semibold text-white font-one">{activeItem.salonName}</p>
+                  {activeItem.parentSalonName && (
+                    <p className="truncate text-[11px] text-white/60 font-one">Membre du salon {activeItem.parentSalonName}</p>
+                  )}
                   <p className="text-xs text-white/60 font-one">
-                    {activeItem.salonName} · {activeItem.city}
+                    {activeItem.city}
                     {activeItem.artistName ? ` · ${activeItem.artistName}` : ""}
                   </p>
                   <div className="mt-1 flex flex-wrap items-center gap-2">
@@ -716,7 +909,7 @@ export default function InspirationMosaicFeed({
                         className="inline-flex items-center gap-1 text-[11px] text-tertiary-300 hover:text-tertiary-100 transition"
                       >
                         <FaInstagram size={14} />
-                        Salon {salonInstagramProfile.label}
+                        {activeItem.isTatoueurAccount ? "Tatoueur.se" : "Salon"} {salonInstagramProfile.label}
                       </a>
                     )}
                     {artistInstagramProfile && (
@@ -731,6 +924,7 @@ export default function InspirationMosaicFeed({
                       </a>
                     )}
                   </div>
+                </div>
                 </div>
                 <div className="flex shrink-0 items-center gap-3">
                   {artistInstagramProfile && (
@@ -761,22 +955,66 @@ export default function InspirationMosaicFeed({
                   </Link>
                 </div>
               </div>
+              {activeItem.canMessageSalon && (
+                <div className="mt-3 lg:hidden">
+                  <StartInkeraConversationButton
+                    key={`mobile-${activeItem.key}`}
+                    variant="compact"
+                    tone="violet"
+                    targetUserId={activeItem.salonUserId}
+                    recipientName={activeItem.salonName}
+                  />
+                </div>
+              )}
+
+              {activeItem.canMessageParentSalon && activeItem.parentSalonUserId && (
+                <div className="mt-3 lg:hidden">
+                  <StartInkeraConversationButton
+                    key={`mobile-parent-${activeItem.key}`}
+                    variant="compact"
+                    tone="violet"
+                    targetUserId={activeItem.parentSalonUserId}
+                    recipientName={activeItem.parentSalonName || "le salon"}
+                  />
+                </div>
+              )}
 
               {/* Desktop : layout vertical complet */}
               <div className="hidden lg:flex lg:flex-col lg:h-full lg:justify-between">
                 <div className="space-y-5">
                   <div className="space-y-1">
-                    <p className="text-[11px] uppercase tracking-[0.14em] text-white/45 font-one">Tatouage</p>
-                    <h2 className="text-lg font-semibold text-white font-one">{activeItem.title}</h2>
                     {activeItem.description && (
                       <p className="text-sm text-white/65 font-one">{activeItem.description}</p>
                     )}
                   </div>
 
-                  <div className="space-y-1 rounded-2xl border border-white/10 bg-white/5 p-3">
-                    <p className="text-[11px] uppercase tracking-[0.14em] text-white/45 font-one">Salon</p>
-                    <p className="text-base tracking-widest font-semibold text-white font-one">{activeItem.salonName}</p>
-                    <p className="text-sm text-white/60 font-one">{activeItem.city}</p>
+                  {(activeItem.pieceSize || activeItem.categories.length > 0 || activeItem.styles.length > 0 || activeItem.hashtags.length > 0) && (
+                    <div className="space-y-2 rounded-2xl border border-white/10 bg-white/5 p-3">
+                      {activeItem.pieceSize && (
+                        <p className="text-sm text-white/70 font-one">
+                          Taille : {PIECE_SIZE_OPTIONS.find((option) => option.value === activeItem.pieceSize)?.label ?? activeItem.pieceSize}
+                        </p>
+                      )}
+                      <div className="flex flex-wrap gap-1.5">
+                        {[...activeItem.categories, ...activeItem.styles].map((label) => (
+                          <span key={label} className="rounded-full bg-tertiary-400/10 px-2 py-0.5 text-[11px] text-tertiary-400 font-one">{label}</span>
+                        ))}
+                        {activeItem.hashtags.map((tag) => (
+                          <span key={`#${tag}`} className="rounded-full bg-white/10 px-2 py-0.5 text-[11px] text-white/70 font-one">#{tag}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="space-y-2 rounded-2xl border border-white/10 bg-white/5 p-3">
+                    <p className="text-[11px] uppercase tracking-[0.14em] text-white/45 font-one">{activeItem.isTatoueurAccount ? "Tatoueur.se" : "Salon"}</p>
+                    <div className="flex items-center gap-3">
+                      <Avatar src={activeItem.authorAvatar} name={activeItem.salonName} size={44} />
+                      <div className="min-w-0">
+                        <p className="truncate text-base tracking-widest font-semibold text-white font-one">{activeItem.salonName}</p>
+                        <p className="text-sm text-white/60 font-one">{activeItem.city}</p>
+                      </div>
+                    </div>
                     {salonInstagramProfile && (
                       <a
                         href={salonInstagramProfile.href}
@@ -790,10 +1028,41 @@ export default function InspirationMosaicFeed({
                     )}
                   </div>
 
+                  {activeItem.parentSalonName && (
+                    <div className="space-y-2 rounded-2xl border border-white/10 bg-white/5 p-3">
+                      <p className="text-[11px] uppercase tracking-[0.14em] text-white/45 font-one">Membre du salon</p>
+                      <Link
+                        href={activeItem.parentSalonHref || activeItem.href}
+                        onClick={closeLightbox}
+                        className="flex cursor-pointer items-center gap-3 transition hover:opacity-80"
+                      >
+                        <Avatar src={activeItem.parentSalonAvatar} name={activeItem.parentSalonName} size={44} />
+                        <div className="min-w-0">
+                          <p className="truncate text-base tracking-widest font-semibold text-white font-one">{activeItem.parentSalonName}</p>
+                          {activeItem.parentSalonCity && (
+                            <p className="text-sm text-white/60 font-one">{activeItem.parentSalonCity}</p>
+                          )}
+                        </div>
+                      </Link>
+                      {activeItem.canMessageParentSalon && activeItem.parentSalonUserId && (
+                        <StartInkeraConversationButton
+                          key={`parent-${activeItem.key}`}
+                          variant="compact"
+                          tone="violet"
+                          targetUserId={activeItem.parentSalonUserId}
+                          recipientName={activeItem.parentSalonName}
+                        />
+                      )}
+                    </div>
+                  )}
+
                   {activeItem.artistName && (
-                    <div className="space-y-1 rounded-2xl border border-white/10 bg-white/5 p-3">
+                    <div className="space-y-2 rounded-2xl border border-white/10 bg-white/5 p-3">
                       <p className="text-[11px] uppercase tracking-[0.14em] text-white/45 font-one">Artiste</p>
-                      <p className="text-sm font-semibold text-white font-one">{activeItem.artistName}</p>
+                      <div className="flex items-center gap-3">
+                        <Avatar src={activeItem.artistAvatar} name={activeItem.artistName} size={36} />
+                        <p className="text-sm font-semibold text-white font-one">{activeItem.artistName}</p>
+                      </div>
                       {artistInstagramProfile && (
                         <a
                           href={artistInstagramProfile.href}
@@ -819,6 +1088,15 @@ export default function InspirationMosaicFeed({
                       handleFavoriteToggle(activeItem.key, isFavorite)
                     }
                   />
+                  {activeItem.canMessageSalon && (
+                    <StartInkeraConversationButton
+                      key={`desktop-${activeItem.key}`}
+                      variant="compact"
+                      tone="violet"
+                      targetUserId={activeItem.salonUserId}
+                      recipientName={activeItem.salonName}
+                    />
+                  )}
                   <AppButton
                     href={activeItem.href}
                     onClick={closeLightbox}

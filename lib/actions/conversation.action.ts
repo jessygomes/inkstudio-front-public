@@ -1,6 +1,65 @@
 "use server";
 import { getAuthHeaders } from "../session";
-import { ConversationDto } from "../type";
+import { ConversationDto, PaginatedConversationsDto } from "../type";
+
+const apiBase = () => process.env.NEXT_PUBLIC_BACK_URL;
+
+/** Liste des discussions accessibles au client, paginée et triée par activité. */
+export const getConversationsAction = async (page = 1): Promise<PaginatedConversationsDto> => {
+  const headers = await getAuthHeaders();
+  const response = await fetch(`${apiBase()}/messaging/conversations?page=${Math.max(1, page)}&limit=20`, {
+    headers, cache: "no-store",
+  });
+  if (!response.ok) throw new Error(`Chargement des conversations impossible (${response.status}).`);
+  return response.json();
+};
+
+export type ConversationAppointment = {
+  id: string;
+  title: string;
+  prestation: string;
+  start: string;
+  end: string;
+  status: string;
+};
+
+export const getConversationAppointmentsAction = async (conversationId: string, page = 1): Promise<{
+  data: ConversationAppointment[]; total: number; page: number; totalPages: number;
+}> => {
+  const headers = await getAuthHeaders();
+  const response = await fetch(`${apiBase()}/messaging/conversations/${encodeURIComponent(conversationId)}/appointments?page=${Math.max(1, page)}`, {
+    headers, cache: "no-store",
+  });
+  if (!response.ok) throw new Error(`Rendez-vous indisponibles (${response.status}).`);
+  return response.json();
+};
+
+/** Depuis le profil public : récupère la conversation Inkera existante ou en crée une sans RDV. */
+export const startConversationFromPublicProfileAction = async (
+  professionalUserId: string,
+): Promise<{ id: string }> => {
+  if (!professionalUserId) throw new Error("Profil professionnel manquant.");
+
+  const headers = await getAuthHeaders();
+  if (!headers.Authorization) throw new Error("Connectez-vous avec un compte client Inkera.");
+
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_BACK_URL}/messaging/conversations/start`,
+    {
+      method: "POST",
+      headers,
+      cache: "no-store",
+      body: JSON.stringify({ professionalUserId }),
+    },
+  );
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const message = result?.message;
+    throw new Error(Array.isArray(message) ? message.join(" · ") : message || "Impossible d'ouvrir la conversation.");
+  }
+  if (typeof result?.id !== "string") throw new Error("Identifiant de conversation manquant.");
+  return { id: result.id };
+};
 
 //! ============================================================================
 //! RECUPERER LE NOMBRE DE MESSAGES NON LUS
@@ -114,7 +173,7 @@ export const markConversationAsReadAction = async (
 
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACK_URL}/messaging/conversations/${conversationId}/mark-as-read`,
+      `${process.env.NEXT_PUBLIC_BACK_URL}/messaging/conversations/${conversationId}/mark-read`,
       {
         method: "PATCH",
         headers,
@@ -129,5 +188,6 @@ export const markConversationAsReadAction = async (
     }
   } catch (error) {
     console.error("❌ Error marking conversation as read:", error);
+    throw error;
   }
 };

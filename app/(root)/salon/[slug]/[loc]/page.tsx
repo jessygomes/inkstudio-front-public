@@ -22,6 +22,7 @@ import FavoriteBtn from "@/components/Shared/FavoriteBtn";
 import SalonReviews from "@/components/ProfilSalon/SalonReviews";
 import { SalonProfileViewTracker } from "@/components/Shared/SalonProfileViewTracker";
 import PublicProfileContactForm from "@/components/Contact/PublicProfileContactForm";
+import StartInkeraConversationButton from "@/components/Contact/StartInkeraConversationButton";
 
 type PageParams = {
   params: Promise<{ slug: string; loc: string }>;
@@ -546,6 +547,7 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
               <p className="text-lg text-white">Votre prochain projet commence ici</p>
               <p className="mt-2 text-sm leading-relaxed text-white/65">Échangez avec {salon.salonName} pour donner vie à vos idées.</p>
               <AppButton href={isFree ? "#contact" : `/salon/${slug}/${loc}/reserver`} variant="primary" fullWidth className="mt-5 min-h-12">{isFree ? "Contacter le salon" : "Prendre rendez-vous"}<ArrowUpRight size={16} /></AppButton>
+              {!isFree && <div className="mt-3"><StartInkeraConversationButton variant="compact" targetUserId={salon.id} recipientName={salon.salonName || "ce tatoueur"} /></div>}
               {!isFree && <a href="#contact" className="mt-2 flex min-h-11 items-center justify-center text-sm text-white/75 hover:text-white">Poser une question</a>}
             </div>
             <SalonPracticalInfo

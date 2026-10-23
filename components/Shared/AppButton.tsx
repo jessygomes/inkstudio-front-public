@@ -2,8 +2,8 @@ import Link from "next/link";
 import React from "react";
 
 type AppButtonProps = React.AriaAttributes & {
-  /** "primary" = gradient tertiary | "secondary" = ghost/outline */
-  variant?: "primary" | "secondary";
+  /** "primary" = gradient tertiary | "secondary" = ghost/outline | "violet" = gradient violet permanent */
+  variant?: "primary" | "secondary" | "violet";
   /** Rend un <Link> si fourni, sinon un <button> */
   href?: string;
   onClick?: () => void;
@@ -36,7 +36,11 @@ export default function AppButton({
   const secondary =
     "border border-white/15 bg-white/5 text-white/80 backdrop-blur-sm hover:border-white/25 hover:text-white";
 
-  const variantClass = variant === "primary" ? primary : secondary;
+  const violet =
+    "cursor-pointer bg-linear-to-r from-cuatro-500 to-cuatro-600 text-white shadow-lg shadow-cuatro-500/25 hover:shadow-cuatro-500/40 hover:brightness-110 hover:-translate-y-0.5";
+
+  const variantClass =
+    variant === "primary" ? primary : variant === "violet" ? violet : secondary;
   const widthClass = fullWidth ? "w-full" : "";
 
   const finalClass = `${base} ${variantClass} ${widthClass} ${className}`.trim();

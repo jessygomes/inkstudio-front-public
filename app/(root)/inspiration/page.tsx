@@ -3,12 +3,26 @@ import {
   getInspirationPortfolioPhotosAction,
 } from "@/lib/actions/inspiration.action";
 import InspirationMosaicFeed from "@/components/Inspiration/InspirationMosaicFeed";
+import { parseInspirationFilters } from "@/components/Inspiration/inspirationFilters";
 
-export default async function InspirationPage() {
+type InspirationPageProps = {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
+
+export default async function InspirationPage({
+  searchParams,
+}: InspirationPageProps) {
+  const params = await searchParams;
+  const initialSelection = parseInspirationFilters((key) => {
+    const value = params[key];
+    return Array.isArray(value) ? value[0] : value;
+  });
+
   const [initialData, filterOptions] = await Promise.all([
     getInspirationPortfolioPhotosAction({
       page: 1,
       limit: 12,
+      ...initialSelection,
     }),
     getInspirationFilterOptionsAction(),
   ]);
@@ -18,6 +32,7 @@ export default async function InspirationPage() {
       <InspirationMosaicFeed
         initialData={initialData}
         initialFilters={filterOptions}
+        initialSelection={initialSelection}
       />
     </main>
   );

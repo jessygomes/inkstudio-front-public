@@ -6,6 +6,7 @@ import { io, Socket } from "socket.io-client";
 
 export interface MessagingMessage {
   id: string;
+  conversationId: string;
   content: string;
   senderId: string;
   type: "USER" | "SYSTEM";
@@ -56,10 +57,6 @@ interface UserTypingEvent {
   userName: string;
 }
 
-interface UnreadCountEvent {
-  totalUnread: number;
-}
-
 export const useMessaging = (token?: string) => {
   const socketRef = useRef<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
@@ -106,22 +103,24 @@ export const useMessaging = (token?: string) => {
       console.error("❌ Erreur de connexion:", error?.message || error);
     });
 
-    // Événement: compteur de messages non lus
-    socket.on("unread-count-updated", (data: UnreadCountEvent) => {
-      setUnreadCount(data.totalUnread);
-    });
-
     // Événement: historique de la conversation
     socket.on(
       "conversation-history",
       (data: { conversationId: string; messages: MessagingMessage[] }) => {
-        setMessages(data.messages.reverse()); // Inverser pour avoir les plus anciens d'abord
+        if (data.conversationId === currentConversationIdRef.current) {
+          setMessages([...data.messages].reverse()); // Pas de mutation du payload partagé
+        }
       }
     );
 
     // Événement: nouveau message
     socket.on("new-message", (message: NewMessageEvent) => {
-      setMessages((prev) => [...prev, message]);
+      if (message.conversationId === currentConversationIdRef.current) {
+        setMessages((prev) => prev.some((item) => item.id === message.id) ? prev : [...prev, message]);
+      }
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new Event("unreadCountRefresh"));
+      }
 
       // Si on est dans la conversation active et que le message est déjà marqué comme lu
       // (car on est présent), notifier le MessageList pour mettre à jour le compteur à 0
@@ -171,20 +170,9 @@ export const useMessaging = (token?: string) => {
         )
       );
 
-      // Optimistic decrement of unread count locally + propagation
-      setUnreadCount((prev) => {
-        const next = Math.max(0, prev - 1);
-
-        if (typeof window !== "undefined") {
-          window.dispatchEvent(
-            new CustomEvent("unreadCountChanged", {
-              detail: { count: next },
-            })
-          );
-        }
-
-        return next;
-      });
+      // Recalculer à partir du serveur : une notification déjà lue ne doit pas
+      // décrémenter le compteur global une seconde fois.
+      if (typeof window !== "undefined") window.dispatchEvent(new Event("unreadCountRefresh"));
 
       // Propager un événement global pour mettre à jour via refetch si besoin
       if (typeof window !== "undefined") {
@@ -236,6 +224,7 @@ export const useMessaging = (token?: string) => {
 
     return () => {
       socket.disconnect();
+      if (socketRef.current === socket) socketRef.current = null;
     };
   }, [token]);
 

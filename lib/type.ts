@@ -188,6 +188,9 @@ export interface ConversationUserDto {
   email: string;
   image?: string | null;
   salonName?: string;
+  city?: string;
+  postalCode?: string;
+  address?: string;
   role?: string;
 }
 

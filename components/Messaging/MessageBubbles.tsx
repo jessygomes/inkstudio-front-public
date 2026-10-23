@@ -4,6 +4,15 @@ import { MdOutlineMessage } from "react-icons/md";
 import MessageOptionsMenu from "./MessageOptionsMenu";
 import { ConversationMessageDto } from "@/lib/type";
 
+// Compatibilité avec les anciens messages dont le contenu est directement l'URL de l'image.
+const inlineImageUrl = (content: string) => {
+  try {
+    const url = new URL(content.trim());
+    if (!["http:", "https:"].includes(url.protocol)) return null;
+    return /\.(png|jpe?g|webp|gif|avif)$/i.test(url.pathname) ? url.href : null;
+  } catch { return null; }
+};
+
 interface MessageBubblesProps {
   messages: ConversationMessageDto[];
   currentUserId?: string;
@@ -31,6 +40,7 @@ export default function MessageBubbles({
       {messages.map((message, index) => {
         const isOwnMessage = message.sender.id === currentUserId;
         const sender = message.sender;
+        const imageFromText = inlineImageUrl(message.content || "");
 
         return (
           <React.Fragment key={message.id}>
@@ -80,9 +90,7 @@ export default function MessageBubbles({
                       : "rounded-bl-md border-white/10 bg-white/5 text-white/90"
                   }`}
                 >
-                  <p className="whitespace-pre-wrap break-words font-one leading-relaxed [overflow-wrap:anywhere]">
-                    {message.content}
-                  </p>
+                  {imageFromText ? <a href={imageFromText} target="_blank" rel="noopener noreferrer"><img src={imageFromText} alt="Photo de la conversation" loading="lazy" className="max-h-72 max-w-full rounded-lg object-contain" /></a> : <p className="whitespace-pre-wrap break-words font-one leading-relaxed [overflow-wrap:anywhere]">{message.content}</p>}
 
                   {/* Images attachées */}
                   {message.attachments && message.attachments.length > 0 && (
@@ -97,11 +105,10 @@ export default function MessageBubbles({
                             rel="noopener noreferrer"
                             className="block relative rounded overflow-hidden hover:opacity-80 transition-opacity"
                           >
-                            <Image
+                            <img
                               src={attachment.fileUrl}
                               alt={attachment.fileName}
-                              width={200}
-                              height={200}
+                              loading="lazy"
                               className="h-auto w-full max-w-[180px] rounded"
                             />
                           </a>

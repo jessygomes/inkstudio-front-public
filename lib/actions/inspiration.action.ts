@@ -8,6 +8,21 @@ type InspirationSalon = {
 	postalCode: string | null;
 	instagram?: string | null;
 	isInspirationSalon: boolean;
+	saasPlan?: string | null;
+	role?: string | null;
+	profileImage?: string | null;
+	firstName?: string | null;
+	lastName?: string | null;
+	salon?: {
+		id: string;
+		salonName: string | null;
+		image: string | null;
+		profileImage?: string | null;
+		city: string | null;
+		postalCode: string | null;
+		instagram?: string | null;
+		saasPlan?: string | null;
+	} | null;
 };
 
 type InspirationTatoueur = {
@@ -18,12 +33,23 @@ type InspirationTatoueur = {
 	instagram: string | null;
 };
 
+export type InspirationPieceSize = "SMALL" | "MEDIUM" | "LARGE";
+
+export type InspirationCategory = {
+	id?: string;
+	slug: string;
+	name: string;
+};
+
 export type InspirationPhoto = {
 	id: string;
 	title: string;
 	description: string;
 	imageUrl: string;
 	style: string[];
+	pieceSize?: InspirationPieceSize | null;
+	categories?: InspirationCategory[];
+	hashtags?: string[];
 	createdAt: string;
 	updatedAt: string;
 	user: InspirationSalon;
@@ -48,6 +74,7 @@ export type InspirationPhotosResponse = {
 export type InspirationFilterOptions = {
 	cities: string[];
 	styles: string[];
+	categories: InspirationCategory[];
 	source: "mock" | "api";
 };
 
@@ -56,7 +83,15 @@ type ApiError = {
 	message?: string;
 };
 
-type InspirationActionOptions = {
+export type InspirationFilters = {
+	city?: string;
+	pieceSize?: string[];
+	category?: string[];
+	style?: string[];
+	hashtag?: string[];
+};
+
+type InspirationActionOptions = InspirationFilters & {
 	page?: number;
 	limit?: number;
 };
@@ -336,15 +371,42 @@ const clampPagination = (options?: InspirationActionOptions) => {
 	};
 };
 
+const normalizeList = (values?: string[]) =>
+	(values ?? []).map((value) => value.trim()).filter(Boolean);
+
 const buildMockResponse = (
 	page: number,
 	limit: number,
+	filters: InspirationFilters = {},
 ): InspirationPhotosResponse => {
-	const total = MOCK_INSPIRATION_PHOTOS.length;
+	const city = filters.city?.trim().toLowerCase();
+	const styles = normalizeList(filters.style).map((value) => value.toLowerCase());
+	const sizes = normalizeList(filters.pieceSize).map((value) => value.toUpperCase());
+	const categories = normalizeList(filters.category).map((value) => value.toLowerCase());
+	const hashtags = normalizeList(filters.hashtag).map((value) =>
+		value.replace(/^#+/, "").toLowerCase(),
+	);
+
+	const matchesAny = (selected: string[], values: string[]) =>
+		selected.length === 0 || selected.some((value) => values.includes(value));
+
+	const filtered = MOCK_INSPIRATION_PHOTOS.filter(
+		(photo) =>
+			(!city || (photo.user.city || "").toLowerCase().includes(city)) &&
+			matchesAny(styles, photo.style.map((value) => value.toLowerCase())) &&
+			matchesAny(sizes, photo.pieceSize ? [photo.pieceSize] : []) &&
+			matchesAny(
+				categories,
+				(photo.categories ?? []).map((value) => value.slug.toLowerCase()),
+			) &&
+			matchesAny(hashtags, (photo.hashtags ?? []).map((value) => value.toLowerCase())),
+	);
+
+	const total = filtered.length;
 	const totalPages = Math.max(1, Math.ceil(total / limit));
 	const safePage = Math.min(page, totalPages);
 	const start = (safePage - 1) * limit;
-	const photos = MOCK_INSPIRATION_PHOTOS.slice(start, start + limit);
+	const photos = filtered.slice(start, start + limit);
 
 	return {
 		photos,
@@ -374,7 +436,7 @@ const getUniqueSortedValues = (values: Array<string | null | undefined>) => {
 
 const buildMockFilterOptions = (): InspirationFilterOptions => {
 	const cities = getUniqueSortedValues(
-		MOCK_INSPIRATION_PHOTOS.map((photo) => photo.user.city),
+		MOCK_INSPIRATION_PHOTOS.map((photo) => photo.user.city?.toUpperCase()),
 	);
 	const styles = getUniqueSortedValues(
 		MOCK_INSPIRATION_PHOTOS.flatMap((photo) => photo.style),
@@ -383,6 +445,7 @@ const buildMockFilterOptions = (): InspirationFilterOptions => {
 	return {
 		cities,
 		styles,
+		categories: [],
 		source: "mock",
 	};
 };
@@ -399,12 +462,26 @@ const getBackUrl = () => {
 const fetchInspirationPhotosFromApi = async (
 	page: number,
 	limit: number,
+	filters: InspirationFilters,
 ): Promise<InspirationPhotosResponse> => {
 	const params = new URLSearchParams({
 		page: page.toString(),
 		limit: limit.toString(),
 	});
 
+	const city = filters.city?.trim();
+	if (city) params.set("city", city);
+
+	const csvFilters = {
+		pieceSize: filters.pieceSize,
+		category: filters.category,
+		style: filters.style,
+		hashtag: filters.hashtag,
+	} as const;
+	for (const [key, values] of Object.entries(csvFilters)) {
+		const list = normalizeList(values);
+		if (list.length > 0) params.set(key, list.join(","));
+	}
 	const response = await fetch(
 		`${getBackUrl()}/portfolio/inspirations?${params.toString()}`,
 		{
@@ -467,20 +544,77 @@ export const getInspirationPortfolioPhotosAction = async (
 	options?: InspirationActionOptions,
 ): Promise<InspirationPhotosResponse> => {
 	const { page, limit } = clampPagination(options);
+	const filters: InspirationFilters = {
+		city: options?.city,
+		pieceSize: options?.pieceSize,
+		category: options?.category,
+		style: options?.style,
+		hashtag: options?.hashtag,
+	};
 
 	if (USE_INSPIRATION_MOCK_DATA) {
-		return buildMockResponse(page, limit);
+		return buildMockResponse(page, limit, filters);
 	}
 
 	try {
-		return await fetchInspirationPhotosFromApi(page, limit);
+		return await fetchInspirationPhotosFromApi(page, limit, filters);
 	} catch (error) {
 		console.error(
 			"Erreur lors de la récupération des images d'inspiration, fallback mock activé :",
 			error,
 		);
-		return buildMockResponse(page, limit);
+		return buildMockResponse(page, limit, filters);
 	}
+};
+
+const fetchStyleNames = async (): Promise<string[]> => {
+	const response = await fetch(`${getBackUrl()}/portfolio/styles`, {
+		method: "GET",
+		headers: { "Content-Type": "application/json" },
+		cache: "no-store",
+	});
+	if (!response.ok) {
+		throw new Error(`Erreur API inspiration (${response.status})`);
+	}
+
+	const data = await response.json();
+	const styles: unknown = data?.styles;
+	if (!Array.isArray(styles)) {
+		throw new Error("Réponse invalide pour les styles inspiration");
+	}
+
+	return getUniqueSortedValues(
+		styles.map((style) =>
+			style && typeof style === "object" && "name" in style
+				? String((style as { name: unknown }).name)
+				: null,
+		),
+	);
+};
+
+const fetchCategories = async (): Promise<InspirationCategory[]> => {
+	const response = await fetch(`${getBackUrl()}/portfolio/categories`, {
+		method: "GET",
+		headers: { "Content-Type": "application/json" },
+		cache: "no-store",
+	});
+	if (!response.ok) {
+		throw new Error(`Erreur API inspiration (${response.status})`);
+	}
+
+	const data = await response.json();
+	if (!Array.isArray(data)) {
+		throw new Error("Réponse invalide pour les catégories inspiration");
+	}
+
+	return data
+		.filter(
+			(category): category is InspirationCategory =>
+				!!category &&
+				typeof category.slug === "string" &&
+				typeof category.name === "string",
+		)
+		.map(({ id, slug, name }) => ({ id, slug, name }));
 };
 
 export const getInspirationFilterOptionsAction = async (): Promise<InspirationFilterOptions> => {
@@ -489,14 +623,16 @@ export const getInspirationFilterOptionsAction = async (): Promise<InspirationFi
 	}
 
 	try {
-		const [cities, styles] = await Promise.all([
+		const [cities, styles, categories] = await Promise.all([
 			fetchStringList("/users/cities"),
-			fetchStringList("/users/styleTattoo"),
+			fetchStyleNames(),
+			fetchCategories(),
 		]);
 
 		return {
-			cities,
+			cities: getUniqueSortedValues(cities.map((city) => city.toUpperCase())),
 			styles,
+			categories,
 			source: "api",
 		};
 	} catch (error) {

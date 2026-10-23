@@ -57,6 +57,7 @@ export default function Conversation() {
       setError(null);
       const result = await getConversationByIdAction(id);
       setConversation(result);
+      window.dispatchEvent(new Event("unreadCountRefresh"));
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Erreur inconnue";
