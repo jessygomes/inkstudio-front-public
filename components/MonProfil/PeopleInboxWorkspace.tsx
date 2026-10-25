@@ -18,6 +18,7 @@ import {
 import { useMessaging } from "@/lib/hook/useMessaging";
 import MessageInput from "@/components/Messaging/MessageInput";
 import MessageBubbles from "@/components/Messaging/MessageBubbles";
+import ConversationMoodboards from "@/components/Messaging/ConversationMoodboards";
 import ConversationRDVDetails from "@/components/Messaging/ConversationRDVDetails";
 
 type MobilePane = "list" | "chat" | "details";
@@ -207,7 +208,8 @@ export default function PeopleInboxWorkspace() {
     : null;
 
   return (
-    <section aria-label="Messagerie Inkera People" className="relative h-[calc(100dvh-220px)] min-h-[520px] overflow-hidden rounded-b-2xl border border-t-0 border-white/10 bg-noir-700 text-white font-one shadow-xl">
+    <>
+    <section aria-label="Messagerie Inkera People" className="relative h-[calc(100dvh-220px)] min-h-[520px] overflow-hidden rounded-2xl border border-white/10 bg-noir-700 text-white font-one shadow-xl">
       <div className={`grid h-full min-h-0 grid-cols-1 ${listCollapsed ? "lg:grid-cols-[56px_minmax(0,1fr)]" : "lg:grid-cols-[300px_minmax(0,1fr)]"} ${detailsCollapsed ? (listCollapsed ? "xl:grid-cols-[56px_minmax(0,1fr)]" : "xl:grid-cols-[340px_minmax(0,1fr)]") : listCollapsed ? "xl:grid-cols-[56px_minmax(0,1fr)_340px]" : "xl:grid-cols-[320px_minmax(0,1fr)_340px] 2xl:grid-cols-[360px_minmax(0,1fr)_380px]"}`}>
         <aside className={`${mobilePane === "list" ? "flex" : "hidden"} min-h-0 min-w-0 flex-col border-r border-white/10 bg-noir-600 lg:flex`}>
           {listCollapsed && <button type="button" aria-label="Afficher les conversations" aria-expanded={false} onClick={() => setListCollapsed(false)} className="cursor-pointer disabled:cursor-not-allowed hidden h-12 shrink-0 items-center justify-center text-white/60 hover:bg-white/5 lg:flex"><PanelLeftOpen size={18}/></button>}
@@ -245,6 +247,7 @@ export default function PeopleInboxWorkspace() {
               <div className="rounded-xl border border-white/10 bg-white/5 p-3"><div className="flex items-center gap-3"><div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-white/10"><Image src={salon?.image || "/images/default-avatar.png"} fill sizes="48px" className="object-cover" alt="Photo du professionnel"/></div><div className="min-w-0"><p className="truncate text-sm font-semibold">{name}</p><p className="mt-1 flex items-start gap-1 text-[11px] text-white/50"><MapPin size={12} className="mt-0.5 shrink-0"/>{[salon?.city, salon?.postalCode].filter(Boolean).join(" ") || "Lieu non renseigné"}</p></div></div>
                 {profileLink ? <Link href={profileLink} className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-tertiary-400/40 bg-tertiary-400/10 px-3 py-2.5 text-xs font-semibold text-tertiary-300 hover:bg-tertiary-400/20"><ExternalLink size={13}/> Voir le profil</Link> : <span className="mt-3 block text-center text-[11px] text-white/35">Profil public indisponible</span>}
               </div>
+              <ConversationMoodboards key={conversation.id} conversationId={conversation.id} />
               <div className="mt-5 border-t border-white/10 pt-4"><h3 className="mb-3 flex items-center gap-2 text-xs font-semibold"><CalendarDays size={15} className="text-tertiary-400"/> Mes rendez-vous ({rdvTotal})</h3>
                 {rdvLoading && <p className="text-xs text-white/45">Chargement…</p>}
                 {rdvError && <p role="alert" className="text-xs text-red-300">{rdvError}</p>}
@@ -268,5 +271,6 @@ export default function PeopleInboxWorkspace() {
         </aside>
       </div>
     </section>
+    </>
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { projectRequest } from "@/lib/actions/projects.action";
 import { ConversationDto } from "@/lib/type";
 import { getUnreadMessagesCountAction } from "@/lib/actions/conversation.action";
 import { useSession } from "next-auth/react";
@@ -14,6 +15,8 @@ import React, {
 
 interface MessagingContextType {
   unreadCount: number;
+  proposalCount: number;
+  messageCount: number;
   conversations: ConversationDto[];
   updateConversationUnreadCount: (
     conversationId: string,
@@ -44,20 +47,28 @@ interface MessagingProviderProps {
 export const MessagingProvider = ({ children }: MessagingProviderProps) => {
   const [unreadCount, setUnreadCount] = useState<number>(0);
   const { status } = useSession();
+  const [proposalCount, setProposalCount] = useState(0);
   const [conversations, setConversations] = useState<ConversationDto[]>([]);
 
   // Charger le nombre de messages non lus uniquement pour un utilisateur connecté
   useEffect(() => {
     if (status !== "authenticated") {
       setUnreadCount(0);
+      setProposalCount(0);
       return;
     }
 
     let active = true;
     const loadUnreadCount = async () => {
       try {
-        const count = await getUnreadMessagesCountAction();
-        if (active) setUnreadCount(count);
+        const [count, proposals] = await Promise.all([
+          getUnreadMessagesCountAction(),
+          projectRequest<{ status: string }[]>("/proposals").catch(() => null),
+        ]);
+        if (active) {
+          setUnreadCount(count);
+          if (proposals) setProposalCount(proposals.filter(item => item.status === "PENDING").length);
+        }
       } catch (error) {
         console.warn("Failed to load unread count:", error);
       }
@@ -134,6 +145,8 @@ export const MessagingProvider = ({ children }: MessagingProviderProps) => {
     <MessagingContext.Provider
       value={{
         unreadCount,
+        proposalCount,
+        messageCount: Math.max(0, unreadCount - proposalCount),
         conversations,
         updateConversationUnreadCount,
         setConversations,

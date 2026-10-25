@@ -231,6 +231,8 @@ export interface MessagesResponseDto {
 }
 
 export interface ConversationDto {
+  projectContactPending?: boolean;
+  contactBlocked?: boolean;
   id: string;
   salonId: string;
   clientUserId: string;

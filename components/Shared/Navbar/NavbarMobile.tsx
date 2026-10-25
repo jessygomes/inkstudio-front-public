@@ -17,7 +17,7 @@ export default function NavbarMobile() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
-  const { unreadCount } = useMessagingContext();
+  const { unreadCount, proposalCount, messageCount } = useMessagingContext();
   const navRef = useRef<HTMLDivElement>(null);
   const scrollYRef = useRef(0);
 
@@ -287,7 +287,11 @@ export default function NavbarMobile() {
                     </Link>
                     <Link href="/mon-profil?tab=messagerie" onClick={handleClose} className="flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-one text-white/85 transition hover:bg-white/10">
                       <span>Messagerie</span>
-                      {unreadCount > 0 && <span aria-label={`${unreadCount} messages non lus`} className="flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-[10px] font-bold text-white">{unreadCount > 99 ? "99+" : unreadCount}</span>}
+                      {messageCount > 0 && <span aria-label={`${messageCount} messages non lus`} className="flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-[10px] font-bold text-white">{messageCount > 99 ? "99+" : messageCount}</span>}
+                    </Link>
+                    <Link href="/mon-profil?tab=moodboard" onClick={handleClose} className="flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-one text-white/85 transition hover:bg-white/10">
+                      <span>Moodboard</span>
+                      {proposalCount > 0 && <span aria-label={`${proposalCount} propositions en attente`} className="flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-[10px] font-bold text-white">{proposalCount > 99 ? "99+" : proposalCount}</span>}
                     </Link>
                   </div>
                 ) : (

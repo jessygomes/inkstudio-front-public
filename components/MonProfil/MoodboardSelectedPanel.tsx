@@ -8,8 +8,13 @@ import { FaArrowLeft, FaPlus, FaSave, FaTrash } from "react-icons/fa";
 import { Moodboard } from "@/lib/actions/moodboard.action";
 import AppButton from "../Shared/AppButton";
 import MoodboardAddImageModal from "./MoodboardAddImageModal";
+import ProjectPublication from "./ProjectPublication";
+import type { ProjectFields } from "./ProjectPublication";
+import ProjectProposals from "./ProjectProposals";
+
 
 type MoodboardSelectedPanelProps = {
+  onProjectUpdated: (fields: ProjectFields) => void;
   selectedMoodboard: Moodboard;
   editName: string;
   editDescription: string;
@@ -27,6 +32,7 @@ type MoodboardSelectedPanelProps = {
 };
 
 export default function MoodboardSelectedPanel({
+  onProjectUpdated,
   selectedMoodboard,
   editName,
   editDescription,
@@ -106,7 +112,7 @@ export default function MoodboardSelectedPanel({
 
   return (
     <div className="space-y-5 font-one [&_button:focus-visible]:outline-2 [&_button:focus-visible]:outline-offset-2 [&_button:focus-visible]:outline-tertiary-400">
-      <div className="border-b border-white/10 pb-3">
+      <div className="pb-3">
         {isEditing ? (
           <form onSubmit={async (event) => { event.preventDefault(); if (!savingInfos && await onSaveInfos()) setIsEditing(false); }} className="space-y-2.5" aria-busy={savingInfos}>
             <div className="flex flex-wrap items-center gap-2">
@@ -124,8 +130,9 @@ export default function MoodboardSelectedPanel({
         ) : (
           <>
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="flex min-w-0 items-center gap-2"><button type="button" onClick={onBack} aria-label="Tous mes moodboards" title="Tous mes moodboards" className="grid h-8 w-8 shrink-0 cursor-pointer place-items-center rounded-lg text-white/60 transition hover:bg-white/5 hover:text-white"><FaArrowLeft size={13} /></button><h3 className="break-words text-base font-medium text-white">{selectedMoodboard.name}</h3><span className="shrink-0 rounded-md bg-white/5 px-2 py-0.5 text-xs text-white/45">{selectedMoodboard.images?.length || 0}</span></div>
-              <div className="flex shrink-0 items-center gap-2">
+              <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2"><button type="button" onClick={onBack} aria-label="Tous mes moodboards" title="Tous mes moodboards" className="grid h-8 w-8 shrink-0 cursor-pointer place-items-center rounded-lg text-white/60 transition hover:bg-white/5 hover:text-white"><FaArrowLeft size={13} /></button><h3 className="min-w-0 break-words text-base font-medium text-white">{selectedMoodboard.name}</h3><span className="shrink-0 rounded-md bg-white/5 px-2 py-0.5 text-xs text-white/45">{selectedMoodboard.images?.length || 0}</span></div>
+              <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
+                <ProjectPublication board={selectedMoodboard} onUpdated={onProjectUpdated} />
                 <button type="button" onClick={() => { onEditNameChange(selectedMoodboard.name); onEditDescriptionChange(selectedMoodboard.description || ""); setIsEditing(true); }} className="inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-lg border border-white/10 px-2.5 text-xs text-white/60 transition hover:bg-white/5 hover:text-white"><Pencil size={12} />Modifier</button>
                 <AppButton type="button" onClick={() => setIsAddImageModalOpen(true)} icon={<FaPlus size={11} />} className="h-8 cursor-pointer !rounded-lg !px-3 !py-0 !text-xs">Ajouter une image</AppButton>
               </div>
@@ -134,6 +141,8 @@ export default function MoodboardSelectedPanel({
           </>
         )}
       </div>
+
+      <ProjectProposals moodboardId={selectedMoodboard.id} />
 
       <MoodboardAddImageModal
         isOpen={isAddImageModalOpen}

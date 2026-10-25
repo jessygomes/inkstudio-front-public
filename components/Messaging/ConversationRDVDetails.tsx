@@ -1,11 +1,13 @@
-/* eslint-disable react/no-unescaped-entities */
 "use client";
+import { RdvPlanningCard, RdvPrestationCard, RdvPaymentCard } from "../MonProfil/RdvInformationCards";
+
 
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { ArrowLeft } from "lucide-react";
 import { AppointmentProps, ConversationDto } from "@/lib/type";
 import { fetchAppointmentById } from "@/lib/actions/appointment.action";
+import ConversationMoodboards from "./ConversationMoodboards";
 
 interface ConversationRDVDetailsProps {
   conversation: ConversationDto;
@@ -98,12 +100,10 @@ export default function ConversationRDVDetails({
 
   if (error || !appointment) {
     return (
-      <div className={`h-full min-h-0 w-full flex items-center justify-center bg-linear-to-br from-noir-500/10 to-noir-500/5 ${embedded ? "" : "rounded-2xl border border-white/20 backdrop-blur-lg shadow-2xl"}`}>
-        <div className="p-6 text-center">
-          <p className="text-sm text-white/50 font-one">
-            Aucun rendez-vous associé
-          </p>
-        </div>
+      <div className={`h-full min-h-0 w-full overflow-y-auto bg-noir-700 p-4 ${embedded ? "" : "rounded-2xl border border-white/15"}`}>
+        {onBack && <button type="button" onClick={onBack} aria-label="Retour aux détails de la conversation" className="grid size-9 cursor-pointer place-items-center rounded-lg text-white/50 hover:bg-white/5"><ArrowLeft size={17} /></button>}
+        <ConversationMoodboards key={conversation.id} conversationId={conversation.id} />
+        <p className="mt-5 text-xs text-white/40">Aucun rendez-vous associé</p>
       </div>
     );
   }
@@ -112,42 +112,23 @@ export default function ConversationRDVDetails({
     STATUS_CONFIG[appointment.status as keyof typeof STATUS_CONFIG] ??
     STATUS_CONFIG.PENDING;
 
-  const displayPrice =
-    appointment.tattooDetail?.price ||
-    appointment.tattooDetail?.estimatedPrice ||
-    0;
-  const hasPrice = typeof displayPrice === "number" && displayPrice > 0;
 
-  const tattooDetail = appointment.tattooDetail;
-  const colorStyle = tattooDetail?.colorStyle;
 
-  const durationMin = Math.round(
-    (new Date(appointment.end).getTime() -
-      new Date(appointment.start).getTime()) /
-      60000,
-  );
 
-  const startDate = new Date(appointment.start).toLocaleDateString("fr-FR", {
-    weekday: "short",
-    day: "2-digit",
-    month: "short",
-  });
 
-  const startTime = new Date(appointment.start).toLocaleTimeString("fr-FR", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
 
-  const endTime = new Date(appointment.end).toLocaleTimeString("fr-FR", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+
+
+
+
+
+
 
   const clientImage = (conversation.client as { image?: string | null }).image;
 
   return (
-    <div className={`flex h-full min-h-0 w-full flex-col overflow-hidden bg-linear-to-b from-noir-700/95 via-noir-700/90 to-noir-800/95 ${embedded ? "" : "border border-white/15 shadow-2xl sm:rounded-3xl"}`}>
-      <div className={`shrink-0 border-b border-white/10 bg-linear-to-r from-noir-700/85 to-noir-600/70 ${embedded ? "px-4 py-3" : "px-5 py-5 sm:rounded-t-3xl"}`}>
+    <div className={`flex h-full min-h-0 w-full flex-col overflow-hidden bg-noir-700 font-one [&_a]:cursor-pointer [&_button]:cursor-pointer [&_button]:disabled:cursor-not-allowed ${embedded ? "" : "border border-white/15 shadow-2xl sm:rounded-3xl"}`}>
+      <div className={`shrink-0 border-b border-white/10 bg-noir-600 ${embedded ? "px-4 py-3" : "px-4 py-3 sm:rounded-t-3xl"}`}>
         <div className={`${embedded ? "mb-2" : "mb-4"} flex items-center gap-2`}>
           {onBack && <button type="button" onClick={onBack} aria-label="Retour aux rendez-vous" title="Retour aux rendez-vous" className="cursor-pointer disabled:cursor-not-allowed grid h-8 w-8 shrink-0 place-items-center rounded-lg text-white/60 transition hover:bg-white/10 hover:text-white focus-visible:outline-2 focus-visible:outline-tertiary-400"><ArrowLeft size={17} /></button>}
         <h2 className="text-xs font-semibold uppercase tracking-widest text-white/60 font-one">
@@ -197,206 +178,7 @@ export default function ConversationRDVDetails({
         </div>
       </div>
 
-      <div className="min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain px-3 py-3 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
-        <section className="overflow-hidden rounded-2xl border border-white/10 bg-linear-to-b from-white/4 to-white/2 p-3">
-          <div className="mb-3 flex items-center justify-between gap-3">
-            <div>
-              <p className="text-[9px] uppercase tracking-[0.14em] text-tertiary-400/80 font-one">
-                Rendez-vous
-              </p>
-              <p className="mt-1 text-[11px] text-white/40 font-one">
-                Planning et prestation
-              </p>
-            </div>
-            <span className="rounded-full border border-white/10 bg-white/5 px-2 py-1 text-[9px] text-white/45 font-one">
-              {appointment.prestation}
-            </span>
-          </div>
-
-          <div className="grid grid-cols-2 gap-2">
-            <div className="col-span-2 flex items-center gap-3 rounded-2xl border border-white/10 bg-linear-to-l from-noir-500 to-noir-700 px-3 py-2.5">
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl border border-blue-400/15 bg-blue-500/12">
-                <svg className="h-3.5 w-3.5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <div className="min-w-0">
-                <p className="text-[9px] uppercase tracking-wider text-blue-200/55 font-one">Date et heure</p>
-                <p className="capitalize text-sm font-semibold text-white font-one">{startDate}</p>
-                <p className="text-[11px] text-white/55 font-one tabular-nums">{startTime} - {endTime}</p>
-              </div>
-            </div>
-
-            <div className="hidden">
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl border border-blue-400/15 bg-blue-500/12">
-                <svg className="h-3.5 w-3.5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <div className="min-w-0">
-                <p className="text-[9px] uppercase tracking-wider text-white/35 font-one">Heure</p>
-                <p className="text-xs text-white font-one tabular-nums">{startTime} - {endTime}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2.5 rounded-2xl border border-white/10 bg-linear-to-l from-noir-500 to-noir-700 px-2.5 py-2">
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl border border-purple-400/15 bg-purple-500/12">
-                <svg className="h-3.5 w-3.5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <div className="min-w-0">
-                <p className="text-[9px] uppercase tracking-wider text-white/35 font-one">Durée</p>
-                <p className="text-xs text-white/90 font-one">{durationMin} min</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2.5 rounded-2xl border border-white/10 bg-linear-to-l from-noir-500 to-noir-700 px-2.5 py-2">
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl border border-emerald-400/15 bg-emerald-500/12">
-                <svg className="h-3.5 w-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                </svg>
-              </div>
-              <div className="min-w-0">
-                <p className="text-[9px] uppercase tracking-wider text-white/35 font-one">Prestation</p>
-                <p className="truncate text-xs text-white/90 font-one">{appointment.prestation}</p>
-              </div>
-            </div>
-
-            {appointment.tatoueur && (
-              <div className="col-span-2 flex items-center gap-2.5 rounded-2xl border border-tertiary-400/15 bg-tertiary-500/[0.06] px-2.5 py-2">
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl border border-tertiary-400/15 bg-tertiary-500/12">
-                  <svg className="h-3.5 w-3.5 text-tertiary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-[9px] uppercase tracking-wider text-white/35 font-one">Artiste</p>
-                  <p className="truncate text-xs text-white/90 font-one">{appointment.tatoueur.name}</p>
-                </div>
-              </div>
-            )}
-          </div>
-        </section>
-
-        {/* {(appointment.prestation === "RETOUCHE" ||
-          appointment.prestation === "TATTOO" ||
-          appointment.prestation === "PIERCING") && (
-          <section className="rounded-3xl flex justify-between items-center border border-white/10 bg-linear-to-b from-white/4 to-white/2 p-3">
-            <p className="mb-2.5 text-[9px] uppercase tracking-[0.14em] text-white/35 font-one">
-              Paiement
-            </p>
-            <div
-              className={`flex w-64 items-center justify-center gap-2 rounded-2xl border px-3 py-1 ${
-                appointment.isPayed
-                  ? "border-emerald-400/30 bg-emerald-500/15 text-emerald-300"
-                  : "border-red-400/30 bg-red-500/15 text-red-300"
-              }`}
-            >
-              <span
-                className={`h-2 w-2 rounded-full ${
-                  appointment.isPayed ? "bg-emerald-300" : "bg-red-300"
-                }`}
-              />
-              <span className="text-xs font-medium font-one">
-                {appointment.isPayed ? "Payé" : "Non payé"}
-              </span>
-            </div>
-          </section>
-        )} */}
-
-        {tattooDetail && (
-          <section className="rounded-3xl border border-white/10 bg-linear-to-b from-white/4 to-white/2 p-3">
-            <p className="mb-2.5 text-[9px] uppercase tracking-[0.14em] text-white/35 font-one">
-              Détails · {appointment.prestation}
-            </p>
-
-            <div className="space-y-2.5">
-              {tattooDetail.description && (
-                <div>
-                  <p className="mb-1 text-[9px] uppercase tracking-wider text-white/30 font-one">Description</p>
-                  <p className="text-xs leading-relaxed text-white/80 font-one">{tattooDetail.description}</p>
-                </div>
-              )}
-
-              {(tattooDetail.zone || tattooDetail.size || colorStyle) && (
-                <div className="flex flex-wrap gap-1.5">
-                  {tattooDetail.zone && (
-                    <span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] text-white/75 font-one">
-                      <span className="text-[9px] text-white/40">Zone</span>
-                      {tattooDetail.zone}
-                    </span>
-                  )}
-                  {tattooDetail.size && (
-                    <span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] text-white/75 font-one">
-                      <span className="text-[9px] text-white/40">Taille</span>
-                      {tattooDetail.size}
-                    </span>
-                  )}
-                  {colorStyle && (
-                    <span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] text-white/75 font-one">
-                      <span className="text-[9px] text-white/40">Style</span>
-                      {colorStyle}
-                    </span>
-                  )}
-                </div>
-              )}
-
-              {hasPrice && (
-                <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/4 px-3 py-2">
-                  <span className="text-[9px] uppercase tracking-wider text-white/35 font-one">
-                    {tattooDetail.price ? "Prix final" : "Estimation"}
-                  </span>
-                  <span className="text-sm font-bold text-white font-one">
-                    {displayPrice}
-                    <span className="ml-0.5 text-xs font-medium text-white/55">€</span>
-                  </span>
-                </div>
-              )}
-
-              {(tattooDetail.reference || tattooDetail.sketch) && (
-                <div>
-                  <p className="mb-2 text-[9px] uppercase tracking-wider text-white/30 font-one">Images</p>
-                  <div className="grid grid-cols-2 gap-2">
-                    {tattooDetail.reference && (
-                      <a
-                        href={tattooDetail.reference}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="group relative h-24 w-full overflow-hidden rounded-2xl border border-white/10 bg-white/5"
-                      >
-                        <Image
-                          src={tattooDetail.reference}
-                          alt="Référence"
-                          fill
-                          className="object-cover transition-transform duration-200 group-hover:scale-105"
-                        />
-                        <div className="absolute inset-0 bg-black/0 transition-colors duration-200 group-hover:bg-black/30" />
-                      </a>
-                    )}
-                    {tattooDetail.sketch && (
-                      <a
-                        href={tattooDetail.sketch}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="group relative h-24 w-full overflow-hidden rounded-2xl border border-white/10 bg-white/5"
-                      >
-                        <Image
-                          src={tattooDetail.sketch}
-                          alt="Croquis"
-                          fill
-                          className="object-cover transition-transform duration-200 group-hover:scale-105"
-                        />
-                        <div className="absolute inset-0 bg-black/0 transition-colors duration-200 group-hover:bg-black/30" />
-                      </a>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-          </section>
-        )}
-      </div>
+      <div className="min-h-0 flex-1 space-y-2.5 overflow-y-auto overscroll-contain p-4"><ConversationMoodboards key={conversation.id} conversationId={conversation.id} /><RdvPlanningCard appointment={appointment} /><RdvPaymentCard appointment={appointment} /><RdvPrestationCard appointment={appointment} /></div>
     </div>
   );
 }

@@ -1,7 +1,8 @@
+import Image from "next/image";
+import { RdvPlanningCard, RdvPrestationCard, RdvPaymentCard } from "./RdvInformationCards";
 import React, { useId } from "react";
 import { Clock, MapPin, MessageSquare, ChevronRight, Video, Phone, ExternalLink } from "lucide-react";
 import Link from "next/link";
-import Image from "next/image";
 import { toSlug } from "@/lib/utils";
 import AppointmentDrawer from "./AppointmentDrawer";
 import AppointmentReview from "./AppointmentReview";
@@ -56,7 +57,6 @@ export default function RendezVousCard({
   hoverRating,
   reviewSubmitting,
   getStatusBadge,
-  formatDate,
   formatTime,
   formatPhoneDisplay,
   toggleExpand,
@@ -128,12 +128,9 @@ export default function RendezVousCard({
       {isExpanded && <AppointmentDrawer id={detailsId} onClose={() => toggleExpand(appointment.id)}>
         <div className="font-one">{renderSummary(true)}
           <div className="mt-2.5 space-y-2.5 border-t border-white/10 pt-2.5">
-            <div className="flex flex-wrap gap-x-5 gap-y-2 text-xs text-white/50">
-              <span>{formatDate(appointment.start)} · {formatTime(appointment.start)} – {formatTime(appointment.end)}</span>
-              {appointment.duration && <span>{appointment.duration} min</span>}
-            </div>
+            <RdvPlanningCard appointment={appointment} /><RdvPaymentCard appointment={appointment} />
             <div className="grid gap-2">
-              <div className="min-w-0 space-y-2 rounded-lg bg-white/3 p-2.5">
+              <div className="min-w-0 space-y-3 rounded-2xl border border-white/10 bg-noir-600 p-4">
                 <div className="flex items-center justify-between text-xs text-white/60">
                   <span className="text-xs font-semibold text-white">Le salon et votre artiste</span>
 
@@ -225,98 +222,10 @@ export default function RendezVousCard({
                 </div>
               </div>
 
-              {appointment.prestationDetails && (
-                <div className="min-w-0 space-y-2">
-                  <div className="flex items-center justify-between text-xs text-white/60">
-                    <span className="text-xs font-semibold text-white">Votre projet</span>
-                  </div>
-                  <div className="grid gap-2 sm:grid-cols-2  text-xs text-white">
-                    {appointment.prestationDetails.zone && (
-                      <div>
-                        <p className="text-white/60">Zone</p>
-                        <p>{appointment.prestationDetails.zone}</p>
-                      </div>
-                    )}
-                    {appointment.prestationDetails.size && (
-                      <div>
-                        <p className="text-white/60">Taille</p>
-                        <p>{appointment.prestationDetails.size}</p>
-                      </div>
-                    )}
-                    {appointment.prestationDetails.colorStyle && (
-                      <div>
-                        <p className="text-white/60">Style</p>
-                        <p>{appointment.prestationDetails.colorStyle}</p>
-                      </div>
-                    )}
-                    {appointment.prestationDetails.piercingZone && (
-                      <div>
-                        <p className="text-white/60">Zone piercing</p>
-                        <p>{appointment.prestationDetails.piercingZone}</p>
-                      </div>
-                    )}
-                    {appointment.prestationDetails.piercingDetails && (
-                      <div className="sm:col-span-2 lg:col-span-1">
-                        <p className="text-white/60">Détail piercing</p>
-                        <p>
-                          {appointment.prestationDetails.piercingDetails.zoneOreille ||
-                            appointment.prestationDetails.piercingDetails.zoneVisage ||
-                            appointment.prestationDetails.piercingDetails.zoneBouche ||
-                            appointment.prestationDetails.piercingDetails.zoneCorps ||
-                            appointment.prestationDetails.piercingDetails.zoneMicrodermal ||
-                            "Non spécifié"}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-
-                  {appointment.prestationDetails.description && (
-                    <div className="pt-2 border-t border-white/10 whitespace-pre-line break-words text-xs text-white/70 leading-5">
-                      {appointment.prestationDetails.description}
-                    </div>
-                  )}
-
-                  {(appointment.prestationDetails.reference || appointment.prestationDetails.sketch) && (
-                    <div className="border-t border-white/10 pt-2">
-                      <p className="text-white/60 text-xs mb-2">Références</p>
-                      <div className="flex flex-wrap gap-2">
-                        {appointment.prestationDetails.reference && (
-                          <div className="relative">
-                            <Image
-                              src={appointment.prestationDetails.reference}
-                              alt="Image de référence"
-                              width={96}
-                              height={96}
-                              className="h-16 w-16 rounded-xl border border-white/15 object-cover"
-                            />
-                            <span className="absolute -bottom-1 -right-1 bg-tertiary-500 text-white text-[11px] px-2 py-0.5 rounded">
-                              Référence
-                            </span>
-                          </div>
-                        )}
-                        {appointment.prestationDetails.sketch && (
-                          <div className="relative">
-                            <Image
-                              src={appointment.prestationDetails.sketch}
-                              alt="Croquis"
-                              width={96}
-                              height={96}
-                              className="h-16 w-16 rounded-xl border border-white/15 object-cover"
-                            />
-                            <span className="absolute -bottom-1 -right-1 bg-blue-500 text-white text-[11px] px-2 py-0.5 rounded">
-                              Croquis
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
+              <RdvPrestationCard appointment={{ ...appointment, tattooDetail: appointment.prestationDetails }} piercingZoneName={appointment.prestationDetails?.piercingDetails?.zoneOreille || appointment.prestationDetails?.piercingDetails?.zoneVisage || appointment.prestationDetails?.piercingDetails?.zoneBouche || appointment.prestationDetails?.piercingDetails?.zoneCorps || appointment.prestationDetails?.piercingDetails?.zoneMicrodermal} />
             </div>
 
-            {(appointment.moodboard || appointment.status === "CONFIRMED" || (appointment.status !== "CANCELED" && appointment.status !== "COMPLETED")) && <div className="border-t border-white/10 pt-3"><h5 className="mb-2 text-xs font-semibold text-white">Gérer mon rendez-vous</h5><div className="flex flex-wrap gap-2">
-
+            {(appointment.moodboard || appointment.status === "CONFIRMED" || (appointment.status !== "CANCELED" && appointment.status !== "COMPLETED")) && <div className="border-t border-white/10 pt-3"><h5 className="mb-3 text-xs font-semibold text-white">Gérer mon rendez-vous</h5><div className="grid grid-cols-2 gap-2">
 
             {appointment.visio && appointment.status === "CONFIRMED" && (
               <span className="inline-flex items-center justify-center min-h-8 rounded-lg border border-blue-400/30 bg-blue-500/10 px-2.5 py-1.5 text-xs text-blue-200 font-one">
@@ -334,7 +243,7 @@ export default function RendezVousCard({
                     appointment.status,
                   )
                 }
-                className="cursor-pointer inline-flex items-center justify-center gap-1.5 min-h-8 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs text-violet-200 transition-all hover:bg-violet-500/20 font-one"
+                className="cursor-pointer inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border px-3 py-2 text-xs font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tertiary-400 disabled:cursor-not-allowed disabled:opacity-50 font-one border-white/10 bg-white/[0.025] text-violet-200 hover:bg-white/5"
               >
                 <FaPalette size={10} /> Moodboard {" "}
                 {appointment.moodboard.name}
@@ -344,33 +253,30 @@ export default function RendezVousCard({
               appointment.status !== "COMPLETED" && (
                 <button
                   onClick={() => handleOpenConnectModal(appointment.id)}
-                  className="cursor-pointer inline-flex items-center justify-center gap-1.5 min-h-8 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs text-white/70 transition-all hover:bg-white/10 font-one"
+                  className="cursor-pointer inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border px-3 py-2 text-xs font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tertiary-400 disabled:cursor-not-allowed disabled:opacity-50 font-one border-white/10 bg-white/[0.025] text-white/70 hover:bg-white/5"
                 >
                   + Lier un moodboard
                 </button>
               )
             )}
 
-            {appointment.status === "CONFIRMED" && (
+            {appointment.status === "CONFIRMED" && new Date(appointment.end).getTime() > Date.now() && (
               <>
                 <button
                   onClick={() => handleEditClick(appointment)}
-                  className="cursor-pointer min-h-8 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs text-white/85 transition-all hover:bg-white/10 font-one"
+                  className="cursor-pointer inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border px-3 py-2 text-xs font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tertiary-400 disabled:cursor-not-allowed disabled:opacity-50 font-one border-white/10 bg-white/[0.025] text-white/80 hover:bg-white/5"
                 >
                   Modifier
                 </button>
                 <button
                   onClick={() => handleCancelClick(appointment.id)}
                   disabled={cancelingAppointmentId === appointment.id}
-                  className="cursor-pointer min-h-8 rounded-lg border border-red-500/30 bg-red-500/10 px-2.5 py-1.5 text-xs text-red-200 transition-all hover:bg-red-500/20 disabled:opacity-50 font-one"
+                  className="cursor-pointer inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border px-3 py-2 text-xs font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tertiary-400 disabled:cursor-not-allowed disabled:opacity-50 font-one border-red-400/15 bg-red-400/[0.025] text-red-300 hover:bg-red-400/10"
                 >
                   {cancelingAppointmentId === appointment.id ? "..." : "Annuler"}
                 </button>
               </>
             )}
-
-
-
 
             </div></div>}
             {appointment.status === "COMPLETED" && (

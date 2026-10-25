@@ -1,8 +1,10 @@
 "use client";
+import ProjectProposals from "./ProjectProposals";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { projectRequest, type ProjectProposal } from "@/lib/actions/projects.action";
 import { toast } from "sonner";
-import { ChevronDown } from "lucide-react";
+import { ArrowLeft, MessageSquare } from "lucide-react";
 import {
   addMoodboardImageAction,
   createMoodboardAction,
@@ -19,6 +21,7 @@ import {
 import AppButton from "../Shared/AppButton";
 import ConfirmActionModal from "../Shared/ConfirmActionModal";
 import { extractUploadThingKey } from "@/lib/utils/extractUploadThingKey";
+import MoodboardCreateModal from "./MoodboardCreateModal";
 import MoodboardCard from "./MoodboardCard";
 import MoodboardSelectedPanel from "./MoodboardSelectedPanel";
 
@@ -37,11 +40,41 @@ type ConfirmState =
 
 export default function MoodboardTab() {
   const [moodboards, setMoodboards] = useState<Moodboard[]>([]);
+  const [showAllProposals, setShowAllProposals] = useState(false);
+  const [proposalCounts, setProposalCounts] = useState<Record<string, number> | null>(null);
+  const handleProposalsLoaded = useCallback((proposals: ProjectProposal[]) => {
+    const counts: Record<string, number> = {};
+    for (const proposal of proposals) {
+      const id = proposal.moodboardId || proposal.moodboard.id;
+      counts[id] = (counts[id] || 0) + 1;
+    }
+    setProposalCounts(counts);
+  }, []);
+  useEffect(() => {
+    let active = true;
+    const refreshCounts = async () => {
+      try {
+        const proposals = await projectRequest<ProjectProposal[]>("/proposals");
+        if (active) handleProposalsLoaded(proposals);
+      } catch (error) {
+        console.warn("Impossible de charger les compteurs de propositions", error);
+      }
+    };
+    void refreshCounts();
+    const timer = window.setInterval(() => void refreshCounts(), 30000);
+    window.addEventListener("unreadCountRefresh", refreshCounts);
+    return () => {
+      active = false;
+      window.clearInterval(timer);
+      window.removeEventListener("unreadCountRefresh", refreshCounts);
+    };
+  }, [handleProposalsLoaded]);
   const [selectedMoodboardId, setSelectedMoodboardId] = useState<string | null>(
     null,
   );
   const [loading, setLoading] = useState(true);
 
+  const [createModalOpen, setCreateModalOpen] = useState(false);
   const [createName, setCreateName] = useState("");
   const [createDescription, setCreateDescription] = useState("");
   const [creating, setCreating] = useState(false);
@@ -173,6 +206,7 @@ export default function MoodboardTab() {
       setSelectedMoodboardId(result.data.id);
       setCreateName("");
       setCreateDescription("");
+      setCreateModalOpen(false);
       toast.success("Moodboard créé");
     } catch (error) {
       console.error("Erreur création moodboard:", error);
@@ -411,10 +445,20 @@ export default function MoodboardTab() {
 
   return (
     <div className="space-y-4">
-      {selectedMoodboard ? (
+      {showAllProposals ? (
+        <div className="space-y-4 font-one">
+          <header className="flex min-w-0 items-center gap-2 pb-3">
+            <button type="button" onClick={() => setShowAllProposals(false)} aria-label="Retour aux moodboards" title="Retour aux moodboards" className="grid size-10 shrink-0 cursor-pointer place-items-center rounded-xl text-white/50 transition hover:bg-white/5 hover:text-white focus-visible:outline-2 focus-visible:outline-tertiary-400"><ArrowLeft size={17} aria-hidden="true" /></button>
+            <h2 className="min-w-0 text-sm font-semibold text-white sm:text-base">Propositions pour vos projets</h2>
+            {proposalCounts && <span className="ml-auto shrink-0 rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-[11px] text-white/45">{Object.values(proposalCounts).reduce((sum, count) => sum + count, 0)}</span>}
+          </header>
+          <ProjectProposals onLoaded={handleProposalsLoaded} />
+        </div>
+      ) : selectedMoodboard ? (
         <MoodboardSelectedPanel
           key={selectedMoodboard.id}
           selectedMoodboard={selectedMoodboard}
+          onProjectUpdated={fields => setMoodboards(prev => prev.map(board => board.id === selectedMoodboard.id ? { ...board, ...fields } : board))}
           editName={editName}
           editDescription={editDescription}
           onEditNameChange={setEditName}
@@ -431,38 +475,14 @@ export default function MoodboardTab() {
         />
       ) : (
         <div className="font-one">
-          <details open={moodboards.length === 0} className="group mb-4 overflow-hidden rounded-xl border border-white/10 bg-white/2 transition-colors open:border-white/15"><summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 px-3 text-xs font-medium text-white/80 transition hover:bg-white/3 focus-visible:outline-2 focus-visible:outline-tertiary-400 [&::-webkit-details-marker]:hidden"><span className="grid h-6 w-6 shrink-0 place-items-center rounded-md bg-tertiary-400/10 text-tertiary-400"><FaPlus size={10} /></span>Créer un moodboard<ChevronDown size={14} aria-hidden="true" className="text-white/40 transition-transform group-open:rotate-180" /><span className="ml-auto rounded-md bg-white/5 px-2 py-1 text-[11px] font-normal text-white/50">{moodboards.length} moodboard{moodboards.length > 1 ? "s" : ""}</span></summary>
-          <form
-            onSubmit={handleCreateMoodboard}
-            className="grid grid-cols-1 items-end gap-2.5 border-t border-white/8 p-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] font-one"
-          >
-            <label className="min-w-0 text-[11px] text-white/55">Nom du moodboard<input
-              required
-              disabled={creating}
-              type="text"
-              value={createName}
-              onChange={(e) => setCreateName(e.target.value)}
-              placeholder="Mon prochain tatouage"
-              className="mt-1 h-9 w-full rounded-lg border border-white/10 bg-noir-700 px-2.5 text-xs text-white outline-none transition placeholder:text-white/30 focus:border-tertiary-400/50 disabled:opacity-50"
-            /></label>
-            <label className="min-w-0 text-[11px] text-white/55">Description <span className="text-white/30">(facultative)</span><input
-              disabled={creating}
-              type="text"
-              value={createDescription}
-              onChange={(e) => setCreateDescription(e.target.value)}
-              placeholder="Une idée, un style, une envie…"
-              className="mt-1 h-9 w-full rounded-lg border border-white/10 bg-noir-700 px-2.5 text-xs text-white outline-none transition placeholder:text-white/30 focus:border-tertiary-400/50 disabled:opacity-50"
-            /></label>
-            <AppButton
-              disabled={creating}
-              icon={<FaPlus className="h-2.5 w-2.5" />}
-              type="submit"
-              className="h-9 cursor-pointer !rounded-lg !px-4 !py-0 !text-xs !shadow-none"
-            >
-              {creating ? "Création..." : "Créer"}
-            </AppButton>
-          </form>
-          </details>
+          <div className="mb-4 flex flex-wrap items-center justify-end gap-2">
+          <AppButton type="button" onClick={() => setCreateModalOpen(true)} icon={<FaPlus size={11} />} className="min-h-11 cursor-pointer !px-4 !text-xs !shadow-none">Créer un moodboard</AppButton>
+
+          <AppButton type="button" variant="secondary" onClick={() => setShowAllProposals(true)} icon={<MessageSquare size={14} />} className="min-h-11 shrink-0 cursor-pointer !px-3 !text-xs">
+            Toutes les propositions
+            {proposalCounts && <span className="rounded-md bg-white/5 px-1.5 py-0.5 text-[10px] text-white/60">{Object.values(proposalCounts).reduce((sum, count) => sum + count, 0)}</span>}
+          </AppButton>
+          </div>
 
           {moodboards.length === 0 ? (
             <div className="rounded-2xl border border-white/10 bg-white/5 py-10 text-center">
@@ -476,10 +496,12 @@ export default function MoodboardTab() {
                 <MoodboardCard
                   key={moodboard.id}
                   moodboard={moodboard}
+                  proposalCount={proposalCounts ? proposalCounts[moodboard.id] || 0 : undefined}
                   isActive={selectedMoodboardId === moodboard.id}
                   isDeleting={deletingMoodboardId === moodboard.id}
                   onOpen={openMoodboard}
                   onDelete={handleDeleteMoodboard}
+                  onProjectUpdated={fields => setMoodboards(prev => prev.map(board => board.id === moodboard.id ? { ...board, ...fields } : board))}
                 />
               ))}
             </div>
@@ -487,6 +509,7 @@ export default function MoodboardTab() {
         </div>
       )}
 
+      <MoodboardCreateModal open={createModalOpen} name={createName} description={createDescription} busy={creating} onNameChange={setCreateName} onDescriptionChange={setCreateDescription} onSubmit={handleCreateMoodboard} onClose={() => { if (!creating) { setCreateModalOpen(false); setCreateName(""); setCreateDescription(""); } }} />
       <ConfirmActionModal
         isOpen={Boolean(confirmState)}
         title={

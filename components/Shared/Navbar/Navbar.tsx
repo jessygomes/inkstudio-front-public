@@ -16,7 +16,7 @@ type NavbarProps = {
 export default function Navbar({ showLogo = false }: NavbarProps) {
   const { data: session, status } = useSession();
   const pathname = usePathname();
-  const { unreadCount } = useMessagingContext();
+  const { unreadCount, proposalCount, messageCount } = useMessagingContext();
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
 
   const navRef = useRef<HTMLUListElement>(null);
@@ -187,7 +187,7 @@ export default function Navbar({ showLogo = false }: NavbarProps) {
                     className="flex cursor-pointer items-center justify-between gap-3 rounded-xl px-3 py-2 text-xs font-two tracking-wide text-white/75 transition hover:bg-white/10 hover:text-white"
                   >
                     {link.label}
-                    {link.href === "/mon-profil?tab=messagerie" && unreadCount > 0 && <span aria-label={`${unreadCount} messages non lus`} className="flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-[10px] font-bold text-white">{unreadCount > 99 ? "99+" : unreadCount}</span>}
+                    {((link.href === "/mon-profil?tab=messagerie" && messageCount > 0) || (link.href === "/mon-profil?tab=moodboard" && proposalCount > 0)) && <span aria-label={`${link.href.endsWith("moodboard") ? proposalCount : messageCount} notifications`} className="flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-[10px] font-bold text-white">{(link.href.endsWith("moodboard") ? proposalCount : messageCount) > 99 ? "99+" : (link.href.endsWith("moodboard") ? proposalCount : messageCount)}</span>}
                   </Link>
                 ))}
                 <div className="my-1 h-px bg-white/10" />

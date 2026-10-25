@@ -13,13 +13,7 @@ import { HiMiniRocketLaunch } from "react-icons/hi2";
 export const dynamic = "force-dynamic";
 
 type TrouverUnSalonPageProps = {
-  searchParams?:
-    | {
-        query?: string | string[];
-        city?: string | string[];
-        style?: string | string[];
-      }
-    | Promise<{
+  searchParams?: Promise<{
         query?: string | string[];
         city?: string | string[];
         style?: string | string[];

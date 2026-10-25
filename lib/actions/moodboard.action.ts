@@ -28,6 +28,15 @@ type MoodboardAppointment = {
 };
 
 export type Moodboard = {
+	projectStatus?: string;
+	projectCity?: string | null;
+	projectCategory?: string | null;
+	projectSize?: string | null;
+	projectStyles?: string[];
+	projectHashtags?: string[];
+	projectBodyPlacement?: string | null;
+	projectMobility?: string | null;
+	projectRadiusKm?: number | null;
 	id: string;
 	clientProfileId: string;
 	name: string;

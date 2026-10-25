@@ -305,11 +305,11 @@ export default function Conversation() {
                 Quelqu&apos;un est en train d&apos;écrire...
               </p>
             )}
-          </div>
+          </div>          {(conversation.projectContactPending || conversation.contactBlocked) && <p className="px-4 py-2 text-sm text-white/60">{conversation.contactBlocked ? "Ce contact est bloqué." : "Acceptez une demande pour poursuivre la conversation."}</p>}
           <MessageInput
             onSendMessage={handleSendMessage}
             onInputChange={handleInputChange}
-            disabled={!isConnected}
+            disabled={!isConnected || conversation.projectContactPending || conversation.contactBlocked}
             className="shrink-0 border-t border-white/10 bg-noir-800/95 p-3 backdrop-blur-sm sm:p-4"
           />
         </section>

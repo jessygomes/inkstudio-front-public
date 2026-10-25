@@ -26,6 +26,7 @@ import { createPortal } from "react-dom";
 import { useEditAppointmentModal } from "@/components/Context/EditAppointmentContext";
 import CancelAppointmentModal from "./CancelAppointmentModal";
 import RendezVousCard from "./RendezVousCard";
+import RendezVousFilters from "./RendezVousFilters";
 
 export type Appointment = {
   id: string;
@@ -495,31 +496,7 @@ export default function RendezVousTab() {
       className="scroll-mt-28 font-one [&_button:focus-visible]:outline-2 [&_button:focus-visible]:outline-offset-2 [&_button:focus-visible]:outline-tertiary-400 [&_a:focus-visible]:outline-2 [&_a:focus-visible]:outline-tertiary-400"
     >
       <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap gap-1" role="group" aria-label="Filtrer les rendez-vous">
-          {[
-            { label: "Tous", value: "" },
-            { label: "Confirmés", value: "CONFIRMED" },
-            { label: "En attente", value: "PENDING" },
-            { label: "Terminés", value: "COMPLETED" },
-            { label: "Annulés", value: "CANCELED" },
-          ].map((item) => {
-            const isActive = statusFilter === item.value;
-            return (
-              <button
-                key={item.value || "all"}
-                aria-pressed={isActive}
-                onClick={() => handleStatusChange(item.value)}
-                className={`shrink-0 min-h-11 cursor-pointer rounded-lg px-4 py-2 text-sm transition-colors font-one ${
-                  isActive
-                    ? "bg-white/10 text-white"
-                    : "text-white/50 hover:bg-white/5 hover:text-white"
-                }`}
-              >
-                {item.label}{filterCounts[item.value] !== undefined && <span className="ml-2 rounded-md bg-white/5 px-1.5 py-0.5 text-xs text-white/55">{filterCounts[item.value]}</span>}
-              </button>
-            );
-          })}
-        </div>
+        <RendezVousFilters value={statusFilter} counts={filterCounts} onChange={handleStatusChange} />
         <Link href="/trouver-un-salon" className="inline-flex min-h-11 shrink-0 items-center rounded-xl border border-white/15 px-3 text-xs text-white/75 transition hover:bg-white/5">Trouver un salon</Link>
       </div>
 
