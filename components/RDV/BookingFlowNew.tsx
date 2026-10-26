@@ -25,6 +25,7 @@ export default function BookingFlow({
   const searchParams = useSearchParams();
 
   const {
+    bookingConfirmationEnabled,
     linkedVenues, venueSalonId, selectedVenue, handleVenueChange,
     methods,
     watch,
@@ -107,12 +108,14 @@ export default function BookingFlow({
 
   const steps = ["Prestation", "Infos", "Disponibilité", "Récap"];
 
+  if (salon.publicBookingAllowed === false) return <div className="rounded-2xl border border-white/15 p-8 text-center"><h2 className="text-xl text-white">Réservation indisponible</h2><p className="mt-3 text-sm text-white/70">Ce tatoueur ne propose pas de créneaux réservables en ligne pour le moment.</p></div>;
+
   // Étape 5: Confirmation (après soumission)
   if (appointmentCreated && step === 5) {
     return (
       <ConfirmationStep
-        salon={selectedVenue ? { ...salon, address: selectedVenue.address, adress: selectedVenue.address, city: selectedVenue.city, postalCode: selectedVenue.postalCode, name: selectedVenue.salonName } : salon}
-        addConfirmationEnabled={salon.addConfirmationEnabled}
+        salon={selectedVenue ? { ...salon, addConfirmationEnabled: bookingConfirmationEnabled, address: selectedVenue.address, adress: selectedVenue.address, city: selectedVenue.city, postalCode: selectedVenue.postalCode, name: selectedVenue.salonName } : salon}
+        addConfirmationEnabled={bookingConfirmationEnabled}
       />
     );
   }
@@ -137,7 +140,6 @@ export default function BookingFlow({
 
           {/* Contenu des étapes */}
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            {linkedVenues.length > 0 && <div className="rounded-2xl border border-white/15 p-5"><label htmlFor="booking-venue" className="mb-2 block text-white">Salon du rendez-vous</label><select id="booking-venue" required disabled={isSubmitting} value={venueSalonId} onChange={e => { handleVenueChange(e.target.value); setStep(1); }} className="w-full rounded-xl border border-white/20 bg-noir-500 p-3 text-white"><option value="">Choisissez le salon où vous souhaitez venir</option>{linkedVenues.filter(v => v.publicBookingEnabled).map(v => <option key={v.id} value={v.id}>{v.salonName} · {v.city}</option>)}</select>{selectedVenue && <p className="mt-2 text-sm text-white/70">{selectedVenue.address}, {selectedVenue.postalCode} {selectedVenue.city}</p>}{!linkedVenues.some(v => v.publicBookingEnabled) && <p className="mt-2 text-sm text-white/70">Aucun salon ne propose actuellement de réservation en ligne avec ce tatoueur.</p>}</div>}
             {/* Étape 1: Choix de la prestation */}
             {step === 1 && (
               <div className="space-y-4">
@@ -211,25 +213,59 @@ export default function BookingFlow({
 
             {/* Étape 3: Sélection des créneaux */}
             {step === 3 && (
-              <SlotSelection
-                prestation={prestation}
-                salon={selectedVenue ? { ...salon, address: selectedVenue.address, city: selectedVenue.city, postalCode: selectedVenue.postalCode, name: selectedVenue.salonName } : salon}
-                artists={artists}
-                isParTatoueurMode={isParTatoueurMode}
-                selectedTatoueur={selectedTatoueur}
-                selectedDate={selectedDate}
-                onDateChange={handleDateChange}
-                timeSlots={timeSlots}
-                selectedSlots={selectedSlots}
-                onSlotSelection={handleSlotSelection}
-                onClearSelection={clearSelectedSlots}
-                occupiedSlots={occupiedSlots}
-                blockedSlots={blockedSlots}
-                isLoadingSlots={isLoadingSlots}
-                selectedFlashId={selectedFlashId}
-                selectedFlashDurationMinutes={selectedFlashDurationMinutes}
-                requiredTattooSlots={requiredTattooSlots}
-              />
+              <div className="space-y-6">
+                {linkedVenues.length > 0 && (
+                  <div className="rounded-2xl border border-white/15 p-5">
+                    <label htmlFor="booking-venue" className="mb-2 block text-white">
+                      Salon du rendez-vous
+                    </label>
+                    <select
+                      id="booking-venue"
+                      required
+                      disabled={isSubmitting}
+                      value={venueSalonId}
+                      onChange={e => handleVenueChange(e.target.value)}
+                      className="w-full rounded-xl border border-white/20 bg-noir-500 p-3 text-white"
+                    >
+                      <option value="">Choisissez le salon où vous souhaitez venir</option>
+                      {linkedVenues.filter(v => v.publicBookingEnabled).map(v => (
+                        <option key={v.id} value={v.id}>{v.salonName} · {v.city}</option>
+                      ))}
+                    </select>
+                    {selectedVenue && (
+                      <p className="mt-2 text-sm text-white/70">
+                        {[selectedVenue.address, [selectedVenue.postalCode, selectedVenue.city].filter(Boolean).join(" ")].filter(Boolean).join(", ")}
+                      </p>
+                    )}
+                    {!linkedVenues.some(v => v.publicBookingEnabled) && (
+                      <p className="mt-2 text-sm text-white/70">
+                        Aucun salon ne propose actuellement de réservation en ligne avec ce tatoueur.
+                      </p>
+                    )}
+                  </div>
+                )}
+                {(linkedVenues.length === 0 || selectedVenue?.publicBookingEnabled) && (
+                  <SlotSelection
+                    prestation={prestation}
+                    salon={selectedVenue ? { ...salon, addConfirmationEnabled: bookingConfirmationEnabled, address: selectedVenue.address, city: selectedVenue.city, postalCode: selectedVenue.postalCode, name: selectedVenue.salonName } : salon}
+                    artists={artists}
+                    isParTatoueurMode={isParTatoueurMode}
+                    selectedTatoueur={selectedTatoueur}
+                    selectedDate={selectedDate}
+                    onDateChange={handleDateChange}
+                    timeSlots={timeSlots}
+                    selectedSlots={selectedSlots}
+                    onSlotSelection={handleSlotSelection}
+                    onClearSelection={clearSelectedSlots}
+                    occupiedSlots={occupiedSlots}
+                    blockedSlots={blockedSlots}
+                    isLoadingSlots={isLoadingSlots}
+                    selectedFlashId={selectedFlashId}
+                    selectedFlashDurationMinutes={selectedFlashDurationMinutes}
+                    requiredTattooSlots={requiredTattooSlots}
+                  />
+                )}
+              </div>
             )}
 
             {/* Étape 4: Récapitulatif */}
@@ -244,7 +280,7 @@ export default function BookingFlow({
                 piercingZones={piercingZones}
                 piercingPrice={piercingPrice}
                 pierc={selectedPiercingZone}
-                salon={selectedVenue ? { ...salon, address: selectedVenue.address, city: selectedVenue.city, postalCode: selectedVenue.postalCode, name: selectedVenue.salonName } : salon}
+                salon={selectedVenue ? { ...salon, addConfirmationEnabled: bookingConfirmationEnabled, address: selectedVenue.address, city: selectedVenue.city, postalCode: selectedVenue.postalCode, name: selectedVenue.salonName } : salon}
                 referenceFile={referenceFile}
                 sketchFile={sketchFile}
                 skinToneOptions={skinToneOptions}

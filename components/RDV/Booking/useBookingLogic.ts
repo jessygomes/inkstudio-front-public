@@ -296,6 +296,8 @@ export function useBookingLogic({
   const linkedVenues: any[] = salon.role === "user_tatoueur" ? salon.linkedSalons || [] : [];
   const [venueSalonId, setVenueSalonId] = useState(() => { const id = searchParams.get("venueSalonId") || ""; return linkedVenues.some(v => v.id === id && v.publicBookingEnabled) ? id : ""; });
   const selectedVenue = linkedVenues.find(v => v.id === venueSalonId);
+  const [createdStatus, setCreatedStatus] = useState<string | null>(null);
+  const bookingConfirmationEnabled = createdStatus ? createdStatus === "PENDING" : salon.role === "user_tatoueur" && salon.saasPlan === "FREE" && selectedVenue ? selectedVenue.addConfirmationEnabled === true : salon.addConfirmationEnabled;
   //! États
   const [step, setStep] = useState(1);
   const [confirmDisabled, setConfirmDisabled] = useState(false);
@@ -575,7 +577,7 @@ export function useBookingLogic({
       4: [],
     };
 
-    if (step === 1 && linkedVenues.length && !selectedVenue?.publicBookingEnabled) { toast.error("Choisissez un salon disponible."); return; }
+    if (step === 3 && linkedVenues.length && !selectedVenue?.publicBookingEnabled) { toast.error("Choisissez un salon disponible."); return; }
     if (step === 1 && isParTatoueurMode && !selectedTatoueur) {
       toast.error("Veuillez sélectionner un tatoueur avant de continuer.");
       return;
@@ -1144,6 +1146,7 @@ export function useBookingLogic({
               ? "Demande de rendez-vous envoyée !"
               : "Rendez-vous confirmé !"),
         );
+        setCreatedStatus((result.data as any)?.status || (result.data as any)?.appointment?.status || null);
         setAppointmentCreated(true);
         setStep(5);
         window.scrollTo({ top: 0, behavior: "smooth" });
@@ -1226,8 +1229,9 @@ export function useBookingLogic({
   };
 
   return {
+    bookingConfirmationEnabled,
     linkedVenues, venueSalonId, selectedVenue,
-    handleVenueChange: (id: string) => { setVenueSalonId(id); setIsLoadingSlots(false); setSelectedSlots([]); setTimeSlots([]); setSelectedDate(""); },
+    handleVenueChange: (id: string) => { setVenueSalonId(id); setIsLoadingSlots(false); setSelectedSlots([]); setTimeSlots([]); setOccupiedSlots([]); setBlockedSlots([]); setSelectedDate(""); },
     // Form methods
     methods,
     watch,

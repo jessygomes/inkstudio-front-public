@@ -196,6 +196,8 @@ export default async function ReserverPage({
 
   // résumé salon
   const salonSummary = {
+    saasPlan: salon.saasPlan,
+    publicBookingAllowed: salon.saasPlan !== "FREE" || (salon.role === "user_tatoueur" && (salon.linkedSalons || []).some((venue: any) => venue.publicBookingEnabled)), 
     role: salon.role,
     linkedSalons: salon.linkedSalons || [],
     id: salon.id,

@@ -48,9 +48,7 @@ export function LinkedSalonCard({ salon }: { salon: LinkedSalonProps }) {
   const prestRemaining = prestUnique.length > MAX ? prestUnique.length - MAX : 0;
 
   return (
-    <li className={`${salon.isCurrentSalon ? "sm:col-span-2 lg:col-span-1 xl:col-span-2 ring-2 ring-tertiary-400/60 " : ""}group relative list-none overflow-hidden rounded-3xl border border-white/10 bg-linear-to-b from-noir-500/8 to-white/2 p-3.5 sm:p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-tertiary-400/35 lg:h-full lg:min-h-88`}>
-      {salon.nextPresenceAt && !salon.isCurrentSalon && <p className="mb-3 text-sm text-white/70">Prochaine présence : {new Date(salon.nextPresenceAt).toLocaleString("fr-FR", { timeZone: "Europe/Paris" })}</p>}
-      <p className="mb-3 text-sm text-white/70">{presenceDescription(salon.presence)}</p>
+    <li className={`${salon.isCurrentSalon ? "ring-2 ring-tertiary-400/60 " : ""}group relative flex flex-col list-none overflow-hidden rounded-3xl border border-white/10 bg-linear-to-b from-noir-500/8 to-white/2 p-3.5 sm:p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-tertiary-400/35 lg:h-full lg:min-h-88`}>
       {/* Header */}
       <div className="relative -mx-3.5 -mt-3.5 mb-3 flex sm:flex-col items-center gap-3.5 rounded-none px-3.5 py-4 sm:-mx-4 sm:-mt-4 sm:px-4 sm:py-5 lg:mb-4 lg:min-h-64 lg:justify-center lg:rounded-t-3xl lg:py-8">
         {imgSrc ? (
@@ -115,6 +113,27 @@ export function LinkedSalonCard({ salon }: { salon: LinkedSalonProps }) {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
           </svg>
         </button>
+      </div>
+
+      <div className="rounded-2xl border border-tertiary-400/20 bg-tertiary-400/5 p-3">
+        <p className="mb-1 text-[10px] uppercase tracking-wider text-tertiary-300 font-one">
+          Présence du tatoueur
+        </p>
+        <p className="text-sm text-white/80">{presenceDescription(salon.presence)}</p>
+        {salon.schedule && salon.schedule.length > 0 && (
+          <ul className="mt-2 space-y-1 text-xs text-white/65">
+            {[...salon.schedule].sort((a, b) => a.day - b.day || a.start.localeCompare(b.start)).map((hours, index) => (
+              <li key={`${hours.day}-${hours.start}-${index}`}>
+                {["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"][hours.day - 1]} : {hours.start} – {hours.end}
+              </li>
+            ))}
+          </ul>
+        )}
+        {salon.nextPresenceAt && (
+          <p className="mt-2 text-xs text-white/65">
+            Prochaine présence : {new Date(salon.nextPresenceAt).toLocaleString("fr-FR", { timeZone: "Europe/Paris" })}
+          </p>
+        )}
       </div>
 
       {/* Contenu dépliable */}

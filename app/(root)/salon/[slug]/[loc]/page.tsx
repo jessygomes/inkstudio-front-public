@@ -298,6 +298,7 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
 
   const flashes = await getAvailableFlashes(salon.id);
   const isFree = salon.saasPlan === "FREE";
+  const canBookAppointments = !isFree || (isTatoueurRole && linkedSalons.some(venue => venue.publicBookingEnabled));
 
   const heroSrc = salon.image || null;
   const profileSrc = salon.profileImage || null;
@@ -535,8 +536,8 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
                   {openNow.today && <span>{openNow.today.start} – {openNow.today.end}</span>}
                 </div>
               </div>
-              <Link href={isFree ? "#contact" : `/salon/${slug}/${loc}/reserver`} className="inline-flex min-h-12 shrink-0 items-center justify-center gap-3 rounded-xl bg-tertiary-500 px-6 py-3 text-sm font-semibold text-white transition hover:brightness-110">
-                <CalendarDays size={18} />{isFree ? "Parlons de votre projet" : "Prendre rendez-vous"}<ArrowUpRight size={17} />
+              <Link href={!canBookAppointments ? "#contact" : `/salon/${slug}/${loc}/reserver`} className="inline-flex min-h-12 shrink-0 items-center justify-center gap-3 rounded-xl bg-tertiary-500 px-6 py-3 text-sm font-semibold text-white transition hover:brightness-110">
+                <CalendarDays size={18} />{!canBookAppointments ? "Parlons de votre projet" : "Prendre rendez-vous"}<ArrowUpRight size={17} />
               </Link>
             </div>
           </div>
@@ -547,7 +548,7 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
             <div className="rounded-2xl border border-tertiary-400/20 bg-tertiary-400/5 p-6">
               <p className="text-lg text-white">Votre prochain projet commence ici</p>
               <p className="mt-2 text-sm leading-relaxed text-white/65">Échangez avec {salon.salonName} pour donner vie à vos idées.</p>
-              <AppButton href={isFree ? "#contact" : `/salon/${slug}/${loc}/reserver`} variant="primary" fullWidth className="mt-5 min-h-12">{isFree ? "Contacter le salon" : "Prendre rendez-vous"}<ArrowUpRight size={16} /></AppButton>
+              <AppButton href={!canBookAppointments ? "#contact" : `/salon/${slug}/${loc}/reserver`} variant="primary" fullWidth className="mt-5 min-h-12">{!canBookAppointments ? "Contacter le salon" : "Prendre rendez-vous"}<ArrowUpRight size={16} /></AppButton>
               {!isFree && <div className="mt-3"><StartInkeraConversationButton variant="compact" targetUserId={salon.id} recipientName={salon.salonName || "ce tatoueur"} /></div>}
               {!isFree && <a href="#contact" className="mt-2 flex min-h-11 items-center justify-center text-sm text-white/75 hover:text-white">Poser une question</a>}
             </div>
@@ -594,7 +595,7 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
               salonName={salon.salonName}
               salonUserId={salon.id}
               bookingPath={`/salon/${resolvedParams.slug}/${resolvedParams.loc}/reserver`}
-              canBookFlashes={!isFree}
+              canBookFlashes={canBookAppointments}
               tatoueurs={sortedTatoueurs.map((t) => ({
                 id: t.id,
                 name: getTatoueurDisplayName(t),
@@ -654,7 +655,7 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
                 </div>
 
                 <ul
-                  className={`grid grid-cols-1 gap-5 ${
+                  className={`grid grid-cols-1 gap-5 lg:auto-rows-fr ${
                     linkedSalons.length > 1
                       ? "sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2"
                       : ""
