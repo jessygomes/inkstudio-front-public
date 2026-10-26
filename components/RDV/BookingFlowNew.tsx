@@ -25,6 +25,7 @@ export default function BookingFlow({
   const searchParams = useSearchParams();
 
   const {
+    linkedVenues, venueSalonId, selectedVenue, handleVenueChange,
     methods,
     watch,
     handleSubmit,
@@ -89,7 +90,7 @@ export default function BookingFlow({
     if (step >= 1 && step <= 4) {
       const urlStep = parseInt(searchParams.get("step") ?? "1", 10);
       if (urlStep !== step) {
-        router.push(`?step=${step}`, { scroll: false });
+        const params = new URLSearchParams(searchParams.toString()); params.set("step", String(step)); router.push(`?${params}`, { scroll: false });
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -110,7 +111,7 @@ export default function BookingFlow({
   if (appointmentCreated && step === 5) {
     return (
       <ConfirmationStep
-        salon={salon}
+        salon={selectedVenue ? { ...salon, address: selectedVenue.address, adress: selectedVenue.address, city: selectedVenue.city, postalCode: selectedVenue.postalCode, name: selectedVenue.salonName } : salon}
         addConfirmationEnabled={salon.addConfirmationEnabled}
       />
     );
@@ -136,6 +137,7 @@ export default function BookingFlow({
 
           {/* Contenu des étapes */}
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            {linkedVenues.length > 0 && <div className="rounded-2xl border border-white/15 p-5"><label htmlFor="booking-venue" className="mb-2 block text-white">Salon du rendez-vous</label><select id="booking-venue" required disabled={isSubmitting} value={venueSalonId} onChange={e => { handleVenueChange(e.target.value); setStep(1); }} className="w-full rounded-xl border border-white/20 bg-noir-500 p-3 text-white"><option value="">Choisissez le salon où vous souhaitez venir</option>{linkedVenues.filter(v => v.publicBookingEnabled).map(v => <option key={v.id} value={v.id}>{v.salonName} · {v.city}</option>)}</select>{selectedVenue && <p className="mt-2 text-sm text-white/70">{selectedVenue.address}, {selectedVenue.postalCode} {selectedVenue.city}</p>}{!linkedVenues.some(v => v.publicBookingEnabled) && <p className="mt-2 text-sm text-white/70">Aucun salon ne propose actuellement de réservation en ligne avec ce tatoueur.</p>}</div>}
             {/* Étape 1: Choix de la prestation */}
             {step === 1 && (
               <div className="space-y-4">
@@ -211,7 +213,7 @@ export default function BookingFlow({
             {step === 3 && (
               <SlotSelection
                 prestation={prestation}
-                salon={salon}
+                salon={selectedVenue ? { ...salon, address: selectedVenue.address, city: selectedVenue.city, postalCode: selectedVenue.postalCode, name: selectedVenue.salonName } : salon}
                 artists={artists}
                 isParTatoueurMode={isParTatoueurMode}
                 selectedTatoueur={selectedTatoueur}
@@ -242,7 +244,7 @@ export default function BookingFlow({
                 piercingZones={piercingZones}
                 piercingPrice={piercingPrice}
                 pierc={selectedPiercingZone}
-                salon={salon}
+                salon={selectedVenue ? { ...salon, address: selectedVenue.address, city: selectedVenue.city, postalCode: selectedVenue.postalCode, name: selectedVenue.salonName } : salon}
                 referenceFile={referenceFile}
                 sketchFile={sketchFile}
                 skinToneOptions={skinToneOptions}

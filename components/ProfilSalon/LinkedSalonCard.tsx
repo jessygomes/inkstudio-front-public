@@ -1,4 +1,5 @@
 "use client";
+import { presenceDescription } from "@/lib/residency-presence";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
@@ -47,7 +48,9 @@ export function LinkedSalonCard({ salon }: { salon: LinkedSalonProps }) {
   const prestRemaining = prestUnique.length > MAX ? prestUnique.length - MAX : 0;
 
   return (
-    <li className="group relative list-none overflow-hidden rounded-3xl border border-white/10 bg-linear-to-b from-noir-500/8 to-white/2 p-3.5 sm:p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-tertiary-400/35 lg:h-full lg:min-h-88">
+    <li className={`${salon.isCurrentSalon ? "sm:col-span-2 lg:col-span-1 xl:col-span-2 ring-2 ring-tertiary-400/60 " : ""}group relative list-none overflow-hidden rounded-3xl border border-white/10 bg-linear-to-b from-noir-500/8 to-white/2 p-3.5 sm:p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-tertiary-400/35 lg:h-full lg:min-h-88`}>
+      {salon.nextPresenceAt && !salon.isCurrentSalon && <p className="mb-3 text-sm text-white/70">Prochaine présence : {new Date(salon.nextPresenceAt).toLocaleString("fr-FR", { timeZone: "Europe/Paris" })}</p>}
+      <p className="mb-3 text-sm text-white/70">{presenceDescription(salon.presence)}</p>
       {/* Header */}
       <div className="relative -mx-3.5 -mt-3.5 mb-3 flex sm:flex-col items-center gap-3.5 rounded-none px-3.5 py-4 sm:-mx-4 sm:-mt-4 sm:px-4 sm:py-5 lg:mb-4 lg:min-h-64 lg:justify-center lg:rounded-t-3xl lg:py-8">
         {imgSrc ? (

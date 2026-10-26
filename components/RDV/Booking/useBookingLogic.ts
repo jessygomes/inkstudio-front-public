@@ -2,13 +2,14 @@
 import { useEffect, useState, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { z } from "zod";
 import { toast } from "sonner";
 import { appointmentRequestSchema } from "@/lib/zod/validator-schema";
 import {
   getTimeslots,
+  getResidencySlots,
   getOccupiedSlots,
   getBlockedSlots,
   getTimeslotBySalon,
@@ -291,6 +292,10 @@ export function useBookingLogic({
     formState: { errors, isSubmitting },
   } = methods;
 
+  const searchParams = useSearchParams();
+  const linkedVenues: any[] = salon.role === "user_tatoueur" ? salon.linkedSalons || [] : [];
+  const [venueSalonId, setVenueSalonId] = useState(() => { const id = searchParams.get("venueSalonId") || ""; return linkedVenues.some(v => v.id === id && v.publicBookingEnabled) ? id : ""; });
+  const selectedVenue = linkedVenues.find(v => v.id === venueSalonId);
   //! États
   const [step, setStep] = useState(1);
   const [confirmDisabled, setConfirmDisabled] = useState(false);
@@ -300,7 +305,7 @@ export function useBookingLogic({
   const prestation = watch("prestation");
   const normalizedAgendaMode =
     typeof salon.agendaMode === "string" ? salon.agendaMode.toUpperCase() : null;
-  const isParTatoueurMode =
+  const isParTatoueurMode = salon.role === "user_tatoueur" ? false :
     normalizedAgendaMode !== null
       ? normalizedAgendaMode === "PAR_TATOUEUR"
       : !salon.appointmentBookingEnabled;
@@ -308,7 +313,7 @@ export function useBookingLogic({
     () =>
       (salon.tatoueurs ?? []).filter(
         (tatoueur: any) =>
-          tatoueur.rdvBookingEnabled || tatoueur.isLinkedUser === true,
+          tatoueur.rdvBookingEnabled === true,
       ),
     [salon.tatoueurs],
   );
@@ -410,6 +415,9 @@ export function useBookingLogic({
     const nextTatoueurId = defaultArtistExists
       ? (defaultTatoueurId as string)
       : artists[0].id;
+
+    // Linked accounts must be explicitly chosen so the change handler redirects.
+    if (artists.find((artist: any) => artist.id === nextTatoueurId)?.isLinkedUser) return;
 
     setSelectedTatoueur(nextTatoueurId);
     setValue("tatoueurId", nextTatoueurId, { shouldValidate: false });
@@ -567,6 +575,7 @@ export function useBookingLogic({
       4: [],
     };
 
+    if (step === 1 && linkedVenues.length && !selectedVenue?.publicBookingEnabled) { toast.error("Choisissez un salon disponible."); return; }
     if (step === 1 && isParTatoueurMode && !selectedTatoueur) {
       toast.error("Veuillez sélectionner un tatoueur avant de continuer.");
       return;
@@ -632,16 +641,20 @@ export function useBookingLogic({
     const shouldFetchBySalon =
       salon.appointmentBookingEnabled && !isStandaloneTatoueurAccount;
 
+    if (linkedVenues.length && !selectedVenue?.publicBookingEnabled) { setTimeSlots([]); setOccupiedSlots([]); setBlockedSlots([]); return; }
     if (!selectedDate) return;
     if (!shouldFetchBySalon && !effectiveTatoueurId) return;
 
+    let cancelled = false;
     const fetchAllSlotData = async () => {
       try {
         setIsLoadingSlots(true);
 
         let timeslotsResult, occupiedResult, blockedResult;
 
-        if (shouldFetchBySalon) {
+        if (selectedVenue) {
+          timeslotsResult = await getResidencySlots(selectedDate, salon.id, venueSalonId); occupiedResult = { ok: true, data: [] }; blockedResult = { ok: true, data: [] };
+        } else if (shouldFetchBySalon || isStandaloneTatoueurAccount) {
           [timeslotsResult, occupiedResult, blockedResult] = await Promise.all([
             getTimeslotBySalon(selectedDate, salon.id),
             getOccupiedSlotsBySalon(selectedDate, salon.id),
@@ -655,6 +668,7 @@ export function useBookingLogic({
           ]);
         }
 
+        if (cancelled) return;
         if (timeslotsResult.ok) {
           setTimeSlots(timeslotsResult.data);
         } else {
@@ -677,16 +691,19 @@ export function useBookingLogic({
         }
       } catch (err) {
         console.error("Erreur fetch créneaux:", err);
+        if (cancelled) return;
         setTimeSlots([]);
         setOccupiedSlots([]);
         setBlockedSlots([]);
       } finally {
-        setIsLoadingSlots(false);
+        if (!cancelled) setIsLoadingSlots(false);
       }
     };
 
     fetchAllSlotData();
+    return () => { cancelled = true; };
   }, [
+    venueSalonId,
     selectedDate,
     selectedTatoueur,
     isStandaloneTatoueurAccount,
@@ -1051,7 +1068,9 @@ export function useBookingLogic({
         return;
       }
 
+      if (linkedVenues.length && !selectedVenue?.publicBookingEnabled) { toast.error("Choisissez un salon disponible."); return; }
       const payload = {
+        venueSalonId: venueSalonId || undefined,
         title: `${data.prestation} - ${data.client.firstName} ${data.client.lastName}`,
         prestation: data.prestation,
         start: startDateTime,
@@ -1113,7 +1132,7 @@ export function useBookingLogic({
         );
 
         if (redirectHref) {
-          router.push(redirectHref);
+          router.push(redirectHref + (redirectHref.includes("?") ? "&" : "?") + "venueSalonId=" + encodeURIComponent(salon.id));
         }
         return;
       }
@@ -1158,7 +1177,7 @@ export function useBookingLogic({
       toast.info(
         "Ce tatoueur possède son propre compte. Redirection vers sa page de réservation.",
       );
-      router.push(selectedArtist.bookingHref);
+      router.push(selectedArtist.bookingHref + (selectedArtist.bookingHref.includes("?") ? "&" : "?") + "venueSalonId=" + encodeURIComponent(salon.id));
       return;
     }
 
@@ -1207,6 +1226,8 @@ export function useBookingLogic({
   };
 
   return {
+    linkedVenues, venueSalonId, selectedVenue,
+    handleVenueChange: (id: string) => { setVenueSalonId(id); setIsLoadingSlots(false); setSelectedSlots([]); setTimeSlots([]); setSelectedDate(""); },
     // Form methods
     methods,
     watch,

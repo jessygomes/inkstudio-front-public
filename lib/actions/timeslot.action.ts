@@ -218,3 +218,9 @@ export async function getBlockedSlotsBySalon(salonId: string) {
     };
   }
 }
+
+export async function getResidencySlots(date: string, artistId: string, salonId: string) {
+  const url = process.env.NEXT_PUBLIC_BACK_URL + "/residencies/availability?date=" + encodeURIComponent(date) + "&artistId=" + encodeURIComponent(artistId) + "&salonId=" + encodeURIComponent(salonId);
+  const response = await fetch(url, { cache: "no-store" });
+  return { ok: response.ok, data: response.ok ? await response.json() : [], message: response.ok ? undefined : "Impossible de charger les disponibilités du salon." };
+}

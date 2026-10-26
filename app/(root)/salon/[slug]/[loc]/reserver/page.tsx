@@ -76,7 +76,7 @@ async function getSalon(slug: string, loc: string) {
   const url = `${base}/users/${encodeURIComponent(slug)}/${encodeURIComponent(
     loc,
   )}`;
-  const res = await fetch(url, { next: { revalidate: 30 } });
+  const res = await fetch(url, { cache: "no-store" });
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(`Failed to load salon (${res.status})`);
   return res.json();
@@ -196,6 +196,8 @@ export default async function ReserverPage({
 
   // résumé salon
   const salonSummary = {
+    role: salon.role,
+    linkedSalons: salon.linkedSalons || [],
     id: salon.id,
     name: salon.salonName,
     image: salon.image ?? null,

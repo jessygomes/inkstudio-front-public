@@ -95,6 +95,10 @@ export type UsersResponse = {
 };
 
 export type LinkedSalonProps = {
+  presence?: import("./residency-presence").LocationPresence | null;
+  schedule?: { day: number; start: string; end: string }[];
+  nextPresenceAt?: string | null;
+  publicBookingEnabled?: boolean;
   id: string;
   salonName: string | null;
   image: string | null;
@@ -342,6 +346,8 @@ export type Tatoueur = {
 };
 
 export type SalonSummary = {
+  role?: string;
+  linkedSalons?: LinkedSalonProps[];
   id: string; // = userId du salon
   name: string;
   image?: string | null;
