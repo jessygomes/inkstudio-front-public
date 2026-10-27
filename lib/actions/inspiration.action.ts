@@ -3,6 +3,7 @@
 type InspirationSalon = {
 	id: string;
 	salonName: string | null;
+	displayName?: string;
 	image: string | null;
 	city: string | null;
 	postalCode: string | null;

@@ -89,7 +89,7 @@ async function getAvailableFlashes(userId: string): Promise<FlashProps[]> {
 
   try {
     const res = await fetch(`${base}/flash/${encodeURIComponent(userId)}`, {
-      next: { revalidate: 30 },
+      cache: "no-store",
     });
     if (!res.ok) return [];
 
@@ -202,7 +202,7 @@ export default async function ReserverPage({
     role: salon.role,
     linkedSalons: salon.linkedSalons || [],
     id: salon.id,
-    name: salon.salonName,
+    name: salon.displayName || salon.salonName,
     image: salon.image ?? null,
     address: salon.address ?? null,
     city: salon.city ?? null,
@@ -265,11 +265,11 @@ export default async function ReserverPage({
         <div className="grid items-start gap-6 lg:grid-cols-[260px_minmax(0,1fr)] xl:gap-10">
           <aside aria-label="Votre salon" className="order-2 overflow-hidden rounded-2xl border border-white/10 bg-noir-800 lg:sticky lg:top-6 lg:order-1">
             <div className="relative h-32 overflow-hidden bg-white/3 lg:h-40">
-              {salon.image ? <Image src={salon.image} alt={salon.salonName} fill sizes="(min-width: 1024px) 260px, 100vw" className="object-cover" priority /> : <div className="grid h-full place-items-center text-xl text-white/15 font-one">{salon.salonName}</div>}
+              {salon.image ? <Image src={salon.image} alt={salon.displayName || salon.salonName} fill sizes="(min-width: 1024px) 260px, 100vw" className="object-cover" priority /> : <div className="grid h-full place-items-center text-xl text-white/15 font-one">{salon.displayName || salon.salonName}</div>}
               <div className="absolute inset-0 bg-linear-to-t from-noir-800/70 via-transparent to-transparent" />
             </div>
             <div className="space-y-5 p-5">
-              <div><p className="text-[9px] font-medium uppercase tracking-[0.16em] text-tertiary-400/80">Vous avez rendez-vous chez</p><div className="mt-3 flex items-center gap-3"><div className="relative grid size-11 shrink-0 place-items-center overflow-hidden rounded-full border border-white/10 bg-white/5">{salon.profileImage || salon.image ? <Image src={salon.profileImage || salon.image} alt={salon.salonName} fill sizes="44px" className="object-cover" /> : <span aria-hidden="true" className="text-base text-white/45">{salon.salonName?.slice(0, 1).toUpperCase()}</span>}</div><div className="min-w-0"><h2 className="break-words text-lg font-semibold tracking-tight text-white font-one">{salon.salonName}</h2><p className="mt-1 text-xs text-white/40">{[displayCity, salon.postalCode].filter(Boolean).join(" · ")}</p></div></div></div>
+              <div><p className="text-[9px] font-medium uppercase tracking-[0.16em] text-tertiary-400/80">Vous avez rendez-vous chez</p><div className="mt-3 flex items-center gap-3"><div className="relative grid size-11 shrink-0 place-items-center overflow-hidden rounded-full border border-white/10 bg-white/5">{salon.profileImage || salon.image ? <Image src={salon.profileImage || salon.image} alt={salon.displayName || salon.salonName} fill sizes="44px" className="object-cover" /> : <span aria-hidden="true" className="text-base text-white/45">{(salon.displayName || salon.salonName)?.slice(0, 1).toUpperCase()}</span>}</div><div className="min-w-0"><h2 className="break-words text-lg font-semibold tracking-tight text-white font-one">{salon.displayName || salon.salonName}</h2><p className="mt-1 text-xs text-white/40">{[displayCity, salon.postalCode].filter(Boolean).join(" · ")}</p></div></div></div>
               <div className="space-y-3 border-t border-white/8 pt-4 text-[11px] leading-5 text-white/55">
                 {salon.address && <div className="flex gap-2.5"><MapPin size={14} className="mt-0.5 shrink-0 text-white/30" /><p>{salon.address}<br />{[salon.postalCode, displayCity].filter(Boolean).join(" ")}</p></div>}
                 {salon.phone && <a href={`tel:${salon.phone}`} className="flex items-center gap-2.5 hover:text-white"><Phone size={13} className="shrink-0 text-white/30" />{displayPhone}</a>}
@@ -305,18 +305,18 @@ export async function generateMetadata({ params }: PageParams) {
   if (!salon) return {};
 
   return {
-    title: salon.salonName,
-    description: `Réservez votre séance chez ${salon.salonName}, situé à ${salon.address}, ${salon.postalCode} ${salon.city}.`,
+    title: salon.displayName || salon.salonName,
+    description: `Réservez votre séance chez ${salon.displayName || salon.salonName}, situé à ${salon.address}, ${salon.postalCode} ${salon.city}.`,
     openGraph: {
-      title: salon.salonName,
-      description: `Réservez votre séance chez ${salon.salonName}, situé à ${salon.address}, ${salon.postalCode} ${salon.city}.`,
+      title: salon.displayName || salon.salonName,
+      description: `Réservez votre séance chez ${salon.displayName || salon.salonName}, situé à ${salon.address}, ${salon.postalCode} ${salon.city}.`,
       url: `${process.env.NEXT_PUBLIC_SITE_URL}/salon/${slug}/${loc}`,
       images: [
         {
           url: salon.image
             ? salon.image
             : `${process.env.NEXT_PUBLIC_SITE_URL}/default-salon-image.jpg`,
-          alt: salon.salonName,
+          alt: salon.displayName || salon.salonName,
         },
       ],
     },

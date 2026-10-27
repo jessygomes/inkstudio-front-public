@@ -165,7 +165,7 @@ const mapPhotoToFeedItem = (photo: InspirationPhoto): PortfolioFeedItem => ({
   imageUrl: photo.imageUrl,
   title: photo.title,
   description: photo.description,
-  salonName: photo.user.salonName || "Salon Inkera",
+  salonName: photo.user.displayName || photo.user.salonName || "Salon Inkera",
   salonUserId: photo.user.id,
   canMessageSalon: Boolean(photo.user.saasPlan) && photo.user.saasPlan !== "FREE",
   isTatoueurAccount: photo.user.role === "user_tatoueur",

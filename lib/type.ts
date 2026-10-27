@@ -1,6 +1,8 @@
 export type SalonProps = {
   id: string;
   salonName: string;
+  displayName?: string;
+  nickname?: string | null;
   image: string;
   profileImage?: string | null;
   email: string;
@@ -119,6 +121,8 @@ export type SalonProfilProps = {
   id: string;
   role?: string;
   salonName: string;
+  displayName?: string;
+  nickname?: string | null;
   verifiedSalon?: boolean;
   image: string;
   profileImage?: string | null;

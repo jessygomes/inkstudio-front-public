@@ -49,7 +49,7 @@ async function getSalon(slug: string, loc: string) {
   const url = `${base}/users/${encodeURIComponent(slug)}/${encodeURIComponent(
     loc,
   )}`;
-  const res = await fetch(url, { next: { revalidate: 30 } });
+  const res = await fetch(url, { cache: "no-store" });
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(`Failed to load salon (${res.status})`);
 
@@ -74,7 +74,7 @@ async function getAvailableFlashes(userId: string): Promise<FlashProps[]> {
 
   try {
     const res = await fetch(`${base}/flash/${encodeURIComponent(userId)}`, {
-      next: { revalidate: 30 },
+      cache: "no-store",
     });
 
     if (!res.ok) return [];
@@ -112,10 +112,10 @@ export async function generateMetadata({
     };
   }
 
-  const title = `${salon.salonName} - Salon de tatouage à ${
+  const title = `${salon.displayName || salon.salonName} - Salon de tatouage à ${
     salon.city || "France"
   } | Inkera`;
-  const description = `Découvrez ${salon.salonName}, salon de tatouage ${
+  const description = `Découvrez ${salon.displayName || salon.salonName}, salon de tatouage ${
     salon.city ? `à ${salon.city}` : "professionnel"
   }. ${
     salon.description
@@ -358,7 +358,7 @@ export default async function ProfilPublicSalonPage({ params, searchParams }: Pa
     "@context": "https://schema.org",
     "@type": "TattooParlor",
     "@id": `https://theinkera.com/salon/${slug}/${loc}`,
-    name: salon.salonName,
+    name: salon.displayName || salon.salonName,
     description:
       salon.description ||
       `Salon de tatouage professionnel ${
@@ -434,7 +434,7 @@ export default async function ProfilPublicSalonPage({ params, searchParams }: Pa
     //         name: tatoueur.name,
     //         description:
     //           tatoueur.description ||
-    //           `Tatoueur professionnel chez ${salon.salonName}`,
+    //           `Tatoueur professionnel chez ${salon.displayName || salon.salonName}`,
     //         image: tatoueur.img || undefined,
     //         sameAs: tatoueur.instagram ? [tatoueur.instagram] : undefined,
     //         knowsAbout: tatoueur.style || "Tatouage",
@@ -443,7 +443,7 @@ export default async function ProfilPublicSalonPage({ params, searchParams }: Pa
     //           name: "Tatoueur",
     //           occupationLocation: {
     //             "@type": "Place",
-    //             name: salon.salonName,
+    //             name: salon.displayName || salon.salonName,
     //           },
     //         },
     //       }))
@@ -469,7 +469,7 @@ export default async function ProfilPublicSalonPage({ params, searchParams }: Pa
       },
       result: {
         "@type": "Reservation",
-        name: `Réservation chez ${salon.salonName}`,
+        name: `Réservation chez ${salon.displayName || salon.salonName}`,
       },
     },
   };
@@ -513,14 +513,14 @@ export default async function ProfilPublicSalonPage({ params, searchParams }: Pa
         <Link href={previousSearch} className="mb-6 inline-flex min-h-10 items-center gap-2 text-sm text-white/65 transition hover:text-white">
           <ArrowLeft size={16} /> {previousSearch.includes("?") ? "Retour aux résultats" : "Tous les salons"}
         </Link>
-        <DesktopSalonHeader variant="mobile" salonId={salon.id} name={salon.salonName} cover={heroSrc} portrait={profileSrc} city={salon.city} postalCode={salon.postalCode} verified={isVerifiedSalon} artist={isTatoueurRole} hasHours={hours.length > 0} open={openNow.open} today={openNow.today} bookingHref={!canBookAppointments ? "#contact" : "/salon/" + slug + "/" + loc + "/reserver"} canBook={canBookAppointments} />
+        <DesktopSalonHeader variant="mobile" salonId={salon.id} name={salon.displayName || salon.salonName} cover={heroSrc} portrait={profileSrc} city={salon.city} postalCode={salon.postalCode} verified={isVerifiedSalon} artist={isTatoueurRole} hasHours={hours.length > 0} open={openNow.open} today={openNow.today} bookingHref={!canBookAppointments ? "#contact" : "/salon/" + slug + "/" + loc + "/reserver"} canBook={canBookAppointments} />
         <SalonSectionNav showTeam={shouldShowTeamSection && sortedTatoueurs.length > 0} className="my-6 lg:hidden" />
         <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)] xl:gap-8">
           <aside id="informations" className="order-2 min-w-0 scroll-mt-28 space-y-4 lg:sticky lg:top-24">
             <section aria-label="Votre prochain projet" className="rounded-2xl border border-tertiary-400/20 bg-linear-to-br from-tertiary-400/10 via-tertiary-500/5 to-noir-800 p-4">
-              <div className="mb-3 flex items-start gap-2.5"><span className="grid size-8 shrink-0 place-items-center rounded-xl border border-tertiary-400/15 bg-tertiary-400/8 text-tertiary-400"><CalendarDays size={15} aria-hidden="true" /></span><div className="min-w-0"><h2 className="text-sm font-medium leading-5 text-white/90">Votre prochain projet commence ici</h2><p className="mt-1 text-[11px] leading-5 text-white/40">Une idée ? Échangez avec {salon.salonName}.</p></div></div>
+              <div className="mb-3 flex items-start gap-2.5"><span className="grid size-8 shrink-0 place-items-center rounded-xl border border-tertiary-400/15 bg-tertiary-400/8 text-tertiary-400"><CalendarDays size={15} aria-hidden="true" /></span><div className="min-w-0"><h2 className="text-sm font-medium leading-5 text-white/90">Votre prochain projet commence ici</h2><p className="mt-1 text-[11px] leading-5 text-white/40">Une idée ? Échangez avec {salon.displayName || salon.salonName}.</p></div></div>
               <div className="space-y-2"><AppButton href={!canBookAppointments ? "#contact" : "/salon/" + slug + "/" + loc + "/reserver"} variant="primary" fullWidth className="min-h-9! px-3! py-2! text-xs! shadow-none! hover:translate-y-0!">{!canBookAppointments ? "Contacter le salon" : "Prendre rendez-vous"}<ArrowUpRight size={14} /></AppButton>
-                {!isFree && <StartInkeraConversationButton variant="compact" targetUserId={salon.id} recipientName={salon.salonName || "ce tatoueur"} className="min-h-9! px-3! py-2! text-xs! shadow-none!" />}
+                {!isFree && <StartInkeraConversationButton variant="compact" targetUserId={salon.id} recipientName={salon.displayName || salon.salonName || "ce tatoueur"} className="min-h-9! px-3! py-2! text-xs! shadow-none!" />}
               </div>
               {!isFree && <a href="#contact" className="mt-2 flex items-center justify-center gap-1 py-1 text-[11px] text-white/40 transition hover:text-white">Poser une question<ArrowUpRight size={11} /></a>}
             </section>
@@ -544,7 +544,7 @@ export default async function ProfilPublicSalonPage({ params, searchParams }: Pa
           <div className="order-1 min-w-0 space-y-8">
             <DesktopSalonHeader
               salonId={salon.id}
-              name={salon.salonName}
+              name={salon.displayName || salon.salonName}
               cover={heroSrc}
               portrait={profileSrc}
               city={salon.city}
@@ -564,7 +564,7 @@ export default async function ProfilPublicSalonPage({ params, searchParams }: Pa
               portfolio={salon.Portfolio ?? []}
               products={salon.ProductSalon ?? []}
               flashes={flashes}
-              salonName={salon.salonName}
+              salonName={salon.displayName || salon.salonName}
               salonUserId={salon.id}
               bookingPath={`/salon/${resolvedParams.slug}/${resolvedParams.loc}/reserver`}
               canBookFlashes={canBookAppointments}
@@ -641,13 +641,13 @@ export default async function ProfilPublicSalonPage({ params, searchParams }: Pa
             )}
 
             {/* Avis */}
-            <section id="avis" className="scroll-mt-28"><SalonReviews salonId={salon.id} salonName={salon.salonName} /></section>
+            <section id="avis" className="scroll-mt-28"><SalonReviews salonId={salon.id} salonName={salon.displayName || salon.salonName} /></section>
 
             <section id="contact" className="scroll-mt-28">
             <PublicProfileContactForm
               messagingEnabled={!isFree}
               targetUserId={salon.id}
-              recipientName={salon.salonName || "ce profil"}
+              recipientName={salon.displayName || salon.salonName || "ce profil"}
             />
             </section>
           </div>

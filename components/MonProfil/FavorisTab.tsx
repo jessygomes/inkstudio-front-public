@@ -23,6 +23,7 @@ import AppButton from "@/components/Shared/AppButton";
 type FavoriteSalon = {
   id: string;
   salonName: string;
+  displayName?: string;
   image?: string;
   city: string;
   postalCode?: string;
@@ -43,6 +44,7 @@ type FavoritePortfolioImage = {
   user?: {
     id?: string;
     salonName?: string;
+    displayName?: string;
     city?: string;
     postalCode?: string;
     instagram?: string;
@@ -269,12 +271,12 @@ export default function FavorisTab() {
             return (
               <article key={salon.id} className="group min-w-0 overflow-hidden rounded-2xl border border-white/10 bg-noir-500 transition-colors hover:border-tertiary-400/25">
                 <div className="flex items-start gap-3 p-3">
-                  <Link href={href} aria-label={`Découvrir ${salon.salonName}`} className="relative block h-24 w-20 shrink-0 overflow-hidden rounded-xl bg-noir-800 sm:w-24">
-                    {salon.image ? <Image src={salon.image} alt="" fill sizes="96px" className="object-cover transition-transform duration-300 motion-safe:group-hover:scale-105" /> : <span className="grid h-full place-items-center bg-tertiary-400/5 text-3xl text-white/30">{salon.salonName.charAt(0)}</span>}
+                  <Link href={href} aria-label={`Découvrir ${salon.displayName || salon.salonName}`} className="relative block h-24 w-20 shrink-0 overflow-hidden rounded-xl bg-noir-800 sm:w-24">
+                    {salon.image ? <Image src={salon.image} alt="" fill sizes="96px" className="object-cover transition-transform duration-300 motion-safe:group-hover:scale-105" /> : <span className="grid h-full place-items-center bg-tertiary-400/5 text-3xl text-white/30">{(salon.displayName || salon.salonName).charAt(0)}</span>}
                   </Link>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-start justify-between gap-1">
-                      <h4 className="min-w-0 break-words pt-1 text-base font-semibold leading-5 text-white"><Link href={href} className="transition hover:text-tertiary-400">{salon.salonName}</Link></h4>
+                      <h4 className="min-w-0 break-words pt-1 text-base font-semibold leading-5 text-white"><Link href={href} className="transition hover:text-tertiary-400">{salon.displayName || salon.salonName}</Link></h4>
                       <div className="shrink-0"><FavoriteBtn salonId={salon.id} variant="icon-only" onToggle={(isFav) => { if (!isFav) fetchFavoriteSalons(); }} /></div>
                     </div>
                     {salon.city && <p className="mt-1 flex items-start gap-1 text-xs leading-5 text-white/50"><MapPin size={12} className="mt-1 shrink-0" /><span className="break-words">{salon.city} {salon.postalCode}</span></p>}
@@ -284,7 +286,7 @@ export default function FavorisTab() {
                 <div className="mx-3 flex flex-wrap items-center justify-between gap-2 border-t border-white/8 py-2">
                   <Link href={href} className="inline-flex min-h-11 items-center gap-2 rounded-lg px-2 text-xs text-white/80 transition hover:bg-white/5 hover:text-tertiary-400">Découvrir le profil<ArrowUpRight size={14} /></Link>
                   <div className="flex items-center gap-1">
-                    {[{href:salon.website,label:"Site internet",Icon:FaGlobe},{href:instagram?.href,label:"Instagram",Icon:FaInstagram},{href:salon.facebook,label:"Facebook",Icon:FaFacebook}].filter((social) => social.href).map(({href:link,label,Icon}) => <a key={label} href={link} target="_blank" rel="noopener noreferrer" aria-label={`${label} de ${salon.salonName}`} title={label} className="grid h-11 w-11 place-items-center rounded-lg text-white/40 transition hover:bg-white/5 hover:text-white"><Icon size={14} /></a>)}
+                    {[{href:salon.website,label:"Site internet",Icon:FaGlobe},{href:instagram?.href,label:"Instagram",Icon:FaInstagram},{href:salon.facebook,label:"Facebook",Icon:FaFacebook}].filter((social) => social.href).map(({href:link,label,Icon}) => <a key={label} href={link} target="_blank" rel="noopener noreferrer" aria-label={`${label} de ${salon.displayName || salon.salonName}`} title={label} className="grid h-11 w-11 place-items-center rounded-lg text-white/40 transition hover:bg-white/5 hover:text-white"><Icon size={14} /></a>)}
                   </div>
                 </div>
               </article>
@@ -298,7 +300,7 @@ export default function FavorisTab() {
               <button type="button" onClick={() => setLightboxIndex(index)} aria-label={`Agrandir ${image.title || "l’image favorite"}`} className="absolute inset-0 cursor-zoom-in"><Image src={image.imageUrl} alt={image.title || "Image favorite"} fill sizes="(min-width:1280px) 25vw, (min-width:1024px) 33vw, 50vw" className="object-contain p-2" /><span className="absolute bottom-2 right-2 grid h-8 w-8 place-items-center rounded-lg bg-black/50 text-white"><Expand size={14} /></span></button>
               <div className="absolute right-2 top-2"><FavoritePortfolioBtn portfolioId={image.id} initialFavorite variant="icon-only" onToggle={(isFav) => { if (!isFav) fetchFavoritePortfolio(); }} /></div>
             </div>
-            <div className="px-3 pb-2 pt-3"><h4 className="line-clamp-2 break-words text-sm text-white">{image.title || "Sans titre"}</h4>{image.tatoueur?.name && <p className="mt-1 truncate text-xs text-white/50">{image.tatoueur.name}</p>}{image.user?.salonName && <Link href={buildSalonHref(image.user.salonName,image.user.city,image.user.postalCode)} className="mt-1 inline-flex min-h-11 max-w-full items-center gap-1 text-xs text-white/60 hover:text-tertiary-400"><span className="truncate">{image.user.salonName}</span><ArrowUpRight size={13} className="shrink-0" /></Link>}</div>
+            <div className="px-3 pb-2 pt-3"><h4 className="line-clamp-2 break-words text-sm text-white">{image.title || "Sans titre"}</h4>{image.tatoueur?.name && <p className="mt-1 truncate text-xs text-white/50">{image.tatoueur.name}</p>}{image.user?.salonName && <Link href={buildSalonHref(image.user.salonName,image.user.city,image.user.postalCode)} className="mt-1 inline-flex min-h-11 max-w-full items-center gap-1 text-xs text-white/60 hover:text-tertiary-400"><span className="truncate">{image.user.displayName || image.user.salonName}</span><ArrowUpRight size={13} className="shrink-0" /></Link>}</div>
           </article>)}
         </div>
       )}
@@ -389,7 +391,7 @@ export default function FavorisTab() {
                 <div className="space-y-1 rounded-2xl border border-white/10 bg-white/5 p-3">
                   <p className="text-[11px] uppercase tracking-[0.14em] text-white/45 font-one">Salon</p>
                   <p className="text-base tracking-widest font-semibold text-white font-one">
-                    {activeImage.user?.salonName || "Salon"}
+                    {activeImage.user?.displayName || activeImage.user?.salonName || "Salon"}
                   </p>
                   <p className="text-sm text-white/60 font-one">
                     {activeImage.user?.city || "Ville non renseignee"}
