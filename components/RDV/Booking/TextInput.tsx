@@ -1,48 +1,30 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import React from "react";
-import { useFormContext } from "react-hook-form";
-
-const classNames = (...c: (string | false | null | undefined)[]) =>
-  c.filter(Boolean).join(" ");
+﻿import { useFormContext } from "react-hook-form";
 
 interface TextInputProps {
   name: string;
   label: string;
   placeholder?: string;
   type?: string;
-  errors?: any;
+  errors?: unknown;
+  required?: boolean;
+  autoComplete?: string;
+  hint?: string;
+  max?: string;
 }
 
-export default function TextInput({
-  name,
-  label,
-  placeholder,
-  type = "text",
-  errors,
-}: TextInputProps) {
-  const { register } = useFormContext();
-  const pathParts = Array.isArray(name) ? name : String(name).split(".");
-  const err = pathParts.reduce((acc: any, key: string) => acc?.[key], errors);
-
+export default function TextInput({ name, label, placeholder, type = "text", required, autoComplete, hint, max }: TextInputProps) {
+  const { register, getFieldState, formState } = useFormContext();
+  const error = getFieldState(name, formState).error;
+  const helpId = `${name}-help`;
   return (
-    <div className="space-y-2">
-      <label className="text-xs text-white/90 font-one">{label}</label>
-      <input
-        type={type}
-        placeholder={placeholder}
-        {...register(name)}
-        className={classNames(
-          "w-full p-3 bg-linear-to-br from-white/0 to-white/2 border rounded-2xl text-white text-sm font-one focus:outline-none transition-all duration-300 placeholder-white/50 backdrop-blur-sm",
-          err
-            ? "border-red-500/50 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
-            : "border-white/20 focus:border-tertiary-400 focus:ring-2 focus:ring-tertiary-400/20",
-        )}
-      />
-      {err && (
-        <p className="text-sm text-red-300 bg-red-500/10 border border-red-500/20 rounded-lg p-2">
-          {String(err?.message)}
-        </p>
-      )}
+    <div className="min-w-0">
+      <label htmlFor={name} className="mb-2 flex items-center gap-1 text-xs font-medium text-white/70 font-one">
+        {label}{required && <span className="text-tertiary-400" aria-hidden="true">*</span>}
+      </label>
+      <input {...register(name)} id={name} type={type} placeholder={placeholder} autoComplete={autoComplete} max={max}
+        aria-required={required} aria-invalid={!!error} aria-describedby={error || hint ? helpId : undefined}
+        className={`h-11 w-full min-w-0 rounded-xl border bg-noir-700/70 px-3.5 text-sm text-white outline-none transition placeholder:text-white/25 focus:bg-white/[0.035] focus:ring-2 [color-scheme:dark] ${error ? "border-red-400/50 focus:ring-red-400/10" : "border-white/10 hover:border-white/20 focus:border-tertiary-400/50 focus:ring-tertiary-400/10"}`} />
+      {(error || hint) && <p id={helpId} role={error ? "alert" : undefined} className={`mt-1.5 text-[11px] leading-5 ${error ? "text-red-300" : "text-white/40"}`}>{error?.message || hint}</p>}
     </div>
   );
 }

@@ -1,60 +1,27 @@
-"use client";
-import React, { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { formUrlQuery, removeKeysFromQuery } from "@/lib/utils";
+﻿"use client";
+import { useEffect, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { Search as SearchIcon, X } from "lucide-react";
 
 export const Search = () => {
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
-
-  // 1) initialise depuis l'URL pour ne pas effacer la query à l'arrivée
-  const [query, setQuery] = useState<string>(searchParams.get("query") ?? "");
-
-  // 2) si l’URL change (ex: filtres/pagination), on resynchronise l’input
+  const urlQuery = searchParams.get("query") ?? "";
+  const [search, setSearch] = useState({ source: urlQuery, value: urlQuery });
+  if (search.source !== urlQuery) setSearch({ source: urlQuery, value: urlQuery });
+  const query = search.source === urlQuery ? search.value : urlQuery;
+  const setQuery = (value: string) => setSearch({ source: urlQuery, value });
   useEffect(() => {
-    const urlQuery = searchParams.get("query") ?? "";
-    setQuery(urlQuery);
-  }, [searchParams]);
-
-  useEffect(() => {
-    const delayDebounceFn = setTimeout(() => {
-      const q = (query ?? "").trim();
-      const currentUrlQuery = searchParams.get("query") ?? "";
-
-      // 🔒 Ne touche pas à l’URL si rien ne change
-      if (q === currentUrlQuery) return;
-
-      let newUrl = "";
-      if (q) {
-        newUrl = formUrlQuery({
-          params: searchParams.toString(),
-          key: "query",
-          value: q,
-        });
-      } else {
-        // q vide -> ne supprime que si l’URL contient encore `query`
-        if (!currentUrlQuery) return;
-        newUrl = removeKeysFromQuery({
-          params: searchParams.toString(),
-          keysToRemove: ["query"],
-        });
-      }
-
-      router.replace(newUrl, { scroll: false });
+    const timer = window.setTimeout(() => {
+      const next = query.trim();
+      if (next === (searchParams.get("query") ?? "")) return;
+      const params = new URLSearchParams(searchParams.toString());
+      if (next) params.set("query", next); else params.delete("query");
+      params.set("page", "1");
+      router.replace(`${pathname}?${params}`, { scroll: false });
     }, 300);
-
-    return () => clearTimeout(delayDebounceFn);
-  }, [query, searchParams, router]);
-
-  return (
-    <div className="">
-      <input
-        type="text"
-        placeholder="Rechercher un salon, un artiste, un style..."
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        className="w-full text-sm text-white bg-white/10 placeholder:text-white/30 placeholder:text-xs py-2 px-4 font-one border rounded-2xl border-white/20 focus:outline-none focus:border-tertiary-400 transition-colors"
-      />
-    </div>
-  );
+    return () => window.clearTimeout(timer);
+  }, [query, searchParams, router, pathname]);
+  return <div role="search" className="relative"><label htmlFor="salon-search" className="sr-only">Rechercher un salon ou un artiste</label><SearchIcon size={17} className="pointer-events-none absolute left-3.5 top-3 text-tertiary-400/75" aria-hidden="true" /><input id="salon-search" type="search" autoComplete="off" placeholder="Un salon, un artiste, une ville, un style…" value={query} onChange={event => setQuery(event.target.value)} className="h-11 w-full min-w-0 rounded-xl border border-white/10 bg-noir-700 pl-10 pr-11 font-one text-sm text-white outline-none transition placeholder:text-white/30 focus:border-tertiary-400/50 focus:ring-2 focus:ring-tertiary-400/10 [&::-webkit-search-cancel-button]:appearance-none" />{query && <button type="button" onClick={() => setQuery("")} aria-label="Effacer la recherche" className="absolute right-1.5 top-1.5 grid size-8 place-items-center rounded-lg text-white/35 transition hover:bg-white/5 hover:text-white"><X size={14} /></button>}</div>;
 };

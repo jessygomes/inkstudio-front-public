@@ -3,13 +3,15 @@
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 
-export default function AuthPromptBanner() {
-  const { data: session, status } = useSession();
+export default function AuthPromptBanner({ compact = false }: { compact?: boolean }) {
+  const { status } = useSession();
 
   // Ne rien afficher si l'utilisateur est connecté ou en cours de chargement
   if (status === "authenticated" || status === "loading") {
     return null;
   }
+
+  if (compact) return <aside className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-white/8 py-4 text-[11px]"><p className="text-white/40">Un compte pour retrouver et gérer vos rendez-vous.</p><div className="flex gap-4"><Link href="/se-connecter" className="text-white/60 hover:text-white">Se connecter</Link><Link href="/creer-un-compte" className="text-tertiary-400/80 hover:text-tertiary-400">Créer un compte</Link></div></aside>;
 
   return (
     <div className="relative overflow-hidden rounded-2xl border border-tertiary-500/30 bg-gradient-to-br from-tertiary-500/10 via-tertiary-600/5 to-purple-500/5 backdrop-blur-lg shadow-lg p-6 mb-6">

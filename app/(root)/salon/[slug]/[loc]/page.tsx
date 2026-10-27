@@ -1,10 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ArrowLeft, ArrowUpRight, MapPin, CalendarDays } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, CalendarDays } from "lucide-react";
 import SalonPresentation from "@/components/ProfilSalon/SalonPresentation";
 import SalonPracticalInfo from "@/components/ProfilSalon/SalonPracticalInfo";
 import SalonTabs from "@/components/ProfilSalon/SalonTabs";
 import AppButton from "@/components/Shared/AppButton";
-import VerifiedProfileBadge from "@/components/Shared/VerifiedProfileBadge";
 import DesktopSalonHeader from "@/components/ProfilSalon/DesktopSalonHeader";
 import SalonSectionNav from "@/components/ProfilSalon/SalonSectionNav";
 import { TeamCard } from "@/components/ProfilSalon/TeamCard";
@@ -12,14 +11,13 @@ import { LinkedSalonCard } from "@/components/ProfilSalon/LinkedSalonCard";
 import { hoursToLines, parseSalonHours } from "@/lib/horaireHelper";
 import { FlashProps, LinkedSalonProps, SalonProfilProps } from "@/lib/type";
 import { toSlug } from "@/lib/utils";
-import Image from "next/image";
+import { getSearchReturnHref } from "@/lib/utils/searchReturn";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Script from "next/script";
 import { Metadata } from "next";
 
 import HoursCard from "@/components/ProfilSalon/HoursCard";
-import FavoriteBtn from "@/components/Shared/FavoriteBtn";
 import SalonReviews from "@/components/ProfilSalon/SalonReviews";
 import { SalonProfileViewTracker } from "@/components/Shared/SalonProfileViewTracker";
 import PublicProfileContactForm from "@/components/Contact/PublicProfileContactForm";
@@ -27,6 +25,7 @@ import StartInkeraConversationButton from "@/components/Contact/StartInkeraConve
 
 type PageParams = {
   params: Promise<{ slug: string; loc: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
 
 type SalonTatoueur = {
@@ -233,7 +232,8 @@ function todayLabelFR() {
 
 
 //! PAGE
-export default async function ProfilPublicSalonPage({ params }: PageParams) {
+export default async function ProfilPublicSalonPage({ params, searchParams }: PageParams) {
+  const previousSearch = getSearchReturnHref((await searchParams)?.returnTo);
   const resolvedParams = await params;
   const { slug, loc } = resolvedParams;
   if (!slug || !loc) notFound();
@@ -510,48 +510,20 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
       >
 
       <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:max-w-none lg:px-8 lg:py-10 xl:px-16">
-        <Link href="/trouver-un-salon" className="mb-6 inline-flex min-h-10 items-center gap-2 text-sm text-white/65 transition hover:text-white">
-          <ArrowLeft size={16} /> Tous les salons
+        <Link href={previousSearch} className="mb-6 inline-flex min-h-10 items-center gap-2 text-sm text-white/65 transition hover:text-white">
+          <ArrowLeft size={16} /> {previousSearch.includes("?") ? "Retour aux résultats" : "Tous les salons"}
         </Link>
-        <header className="overflow-hidden rounded-3xl border border-white/10 bg-noir-500 lg:hidden">
-          <div className="relative h-48 bg-linear-to-br from-tertiary-500/20 via-noir-500 to-noir-700 sm:h-64 lg:h-80">
-            {(heroSrc || profileSrc) && <Image src={(heroSrc || profileSrc)!} alt={`Le salon ${salon.salonName}`} fill sizes="(min-width:1280px) calc(100vw - 128px), (min-width:1024px) calc(100vw - 64px), 100vw" className={heroSrc ? "object-cover" : "object-cover blur-xl opacity-50"} priority />}
-            <div className="absolute inset-0 bg-linear-to-t from-noir-500 via-black/10 to-transparent" />
-            <div className="absolute right-4 top-4"><FavoriteBtn salonId={salon.id} variant="icon-only" /></div>
-          </div>
-          <div className="relative px-5 pb-6 sm:px-8 sm:pb-8">
-            <div className="-mt-12 mb-5 flex items-end justify-between gap-4">
-              <div className="relative grid h-24 w-24 shrink-0 place-items-center overflow-hidden rounded-2xl border-4 border-noir-500 bg-noir-700 text-3xl text-white sm:h-28 sm:w-28">
-                {profileSrc ? <Image src={profileSrc} alt={salon.salonName} fill sizes="112px" className="object-cover" /> : salon.salonName?.charAt(0)}
-              </div>
-              {isVerifiedSalon && <VerifiedProfileBadge className="rounded-full bg-emerald-400/10 px-3 py-1.5" />}
-            </div>
-            <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
-              <div className="min-w-0">
-                <p className="mb-2 text-xs tracking-[0.18em] text-tertiary-400 uppercase">{isTatoueurRole ? "Artiste tatoueur" : "Salon de tatouage"}</p>
-                <h1 className="break-words font-one text-3xl leading-tight text-white sm:text-4xl lg:text-5xl">{salon.salonName}</h1>
-                <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-white/70">
-                  {salon.city && <span className="inline-flex items-center gap-1.5"><MapPin size={16} />{salon.city} {salon.postalCode}</span>}
-                  {hours.length > 0 && <span className="inline-flex items-center gap-2"><span className={`h-2 w-2 rounded-full ${openNow.open ? "bg-emerald-400" : "bg-white/40"}`} />{openNow.open ? "Ouvert maintenant" : "Actuellement fermé"}</span>}
-                  {openNow.today && <span>{openNow.today.start} – {openNow.today.end}</span>}
-                </div>
-              </div>
-              <Link href={!canBookAppointments ? "#contact" : `/salon/${slug}/${loc}/reserver`} className="inline-flex min-h-12 shrink-0 items-center justify-center gap-3 rounded-xl bg-tertiary-500 px-6 py-3 text-sm font-semibold text-white transition hover:brightness-110">
-                <CalendarDays size={18} />{!canBookAppointments ? "Parlons de votre projet" : "Prendre rendez-vous"}<ArrowUpRight size={17} />
-              </Link>
-            </div>
-          </div>
-        </header>
+        <DesktopSalonHeader variant="mobile" salonId={salon.id} name={salon.salonName} cover={heroSrc} portrait={profileSrc} city={salon.city} postalCode={salon.postalCode} verified={isVerifiedSalon} artist={isTatoueurRole} hasHours={hours.length > 0} open={openNow.open} today={openNow.today} bookingHref={!canBookAppointments ? "#contact" : "/salon/" + slug + "/" + loc + "/reserver"} canBook={canBookAppointments} />
         <SalonSectionNav showTeam={shouldShowTeamSection && sortedTatoueurs.length > 0} className="my-6 lg:hidden" />
         <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)] xl:gap-8">
           <aside id="informations" className="order-2 min-w-0 scroll-mt-28 space-y-4 lg:sticky lg:top-24">
-            <div className="rounded-2xl border border-tertiary-400/20 bg-tertiary-400/5 p-6">
-              <p className="text-lg text-white">Votre prochain projet commence ici</p>
-              <p className="mt-2 text-sm leading-relaxed text-white/65">Échangez avec {salon.salonName} pour donner vie à vos idées.</p>
-              <AppButton href={!canBookAppointments ? "#contact" : `/salon/${slug}/${loc}/reserver`} variant="primary" fullWidth className="mt-5 min-h-12">{!canBookAppointments ? "Contacter le salon" : "Prendre rendez-vous"}<ArrowUpRight size={16} /></AppButton>
-              {!isFree && <div className="mt-3"><StartInkeraConversationButton variant="compact" targetUserId={salon.id} recipientName={salon.salonName || "ce tatoueur"} /></div>}
-              {!isFree && <a href="#contact" className="mt-2 flex min-h-11 items-center justify-center text-sm text-white/75 hover:text-white">Poser une question</a>}
-            </div>
+            <section aria-label="Votre prochain projet" className="rounded-2xl border border-tertiary-400/20 bg-linear-to-br from-tertiary-400/10 via-tertiary-500/5 to-noir-700 p-4">
+              <div className="mb-3 flex items-start gap-2.5"><span className="grid size-8 shrink-0 place-items-center rounded-xl border border-tertiary-400/15 bg-tertiary-400/8 text-tertiary-400"><CalendarDays size={15} aria-hidden="true" /></span><div className="min-w-0"><h2 className="text-sm font-medium leading-5 text-white/90">Votre prochain projet commence ici</h2><p className="mt-1 text-[11px] leading-5 text-white/40">Une idée ? Échangez avec {salon.salonName}.</p></div></div>
+              <div className="space-y-2"><AppButton href={!canBookAppointments ? "#contact" : "/salon/" + slug + "/" + loc + "/reserver"} variant="primary" fullWidth className="min-h-9! px-3! py-2! text-xs! shadow-none! hover:translate-y-0!">{!canBookAppointments ? "Contacter le salon" : "Prendre rendez-vous"}<ArrowUpRight size={14} /></AppButton>
+                {!isFree && <StartInkeraConversationButton variant="compact" targetUserId={salon.id} recipientName={salon.salonName || "ce tatoueur"} className="min-h-9! px-3! py-2! text-xs! shadow-none!" />}
+              </div>
+              {!isFree && <a href="#contact" className="mt-2 flex items-center justify-center gap-1 py-1 text-[11px] text-white/40 transition hover:text-white">Poser une question<ArrowUpRight size={11} /></a>}
+            </section>
             <SalonPracticalInfo
               address={salon.address}
               city={salon.city}
@@ -673,6 +645,7 @@ export default async function ProfilPublicSalonPage({ params }: PageParams) {
 
             <section id="contact" className="scroll-mt-28">
             <PublicProfileContactForm
+              messagingEnabled={!isFree}
               targetUserId={salon.id}
               recipientName={salon.salonName || "ce profil"}
             />

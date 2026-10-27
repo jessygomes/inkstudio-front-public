@@ -1,266 +1,52 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+﻿"use client";
+import { useMemo, useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { ArrowUpRight, ChevronLeft, ChevronRight, MapPin, PenTool, UsersRound } from "lucide-react";
+import AppButton from "@/components/Shared/AppButton";
 import { SalonProps } from "@/lib/type";
 import { toSlug } from "@/lib/utils";
-import AppButton from "@/components/Shared/AppButton";
-import Image from "next/image";
-import { useMemo, useState } from "react";
+import { getTattooStyleOptions } from "@/lib/utils/tattooStyles";
 
-export function SalonCard({ salon }: { salon: SalonProps }) {
-  //! Images : photo salon + photos tatoueurs
-  const images = useMemo(() => {
-    const list = Array.isArray(salon.Tatoueur)
-      ? salon.Tatoueur
-      : salon.Tatoueur
-      ? [salon.Tatoueur]
-      : [];
-    const tattooerImages = list.map((t) => t?.img).filter(Boolean);
-    return [salon.image, ...tattooerImages].filter(Boolean) as string[];
-  }, [salon.image, salon.Tatoueur]);
+type SearchProfile = SalonProps & { role?: string; style?: string[]; prestation?: string[]; };
+const serviceLabels: Record<string, string> = { TATTOO: "Tatouage", PIERCING: "Piercing", PROJET: "Consultation", RETOUCHE: "Retouche" };
+function unique(values: unknown[]) {
+  const seen = new Set<string>();
+  return values.filter((value): value is string => typeof value === "string").map(value => value.trim()).filter(value => { const key = value.trim().toLocaleLowerCase("fr-FR"); if (!key || seen.has(key)) return false; seen.add(key); return true; });
+}
 
+export function SalonCard({ salon, returnTo }: { salon: SearchProfile; returnTo?: string }) {
   const [current, setCurrent] = useState(0);
-  const hasImages = images.length > 0;
-  const profileSrc = salon.profileImage || salon.image || null;
-
-  const FALLBACK =
-    "data:image/svg+xml;utf8," +
-    encodeURIComponent(
-      `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 240'><rect width='400' height='240' fill='%231a1a1a'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%23ffffff88' font-family='sans-serif' font-size='18'>Aucune image</text></svg>`
-    );
-
-  const mediaSrc = hasImages ? images[current] : profileSrc || FALLBACK;
-
-  const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (!hasImages) return;
-    if (e.key === "ArrowRight") setCurrent((c) => (c + 1) % images.length);
-    if (e.key === "ArrowLeft")
-      setCurrent((c) => (c - 1 + images.length) % images.length);
-  };
-
-  //! URL lisible
-  const nameSlug = toSlug(salon.salonName || "salon");
-  const locSource = [salon.city, salon.postalCode]
-    .filter((v) => typeof v === "string" && v.trim() !== "")
-    .join("-");
-  const locSlug = toSlug(locSource) || "localisation";
-  const salonHref = `/salon/${nameSlug}/${locSlug}`;
-
-  //! Liste tatoueurs (uniformiser tableau / objet)
-  const tattooers = useMemo(() => {
-    return Array.isArray(salon.Tatoueur)
-      ? salon.Tatoueur
-      : salon.Tatoueur
-      ? [salon.Tatoueur]
-      : [];
-  }, [salon.Tatoueur]);
-
-  //! Agrégation des styles (dédupliqués, insensible à la casse)
-  const { styleChips, remainingCount } = useMemo(() => {
-    const all = tattooers.flatMap((t) =>
-      Array.isArray(t?.style) ? t.style : []
-    );
-    const cleaned = all
-      .map((s) => (typeof s === "string" ? s.trim() : ""))
-      .filter(Boolean);
-
-    const seen = new Set<string>();
-    const unique: string[] = [];
-    for (const s of cleaned) {
-      const key = s.toLowerCase();
-      if (!seen.has(key)) {
-        seen.add(key);
-        unique.push(s);
-      }
-    }
-
-    const MAX = 4;
-    return {
-      styleChips: unique.slice(0, MAX),
-      remainingCount: unique.length > MAX ? unique.length - MAX : 0,
-    };
-  }, [tattooers]);
-
-  //! Prestations (dédupliquées, insensible à la casse)
-  const { prestationChips, prestationRemaining } = useMemo(() => {
-    // Compat: accepte salon.prestations OU salon.prestation
-    const raw =
-      (Array.isArray((salon as any).prestations) &&
-        (salon as any).prestations) ||
-      (Array.isArray((salon as any).prestation) && (salon as any).prestation) ||
-      [];
-    const cleaned = raw
-      .map((p: unknown) => (typeof p === "string" ? p.trim() : ""))
-      .filter(Boolean);
-
-    const seen = new Set<string>();
-    const unique: string[] = [];
-    for (const p of cleaned) {
-      const key = p.toLowerCase();
-      if (!seen.has(key)) {
-        seen.add(key);
-        unique.push(p);
-      }
-    }
-
-    const MAX = 4;
-    return {
-      prestationChips: unique.slice(0, MAX),
-      prestationRemaining: unique.length > MAX ? unique.length - MAX : 0,
-    };
-  }, [salon]);
-
+  const artists = useMemo(() => Array.isArray(salon.Tatoueur) ? salon.Tatoueur : salon.Tatoueur ? [salon.Tatoueur] : [], [salon.Tatoueur]);
+  const images = useMemo(() => Array.from(new Set([salon.image, ...(salon.salonPhotos || []), ...artists.map(artist => artist.img)].filter((value): value is string => typeof value === "string" && !!value.trim()))), [salon.image, salon.salonPhotos, artists]);
+  const imageIndex = images.length ? current % images.length : 0;
+  const portrait = salon.profileImage || salon.image;
+  const isArtist = salon.role === "user_tatoueur";
+  const styles = getTattooStyleOptions([...(Array.isArray(salon.style) ? salon.style : []), ...artists.flatMap(artist => Array.isArray(artist.style) ? artist.style : [])]).map(option => option.label);
+  const services = unique(Array.isArray(salon.prestations) ? salon.prestations : salon.prestation || []);
+  const location = toSlug([salon.city, salon.postalCode].filter(Boolean).join("-")) || "localisation";
+  const profileHref = `/salon/${toSlug(salon.salonName || "salon")}/${location}`;
+  const href = returnTo ? `${profileHref}?${new URLSearchParams({ returnTo })}` : profileHref;
   return (
-    <div
-      className="group relative flex flex-col rounded-3xl overflow-hidden shadow-2xl bg-noir-500/80 backdrop-blur supports-backdrop-filter:bg-noir-500/60 transition-all duration-300 hover:shadow-[0_20px_60px_rgba(0,0,0,0.35)] focus-within:ring-2 focus-within:ring-white/30"
-      tabIndex={-1}
-    >
-      {/* Media */}
-      <div
-        className="relative h-48 w-full overflow-hidden outline-none"
-        role="button"
-        tabIndex={0}
-        aria-label="Changer l'image"
-        onKeyDown={onKeyDown}
-      >
-        <Image
-          src={mediaSrc}
-          alt={salon.salonName}
-          fill
-          sizes="(min-width: 1280px) 33vw, (min-width: 768px) 50vw, 100vw"
-          className={`object-cover transition-transform duration-500 ${
-            hasImages ? "group-hover:scale-105" : "blur-2xl scale-110"
-          }`}
-          priority={false}
-        />
-        <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-noir-700/80 via-transparent to-transparent" />
-
-        {salon.city && (
-          <span className="absolute top-3 right-3 px-4 py-1 rounded-2xl text-xs uppercase font-one tracking-widest text-white shadow-lg bg-linear-to-br from-noir-500/70 to-noir-700/40 border border-white/20 backdrop-blur-2xl">
-            {salon.city}
-          </span>
-        )}
-
-        {hasImages && (
-          <div className="absolute bottom-4 right-5 sm:right-6 flex gap-2 z-20">
-            {images.map((_, idx) => (
-              <button
-                key={idx}
-                onClick={() => setCurrent(idx)}
-                aria-label={`Voir image ${idx + 1}`}
-                className={`h-2.5 w-2.5 cursor-pointer rounded-full border border-white/20 transition${
-                  current === idx
-                    ? "scale-110 bg-tertiary-400"
-                    : "bg-white/40 hover:bg-white/60"
-                }`}
-              />
-            ))}
-          </div>
-        )}
+    <article className="group flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-white/10 bg-noir-700 font-one transition hover:border-tertiary-400/25 focus-within:ring-2 focus-within:ring-tertiary-400/30">
+      <div className="relative aspect-[16/9] overflow-hidden bg-linear-to-br from-tertiary-400/8 via-white/3 to-noir-700">
+        <Link href={href} aria-label={`Découvrir ${salon.salonName}`} className="absolute inset-0">
+          {images.length > 0 && <Image src={images[imageIndex]} alt={salon.salonName} fill sizes="(min-width: 1280px) 30vw, (min-width: 640px) 45vw, 100vw" className="object-cover transition duration-500 group-hover:scale-[1.03] motion-reduce:transform-none" />}
+          <span className="absolute inset-0 bg-linear-to-t from-noir-700/70 via-transparent to-transparent" />
+        </Link>
+        {salon.role && <span className="pointer-events-none absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-black/45 px-2.5 py-1 text-[9px] text-white/80 backdrop-blur-md"><PenTool size={10} />{isArtist ? "Artiste tatoueur" : "Salon de tatouage"}</span>}
+        {images.length > 1 && <div role="group" aria-label={`Photos de ${salon.salonName}`} className="absolute bottom-3 right-3 flex items-center gap-1.5 rounded-lg border border-white/10 bg-black/45 p-1 backdrop-blur-md"><button type="button" aria-label="Photo précédente" onClick={() => setCurrent((imageIndex - 1 + images.length) % images.length)} className="grid size-7 place-items-center rounded-md text-white/70 hover:bg-white/10 hover:text-white"><ChevronLeft size={13} /></button><span aria-live="polite" className="min-w-7 text-center text-[9px] tabular-nums text-white/65">{imageIndex + 1}/{images.length}</span><button type="button" aria-label="Photo suivante" onClick={() => setCurrent((imageIndex + 1) % images.length)} className="grid size-7 place-items-center rounded-md text-white/70 hover:bg-white/10 hover:text-white"><ChevronRight size={13} /></button></div>}
       </div>
-
-      {profileSrc && (
-        <div className="absolute left-1/2 top-41 -translate-x-1/2 -translate-y-1/2 z-30">
-          <div className="relative h-24 w-24 rounded-full overflow-hidden shadow-lg shadow-noir-700/60 bg-noir-500">
-            <Image
-              src={profileSrc}
-              alt={`Photo de profil ${salon.salonName}`}
-              fill
-              sizes="80px"
-              className="object-cover"
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Contenu */}
-      <div className={`${profileSrc ? "pt-10" : ""} p-5 sm:p-5`}>
-        <h3 className="text-white text-xl sm:text-2xl font-one tracking-widest">
-          {salon.salonName}
-        </h3>
-
-        {/* Ligne d’infos */}
-        <div className="mt-2 flex flex-wrap items-center gap-2 font-one text-white/70 text-sm">
-          {tattooers.length === 0
-            ? "Tatoueur : Inconnu"
-            : `${tattooers.length > 1 ? "Tatoueurs" : "Tatoueur"} : ${tattooers
-                .map((t) => t.name)
-                .filter(Boolean)
-                .join(" - ")}`}
-        </div>
-
-        <div className="mt-2 flex flex-wrap gap-1">
-          {prestationChips.length > 0 ? (
-            <>
-              {prestationChips.map((p, idx) => (
-                <span
-                  key={`${p}-${idx}`}
-                  className="px-2.5 py-1 rounded-lg bg-white/5 text-white/80 border border-white/10 text-[10px] font-one"
-                  title={p}
-                >
-                  {p}
-                </span>
-              ))}
-              {prestationRemaining > 0 && (
-                <span className="px-2.5 py-1 rounded-lg bg-white/5 text-white/80 border border-white/10 text-[10px] font-one">
-                  +{prestationRemaining}
-                </span>
-              )}
-            </>
-          ) : (
-            <span className="px-2.5 py-1 rounded-lg bg-white/5 text-white/80 border border-white/10 text-[10px] font-one">
-              Prestations : non renseignées
-            </span>
-          )}
-        </div>
-
-        {/* Styles (chips) */}
-        <div className="mt-3 flex flex-wrap gap-1">
-          {styleChips.length > 0 ? (
-            <>
-              {styleChips.map((s, idx) => (
-                <span
-                  key={`${s}-${idx}`}
-                  className="px-2.5 py-1 rounded-lg bg-white/5 text-white/80 border border-white/10 text-[10px] font-var(--font-one)"
-                  title={s}
-                >
-                  {s}
-                </span>
-              ))}
-              {remainingCount > 0 && (
-                <span className="px-2.5 py-1 rounded-lg bg-white/5 text-white/80 border border-white/10 text-[10px] font-var(--font-one)">
-                  +{remainingCount}
-                </span>
-              )}
-            </>
-          ) : (
-            <span className="px-2.5 py-1 rounded-lg bg-white/5 text-white/80 border border-white/10 text-[10px] font-var(--font-one)">
-              Styles : non renseignés
-            </span>
-          )}
-        </div>
-
-        {/* Actions */}
-        <div className="mt-5 flex items-center gap-3">
-          <AppButton
-            href={salonHref}
-            variant="primary"
-            className="mx-auto"
-          >
-            Voir le salon
-          </AppButton>
-
-          {/* <button
-            type="button"
-            className="cursor-pointer px-3 py-2 rounded-lg text-xs font-var(--font-one) text-white/90 border border-white/10 hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-white/30 transition"
-            onClick={() => {
-              // Action secondaire (modal, like, etc.)
-            }}
-          >
-            En savoir +
-          </button> */}
-        </div>
+      <div className="relative flex min-w-0 flex-1 flex-col px-4 pb-4">
+        <div className="relative -mt-6 mb-3 grid size-12 shrink-0 place-items-center overflow-hidden rounded-xl border-[3px] border-noir-700 bg-noir-700 text-lg text-white/40 shadow-md">{portrait ? <Image src={portrait} alt={`Profil de ${salon.salonName}`} fill sizes="48px" className="object-cover" /> : salon.salonName?.charAt(0).toUpperCase()}</div>
+        <Link href={href} className="w-fit max-w-full"><h3 className="break-words text-lg font-medium leading-snug tracking-tight text-white/90 transition hover:text-tertiary-400">{salon.salonName}</h3></Link>
+        {(salon.city || salon.postalCode) && <p className="mt-1.5 flex items-start gap-1.5 text-[10px] text-white/40"><MapPin size={12} className="mt-0.5 shrink-0 text-tertiary-400/70" />{[salon.city?.toLocaleUpperCase("fr-FR"), salon.postalCode].filter(Boolean).join(" · ")}</p>}
+        {!isArtist && artists.length > 0 && <p className="mt-2 flex items-center gap-1.5 text-[10px] text-white/40"><UsersRound size={12} />{artists.length} artiste{artists.length > 1 ? "s" : ""}{artists.length === 1 && artists[0].name ? ` · ${artists[0].name}` : ""}</p>}
+        {salon.description?.trim() && <p className="mt-3 line-clamp-2 break-words text-xs leading-5 text-white/45">{salon.description}</p>}
+        {!!services.length && <div className="mt-3 flex flex-wrap gap-1.5">{services.slice(0, 3).map(service => <span key={service} className="max-w-full break-words rounded-md border border-tertiary-400/10 bg-tertiary-400/5 px-2 py-1 text-[9px] text-tertiary-400/80">{serviceLabels[service.toUpperCase()] || service}</span>)}{services.length > 3 && <span className="px-1 py-1 text-[9px] text-white/35">+{services.length - 3}</span>}</div>}
+        {!!styles.length && <div className="mt-2 flex flex-wrap gap-1.5">{styles.slice(0, 3).map(style => <span key={style} className="max-w-full break-words rounded-md border border-white/8 bg-white/[0.025] px-2 py-1 text-[9px] text-white/50">{style}</span>)}{styles.length > 3 && <span className="px-1 py-1 text-[9px] text-white/35">+{styles.length - 3}</span>}</div>}
+        <div className="mt-auto pt-4"><AppButton href={href} fullWidth className="min-h-9! justify-between! rounded-lg! px-3! py-2! text-xs! shadow-none! hover:translate-y-0!">Découvrir le profil<ArrowUpRight size={14} /></AppButton></div>
       </div>
-
-      <div className="pointer-events-none h-2 w-full bg-linear-to-r from-tertiary-400/80 to-tertiary-500/80 opacity-90 animate-pulse" />
-    </div>
+    </article>
   );
 }

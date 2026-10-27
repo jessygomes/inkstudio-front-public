@@ -1,24 +1,9 @@
-import React from "react";
-import { useFormContext } from "react-hook-form";
+﻿import { useFormContext } from "react-hook-form";
 
-interface TextAreaProps {
-  name: string;
-  label: string;
-  placeholder?: string;
-}
+interface TextAreaProps { name: string; label: string; placeholder?: string; }
 
 export default function TextArea({ name, label, placeholder }: TextAreaProps) {
-  const { register } = useFormContext();
-
-  return (
-    <div className="space-y-2">
-      <label className="text-xs text-white/90 font-one">{label}</label>
-      <textarea
-        rows={4}
-        placeholder={placeholder}
-        {...register(name)}
-        className="w-full p-3 bg-linear-to-br from-white/0 to-white/2 border border-white/20 rounded-2xl text-white font-one text-sm focus:outline-none focus:border-tertiary-400 focus:ring-2 focus:ring-tertiary-400/20 transition-all duration-300 resize-y placeholder-white/50 backdrop-blur-sm"
-      />
-    </div>
-  );
+  const { register, getFieldState, formState } = useFormContext();
+  const error = getFieldState(name, formState).error;
+  return <div className="min-w-0"><label htmlFor={name} className="mb-2 block text-xs font-medium text-white/70 font-one">{label}</label><textarea {...register(name)} id={name} rows={3} placeholder={placeholder} aria-invalid={!!error} aria-describedby={error ? name + "-error" : undefined} className="min-h-24 w-full resize-y rounded-xl border border-white/10 bg-noir-700/70 px-3.5 py-3 text-sm leading-6 text-white outline-none transition placeholder:text-white/25 hover:border-white/20 focus:border-tertiary-400/50 focus:ring-2 focus:ring-tertiary-400/10" />{error && <p id={name + "-error"} role="alert" className="mt-1 text-[11px] text-red-300">{error.message}</p>}</div>;
 }

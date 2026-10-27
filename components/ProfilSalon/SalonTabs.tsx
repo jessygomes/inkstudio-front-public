@@ -2,7 +2,7 @@
 
 import { Images, ImageIcon, Palette, Zap, ShoppingBag, Expand, ArrowUpRight } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
+import AppButton from "@/components/Shared/AppButton";
 import { useMemo, useRef, useState, useCallback, useEffect } from "react";
 import { createPortal } from "react-dom";
 import type { FlashProps, PortfolioProps, ProductSalonProps } from "@/lib/type";
@@ -458,12 +458,12 @@ export default function SalonTabs({
 
   return (
     <section id="creations" className="scroll-mt-28" ref={sectionRef}>
-      <div className="bg-noir-500 rounded-2xl border border-white/10 p-4 font-one sm:p-5">
+      <div className="bg-noir-700 rounded-2xl border border-white/10 p-4 font-one sm:p-6">
         <div className="mb-5 flex items-center gap-3">
-          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-tertiary-400/10 text-tertiary-400"><Images size={18} aria-hidden="true" /></span>
-          <div><h2 className="text-lg text-white sm:text-xl">L’univers du salon</h2><p className="mt-1 text-xs text-white/50">Un lieu, des artistes, des idées à explorer.</p></div>
+          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-tertiary-400/15 bg-tertiary-400/8 text-tertiary-400"><Images size={17} aria-hidden="true" /></span>
+          <div><p className="mb-1 text-[9px] uppercase tracking-[0.16em] text-white/35">En images</p><h2 className="text-lg font-medium text-white/90">L’univers du salon</h2><p className="mt-1 text-[11px] leading-5 text-white/40">Le lieu, les réalisations et vos prochaines inspirations.</p></div>
         </div>
-        <div role="tablist" aria-label="Contenus du salon" className="mb-4 grid grid-cols-2 gap-1.5 rounded-xl bg-noir-700/70 p-1.5 sm:grid-cols-4">
+        <div role="tablist" aria-label="Contenus du salon" className="mb-4 grid grid-cols-2 gap-1.5 rounded-xl border border-white/8 bg-noir-700 p-1.5 sm:grid-cols-4">
           {([
             { key: "photos", label: "Le salon", count: counts.photos, Icon: ImageIcon },
             { key: "portfolio", label: "Portfolio", count: counts.portfolio, Icon: Palette },
@@ -481,17 +481,17 @@ export default function SalonTabs({
                 setTab(tabs[nextIndex]);
                 document.getElementById(`gallery-tab-${tabs[nextIndex]}`)?.focus();
               }}
-              className={`flex min-h-11 min-w-0 cursor-pointer items-center justify-center gap-2 rounded-lg px-2 py-2 text-xs transition focus-visible:outline-2 focus-visible:outline-tertiary-400 sm:text-sm ${active === key ? "bg-white/10 text-white shadow-sm" : "text-white/50 hover:bg-white/5 hover:text-white"}`}>
-              <Icon size={16} className={`shrink-0 ${active === key ? "text-tertiary-400" : ""}`} aria-hidden="true" /><span>{label}</span>
-              <span className={`rounded-md px-1.5 py-0.5 text-[10px] tabular-nums ${active === key ? "bg-tertiary-400/15 text-tertiary-400" : "bg-white/5 text-white/40"}`}>{count}</span>
+              className={`flex min-h-10 min-w-0 cursor-pointer items-center justify-center gap-1.5 rounded-lg px-2 py-2 text-[11px] transition focus-visible:outline-2 focus-visible:outline-tertiary-400 sm:text-xs ${active === key ? "bg-linear-to-r from-tertiary-400 to-tertiary-500 text-white shadow-sm" : "text-white/50 hover:bg-white/5 hover:text-white"}`}>
+              <Icon size={16} className={`shrink-0 ${active === key ? "text-white" : "text-white/35"}`} aria-hidden="true" /><span>{label}</span>
+              <span className={`rounded-md px-1.5 py-0.5 text-[10px] tabular-nums ${active === key ? "bg-black/15 text-white" : "bg-white/5 text-white/40"}`}>{count}</span>
             </button>
           ))}
         </div>
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-          <p className="text-xs leading-5 text-white/50">{{ photos: "Découvrez le lieu et son ambiance.", portfolio: "Les réalisations des artistes du salon.", flashes: "Des dessins disponibles pour votre prochain tatouage.", products: "Les produits proposés par le salon." }[active]}</p>
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-white/8 bg-white/[0.015] px-3 py-2.5">
+          <p className="text-[11px] leading-5 text-white/45">{{ photos: "Découvrez le lieu et son ambiance.", portfolio: "Les réalisations des artistes du salon.", flashes: "Des dessins disponibles pour votre prochain tatouage.", products: "Les produits proposés par le salon." }[active]}</p>
           <div className="flex flex-wrap items-center gap-2">
-            {showSortControl && <select value={flashSort} onChange={(event) => { setFlashSort(event.target.value as FlashSort); setFlashesPage(1); }} aria-label="Trier les flashs" className="min-h-11 rounded-lg border border-white/10 bg-noir-700 px-3 text-xs text-white/75"><option value="default">Ordre par défaut</option><option value="price-asc">Prix croissant</option><option value="price-desc">Prix décroissant</option><option value="name-asc">Nom A → Z</option></select>}
-            {showExpandControl && <button type="button" onClick={() => openLightbox(0)} className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border border-white/10 px-3 text-xs text-white/70 transition hover:bg-white/5 hover:text-white"><Expand size={14} aria-hidden="true" />Ouvrir la galerie</button>}
+            {showSortControl && <select value={flashSort} onChange={(event) => { setFlashSort(event.target.value as FlashSort); setFlashesPage(1); }} aria-label="Trier les flashs" className="min-h-9 rounded-lg border border-white/10 bg-noir-700 px-2.5 font-one text-[11px] text-white/75"><option value="default">Ordre par défaut</option><option value="price-asc">Prix croissant</option><option value="price-desc">Prix décroissant</option><option value="name-asc">Nom A → Z</option></select>}
+            {showExpandControl && <AppButton type="button" variant="secondary" onClick={() => openLightbox(0)} className="min-h-9! px-2.5! py-1.5! text-[11px]! rounded-lg! shadow-none!"><Expand size={13} aria-hidden="true" />Agrandir</AppButton>}
           </div>
         </div>
 
@@ -501,11 +501,11 @@ export default function SalonTabs({
           (counts.photos === 0 ? (
             <Empty>Aucune photo du lieu.</Empty>
           ) : (
-            <ul className="grid grid-cols-2 xl:grid-cols-3 gap-3">
+            <ul className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
               {photos.map((src, i) => (
                 <li
                   key={`${src}-${i}`}
-                  className="relative aspect-4/3 rounded-xl overflow-hidden border border-white/10 bg-white/5 hover:bg-white/10 transition group cursor-zoom-in"
+                  className="relative aspect-3/2 rounded-xl overflow-hidden border border-white/8 bg-white/3 transition hover:border-tertiary-400/35 group cursor-zoom-in"
 
                 >
                   <button type="button" className="absolute inset-0 h-full w-full cursor-zoom-in" aria-label={`Agrandir la photo du salon ${i + 1}`} onClick={() => openLightbox(i)}>
@@ -513,10 +513,10 @@ export default function SalonTabs({
                     src={src}
                     alt={`${salonName ?? "Salon"} - photo ${i + 1}`}
                     fill
-                    sizes="(min-width:1024px) 25vw, (min-width:640px) 33vw, 50vw"
+                    sizes="(min-width:1024px) 22vw, (min-width:640px) 30vw, 45vw"
                     className="object-cover"
                   />
-                  <span className="absolute bottom-2 right-2 grid h-8 w-8 place-items-center rounded-lg bg-black/50 text-white backdrop-blur-sm"><Expand size={14} aria-hidden="true" /></span>
+                  <span className="absolute bottom-2 right-2 grid h-6 w-6 place-items-center rounded-md bg-black/50 text-white backdrop-blur-sm"><Expand size={14} aria-hidden="true" /></span>
                   </button>
                 </li>
               ))}
@@ -566,16 +566,16 @@ export default function SalonTabs({
             <Empty>Aucune pièce dans le portfolio.</Empty>
           ) : (
             <>
-              <ul className="grid grid-cols-2 xl:grid-cols-3 gap-3">
+              <ul className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
                 {portfolioPageItems.map((item, idx) => {
                   const imageIndex = idx;
                   return (
                     <li
                       key={item.id}
-                      className="group flex min-w-0 flex-col rounded-xl border border-white/10 bg-noir-700/50 overflow-hidden transition hover:border-tertiary-400/30"
+                      className="group flex min-w-0 flex-col rounded-xl border border-white/8 bg-white/[0.015] overflow-hidden transition hover:border-tertiary-400/30"
                     >
                       <button
-                        className="relative block aspect-square w-full shrink-0 cursor-zoom-in overflow-hidden"
+                        className="relative block aspect-4/3 w-full shrink-0 cursor-zoom-in overflow-hidden"
                         onClick={() => openLightbox(imageIndex)}
                         aria-label={`Agrandir ${item.title}`}
                       >
@@ -583,13 +583,13 @@ export default function SalonTabs({
                           src={item.imageUrl}
                           alt={item.title}
                           fill
-                          sizes="(min-width:1024px) 33vw, (min-width:640px) 50vw, 50vw"
+                          sizes="(min-width:1024px) 22vw, (min-width:640px) 30vw, 45vw"
                           className="object-cover"
                         />
                         <div className="absolute inset-0 bg-black/0 hover:bg-black/20 transition" />
                       </button>
-                      <div className="p-3">
-                        <p className="break-words text-white/95 font-one text-sm">
+                      <div className="p-2.5">
+                        <p className="break-words text-white/90 font-one text-xs">
                           {item.title}
                         </p>
                         {item.description && (
@@ -617,7 +617,7 @@ export default function SalonTabs({
             <Empty>Aucun flash disponible pour le moment.</Empty>
           ) : (
             <>
-              <ul className="grid grid-cols-2 xl:grid-cols-3 gap-3">
+              <ul className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
                 {flashesPageItems.map((f) => {
                   const label = f.title || f.name || "Flash";
                   const dimensions = getFlashDimensions(f);
@@ -625,11 +625,11 @@ export default function SalonTabs({
                   return (
                     <li
                       key={f.id}
-                      className="group flex min-w-0 flex-col rounded-xl border border-white/10 bg-noir-700/50 overflow-hidden transition hover:border-tertiary-400/30"
+                      className="group flex min-w-0 flex-col rounded-xl border border-white/8 bg-white/[0.015] overflow-hidden transition hover:border-tertiary-400/30"
                     >
                       <button
                         type="button"
-                        className="relative block aspect-square w-full shrink-0 cursor-zoom-in bg-noir-700 text-left disabled:cursor-default"
+                        className="relative block aspect-4/3 w-full shrink-0 cursor-zoom-in bg-noir-700 text-left disabled:cursor-default"
                         onClick={() => {
                           if (typeof imageIndex === "number") {
                             openLightbox(imageIndex);
@@ -647,7 +647,7 @@ export default function SalonTabs({
                             src={f.imageUrl}
                             alt={label}
                             fill
-                            sizes="(min-width:1024px) 33vw, (min-width:640px) 50vw, 50vw"
+                            sizes="(min-width:1024px) 22vw, (min-width:640px) 30vw, 45vw"
                             className="object-contain p-2"
                           />
                         ) : (
@@ -659,8 +659,8 @@ export default function SalonTabs({
                           <div className="absolute inset-0 bg-black/0 hover:bg-black/10 transition" />
                         )}
                       </button>
-                      <div className="flex flex-1 flex-col gap-2 p-3">
-                        <p className="break-words text-white/95 font-one text-sm">
+                      <div className="flex flex-1 flex-col gap-1.5 p-2.5">
+                        <p className="break-words text-white/90 font-one text-xs">
                           {label}
                         </p>
                         {f.description && (
@@ -674,19 +674,20 @@ export default function SalonTabs({
                           </p>
                         )}
                         {typeof f.price === "number" && (
-                          <p className="text-white text-base font-semibold font-one mt-1">
+                          <p className="text-white text-sm font-semibold font-one mt-1">
                             {formatPrice(f.price)}
                           </p>
                         )}
 
                         {bookingPath && canBookFlashes && (
                           <div className="mt-auto pt-2">
-                            <Link
+                            <AppButton
                               href={`${bookingPath}?prestation=TATTOO&flashId=${encodeURIComponent(f.id)}`}
-                              className="inline-flex min-h-11 w-full items-center justify-between gap-2 rounded-lg bg-tertiary-400/10 px-3 text-xs text-white transition hover:bg-tertiary-400/20"
+                              fullWidth
+                              className="min-h-9! justify-between! px-2.5! py-2! text-[11px]! rounded-lg! shadow-none! hover:translate-y-0!"
                             >
-                              Réserver <ArrowUpRight size={15} className="text-tertiary-400" aria-hidden="true" />
-                            </Link>
+                              Réserver <ArrowUpRight size={13} className="text-white" aria-hidden="true" />
+                            </AppButton>
                           </div>
                         )}
                       </div>
@@ -709,29 +710,29 @@ export default function SalonTabs({
             <Empty>Aucun produit en vente.</Empty>
           ) : (
             <>
-              <ul className="grid grid-cols-2 xl:grid-cols-3 gap-3">
+              <ul className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
                 {productsPageItems.map((p) => (
                   <li
                     key={p.id}
-                    className="group flex min-w-0 flex-col rounded-xl border border-white/10 bg-noir-700/50 overflow-hidden transition hover:border-tertiary-400/30"
+                    className="group flex min-w-0 flex-col rounded-xl border border-white/8 bg-white/[0.015] overflow-hidden transition hover:border-tertiary-400/30"
                   >
-                    <div className="relative aspect-square shrink-0 bg-noir-700">
+                    <div className="relative aspect-4/3 shrink-0 bg-noir-700">
                       <Image
                         src={p.imageUrl}
                         alt={p.name}
                         fill
-                        sizes="(min-width:1024px) 33vw, (min-width:640px) 50vw, 50vw"
+                        sizes="(min-width:1024px) 22vw, (min-width:640px) 30vw, 45vw"
                         className="object-contain p-2"
                       />
                     </div>
-                    <div className="flex flex-1 flex-col gap-2 p-3">
-                      <p className="break-words text-white/95 font-one text-sm">{p.name}</p>
+                    <div className="flex flex-1 flex-col gap-1.5 p-2.5">
+                      <p className="break-words text-white/90 font-one text-xs">{p.name}</p>
                       {p.description && (
                         <p className="text-white/60 text-xs line-clamp-2">
                           {p.description}
                         </p>
                       )}
-                      <p className="text-white text-base font-semibold font-one mt-1">
+                      <p className="text-white text-sm font-semibold font-one mt-1">
                         {formatPrice(p.price)}
                       </p>
                     </div>

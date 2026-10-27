@@ -7,6 +7,7 @@ import { notFound } from "next/navigation";
 import { CiInstagram, CiFacebook } from "react-icons/ci";
 import { PiTiktokLogoThin } from "react-icons/pi";
 import { TfiWorld } from "react-icons/tfi";
+import { Clock3, ChevronDown, MapPin, Phone, Mail, ArrowUpRight, ArrowLeft } from "lucide-react";
 import { parseSalonHours, hoursToLines } from "@/lib/horaireHelper";
 import { FlashProps } from "@/lib/type";
 import { toSlug } from "@/lib/utils";
@@ -246,6 +247,10 @@ export default async function ReserverPage({
     return (p.find((x) => x.type === "weekday")?.value || "").toLowerCase();
   }
   const todayFR = todayLabelFR();
+  const displayCity = typeof salon.city === "string" ? salon.city.toLocaleUpperCase("fr-FR") : "";
+  const phoneDigits = String(salon.phone || "").replace(/\D/g, "");
+  const localPhoneDigits = phoneDigits.length === 11 && phoneDigits.startsWith("33") ? "0" + phoneDigits.slice(2) : phoneDigits;
+  const displayPhone = localPhoneDigits.length === 10 ? localPhoneDigits.match(/.{2}/g)?.join(" ") : salon.phone;
 
   // pour itinéraire (si tu veux l’ajouter plus tard)
   // const mapsQuery = encodeURIComponent(
@@ -254,317 +259,44 @@ export default async function ReserverPage({
   // const directionsHref = `https://www.google.com/maps/search/?api=1&query=${mapsQuery}`;
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-noir-700  to-noir-700 pt-6">
-      <section className="px-4 sm:px-6 lg:px-8 xl:px-16 py-4">
-        <div className="mx-auto max-w-7xl">
-          {/* Header ultra-compact */}
-          <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-linear-to-br from-noir-500/8 to-white/2 backdrop-blur-lg shadow-lg mb-5">
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 p-5">
-              {/* Photo compacte - 1/5 sur desktop */}
-              <div className="lg:col-span-1">
-                <div className="relative h-32 lg:h-full rounded-2xl overflow-hidden border border-white/10">
-                  {salon.image ? (
-                    <Image
-                      src={salon.image}
-                      alt={salon.salonName}
-                      fill
-                      className="object-cover"
-                      priority
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-linear-to-br from-noir-600 to-noir-800 grid place-items-center">
-                      <div className="text-center text-white/60">
-                        <div className="w-8 h-8 bg-white/10 rounded-full grid place-items-center mx-auto mb-1">
-                          <svg
-                            className="w-4 h-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={1.5}
-                              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                            />
-                          </svg>
-                        </div>
-                        <span className="text-xs font-one">N/A</span>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Status badge compact */}
-                  <div className="absolute top-2 right-2">
-                    <span
-                      className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-one border backdrop-blur-md ${
-                        openNow.open
-                          ? "bg-emerald-500/30 text-emerald-200 border-emerald-400/50"
-                          : "bg-red-500/30 text-red-200 border-red-400/50"
-                      }`}
-                    >
-                      <span
-                        className={`h-1 w-1 rounded-full ${
-                          openNow.open ? "bg-emerald-300" : "bg-red-300"
-                        }`}
-                      />
-                      {openNow.open ? "Ouvert" : "Fermé"}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Informations principales - 4/5 sur desktop */}
-              <div className="lg:col-span-4">
-                {/* En-tête compact */}
-                <div className="mb-4">
-                  <h1 className="text-2xl lg:text-3xl font-one text-white font-bold tracking-wide mb-1">
-                    {salon.salonName}
-                  </h1>
-                  <div className="flex items-center gap-1.5 text-white/70">
-                    <svg
-                      className="w-3 h-3"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    <span className="font-one text-sm">
-                      {[salon.city, salon.postalCode]
-                        .filter(Boolean)
-                        .join(" • ")}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Grid 3 colonnes ultra-compact */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {/* Prestations compact */}
-
-                  {/* Contact compact */}
-                  <div className="bg-linear-to-br from-noir-500/8 to-white/2 rounded-2xl p-3 border border-white/5">
-                    <h3 className="text-white/80 font-one text-xs uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                      <svg
-                        className="w-3 h-3 text-tertiary-400"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                        />
-                      </svg>
-                      Contact
-                    </h3>
-                    <div className="space-y-2">
-                      {salon.address && (
-                        <div className="flex items-start gap-2">
-                          <div className="w-5 h-5 rounded-2xl bg-white/10 flex items-center justify-center shrink-0 mt-0.5">
-                            <svg
-                              className="w-3 h-3 text-white/60"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                              />
-                            </svg>
-                          </div>
-                          <div>
-                            <p className="text-white/80 font-one text-xs leading-relaxed">
-                              {salon.address}
-                              {salon.city && (
-                                <>
-                                  {", "}
-                                  {salon.city}
-                                </>
-                              )}
-                              {salon.postalCode && <> {salon.postalCode}</>}
-                            </p>
-                          </div>
-                        </div>
-                      )}
-
-                      {salon.phone && (
-                        <div className="flex items-center gap-2">
-                          <div className="w-5 h-5 rounded-2xl bg-white/10 flex items-center justify-center shrink-0">
-                            <svg
-                              className="w-3 h-3 text-white/60"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
-                              />
-                            </svg>
-                          </div>
-                          <a
-                            href={`tel:${salon.phone}`}
-                            className="text-white/80 font-one text-xs hover:text-tertiary-400 transition-colors"
-                          >
-                            {salon.phone}
-                          </a>
-                        </div>
-                      )}
-
-                      {/* Réseaux sociaux ultra-compact */}
-                      {(salon.instagram ||
-                        salon.facebook ||
-                        salon.tiktok ||
-                        salon.website) && (
-                        <div className="pt-2 border-t border-white/5">
-                          <div className="flex gap-1">
-                            {salon.instagram && (
-                              <Link
-                                href={salon.instagram}
-                                target="_blank"
-                                className="w-6 h-6 rounded-2xl bg-linear-to-br from-pink-500/20 to-purple-500/20 border border-pink-500/30 flex items-center justify-center hover:scale-105 transition-transform"
-                                aria-label="Instagram"
-                              >
-                                <CiInstagram className="w-3 h-3 text-pink-400" />
-                              </Link>
-                            )}
-                            {salon.facebook && (
-                              <Link
-                                href={salon.facebook}
-                                target="_blank"
-                                className="w-6 h-6 rounded-2xl bg-linear-to-br from-blue-500/20 to-blue-600/20 border border-blue-500/30 flex items-center justify-center hover:scale-105 transition-transform"
-                                aria-label="Facebook"
-                              >
-                                <CiFacebook className="w-3 h-3 text-blue-400" />
-                              </Link>
-                            )}
-                            {salon.tiktok && (
-                              <Link
-                                href={salon.tiktok}
-                                target="_blank"
-                                className="w-6 h-6 rounded-2xl bg-linear-to-br from-gray-500/20 to-gray-600/20 border border-gray-500/30 flex items-center justify-center hover:scale-105 transition-transform"
-                                aria-label="TikTok"
-                              >
-                                <PiTiktokLogoThin className="w-3 h-3 text-gray-400" />
-                              </Link>
-                            )}
-                            {salon.website && (
-                              <Link
-                                href={salon.website}
-                                target="_blank"
-                                className="w-6 h-6 rounded-2xl bg-linear-to-br from-emerald-500/20 to-emerald-600/20 border border-emerald-500/30 flex items-center justify-center hover:scale-105 transition-transform"
-                                aria-label="Site web"
-                              >
-                                <TfiWorld className="w-3 h-3 text-emerald-400" />
-                              </Link>
-                            )}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Horaires ultra-compact */}
-                  <div className="bg-white/2 rounded-2xl p-3 border border-white/5 col-span-2">
-                    <h3 className="text-white/80 font-one text-xs uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                      <svg
-                        className="w-3 h-3 text-tertiary-400"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                        />
-                      </svg>
-                      Horaires
-                    </h3>
-
-                    {/* Status aujourd'hui compact */}
-                    {openNow.today && (
-                      <div className="mb-2 p-2 rounded-2xl bg-linear-to-r from-tertiary-500/15 to-tertiary-400/10 border border-tertiary-500/25">
-                        <div className="flex items-center justify-between">
-                          <span className="text-white font-one text-xs font-semibold">
-                            Aujourd&apos;hui
-                          </span>
-                          <div className="flex items-center gap-1">
-                            <span
-                              className={`h-1 w-1 rounded-full ${
-                                openNow.open ? "bg-emerald-400" : "bg-red-400"
-                              }`}
-                            />
-                            <span
-                              className={`text-xs font-one ${
-                                openNow.open
-                                  ? "text-emerald-300"
-                                  : "text-red-300"
-                              }`}
-                            >
-                              {openNow.open ? "Ouvert" : "Fermé"}
-                            </span>
-                          </div>
-                        </div>
-                        <p className="text-white/80 font-one text-xs">
-                          {openNow.today.start}–{openNow.today.end}
-                        </p>
-                      </div>
-                    )}
-
-                    {/* Horaires condensés - Affichage en 2 colonnes */}
-                    <div className="grid sm:grid-cols-2 gap-x-4 gap-y-1">
-                      {hoursLines.map((h) => {
-                        const isToday = h.day.toLowerCase() === todayFR;
-                        return (
-                          <div
-                            key={h.day}
-                            className={`flex justify-between text-xs ${
-                              isToday ? "text-tertiary-300" : "text-white/70"
-                            }`}
-                          >
-                            <span className="font-one capitalize">{h.day}</span>
-                            <span className="font-one">{h.value}</span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
-              </div>
+    <div className="min-h-screen bg-noir-700 px-4 pb-10 pt-6 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl">
+        <Link href={`/salon/${slug}/${loc}`} className="mb-6 inline-flex items-center gap-2 text-xs text-white/40 transition hover:text-white"><ArrowLeft size={13} />Retour au salon</Link>
+        <div className="grid items-start gap-6 lg:grid-cols-[260px_minmax(0,1fr)] xl:gap-10">
+          <aside aria-label="Votre salon" className="order-2 overflow-hidden rounded-2xl border border-white/10 bg-noir-700 lg:sticky lg:top-6 lg:order-1">
+            <div className="relative h-32 overflow-hidden bg-white/3 lg:h-40">
+              {salon.image ? <Image src={salon.image} alt={salon.salonName} fill sizes="(min-width: 1024px) 260px, 100vw" className="object-cover" priority /> : <div className="grid h-full place-items-center text-xl text-white/15 font-one">{salon.salonName}</div>}
+              <div className="absolute inset-0 bg-linear-to-t from-noir-700/70 via-transparent to-transparent" />
             </div>
-          </div>
-
-          {/* Bannière d'incitation à la création de compte */}
-          <AuthPromptBanner />
-
-          {/* Flow de réservation */}
-          <BookingFlowNew
-            salon={salonSummary}
-            apiBase={process.env.NEXT_PUBLIC_BACK_URL}
-            defaultTatoueurId={null}
-            defaultPrestation={defaultPrestation}
-            flashes={availableFlashes}
-            defaultFlashId={defaultFlashId}
-          />
+            <div className="space-y-5 p-5">
+              <div><p className="text-[9px] font-medium uppercase tracking-[0.16em] text-tertiary-400/80">Vous avez rendez-vous chez</p><div className="mt-3 flex items-center gap-3"><div className="relative grid size-11 shrink-0 place-items-center overflow-hidden rounded-full border border-white/10 bg-white/5">{salon.profileImage || salon.image ? <Image src={salon.profileImage || salon.image} alt={salon.salonName} fill sizes="44px" className="object-cover" /> : <span aria-hidden="true" className="text-base text-white/45">{salon.salonName?.slice(0, 1).toUpperCase()}</span>}</div><div className="min-w-0"><h2 className="break-words text-lg font-semibold tracking-tight text-white font-one">{salon.salonName}</h2><p className="mt-1 text-xs text-white/40">{[displayCity, salon.postalCode].filter(Boolean).join(" · ")}</p></div></div></div>
+              <div className="space-y-3 border-t border-white/8 pt-4 text-[11px] leading-5 text-white/55">
+                {salon.address && <div className="flex gap-2.5"><MapPin size={14} className="mt-0.5 shrink-0 text-white/30" /><p>{salon.address}<br />{[salon.postalCode, displayCity].filter(Boolean).join(" ")}</p></div>}
+                {salon.phone && <a href={`tel:${salon.phone}`} className="flex items-center gap-2.5 hover:text-white"><Phone size={13} className="shrink-0 text-white/30" />{displayPhone}</a>}
+                {salon.email && <a href={`mailto:${salon.email}`} className="flex items-start gap-2.5 break-all hover:text-white"><Mail size={13} className="mt-0.5 shrink-0 text-white/30" />{salon.email}</a>}
+              </div>
+              <div className="overflow-hidden rounded-xl border border-white/8 bg-noir-700/40">
+                <div className="flex gap-2.5 p-3"><span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-white/5 text-tertiary-400"><Clock3 size={15} /></span><div className="flex-1"><p className="text-[10px] text-white/40">Aujourd’hui au salon</p><div className="mt-1 flex items-center justify-between gap-2"><p className="text-[11px] tabular-nums text-white/80">{openNow.today ? openNow.today.start + " – " + openNow.today.end : hoursLines.length ? "Fermé aujourd’hui" : "Horaires non renseignés"}</p>{!!hoursLines.length && <span className={`size-1.5 shrink-0 rounded-full ${openNow.open ? "bg-emerald-400" : "bg-white/25"}`} aria-label={openNow.open ? "Ouvert actuellement" : "Actuellement fermé"} />}</div></div></div>
+                {!!hoursLines.length && <details className="group border-t border-white/8"><summary className="flex cursor-pointer list-none items-center justify-between px-3 py-2.5 text-[10px] text-white/45 hover:text-white [&::-webkit-details-marker]:hidden">Les horaires de la semaine<ChevronDown size={12} className="transition-transform group-open:rotate-180" /></summary><div className="space-y-0.5 px-1.5 pb-1.5">{hoursLines.map(hour => <div key={hour.day} className={`flex items-center justify-between gap-2 rounded-lg px-2 py-2 text-[10px] ${hour.day.toLowerCase() === todayFR ? "bg-tertiary-400/5 text-tertiary-400" : "text-white/45"}`}><span className="capitalize">{hour.day}</span><span className="tabular-nums">{hour.value}</span></div>)}</div></details>}
+              </div>
+              {(salon.instagram || salon.facebook || salon.tiktok || salon.website) && <div className="flex items-center gap-3 text-white/35">
+                {salon.instagram && <a href={salon.instagram} target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="hover:text-white"><CiInstagram size={18} /></a>}
+                {salon.facebook && <a href={salon.facebook} target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="hover:text-white"><CiFacebook size={18} /></a>}
+                {salon.tiktok && <a href={salon.tiktok} target="_blank" rel="noopener noreferrer" aria-label="TikTok" className="hover:text-white"><PiTiktokLogoThin size={17} /></a>}
+                {salon.website && <a href={salon.website} target="_blank" rel="noopener noreferrer" aria-label="Site du salon" className="hover:text-white"><TfiWorld size={16} /></a>}
+              </div>}
+              <Link href={`/salon/${slug}/${loc}`} className="flex items-center justify-between border-t border-white/8 pt-3 text-[10px] text-white/35 hover:text-white">Découvrir le salon<ArrowUpRight size={12} /></Link>
+            </div>
+          </aside>
+          <main className="order-1 min-w-0 lg:order-2">
+            <BookingFlowNew salon={salonSummary} apiBase={process.env.NEXT_PUBLIC_BACK_URL} defaultTatoueurId={null} defaultPrestation={defaultPrestation} flashes={availableFlashes} defaultFlashId={defaultFlashId} />
+            <AuthPromptBanner compact />
+          </main>
         </div>
-      </section>
+      </div>
     </div>
   );
 }
-
 export async function generateMetadata({ params }: PageParams) {
   const resolvedParams = await params;
   const { slug, loc } = resolvedParams;

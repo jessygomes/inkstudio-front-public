@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState, useMemo } from "react";
 import { useForm } from "react-hook-form";
+import { getBookingSlotRange } from "./slotRange";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -19,10 +20,11 @@ import {
 import { getPiercingPrice } from "@/lib/actions/piercingPrice.action";
 import { createAppointmentByClient, getSkinTones } from "@/lib/actions/appointment.action";
 import { getMyMoodboardsAction } from "@/lib/actions/moodboard.action";
+import { getClientProfile } from "@/lib/actions/user.action";
 import { toDateInputValue } from "@/lib/utils/date";
 import { uploadFiles } from "@/lib/utils/uploadthing";
 import imageCompression from "browser-image-compression";
-import { FlashProps, PiercingService, PiercingZone } from "@/lib/type";
+import { FlashProps, PiercingService, PiercingZone, Tatoueur } from "@/lib/type";
 import { BookingMoodboardOption, SkinToneOption } from "./types";
 
 type AppointmentRequestForm = z.infer<typeof appointmentRequestSchema>;
@@ -196,7 +198,6 @@ export function useBookingLogic({
   flashes = [],
   defaultFlashId,
 }: UseBookingLogicProps) {
-  const MAX_CLIENT_SLOTS = 2; // Limite standard hors PROJET (1h = 2 créneaux de 30 min)
   const initialPrestation =
     defaultPrestation &&
     ["TATTOO", "PIERCING", "PROJET", "RETOUCHE"].includes(defaultPrestation)
@@ -216,7 +217,7 @@ export function useBookingLogic({
     email?: string;
     phone?: string;
     birthDate?: string;
-    clientProfile?: { birthDate?: string | null };
+    clientProfile?: { birthDate?: string | null; phone?: string | null };
   };
 
   const {
@@ -229,6 +230,7 @@ export function useBookingLogic({
     clientProfile,
   } = sessionUser;
 
+  const effectivePhone = sessionPhone || clientProfile?.phone || "";
   const effectiveBirthDate =
     sessionBirthDate || clientProfile?.birthDate || undefined;
 
@@ -249,7 +251,7 @@ export function useBookingLogic({
         firstName: isAuthenticated && sessionUser ? sessionUser.firstName : "",
         lastName: isAuthenticated && sessionUser ? sessionUser.lastName : "",
         email: isAuthenticated && sessionUser ? sessionUser.email : "",
-        phone: isAuthenticated && sessionUser ? sessionUser.phone : "",
+        phone: isAuthenticated ? effectivePhone : "",
         birthDate:
           isAuthenticated && effectiveBirthDate
             ? toDateInputValue(effectiveBirthDate)
@@ -268,7 +270,9 @@ export function useBookingLogic({
     methods.setValue("client.firstName", sessionFirstName || "");
     methods.setValue("client.lastName", sessionLastName || "");
     methods.setValue("client.email", sessionEmail || "");
-    methods.setValue("client.phone", sessionPhone || "");
+    if (!methods.getFieldState("client.phone").isDirty && !methods.getValues("client.phone")) {
+      methods.setValue("client.phone", effectivePhone);
+    }
     methods.setValue(
       "client.birthDate",
       effectiveBirthDate ? toDateInputValue(effectiveBirthDate) : "",
@@ -279,9 +283,29 @@ export function useBookingLogic({
     sessionEmail,
     sessionFirstName,
     sessionLastName,
-    sessionPhone,
+    effectivePhone,
     methods,
   ]);
+
+  // The full profile can contain a newer phone number than the login session.
+  useEffect(() => {
+    if (!isAuthenticated || !sessionUserId) return;
+    let active = true;
+    const prefillPhone = async () => {
+      try {
+        const result = await getClientProfile();
+        if (!active || !result.ok || !result.data) return;
+        const phone = result.data.phone || result.data.clientProfile?.phone;
+        if (typeof phone === "string" && phone.trim() && !methods.getFieldState("client.phone").isDirty) {
+          methods.setValue("client.phone", phone.trim(), { shouldValidate: true });
+        }
+      } catch {
+        // A profile fetch must not interrupt booking or clear a number already entered.
+      }
+    };
+    void prefillPhone();
+    return () => { active = false; };
+  }, [isAuthenticated, sessionUserId, methods]);
 
   //! Déstructurer les méthodes du formulaire
   const {
@@ -300,7 +324,8 @@ export function useBookingLogic({
   const bookingConfirmationEnabled = createdStatus ? createdStatus === "PENDING" : salon.role === "user_tatoueur" && salon.saasPlan === "FREE" && selectedVenue ? selectedVenue.addConfirmationEnabled === true : salon.addConfirmationEnabled;
   //! États
   const [step, setStep] = useState(1);
-  const [confirmDisabled, setConfirmDisabled] = useState(false);
+  const confirmDisabled = false;
+  const [navigationError, setNavigationError] = useState("");
   const [appointmentCreated, setAppointmentCreated] = useState(false);
 
   //! Prestation et artistes
@@ -311,7 +336,7 @@ export function useBookingLogic({
     normalizedAgendaMode !== null
       ? normalizedAgendaMode === "PAR_TATOUEUR"
       : !salon.appointmentBookingEnabled;
-  const artists = useMemo(
+  const artists = useMemo<Tatoueur[]>(
     () =>
       (salon.tatoueurs ?? []).filter(
         (tatoueur: any) =>
@@ -366,7 +391,11 @@ export function useBookingLogic({
 
         const data = response.data as SkinToneOption[];
         if (isMounted) {
-          setSkinToneOptions(Array.isArray(data) ? data : []);
+          const labels: Record<SkinToneOption["value"], string> = {
+            tres_claire: "Très claire", claire: "Claire", claire_moyenne: "Claire à moyenne",
+            mate: "Mate", foncee: "Foncée", tres_foncee: "Très foncée",
+          };
+          setSkinToneOptions(Array.isArray(data) ? data.map(option => ({ ...option, label: labels[option.value] || option.label })) : []);
         }
       } catch (error) {
         console.error("Erreur lors du chargement des teintes de peau:", error);
@@ -522,7 +551,7 @@ export function useBookingLogic({
   );
   const selectedFlashDurationMinutes = useMemo(() => {
     const raw = Number(selectedFlash?.appointmentDurationMinutes);
-    if (Number.isFinite(raw) && raw > 0) return raw;
+    if (Number.isFinite(raw) && raw > 0) return Math.max(60, raw);
     return 60;
   }, [selectedFlash?.appointmentDurationMinutes]);
   const requiredTattooSlots = useMemo(
@@ -560,6 +589,8 @@ export function useBookingLogic({
 
   //! Navigation entre étapes
   const goNext = async () => {
+    setNavigationError("");
+    const reportNavigationError = (message: string) => setNavigationError(message);
     const fieldsByStep: Record<
       number,
       (keyof AppointmentRequestForm | string)[]
@@ -577,31 +608,40 @@ export function useBookingLogic({
       4: [],
     };
 
-    if (step === 3 && linkedVenues.length && !selectedVenue?.publicBookingEnabled) { toast.error("Choisissez un salon disponible."); return; }
+    if (step === 1 && !prestation) { reportNavigationError("Choisissez une prestation pour continuer."); return; }
+    if (step === 3 && linkedVenues.length && !selectedVenue?.publicBookingEnabled) { reportNavigationError("Choisissez un salon disponible."); return; }
     if (step === 1 && isParTatoueurMode && !selectedTatoueur) {
-      toast.error("Veuillez sélectionner un tatoueur avant de continuer.");
+      reportNavigationError("Veuillez sélectionner un tatoueur avant de continuer.");
       return;
     }
 
     if (step === 3) {
+      if (!selectedDate || selectedDate < toDateInputValue(new Date())) {
+        reportNavigationError("Choisissez une date à partir d’aujourd’hui.");
+        return;
+      }
       if (isParTatoueurMode && !selectedTatoueur) {
-        toast.error("Veuillez sélectionner un tatoueur");
+        reportNavigationError("Veuillez sélectionner un tatoueur");
+        return;
+      }
+      if (prestation === "RETOUCHE" && selectedSlots.length < 2) {
+        reportNavigationError("Un rendez-vous de retouche nécessite au minimum une heure.");
         return;
       }
       if (selectedSlots.length === 0) {
-        toast.error("Veuillez sélectionner au moins un créneau");
+        reportNavigationError("Veuillez sélectionner au moins un créneau");
         return;
       }
 
       if (prestation === "PROJET" && selectedSlots.length !== requiredProjectSlots) {
-        toast.error(
+        reportNavigationError(
           `Pour un rendez-vous projet, vous devez sélectionner exactement ${requiredProjectSlots} créneau(x), soit ${projectAppointmentDurationMinutes} minutes.`,
         );
         return;
       }
 
       if (prestation === "TATTOO" && selectedSlots.length !== requiredTattooSlots) {
-        toast.error(
+        reportNavigationError(
           `Pour ce flash, vous devez sélectionner exactement ${requiredTattooSlots} créneau(x), soit ${selectedFlashDurationMinutes} minutes.`,
         );
         return;
@@ -609,29 +649,31 @@ export function useBookingLogic({
     }
 
     if (step === 2 && prestation === "TATTOO" && !selectedFlashId) {
-      toast.error(
+      reportNavigationError(
         "Pour une prestation tattoo, veuillez sélectionner un flash avant de continuer.",
       );
       return;
     }
 
-    const ok = await trigger(fieldsByStep[step] as any);
-    if (!ok) return;
+    if (step === 2 && prestation === "PIERCING" && (!selectedPiercingZone || !selectedPiercingService)) {
+      reportNavigationError("Choisissez une zone et un type de piercing pour continuer.");
+      return;
+    }
+    const ok = await trigger(fieldsByStep[step] as any, { shouldFocus: true });
+    if (!ok) { setNavigationError("Vérifiez les champs indiqués avant de continuer."); return; }
 
     if (step === 3) {
       setStep(4);
-      setConfirmDisabled(true);
-      setTimeout(() => setConfirmDisabled(false), 3000);
+
     } else {
       setStep((s) => Math.min(4, s + 1));
     }
 
-    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const goPrev = () => {
+    setNavigationError("");
     setStep((s) => Math.max(1, s - 1));
-    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   //! -------------------------------------------------
@@ -705,6 +747,8 @@ export function useBookingLogic({
     fetchAllSlotData();
     return () => { cancelled = true; };
   }, [
+    linkedVenues.length,
+    selectedVenue,
     venueSalonId,
     selectedDate,
     selectedTatoueur,
@@ -755,73 +799,15 @@ export function useBookingLogic({
   };
 
   //! Sélection de créneaux
-  const handleSlotSelection = (slotStart: string) => {
-    if (isSlotBlocked(slotStart)) {
-      toast.error("Ce créneau est indisponible (période bloquée)");
+  const handleSlotSelection = (slotStart: string, durationSlots = 1) => {
+    setNavigationError("");
+    const count = prestation === "PROJET" ? requiredProjectSlots : prestation === "TATTOO" ? requiredTattooSlots : prestation === "RETOUCHE" ? 2 : Math.min(2, Math.max(1, durationSlots));
+    const range = getBookingSlotRange(slotStart, count, timeSlots.map(slot => slot.start), value => isSlotBlocked(value) || isSlotOccupied(value));
+    if (!range) {
+      setNavigationError("Cet horaire ne permet pas de réserver toute la durée du rendez-vous. Choisissez un autre départ.");
       return;
     }
-
-    if (isSlotOccupied(slotStart)) {
-      toast.error("Ce créneau est déjà occupé");
-      return;
-    }
-
-    //! Toggle
-    if (selectedSlots.includes(slotStart)) {
-      const newSelection = selectedSlots.filter((s) => s !== slotStart);
-      const times = newSelection
-        .map((s) => new Date(s).getTime())
-        .sort((a, b) => a - b);
-      const consecutive = times.every(
-        (t, i) => i === 0 || t - times[i - 1] === 30 * 60 * 1000,
-      );
-      if (consecutive || newSelection.length <= 1) {
-        setSelectedSlots(newSelection);
-      } else {
-        toast.error("Les créneaux restants ne sont plus consécutifs.");
-      }
-      return;
-    }
-
-    const maxSelectableSlots =
-      prestation === "PROJET"
-        ? requiredProjectSlots
-        : prestation === "TATTOO" && selectedFlashId
-          ? requiredTattooSlots
-          : MAX_CLIENT_SLOTS;
-
-    if (selectedSlots.length >= maxSelectableSlots) {
-      if (prestation === "PROJET") {
-        toast.error(
-          `Un rendez-vous projet dure ${projectAppointmentDurationMinutes} minutes (${requiredProjectSlots} créneau(x)).`,
-        );
-      } else if (prestation === "TATTOO" && selectedFlashId) {
-        toast.error(
-          `Ce flash dure ${selectedFlashDurationMinutes} minutes (${requiredTattooSlots} créneau(x)).`,
-        );
-      } else {
-        toast.error(
-          "Vous pouvez sélectionner au maximum 1h (2 créneaux de 30 minutes).",
-        );
-      }
-      return;
-    }
-
-    //! Ajouter le créneau
-    const newSelection = [...selectedSlots, slotStart]
-      .filter((s, i, arr) => arr.indexOf(s) === i)
-      .sort();
-
-    const nums = newSelection.map((s) => new Date(s).getTime());
-    const consecutive = nums.every(
-      (t, i) => i === 0 || t - nums[i - 1] === 30 * 60 * 1000,
-    );
-
-    if (consecutive) {
-      setSelectedSlots(newSelection);
-    } else {
-      toast.error("Les créneaux doivent être consécutifs.");
-    }
+    setSelectedSlots(selectedSlots[0] === slotStart && selectedSlots.length === count ? [] : range);
   };
 
   //! -------------------------------------------------
@@ -954,6 +940,10 @@ export function useBookingLogic({
   //! Soumission du formulaire
   //! -------------------------------------------------
   const onSubmit = async (data: AppointmentRequestForm) => {
+    if (data.prestation === "RETOUCHE" && selectedSlots.length < 2) {
+      toast.error("Un rendez-vous de retouche nécessite au minimum une heure.");
+      return;
+    }
     if (selectedSlots.length === 0) {
       toast.error("Veuillez sélectionner au moins un créneau");
       return;
@@ -1085,7 +1075,7 @@ export function useBookingLogic({
           ? new Date(data.client.birthDate).toISOString()
           : "",
         tatoueurId: performerTatoueurId,
-        visio: data.visio || false,
+        visio: false,
         description: `${baseDescription}${flashNote}`.trim(),
         zone: data.details?.zone || "",
         size: data.details?.size || "",
@@ -1191,12 +1181,17 @@ export function useBookingLogic({
 
   // Handler pour changement de date
   const handleDateChange = (date: string) => {
+    setNavigationError("");
+    setTimeSlots([]);
+    setOccupiedSlots([]);
+    setBlockedSlots([]);
     setSelectedDate(date);
     setSelectedSlots([]);
   };
 
   // Handler pour changement de prestation
   const handlePrestationChange = (prestation: string) => {
+    setNavigationError("");
     setValue("prestation", prestation as any);
     setSelectedSlots([]);
     if (prestation !== "TATTOO") {
@@ -1211,6 +1206,8 @@ export function useBookingLogic({
   };
 
   const handleFlashChange = (flashId: string) => {
+    setSelectedSlots([]);
+    setNavigationError("");
     setSelectedFlashId(flashId);
     const selectedFlash = availableFlashes.find((f) => f.id === flashId);
     const dimensions = getFlashDimensions(selectedFlash);
@@ -1229,6 +1226,8 @@ export function useBookingLogic({
   };
 
   return {
+    navigationError,
+    setNavigationError,
     bookingConfirmationEnabled,
     linkedVenues, venueSalonId, selectedVenue,
     handleVenueChange: (id: string) => { setVenueSalonId(id); setIsLoadingSlots(false); setSelectedSlots([]); setTimeSlots([]); setOccupiedSlots([]); setBlockedSlots([]); setSelectedDate(""); },

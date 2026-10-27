@@ -14,10 +14,11 @@ type Props = {
   variant?: "card" | "compact";
   /** "violet" = dégradé violet permanent (modale inspiration) */
   tone?: "default" | "violet";
+  className?: string;
 };
 
 /** Une conversation Inbox par professionnel / compte client, même avec plusieurs RDV. */
-export default function StartInkeraConversationButton({ targetUserId, recipientName, variant = "card", tone = "default" }: Props) {
+export default function StartInkeraConversationButton({ targetUserId, recipientName, variant = "card", tone = "default", className = "" }: Props) {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -54,7 +55,7 @@ export default function StartInkeraConversationButton({ targetUserId, recipientN
           onClick={handleClick}
           disabled={pending || status === "loading"}
           icon={pending ? <LoaderCircle size={16} className="animate-spin" /> : <MessageCircle size={16} />}
-          className={`cursor-pointer ${tone === "violet" ? "" : "min-h-12"}`}
+          className={`cursor-pointer ${tone === "violet" ? "" : "min-h-12"} ${className}`}
         >
           {pending ? "Ouverture…" : "Envoyer un message"}
         </AppButton>

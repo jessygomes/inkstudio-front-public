@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
-import { useFormContext } from "react-hook-form";
+import { CalendarDays, ChevronLeft, ChevronRight, Clock3, Check, CalendarSearch } from "lucide-react";
+
 
 import {
   addMinutesToTime,
@@ -16,10 +17,9 @@ import {
 } from "@/lib/utils/date";
 import { parseSalonHours } from "@/lib/horaireHelper";
 import Section from "./Section";
+import AppButton from "@/components/Shared/AppButton";
 import { TimeSlot } from "./types";
-
-const classNames = (...c: (string | false | null | undefined)[]) =>
-  c.filter(Boolean).join(" ");
+import { getBookingSlotRange } from "./slotRange";
 
 interface SlotSelectionProps {
   prestation: string;
@@ -31,7 +31,7 @@ interface SlotSelectionProps {
   onDateChange: (date: string) => void;
   timeSlots: TimeSlot[];
   selectedSlots: string[];
-  onSlotSelection: (slotStart: string) => void;
+  onSlotSelection: (slotStart: string, durationSlots?: number) => void;
   onClearSelection: () => void;
   occupiedSlots: any[];
   blockedSlots: any[];
@@ -56,11 +56,10 @@ export default function SlotSelection({
   occupiedSlots,
   blockedSlots,
   isLoadingSlots,
-  selectedFlashId,
   selectedFlashDurationMinutes = 60,
   requiredTattooSlots = 2,
 }: SlotSelectionProps) {
-  const { register } = useFormContext();
+
   const parsedSalonHours = React.useMemo(
     () => parseSalonHours(salon.salonHours),
     [salon.salonHours],
@@ -86,15 +85,9 @@ export default function SlotSelection({
     () => artists.find((artist) => artist.id === selectedTatoueur) || null,
     [artists, selectedTatoueur],
   );
-  const projectAppointmentDurationMinutes = React.useMemo(() => {
-    const raw = Number(salon?.projectAppointmentDurationMinutes);
-    if (Number.isFinite(raw) && raw > 0) return raw;
-    return 60;
-  }, [salon?.projectAppointmentDurationMinutes]);
-  const requiredProjectSlots = React.useMemo(
-    () => Math.max(1, Math.ceil(projectAppointmentDurationMinutes / 30)),
-    [projectAppointmentDurationMinutes],
-  );
+  const rawProjectDuration = Number(salon.projectAppointmentDurationMinutes);
+  const projectAppointmentDurationMinutes = Number.isFinite(rawProjectDuration) && rawProjectDuration > 0 ? rawProjectDuration : 60;
+  const requiredProjectSlots = Math.max(1, Math.ceil(projectAppointmentDurationMinutes / 30));
 
   // Vérifier si un créneau est bloqué
   const isSlotBlocked = (slotStart: string) => {
@@ -132,414 +125,57 @@ export default function SlotSelection({
     });
   };
 
-  const buildSlotsFromRanges = (
-    ranges: any[],
-    startKey: "start" | "startDate",
-    endKey: "end" | "endDate",
-  ) => {
-    if (!selectedDate) return [] as string[];
+  const displayedSlotStarts = Array.from(new Set(timeSlots.map(slot => slot.start)))
+    .filter(value => (slotDisplayMode === "timezone" ? getDateKeyInTimeZone(value) : getIsoDatePart(value)) === selectedDate)
+    .sort((a, b) => Date.parse(a) - Date.parse(b));
 
-    const dayStart = new Date(`${selectedDate}T00:00:00.000Z`);
-    const dayEnd = new Date(`${selectedDate}T23:59:59.999Z`);
-    const slots: string[] = [];
-
-    ranges.forEach((range) => {
-      const rangeStart = new Date(range[startKey]);
-      const rangeEnd = new Date(range[endKey]);
-
-      const start = new Date(
-        Math.max(rangeStart.getTime(), dayStart.getTime()),
-      );
-      const end = new Date(Math.min(rangeEnd.getTime(), dayEnd.getTime()));
-
-      if (start >= end) return;
-
-      const alignedStart = new Date(start);
-      alignedStart.setSeconds(0, 0);
-      const remainder = alignedStart.getMinutes() % 30;
-      if (remainder !== 0) {
-        alignedStart.setMinutes(alignedStart.getMinutes() + (30 - remainder));
-      }
-
-      for (
-        let cursor = alignedStart;
-        cursor < end;
-        cursor = new Date(cursor.getTime() + 30 * 60 * 1000)
-      ) {
-        slots.push(cursor.toISOString());
-      }
-    });
-
-    return slots;
-  };
-
-  const displayedSlotStarts = React.useMemo(() => {
-    const available = timeSlots.map((slot) => slot.start);
-    const occupied = buildSlotsFromRanges(occupiedSlots, "start", "end");
-    const blocked = buildSlotsFromRanges(blockedSlots, "startDate", "endDate");
-    const merged = Array.from(
-      new Set([...available, ...occupied, ...blocked, ...selectedSlots]),
-    );
-
-    return merged
-      .filter((slotStart) => {
-        const slotDateKey =
-          slotDisplayMode === "timezone"
-            ? getDateKeyInTimeZone(slotStart)
-            : getIsoDatePart(slotStart);
-
-        return slotDateKey === selectedDate;
-      })
-      .sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
-  }, [
-    timeSlots,
-    occupiedSlots,
-    blockedSlots,
-    selectedSlots,
-    selectedDate,
-    slotDisplayMode,
-  ]);
+  const [weekOffset, setWeekOffset] = React.useState(() => Math.max(0, Math.floor((Date.parse(selectedDate) - Date.parse(toDateInputValue(new Date()))) / (7 * 86400000))) || 0);
+  const [durationSlots, setDurationSlots] = React.useState(() => Math.min(2, Math.max(1, selectedSlots.length)));
+  const fixedDuration = prestation === "PROJET" || prestation === "TATTOO" || prestation === "RETOUCHE";
+  const slotCount = prestation === "PROJET" ? requiredProjectSlots : prestation === "TATTOO" ? requiredTattooSlots : prestation === "RETOUCHE" ? 2 : durationSlots;
+  const requestedMinutes = prestation === "PROJET" ? projectAppointmentDurationMinutes : prestation === "TATTOO" ? Math.max(60, selectedFlashDurationMinutes) : prestation === "RETOUCHE" ? 60 : durationSlots * 30;
+  const weekDates = Array.from({ length: 7 }, (_, index) => {
+    const date = new Date();
+    date.setHours(12, 0, 0, 0);
+    date.setDate(date.getDate() + weekOffset * 7 + index);
+    return { key: toDateInputValue(date), date };
+  });
+  const formatStart = (value: string) => slotDisplayMode === "timezone" ? getTimeInTimeZone(value) : getIsoTimePart(value);
+  const formatEnd = (value: string) => slotDisplayMode === "timezone" ? addMinutesToIsoInTimeZone(value, 30) : addMinutesToTime(getIsoTimePart(value), 30);
+  const availableStarts = timeSlots.map(slot => slot.start);
+  const bookableStarts = displayedSlotStarts.filter(value => getBookingSlotRange(value, slotCount, availableStarts, start => isSlotBlocked(start) || isSlotOccupied(start)) !== null);
+  const periods = [
+    { label: "Matin", starts: bookableStarts.filter(value => Number(formatStart(value).split(":")[0]) < 12) },
+    { label: "Après-midi", starts: bookableStarts.filter(value => { const hour = Number(formatStart(value).split(":")[0]); return hour >= 12 && hour < 18; }) },
+    { label: "Soir", starts: bookableStarts.filter(value => Number(formatStart(value).split(":")[0]) >= 18) },
+  ];
+  const sortedSelection = [...selectedSlots].sort();
 
   return (
-    <Section title="Choisir ses créneaux">
-      {/* Champ Visio pour prestation PROJET */}
-      {prestation === "PROJET" && (
-        <div className="mb-4 bg-white/5 p-3 rounded-2xl border border-white/10">
-          <label className="flex items-start gap-3 cursor-pointer">
-            <input
-              type="checkbox"
-              {...register("visio")}
-              className="w-4 h-4 bg-white/10 border border-white/20 rounded focus:outline-none focus:border-tertiary-400 transition-colors accent-tertiary-400 mt-0.5"
-            />
-            <div className="flex-1">
-              <span className="text-sm text-white/90 font-one block">
-                Rendez-vous en visioconférence
-              </span>
-              <p className="text-xs text-white/60 font-one mt-0.5">
-                Cochez cette case si vous souhaitez que ce rendez-vous se
-                déroule en ligne
-              </p>
-            </div>
-          </label>
-        </div>
-      )}
-
-      {/* Vérification si des tatoueurs sont disponibles */}
-      {artists.length === 0 && isParTatoueurMode ? (
-        <div className="bg-orange-500/10 border border-orange-500/30 rounded-md p-4 text-center">
-          <div className="w-10 h-10 bg-orange-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
-            <svg
-              className="w-5 h-5 text-orange-400"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"
-              />
-            </svg>
+    <div className="space-y-4">
+      <Section title="Quand souhaitez-vous venir ?" description={selectedArtist ? `Consultez les disponibilités de ${selectedArtist.name}.` : "Choisissez votre jour, puis l’heure qui vous convient."} icon={<CalendarDays size={17} />}>
+        {artists.length === 0 && isParTatoueurMode ? <p role="status" className="rounded-xl bg-white/3 p-4 text-xs text-white/55">Aucun artiste n’est réservable en ligne pour le moment.</p> : <div className="space-y-5">
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-xs font-medium capitalize text-white/75">{weekDates[0].date.toLocaleDateString("fr-FR", { month: "long", year: "numeric" })}</p>
+            <div className="flex gap-1"><button type="button" aria-label="Semaine précédente" disabled={weekOffset === 0} onClick={() => setWeekOffset(value => Math.max(0, value - 1))} className="rounded-lg border border-white/10 p-2 text-white/60 transition hover:bg-white/5 disabled:opacity-20"><ChevronLeft size={14} /></button><button type="button" aria-label="Semaine suivante" onClick={() => setWeekOffset(value => value + 1)} className="rounded-lg border border-white/10 p-2 text-white/60 transition hover:bg-white/5"><ChevronRight size={14} /></button></div>
           </div>
-          <h3 className="text-orange-300 font-one mb-1">
-            Aucun tatoueur disponible
-          </h3>
-          <p className="text-orange-300/80 text-sm font-one">
-            Les réservations en ligne ne sont pas activées pour ce salon.
-          </p>
-        </div>
-      ) : (
-        <>
-          {/* Tatoueur choisi + date */}
-          <div className="mb-4 flex flex-col sm:flex-row sm:items-end sm:gap-4">
-            {isParTatoueurMode && selectedArtist && (
-              <div className="mb-3 sm:mb-0 max-w-sm rounded-2xl border border-white/10 bg-white/3 px-4 py-3">
-                <p className="text-[11px] uppercase tracking-wide text-white/60 font-one">
-                  Agenda affiché
-                </p>
-                <p className="text-white font-one text-sm mt-0.5">
-                  {selectedArtist.name}
-                </p>
-                {selectedArtist.isLinkedUser && (
-                  <p className="text-xs text-tertiary-300 mt-1.5 font-one">
-                    Tatoueur avec compte personnel
-                  </p>
-                )}
-              </div>
-            )}
-
-            {/* Sélection de date */}
-            {!isParTatoueurMode || selectedTatoueur ? (
-              <div>
-                <label className="text-xs text-white/80 font-one mb-2 block uppercase tracking-wide">
-                  Date souhaitée
-                </label>
-                <input
-                  type="date"
-                  value={selectedDate}
-                  onChange={(e) => onDateChange(e.target.value)}
-                  min={toDateInputValue(new Date())}
-                  className="w-full max-w-xs p-2.5 bg-white/2 border border-white/10 rounded-2xl font-one text-white text-sm focus:outline-none focus:border-tertiary-400 focus:ring-1 focus:ring-tertiary-400/30 transition-all"
-                />
-              </div>
-            ) : null}
-          </div>
-
-          {/* Créneaux disponibles */}
-          {selectedDate &&
-            (!isParTatoueurMode || selectedTatoueur) && (
-              <div className="space-y-4">
-                <div>
-                  <h3 className="text-white font-one mb-1">Créneaux</h3>
-                  <p className="text-xs text-white/60 font-one">
-                    Les créneaux occupés et bloqués sont affichés mais non
-                    sélectionnables
-                  </p>
-                  {prestation === "PROJET" && (
-                    <p className="text-sm text-tertiary-400 font-one mt-1">
-                      Un rendez-vous projet dure {projectAppointmentDurationMinutes} min :
-                      sélectionnez exactement {requiredProjectSlots} créneau(x) de 30 min.
-                    </p>
-                  )}
-                  {prestation === "TATTOO" && selectedFlashId && (
-                    <p className="text-sm text-tertiary-400 font-one mt-1">
-                      Ce flash dure <strong>{selectedFlashDurationMinutes} min</strong> : sélectionnez
-                      exactement <strong>{requiredTattooSlots} créneaux de 30 min</strong>.
-                    </p>
-                  )}
-                </div>
-
-                {/* Légende */}
-                <div className="bg-white/3 rounded-2xl border border-white/10 p-3">
-                  <h4 className="text-white/80 font-one font-semibold text-xs mb-2 uppercase tracking-wide">
-                    Légende
-                  </h4>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 text-xs">
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 border border-white/20 rounded" />
-                      <span className="text-white/70 font-one">Disponible</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 bg-linear-to-br from-tertiary-500/30 to-tertiary-400/20 border border-tertiary-400/60 rounded" />
-                      <span className="text-white/70 font-one">
-                        Sélectionné
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 bg-linear-to-br from-gray-500/20 to-gray-600/10 border border-gray-500/40 rounded" />
-                      <span className="text-white/70 font-one">Occupé</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 bg-linear-to-br from-red-500/20 to-red-600/10 border border-red-500/40 rounded" />
-                      <span className="text-white/70 font-one">Bloqué</span>
-                    </div>
-                  </div>
-                </div>
-
-                {isLoadingSlots ? (
-                  <div className="flex flex-col items-center justify-center p-8 bg-white/3 rounded-2xl border border-white/10">
-                    <div className="animate-spin rounded-full h-8 w-8 border-2 border-tertiary-400 border-t-transparent mb-3"></div>
-                    <span className="text-white font-one text-sm">
-                      Chargement des créneaux...
-                    </span>
-                  </div>
-                ) : displayedSlotStarts.length > 0 ? (
-                  <>
-                    <div className="space-y-3">
-                      <p className="text-xs text-white/50">
-                        {prestation === "PROJET"
-                          ? `Cliquez sur les créneaux pour les sélectionner (ils doivent être consécutifs). Pour un projet, vous devez prendre exactement ${requiredProjectSlots} créneau(x), soit ${projectAppointmentDurationMinutes} min.`
-                          : prestation === "TATTOO" && selectedFlashId
-                            ? `Cliquez sur les créneaux pour les sélectionner (ils doivent être consécutifs). Pour ce flash, vous devez prendre exactement ${requiredTattooSlots} créneau(x), soit ${selectedFlashDurationMinutes} min.`
-                            : "Cliquez sur les créneaux pour les sélectionner (doivent être consécutifs). Maximum 1h par réservation (2 créneaux de 30 min). Les créneaux occupés ou bloqués restent visibles."}
-                      </p>
-                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
-                        {displayedSlotStarts.map((slotStartIso) => {
-                          const startTime =
-                            slotDisplayMode === "timezone"
-                              ? getTimeInTimeZone(slotStartIso)
-                              : getIsoTimePart(slotStartIso);
-                          const endTime =
-                            slotDisplayMode === "timezone"
-                              ? addMinutesToIsoInTimeZone(slotStartIso, 30)
-                              : addMinutesToTime(startTime, 30);
-
-                          const isSelected =
-                            selectedSlots.includes(slotStartIso);
-                          const isOccupied = isSlotOccupied(slotStartIso);
-                          const isBlocked = isSlotBlocked(slotStartIso);
-                          const isAvailable = timeSlots.some(
-                            (slot) => slot.start === slotStartIso,
-                          );
-                          const isDisabled =
-                            !isAvailable || isOccupied || isBlocked;
-
-                          return (
-                            <button
-                              key={slotStartIso}
-                              type="button"
-                              onClick={() =>
-                                !isDisabled && onSlotSelection(slotStartIso)
-                              }
-                              disabled={isDisabled}
-                              className={classNames(
-                                "cursor-pointer p-3 rounded-2xl text-xs font-one font-medium transition-all duration-200 border",
-                                isSelected &&
-                                  "bg-linear-to-br from-tertiary-500/30 to-tertiary-400/20 border-tertiary-400/60 text-white shadow-lg",
-                                !isSelected &&
-                                  !isDisabled &&
-                                  "bg-linear-to-br border-white/20 text-white/80 hover:bg-white/12",
-                                isOccupied &&
-                                  "bg-linear-to-br from-gray-500/20 to-gray-600/10 border-gray-500/40 text-gray-400 cursor-not-allowed",
-                                isBlocked &&
-                                  "bg-linear-to-br from-red-500/20 to-red-600/10 border-red-500/40 text-red-400 cursor-not-allowed",
-                              )}
-                            >
-                              <div className="flex flex-col items-center gap-1">
-                                <span>{startTime}</span>
-                                <span className="text-[10px] opacity-70">
-                                  {endTime}
-                                </span>
-                              </div>
-                            </button>
-                          );
-                        })}
-                      </div>
-
-                      {/* Résumé de sélection */}
-                      <div className="flex flex-wrap gap-3 text-xs text-white/70 font-one">
-                        <div className="flex items-center gap-1.5">
-                          <span>Total :</span>
-                          <span>{displayedSlotStarts.length}</span>
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                          <span>Sélectionnés :</span>
-                          <span className="text-tertiary-400">
-                            {selectedSlots.length}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                          <span>Durée :</span>
-                          <span className="text-tertiary-400">
-                            {selectedSlots.length * 30} min
-                          </span>
-                        </div>
-                        {selectedSlots.length > 0 && (
-                          <button
-                            type="button"
-                            onClick={onClearSelection}
-                            className="cursor-pointer ml-auto px-3 py-1 rounded-2xl border border-white/20 text-white/80 hover:bg-white/12 transition-colors"
-                          >
-                            Tout désélectionner
-                          </button>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Récapitulatif de sélection */}
-                    {selectedSlots.length > 0 && (
-                      <div className="bg-tertiary-500/10 border border-tertiary-500/30 rounded-2xl p-4">
-                        <div className="flex items-start gap-3">
-                          <div className="shrink-0 w-8 h-8 rounded-2xl bg-tertiary-500/20 flex items-center justify-center">
-                            <svg
-                              className="w-4 h-4 text-tertiary-300"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                              />
-                            </svg>
-                          </div>
-                          <div className="flex-1 space-y-2">
-                            <div>
-                              <h4 className="text-white font-one text-sm">
-                                Créneaux sélectionnés
-                              </h4>
-                              <p className="text-xs text-white/60 font-one">
-                                Vérifiez votre sélection
-                              </p>
-                            </div>
-                            <div className="grid grid-cols-2 gap-2 text-sm">
-                              <div className="bg-white/5 rounded-2xl p-2 border border-white/10">
-                                <p className="text-xs text-white/60 mb-0.5">
-                                  Date
-                                </p>
-                                <p className="text-white font-one text-sm">
-                                  {formatDateKeyForDisplay(selectedDate)}
-                                </p>
-                              </div>
-                              <div className="bg-white/5 rounded-2xl p-2 border border-white/10">
-                                <p className="text-xs text-white/60 mb-0.5">
-                                  Horaire
-                                </p>
-                                <p className="text-white font-one text-sm">
-                                  {getIsoTimePart(selectedSlots[0])}{" "}
-                                  -{" "}
-                                  {addMinutesToTime(
-                                    getIsoTimePart(
-                                      selectedSlots[selectedSlots.length - 1],
-                                    ),
-                                    30,
-                                  )}
-                                </p>
-                              </div>
-                              <div className="bg-white/5 rounded-2xl p-2 border border-white/10">
-                                <p className="text-xs text-white/60 mb-0.5">
-                                  Durée
-                                </p>
-                                <p className="text-white font-one text-sm">
-                                  {selectedSlots.length * 30} min
-                                </p>
-                              </div>
-                              <div className="bg-white/5 rounded-2xl p-2 border border-white/10">
-                                <p className="text-xs text-white/60 mb-0.5">
-                                  Créneaux
-                                </p>
-                                <p className="text-white font-one text-sm">
-                                  {selectedSlots.length} x 30min
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <div className="bg-orange-500/10 border border-orange-500/30 rounded-md p-4 text-center">
-                    <div className="w-10 h-10 bg-orange-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
-                      <svg
-                        className="w-5 h-5 text-orange-400"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                        />
-                      </svg>
-                    </div>
-                    <h3 className="text-orange-300 font-one mb-1">
-                      Aucun créneau disponible
-                    </h3>
-                    <p className="text-orange-300/80 text-sm font-one">
-                      Essayez une autre date ou un autre tatoueur
-                    </p>
-                  </div>
-                )}
-              </div>
-            )}
-        </>
-      )}
-    </Section>
+          <div className="grid grid-cols-7 gap-1.5 sm:gap-2">{weekDates.map(({ key, date }) => {
+            const active = selectedDate === key;
+            return <button type="button" key={key} aria-pressed={active} aria-label={date.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })} onClick={() => onDateChange(key)} className={`flex min-w-0 flex-col items-center gap-2 rounded-xl border px-1 py-3 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tertiary-400/40 ${active ? "border-tertiary-400/60 bg-tertiary-400/10 text-white" : "border-white/8 bg-noir-700/40 text-white/45 hover:border-white/25"}`}><span className="text-[9px] capitalize sm:text-[10px]">{date.toLocaleDateString("fr-FR", { weekday: "short" }).replace(".", "")}</span><span className={`text-base font-semibold ${active ? "text-tertiary-400" : "text-white/80"}`}>{date.getDate()}</span><span className={`size-1 rounded-full ${active ? "bg-tertiary-400" : "bg-white/15"}`} /></button>;
+          })}</div>
+          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-white/8 pt-3"><label htmlFor="booking-date" className="text-[11px] text-white/45">Une autre date ?</label><input id="booking-date" type="date" min={toDateInputValue(new Date())} value={selectedDate} onChange={e => { onDateChange(e.target.value); if (e.target.value) setWeekOffset(Math.max(0, Math.floor((Date.parse(e.target.value) - Date.parse(toDateInputValue(new Date()))) / (7 * 86400000)))); }} className="min-w-0 rounded-lg border border-white/10 bg-noir-700 px-3 py-2 text-xs text-white/75 outline-none focus:border-tertiary-400/50 [color-scheme:dark]" /></div>
+        </div>}
+      </Section>
+      {(!isParTatoueurMode || selectedTatoueur) && <Section title="Choisissez votre heure de début" description={selectedDate ? formatDateKeyForDisplay(selectedDate) : "Les disponibilités s’afficheront après le choix d’une date."} icon={<Clock3 size={17} />}>
+        {!fixedDuration && <div className="mb-4 flex flex-wrap items-center justify-between gap-3"><p className="text-[11px] text-white/50">Durée du rendez-vous</p><div className="flex gap-1 rounded-lg border border-white/8 bg-noir-700 p-1">{[1, 2].map(count => <button key={count} type="button" aria-pressed={durationSlots === count} onClick={() => { setDurationSlots(count); onClearSelection(); }} className={`rounded-md px-3 py-1.5 text-[11px] transition ${durationSlots === count ? "bg-white/10 text-white" : "text-white/40 hover:text-white"}`}>{count * 30} min</button>)}</div></div>}
+        {fixedDuration && <p className="mb-4 rounded-lg bg-tertiary-400/5 px-3 py-2.5 text-[11px] leading-5 text-white/55">Durée prévue : <strong className="font-medium text-white/85">{requestedMinutes} min</strong>. Choisissez une heure de début, nous réservons les créneaux nécessaires.</p>}
+        {(prestation === "TATTOO" || prestation === "RETOUCHE") && <p className="mb-4 rounded-xl border border-white/10 bg-noir-700/40 p-3 text-xs leading-6 text-white/55">Prévoyez <strong className="font-medium text-white/85">au minimum une heure</strong> pour un tatouage ou une retouche. Le salon ou le tatoueur pourra ajuster la durée selon votre projet. <span className="text-white/75">Vous recevrez un email si la durée de votre rendez-vous est modifiée.</span></p>}
+        {isLoadingSlots ? <div role="status" className="space-y-3 py-4"><p className="text-xs text-white/45">Recherche des disponibilités…</p><div className="grid grid-cols-3 gap-2 sm:grid-cols-5">{Array.from({ length: 10 }, (_, index) => <div key={index} className="h-10 animate-pulse rounded-xl bg-white/5 motion-reduce:animate-none" />)}</div></div> : !selectedDate ? <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-white/10 px-4 py-8 text-center"><CalendarSearch size={26} className="text-white/20" /><p className="text-xs text-white/45">Commencez par choisir une date au-dessus.</p></div> : bookableStarts.length ? <div className="space-y-4">{periods.filter(period => period.starts.length).map(period => <div key={period.label}><p className="mb-2 text-[10px] font-medium uppercase tracking-[0.1em] text-white/35">{period.label}</p><div className="grid grid-cols-3 gap-2 sm:grid-cols-5">{period.starts.map(start => {
+          const active = sortedSelection[0] === start;
+          return <button key={start} type="button" aria-pressed={active} onClick={() => onSlotSelection(start, slotCount)} className={`flex items-center justify-center gap-1.5 rounded-xl border px-2 py-2.5 text-xs font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tertiary-400/50 ${active ? "border-tertiary-400/60 bg-tertiary-400/10 text-tertiary-400" : "border-white/10 bg-noir-700/40 text-white/75 hover:border-tertiary-400/40 hover:bg-white/5"}`}>{active && <Check size={12} />}{formatStart(start)}</button>;
+        })}</div></div>)}</div> : <div role="status" className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-white/10 p-6 text-center"><CalendarSearch size={26} className="text-white/25" /><div><p className="text-sm text-white/80">Pas de disponibilité pour cette durée</p><p className="mt-1 text-xs leading-5 text-white/45">Essayez une autre date{!fixedDuration ? " ou une durée plus courte" : ""}.</p></div></div>}
+        {!!sortedSelection.length && <div aria-live="polite" className="mt-5 flex flex-wrap items-center gap-3 rounded-xl border border-tertiary-400/20 bg-tertiary-400/5 p-3.5"><span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-tertiary-400/10 text-tertiary-400"><Check size={15} /></span><div className="min-w-0 flex-1"><p className="text-xs font-medium text-white/90">{formatStart(sortedSelection[0])} – {formatEnd(sortedSelection[sortedSelection.length - 1])}</p><p className="mt-1 text-[10px] text-white/45">{formatDateKeyForDisplay(selectedDate)} · {sortedSelection.length * 30} min réservées</p></div><AppButton type="button" variant="secondary" onClick={onClearSelection} className="px-2.5! py-1.5! text-[11px]! shadow-none!">Effacer</AppButton></div>}
+      </Section>}
+    </div>
   );
 }

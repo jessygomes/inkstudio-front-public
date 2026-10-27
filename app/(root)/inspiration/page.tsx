@@ -28,7 +28,7 @@ export default async function InspirationPage({
   ]);
 
   return (
-    <main className="w-full px-4 py-6 sm:py-8 lg:px-20 bg-noir-700">
+    <main className="w-full bg-noir-700 px-4 py-4 sm:px-6 sm:py-5 lg:px-10 xl:px-16">
       <InspirationMosaicFeed
         initialData={initialData}
         initialFilters={filterOptions}

@@ -1,61 +1,20 @@
-"use client";
+﻿"use client";
+/* eslint-disable @next/next/no-img-element -- Object URLs preview local files before upload. */
+import { useEffect, useRef } from "react";
 
-import React, { useState, useEffect } from "react";
+interface ReferenceImagesProps { referenceFile?: File | null; sketchFile?: File | null; }
 
-interface ReferenceImagesProps {
-  referenceFile?: File | null;
-  sketchFile?: File | null;
+export default function ReferenceImages({ referenceFile, sketchFile }: ReferenceImagesProps) {
+  if (!referenceFile && !sketchFile) return null;
+  return <div className="mt-4 border-t border-white/8 pt-4"><p className="mb-3 text-[10px] uppercase tracking-wider text-white/40">Vos inspirations</p><div className="grid gap-2">{referenceFile && <FilePreview file={referenceFile} label="Référence principale" />}{sketchFile && <FilePreview file={sketchFile} label="Croquis / seconde référence" />}</div></div>;
 }
 
-export default function ReferenceImages({
-  referenceFile,
-  sketchFile,
-}: ReferenceImagesProps) {
-  const [referenceUrl, setReferenceUrl] = useState<string | null>(null);
-  const [sketchUrl, setSketchUrl] = useState<string | null>(null);
-
-  // Créer les URLs des objets pour les fichiers
+function FilePreview({ file, label }: { file: File; label: string }) {
+  const imageRef = useRef<HTMLImageElement>(null);
   useEffect(() => {
-    if (referenceFile) {
-      const url = URL.createObjectURL(referenceFile);
-      setReferenceUrl(url);
-      return () => URL.revokeObjectURL(url);
-    }
-  }, [referenceFile]);
-
-  useEffect(() => {
-    if (sketchFile) {
-      const url = URL.createObjectURL(sketchFile);
-      setSketchUrl(url);
-      return () => URL.revokeObjectURL(url);
-    }
-  }, [sketchFile]);
-
-  if (!referenceFile && !sketchFile) return null;
-
-  return (
-    <div>
-      <p className="text-white/60 font-one text-sm mb-2">Images de référence</p>
-      <div className="flex gap-2">
-        {referenceUrl && (
-          <div className="w-20 h-20 rounded overflow-hidden border border-white/10">
-            <img
-              src={referenceUrl}
-              alt="Référence"
-              className="w-full h-full object-cover"
-            />
-          </div>
-        )}
-        {sketchUrl && (
-          <div className="w-20 h-20 rounded overflow-hidden border border-white/10">
-            <img
-              src={sketchUrl}
-              alt="Sketch"
-              className="w-full h-full object-cover"
-            />
-          </div>
-        )}
-      </div>
-    </div>
-  );
+    const url = URL.createObjectURL(file);
+    if (imageRef.current) imageRef.current.src = url;
+    return () => URL.revokeObjectURL(url);
+  }, [file]);
+  return <div className="flex min-w-0 items-center gap-3 rounded-xl border border-white/8 bg-noir-700/40 p-2"><img ref={imageRef} alt={label} className="size-12 shrink-0 rounded-lg bg-white/5 object-cover" /><div className="min-w-0"><p className="text-[10px] text-white/40">{label}</p><p className="mt-1 truncate text-[11px] text-white/75">{file.name}</p></div></div>;
 }
