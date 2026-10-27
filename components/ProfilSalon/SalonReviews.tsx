@@ -42,7 +42,7 @@ function ReviewDate({ value }: { value?: string | null }) {
 }
 
 const buttonClass = "px-3! py-2! text-xs! rounded-lg! shadow-none!";
-const fieldClass = "mt-2 w-full rounded-xl border border-white/10 bg-noir-700 px-3.5 py-3 font-one text-sm text-white outline-none transition placeholder:text-white/25 focus:border-tertiary-400/50 focus:ring-2 focus:ring-tertiary-400/10";
+const fieldClass = "mt-2 w-full rounded-xl border border-white/10 bg-noir-800 px-3.5 py-3 font-one text-sm text-white outline-none transition placeholder:text-white/25 focus:border-tertiary-400/50 focus:ring-2 focus:ring-tertiary-400/10";
 
 export default function SalonReviews({ salonId, salonName }: Props) {
   const { isAuthenticated, isClient } = useUser();
@@ -108,7 +108,7 @@ export default function SalonReviews({ salonId, salonName }: Props) {
   };
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-white/10 bg-noir-700 font-one">
+    <div className="overflow-hidden rounded-2xl border border-white/10 bg-noir-800 font-one">
       <div className="p-4 sm:p-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="flex items-start gap-3"><span className="grid size-9 shrink-0 place-items-center rounded-xl border border-tertiary-400/15 bg-tertiary-400/8 text-tertiary-400"><MessageSquare size={17} aria-hidden="true" /></span><div><p className="mb-1 text-[9px] uppercase tracking-[0.14em] text-white/35">Leurs expériences</p><h2 className="text-lg font-medium text-white/90" title={"Avis sur " + (salonName || "ce salon")}>Les avis clients</h2><p className="mt-1 text-[11px] leading-5 text-white/40">Des retours pour imaginer votre prochaine séance.</p></div></div>
@@ -119,7 +119,7 @@ export default function SalonReviews({ salonId, salonName }: Props) {
           {(stats.totalReviews > 0 || error) && <AppButton type="button" variant="secondary" aria-expanded={listOpen} aria-controls={id + "-reviews"} onClick={() => setListOpen(open => !open)} className={buttonClass}>{listOpen ? "Masquer les avis" : "Lire les avis"}<ChevronRight size={13} className={listOpen ? "rotate-90" : ""} /></AppButton>}
         </div>
         {formOpen && (
-          <div id={`${id}-form`} className="mt-6 rounded-2xl border border-white/10 bg-noir-700/40 p-4 sm:p-6">
+          <div id={`${id}-form`} className="mt-6 rounded-2xl border border-white/10 bg-noir-800/40 p-4 sm:p-6">
             {!isAuthenticated ? (
               <div className="space-y-3"><h3 className="text-lg text-white">Votre expérience compte</h3><p className="text-sm text-white/65">Connectez-vous à votre compte client pour partager votre avis.</p><AppButton href="/se-connecter" variant="secondary" className={buttonClass}>Se connecter</AppButton></div>
             ) : !isClient ? <p className="text-sm text-white/70">Les avis sont réservés aux comptes clients.</p> : (
@@ -150,7 +150,7 @@ export default function SalonReviews({ salonId, salonName }: Props) {
       {listOpen && <div id={`${id}-reviews`} className="border-t border-white/10 p-4 sm:p-5">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
           <h3 className="text-base text-white">Les témoignages</h3>
-          <label className="flex items-center gap-2 text-sm text-white/60">Trier par<select value={sort} disabled={loading} onChange={(event) => setSort(event.target.value as Sort)} className="min-h-10 rounded-lg border border-white/10 bg-noir-700 px-3 font-one text-xs text-white focus-visible:outline-tertiary-400"><option value="recent">Les plus récents</option><option value="rating">Les mieux notés</option><option value="oldest">Les plus anciens</option></select></label>
+          <label className="flex items-center gap-2 text-sm text-white/60">Trier par<select value={sort} disabled={loading} onChange={(event) => setSort(event.target.value as Sort)} className="min-h-10 rounded-lg border border-white/10 bg-noir-800 px-3 font-one text-xs text-white focus-visible:outline-tertiary-400"><option value="recent">Les plus récents</option><option value="rating">Les mieux notés</option><option value="oldest">Les plus anciens</option></select></label>
         </div>
         <div aria-live="polite" aria-busy={loading}>
           {loading ? (

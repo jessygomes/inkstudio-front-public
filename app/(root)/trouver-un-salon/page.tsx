@@ -1,6 +1,6 @@
 import SalonSearchToolbar from "@/components/TrouverUnSalon/SalonSearchToolbar";
 import ListeSalon from "@/components/TrouverUnSalon/ListeSalon";
-import { ArrowUpRight, Search as SearchIcon, UsersRound, Sparkles } from "lucide-react";
+import { ArrowUpRight, Search as SearchIcon } from "lucide-react";
 import AppButton from "@/components/Shared/AppButton";
 import { Suspense } from "react";
 import Script from "next/script";
@@ -11,14 +11,6 @@ import { Metadata } from "next";
 
 
 export const dynamic = "force-dynamic";
-
-type TrouverUnSalonPageProps = {
-  searchParams?: Promise<{
-        query?: string | string[];
-        city?: string | string[];
-        style?: string | string[];
-      }>;
-};
 
 export const metadata: Metadata = {
   title: "Trouver un salon de tatouage - Inkera | Annuaire France",
@@ -97,22 +89,7 @@ function SalonListFallback() {
   );
 }
 
-export default async function TrouverUnSalonPage({
-  searchParams,
-}: TrouverUnSalonPageProps) {
-const resolvedSearchParams = searchParams
-    ? await Promise.resolve(searchParams)
-    : undefined;
-
-  const getSingleParam = (value?: string | string[]) =>
-    Array.isArray(value) ? value[0] : value;
-
-  const hasActiveSearch = Boolean(
-    getSingleParam(resolvedSearchParams?.query) ||
-      getSingleParam(resolvedSearchParams?.city) ||
-      getSingleParam(resolvedSearchParams?.style),
-  );
-
+export default async function TrouverUnSalonPage() {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
@@ -163,14 +140,11 @@ const resolvedSearchParams = searchParams
   return (
     <>
       <Script id="search-jsonld" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <div className="min-h-screen bg-noir-700 font-one">
+      <div className="min-h-screen bg-noir-800 font-one">
         <div className="w-full space-y-6 px-4 py-5 sm:px-6 sm:py-7 lg:px-10 xl:px-16">
-          <header className="flex flex-wrap items-start justify-between gap-4"><div className="flex items-start gap-3"><span className="mt-0.5 grid size-9 shrink-0 place-items-center rounded-xl border border-tertiary-400/15 bg-tertiary-400/8 text-tertiary-400"><SearchIcon size={17} /></span><div><p className="mb-1 text-[9px] uppercase tracking-[0.16em] text-white/35">Une rencontre, un projet</p><h1 className="text-xl font-medium leading-tight tracking-tight text-white sm:text-2xl">Trouvez votre prochain artiste</h1><p className="mt-1 text-xs leading-6 text-white/45">Explorez les profils des salons et tatoueurs déjà présents sur Inkera.</p></div></div><span className="rounded-full border border-white/8 bg-white/[0.025] px-2.5 py-1.5 text-[9px] text-white/40">Annuaire complet en préparation</span></header>
-          <div className="rounded-2xl border border-white/10 bg-noir-700 p-3 sm:p-4"><Suspense fallback={<SearchFallback />}><SearchContent /></Suspense></div>
-          {hasActiveSearch ? <Suspense fallback={<SalonListFallback />}><SalonListContent /></Suspense> : <div className="space-y-4">
-            <div className="rounded-2xl border border-dashed border-white/10 px-5 py-8 text-center"><SearchIcon size={26} className="mx-auto mb-3 text-white/20" /><h2 className="text-base text-white/80">Un nom, une ville, un univers…</h2><p className="mx-auto mt-2 max-w-md text-xs leading-6 text-white/40">Lancez une recherche pour découvrir les profils déjà consultables. L’annuaire complet ouvrira lorsque suffisamment de salons seront inscrits.</p></div>
-            <div className="grid gap-3 sm:grid-cols-2"><article className="flex items-start gap-3 rounded-xl border border-white/8 bg-white/[0.015] p-4"><UsersRound size={17} className="mt-0.5 shrink-0 text-tertiary-400/70" /><div><h3 className="text-xs font-medium text-white/80">Des artistes déjà à découvrir</h3><p className="mt-1 text-[11px] leading-5 text-white/40">Consultez leurs créations, leurs spécialités et les informations utiles pour votre projet.</p></div></article><article className="flex items-start gap-3 rounded-xl border border-white/8 bg-white/[0.015] p-4"><Sparkles size={17} className="mt-0.5 shrink-0 text-tertiary-400/70" /><div><h3 className="text-xs font-medium text-white/80">Une communauté qui grandit</h3><p className="mt-1 text-[11px] leading-5 text-white/40">De nouveaux professionnels rejoignent Inkera. Revenez découvrir leurs univers.</p></div></article></div>
-          </div>}
+          <header className="flex flex-wrap items-start justify-between gap-4"><div className="flex items-start gap-3"><span className="mt-0.5 grid size-9 shrink-0 place-items-center rounded-xl border border-tertiary-400/15 bg-tertiary-400/8 text-tertiary-400"><SearchIcon size={17} /></span><div><p className="mb-1 text-[9px] uppercase tracking-[0.16em] text-white/35">Une rencontre, un projet</p><h1 className="text-xl font-medium leading-tight tracking-tight text-white sm:text-2xl">Trouvez votre prochain artiste</h1><p className="mt-1 text-xs leading-6 text-white/45">Explorez les profils des salons et tatoueurs déjà présents sur Inkera.</p></div></div></header>
+          <div className="rounded-2xl border border-white/10 bg-noir-800 p-3 sm:p-4"><Suspense fallback={<SearchFallback />}><SearchContent /></Suspense></div>
+          <Suspense fallback={<SalonListFallback />}><SalonListContent /></Suspense>
           <aside className="flex flex-wrap items-center justify-between gap-3 border-t border-white/8 pt-5"><p className="text-xs text-white/40">Vous êtes tatoueur ou tatoueuse ? Faites découvrir votre univers.</p><AppButton href="/en-savoir-plus" variant="secondary" className="px-3! py-2! text-xs! shadow-none!">Découvrir Inkera<ArrowUpRight size={13} /></AppButton></aside>
         </div>
       </div>

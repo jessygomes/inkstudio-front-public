@@ -23,7 +23,7 @@ export default function TextInput({ name, label, placeholder, type = "text", req
       </label>
       <input {...register(name)} id={name} type={type} placeholder={placeholder} autoComplete={autoComplete} max={max}
         aria-required={required} aria-invalid={!!error} aria-describedby={error || hint ? helpId : undefined}
-        className={`h-11 w-full min-w-0 rounded-xl border bg-noir-700/70 px-3.5 text-sm text-white outline-none transition placeholder:text-white/25 focus:bg-white/[0.035] focus:ring-2 [color-scheme:dark] ${error ? "border-red-400/50 focus:ring-red-400/10" : "border-white/10 hover:border-white/20 focus:border-tertiary-400/50 focus:ring-tertiary-400/10"}`} />
+        className={`h-11 w-full min-w-0 rounded-xl border bg-noir-800/70 px-3.5 text-sm text-white outline-none transition placeholder:text-white/25 focus:bg-white/[0.035] focus:ring-2 [color-scheme:dark] ${error ? "border-red-400/50 focus:ring-red-400/10" : "border-white/10 hover:border-white/20 focus:border-tertiary-400/50 focus:ring-tertiary-400/10"}`} />
       {(error || hint) && <p id={helpId} role={error ? "alert" : undefined} className={`mt-1.5 text-[11px] leading-5 ${error ? "text-red-300" : "text-white/40"}`}>{error?.message || hint}</p>}
     </div>
   );

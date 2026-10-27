@@ -215,7 +215,7 @@ export default function MessageInput({
       <form onSubmit={handleSendMessage} className="flex flex-col gap-2">
         {/* Aperçu de l'image ou message d'erreur */}
         {preview && !compressionError && (
-          <div className="relative h-20 w-20 overflow-hidden rounded-lg border border-white/10 bg-noir-700">
+          <div className="relative h-20 w-20 overflow-hidden rounded-lg border border-white/10 bg-noir-800">
             <Image src={preview} alt="Aperçu" fill className="object-cover" />
             <button
               type="button"
@@ -273,7 +273,7 @@ export default function MessageInput({
 
         {/* Zone input */}
         <div
-          className={`flex items-end gap-2 rounded-xl border border-white/10 bg-noir-700/50 ${compact ? "p-1.5" : "p-2"} transition-colors focus-within:border-tertiary-400/50`}
+          className={`flex items-end gap-2 rounded-xl border border-white/10 bg-noir-800/50 ${compact ? "p-1.5" : "p-2"} transition-colors focus-within:border-tertiary-400/50`}
           onDragOver={handleDragOver}
           onDrop={handleDrop}
         >
@@ -282,7 +282,7 @@ export default function MessageInput({
             type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={disabled || sendingMessage || isUploading}
-            className={`${compact ? "h-8 w-8" : "h-10 w-10"} flex shrink-0 cursor-pointer items-center justify-center rounded-xl border border-white/20 bg-noir-700 text-xs text-tertiary-500 transition-colors hover:border-tertiary-400 hover:text-tertiary-300 disabled:cursor-not-allowed disabled:opacity-50`}
+            className={`${compact ? "h-8 w-8" : "h-10 w-10"} flex shrink-0 cursor-pointer items-center justify-center rounded-xl border border-white/20 bg-noir-800 text-xs text-tertiary-500 transition-colors hover:border-tertiary-400 hover:text-tertiary-300 disabled:cursor-not-allowed disabled:opacity-50`}
             title="Ajouter une image"
           >
             <MdImage className="w-4 h-4" />

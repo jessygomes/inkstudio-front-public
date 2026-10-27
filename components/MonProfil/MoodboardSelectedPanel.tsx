@@ -118,13 +118,13 @@ export default function MoodboardSelectedPanel({
             <div className="flex flex-wrap items-center gap-2">
               <button type="button" onClick={onBack} aria-label="Tous mes moodboards" title="Tous mes moodboards" className="grid h-8 w-8 shrink-0 cursor-pointer place-items-center rounded-lg text-white/60 transition hover:bg-white/5 hover:text-white"><FaArrowLeft size={13} /></button>
               <label htmlFor={`${formId}-name`} className="sr-only">Nom du moodboard</label>
-              <input autoFocus id={`${formId}-name`} value={editName} onChange={(event) => onEditNameChange(event.target.value)} required disabled={savingInfos} className="h-9 min-w-0 flex-1 rounded-lg border border-white/15 bg-noir-700 px-3 text-sm text-white outline-none focus:border-tertiary-400" />
+              <input autoFocus id={`${formId}-name`} value={editName} onChange={(event) => onEditNameChange(event.target.value)} required disabled={savingInfos} className="h-9 min-w-0 flex-1 rounded-lg border border-white/15 bg-noir-800 px-3 text-sm text-white outline-none focus:border-tertiary-400" />
               <span className="shrink-0 rounded-md bg-white/5 px-2 py-0.5 text-xs text-white/45">{selectedMoodboard.images?.length || 0}</span>
               <button type="button" disabled={savingInfos} onClick={() => { onEditNameChange(selectedMoodboard.name); onEditDescriptionChange(selectedMoodboard.description || ""); setIsEditing(false); }} className="h-9 cursor-pointer rounded-lg border border-white/10 px-3 text-xs text-white/60 hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-50">Annuler</button>
               <AppButton type="submit" variant="secondary" disabled={savingInfos || !editName.trim()} icon={<FaSave size={12} />} className="h-9 cursor-pointer !rounded-lg !px-3 !py-0 !text-xs">{savingInfos ? "Enregistrement…" : "Valider"}</AppButton>
             </div>
             <label htmlFor={`${formId}-description`} className="sr-only">Description (facultative)</label>
-            <textarea id={`${formId}-description`} value={editDescription} onChange={(event) => onEditDescriptionChange(event.target.value)} rows={2} placeholder="Description (facultative)" disabled={savingInfos} className="w-full resize-y rounded-lg border border-white/15 bg-noir-700 px-3 py-2 text-xs text-white outline-none placeholder:text-white/35 focus:border-tertiary-400" />
+            <textarea id={`${formId}-description`} value={editDescription} onChange={(event) => onEditDescriptionChange(event.target.value)} rows={2} placeholder="Description (facultative)" disabled={savingInfos} className="w-full resize-y rounded-lg border border-white/15 bg-noir-800 px-3 py-2 text-xs text-white outline-none placeholder:text-white/35 focus:border-tertiary-400" />
             {hasChanges && <p className="text-[11px] text-white/45">Modifications non enregistrées</p>}
           </form>
         ) : (
@@ -170,7 +170,7 @@ export default function MoodboardSelectedPanel({
               <button
                 type="button"
                 onClick={() => openLightbox(index)}
-                className="relative block aspect-[4/5] w-full cursor-zoom-in bg-noir-700"
+                className="relative block aspect-[4/5] w-full cursor-zoom-in bg-noir-800"
                 aria-label={`Agrandir l'image ${index + 1}`}
               >
                 <Image

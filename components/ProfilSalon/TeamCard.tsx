@@ -39,7 +39,7 @@ export function TeamCard({ name, img, description, instagram, skills, style, isL
   return (
     <article aria-labelledby={`${id}-name`} className="group flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-white/10 bg-noir-500 font-one transition-colors hover:border-tertiary-400/30">
       <div className="flex items-center gap-4 bg-linear-to-br from-white/5 to-transparent p-4 sm:p-5">
-        <div className="relative grid h-20 w-20 shrink-0 place-items-center overflow-hidden rounded-2xl border border-white/10 bg-noir-700 text-2xl text-white/60 sm:h-24 sm:w-24">
+        <div className="relative grid h-20 w-20 shrink-0 place-items-center overflow-hidden rounded-2xl border border-white/10 bg-noir-800 text-2xl text-white/60 sm:h-24 sm:w-24">
           {img ? <Image src={img} alt={`Portrait de ${name}`} fill sizes="(min-width:640px) 96px, 80px" className="object-cover transition-transform duration-300 motion-safe:group-hover:scale-105" /> : name.trim().charAt(0).toUpperCase()}
         </div>
         <div className="min-w-0">

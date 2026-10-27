@@ -8,7 +8,7 @@ export default async function ModifierProfilPage() {
   // Redirection si pas authentifié ou pas client
   if (!session?.user) {
     return (
-      <div className="min-h-screen bg-noir-700 px-4 pt-10 flex items-center justify-center">
+      <div className="min-h-screen bg-noir-800 px-4 pt-10 flex items-center justify-center">
         <div className="max-w-md text-center">
           <p className="text-white/60 font-one mb-4">
             Vous devez être connecté en tant que client pour accéder à cette
@@ -28,7 +28,7 @@ export default async function ModifierProfilPage() {
   const user = session.user as any;
 
   return (
-    <div className="min-h-screen bg-noir-700">
+    <div className="min-h-screen bg-noir-800">
       <UpdateProfil {...user} />
     </div>
   );

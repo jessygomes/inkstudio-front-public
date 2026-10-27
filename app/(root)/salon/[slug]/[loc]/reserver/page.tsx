@@ -259,14 +259,14 @@ export default async function ReserverPage({
   // const directionsHref = `https://www.google.com/maps/search/?api=1&query=${mapsQuery}`;
 
   return (
-    <div className="min-h-screen bg-noir-700 px-4 pb-10 pt-6 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-noir-800 px-4 pb-10 pt-6 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
         <Link href={`/salon/${slug}/${loc}`} className="mb-6 inline-flex items-center gap-2 text-xs text-white/40 transition hover:text-white"><ArrowLeft size={13} />Retour au salon</Link>
         <div className="grid items-start gap-6 lg:grid-cols-[260px_minmax(0,1fr)] xl:gap-10">
-          <aside aria-label="Votre salon" className="order-2 overflow-hidden rounded-2xl border border-white/10 bg-noir-700 lg:sticky lg:top-6 lg:order-1">
+          <aside aria-label="Votre salon" className="order-2 overflow-hidden rounded-2xl border border-white/10 bg-noir-800 lg:sticky lg:top-6 lg:order-1">
             <div className="relative h-32 overflow-hidden bg-white/3 lg:h-40">
               {salon.image ? <Image src={salon.image} alt={salon.salonName} fill sizes="(min-width: 1024px) 260px, 100vw" className="object-cover" priority /> : <div className="grid h-full place-items-center text-xl text-white/15 font-one">{salon.salonName}</div>}
-              <div className="absolute inset-0 bg-linear-to-t from-noir-700/70 via-transparent to-transparent" />
+              <div className="absolute inset-0 bg-linear-to-t from-noir-800/70 via-transparent to-transparent" />
             </div>
             <div className="space-y-5 p-5">
               <div><p className="text-[9px] font-medium uppercase tracking-[0.16em] text-tertiary-400/80">Vous avez rendez-vous chez</p><div className="mt-3 flex items-center gap-3"><div className="relative grid size-11 shrink-0 place-items-center overflow-hidden rounded-full border border-white/10 bg-white/5">{salon.profileImage || salon.image ? <Image src={salon.profileImage || salon.image} alt={salon.salonName} fill sizes="44px" className="object-cover" /> : <span aria-hidden="true" className="text-base text-white/45">{salon.salonName?.slice(0, 1).toUpperCase()}</span>}</div><div className="min-w-0"><h2 className="break-words text-lg font-semibold tracking-tight text-white font-one">{salon.salonName}</h2><p className="mt-1 text-xs text-white/40">{[displayCity, salon.postalCode].filter(Boolean).join(" · ")}</p></div></div></div>
@@ -275,7 +275,7 @@ export default async function ReserverPage({
                 {salon.phone && <a href={`tel:${salon.phone}`} className="flex items-center gap-2.5 hover:text-white"><Phone size={13} className="shrink-0 text-white/30" />{displayPhone}</a>}
                 {salon.email && <a href={`mailto:${salon.email}`} className="flex items-start gap-2.5 break-all hover:text-white"><Mail size={13} className="mt-0.5 shrink-0 text-white/30" />{salon.email}</a>}
               </div>
-              <div className="overflow-hidden rounded-xl border border-white/8 bg-noir-700/40">
+              <div className="overflow-hidden rounded-xl border border-white/8 bg-noir-800/40">
                 <div className="flex gap-2.5 p-3"><span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-white/5 text-tertiary-400"><Clock3 size={15} /></span><div className="flex-1"><p className="text-[10px] text-white/40">Aujourd’hui au salon</p><div className="mt-1 flex items-center justify-between gap-2"><p className="text-[11px] tabular-nums text-white/80">{openNow.today ? openNow.today.start + " – " + openNow.today.end : hoursLines.length ? "Fermé aujourd’hui" : "Horaires non renseignés"}</p>{!!hoursLines.length && <span className={`size-1.5 shrink-0 rounded-full ${openNow.open ? "bg-emerald-400" : "bg-white/25"}`} aria-label={openNow.open ? "Ouvert actuellement" : "Actuellement fermé"} />}</div></div></div>
                 {!!hoursLines.length && <details className="group border-t border-white/8"><summary className="flex cursor-pointer list-none items-center justify-between px-3 py-2.5 text-[10px] text-white/45 hover:text-white [&::-webkit-details-marker]:hidden">Les horaires de la semaine<ChevronDown size={12} className="transition-transform group-open:rotate-180" /></summary><div className="space-y-0.5 px-1.5 pb-1.5">{hoursLines.map(hour => <div key={hour.day} className={`flex items-center justify-between gap-2 rounded-lg px-2 py-2 text-[10px] ${hour.day.toLowerCase() === todayFR ? "bg-tertiary-400/5 text-tertiary-400" : "text-white/45"}`}><span className="capitalize">{hour.day}</span><span className="tabular-nums">{hour.value}</span></div>)}</div></details>}
               </div>

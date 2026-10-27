@@ -5,7 +5,7 @@ import type { RendezVousCardProps } from "./RendezVousCard";
 
 type Props = Pick<RendezVousCardProps, "appointment" | "hasReview" | "reviewForm" | "hoverRating" | "reviewSubmitting" | "setHoverRating" | "setReviewForm" | "handleSubmitReview">;
 const ratings = ["Très déçu", "Déçu", "Correct", "Satisfait", "Très satisfait"];
-const fieldClass = "w-full rounded-lg border border-white/15 bg-noir-700 px-3 py-2 text-base text-white placeholder:text-white/35 outline-none transition-colors hover:border-white/25 focus:border-tertiary-400 focus:ring-2 focus:ring-tertiary-400/15 @sm:text-sm";
+const fieldClass = "w-full rounded-lg border border-white/15 bg-noir-800 px-3 py-2 text-base text-white placeholder:text-white/35 outline-none transition-colors hover:border-white/25 focus:border-tertiary-400 focus:ring-2 focus:ring-tertiary-400/15 @sm:text-sm";
 
 export default function AppointmentReview({ appointment, hasReview, reviewForm, hoverRating, reviewSubmitting, setHoverRating, setReviewForm, handleSubmitReview }: Props) {
   const id = useId();

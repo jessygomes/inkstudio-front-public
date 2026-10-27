@@ -45,7 +45,7 @@ export default function ProfileEditorForm({ form, onSubmit, isSubmitting, onCanc
         </div>
       </header>
       <div className="grid min-w-0 items-start gap-4 xl:grid-cols-[220px_minmax(0,1fr)] xl:gap-6">
-        <aside className="min-w-0 rounded-2xl border border-white/10 bg-noir-700 p-2 xl:sticky xl:top-24 xl:p-4">
+        <aside className="min-w-0 rounded-2xl border border-white/10 bg-noir-800 p-2 xl:sticky xl:top-24 xl:p-4">
           <p className="mb-3 hidden px-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/35 xl:block">Dans votre profil</p>
           <nav aria-label="Sections du formulaire" className="grid grid-cols-3 gap-1 xl:grid-cols-1">
             {[
@@ -58,7 +58,7 @@ export default function ProfileEditorForm({ form, onSubmit, isSubmitting, onCanc
         </aside>
         <form noValidate onSubmit={handleSubmit(async values => { if (!photoBusy) await onSubmit(values); })} aria-busy={isSubmitting || photoBusy} className="min-w-0 space-y-4">
         <fieldset disabled={isSubmitting} className="min-w-0 space-y-4 disabled:opacity-70">
-          <section id="profile-photo" aria-labelledby="profile-photo-title" className="scroll-mt-24 rounded-2xl border border-white/10 bg-noir-700 p-4 sm:p-6">
+          <section id="profile-photo" aria-labelledby="profile-photo-title" className="scroll-mt-24 rounded-2xl border border-white/10 bg-noir-800 p-4 sm:p-6">
             <div className="mb-5 flex items-start gap-3"><span className="grid size-9 shrink-0 place-items-center rounded-xl border border-tertiary-400/20 bg-tertiary-400/10 text-tertiary-400"><Camera size={17} aria-hidden="true" /></span><div><p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/35">01 · Votre image</p><h2 id="profile-photo-title" className="mt-1 text-sm font-semibold tracking-tight text-white sm:text-base">Photo de profil</h2><p className="mt-1 font-two text-[11px] leading-relaxed text-white/40">Ajoutez une touche personnelle à votre espace.</p></div></div>
             <SalonImageUploader compact currentImage={watch("image") || undefined} disabled={isSubmitting} onBusyChange={setPhotoBusy}
                 onImageUpload={url => setValue("image", url, { shouldDirty: true, shouldValidate: true })}
@@ -66,7 +66,7 @@ export default function ProfileEditorForm({ form, onSubmit, isSubmitting, onCanc
             {errors.image && <p role="alert" className="mt-2 text-[11px] text-red-300">{errors.image.message}</p>}
           </section>
             {sections.map((section, index) => (
-              <section key={section.title} id={`editor-section-${index}`} aria-labelledby={`editor-section-title-${index}`} className="scroll-mt-24 rounded-2xl border border-white/10 bg-noir-700 p-4 sm:p-6">
+              <section key={section.title} id={`editor-section-${index}`} aria-labelledby={`editor-section-title-${index}`} className="scroll-mt-24 rounded-2xl border border-white/10 bg-noir-800 p-4 sm:p-6">
                 <div className="mb-5 flex items-start gap-3">
                   <span aria-hidden="true" className="grid size-9 shrink-0 place-items-center rounded-xl border border-tertiary-400/20 bg-tertiary-400/10 text-tertiary-400">{index === 0 ? <UserRound size={17} /> : <Mail size={17} />}</span>
                   <div>
@@ -86,7 +86,7 @@ export default function ProfileEditorForm({ form, onSubmit, isSubmitting, onCanc
                         <input id={field.name} type={field.type || "text"} autoComplete={field.autoComplete}
                           aria-required={field.required} aria-invalid={!!error} aria-describedby={error ? `${field.name}-error` : undefined}
                           maxLength={field.name === "postalCode" ? 5 : undefined} {...register(field.name)}
-                          className={`min-h-11 w-full min-w-0 rounded-xl border bg-noir-700 px-3.5 py-2.5 font-two text-sm text-white outline-none transition [color-scheme:dark] focus:border-tertiary-400/45 focus:bg-noir-700 focus:ring-2 focus:ring-tertiary-400/10 ${error ? "border-red-400/70" : "border-white/10 hover:border-white/20"}`} />
+                          className={`min-h-11 w-full min-w-0 rounded-xl border bg-noir-800 px-3.5 py-2.5 font-two text-sm text-white outline-none transition [color-scheme:dark] focus:border-tertiary-400/45 focus:bg-noir-800 focus:ring-2 focus:ring-tertiary-400/10 ${error ? "border-red-400/70" : "border-white/10 hover:border-white/20"}`} />
                         {error && <p id={`${field.name}-error`} role="alert" className="mt-1 text-[10px] text-red-300">{error.message}</p>}
                       </div>
                     );
@@ -96,7 +96,7 @@ export default function ProfileEditorForm({ form, onSubmit, isSubmitting, onCanc
             ))}
         </fieldset>
         <p className="text-[10px] text-white/35"><span className="text-tertiary-400">*</span> Champs obligatoires</p>
-        <footer className="sticky bottom-3 z-10 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-noir-700/95 p-3 shadow-xl shadow-black/20 backdrop-blur-xl sm:p-4">
+        <footer className="sticky bottom-3 z-10 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-noir-800/95 p-3 shadow-xl shadow-black/20 backdrop-blur-xl sm:p-4">
           <p role="status" className="flex items-center gap-2 text-[11px] text-white/40">
             {isSubmitting || photoBusy ? <LoaderCircle size={15} className="animate-spin" aria-hidden="true" /> : !isDirty ? <Check size={15} aria-hidden="true" /> : <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-tertiary-400" />}
             {photoBusy ? "Ajout de la photo en cours…" : isSubmitting ? "Enregistrement en cours…" : isDirty ? "Modifications non enregistrées" : "Aucune modification en attente"}

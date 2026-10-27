@@ -117,9 +117,9 @@ export default function ContactPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <div className="min-h-screen bg-linear-to-b from-noir-700 via-noir-600 to-noir-700">
+      <div className="min-h-screen bg-linear-to-b from-noir-800 via-noir-600 to-noir-800">
         {/* Hero Section */}
-        <section className="bg-linear-to-r from-noir-700 to-noir-800 pt-20 relative overflow-hidden">
+        <section className="bg-linear-to-r from-noir-800 to-noir-800 pt-20 relative overflow-hidden">
           {/* <div className="absolute top-0 right-0 w-80 h-80 bg-tertiary-400/5 rounded-full blur-3xl"></div>
           <div className="absolute bottom-0 left-0 w-96 h-96 bg-tertiary-500/3 rounded-full blur-3xl"></div> */}
 

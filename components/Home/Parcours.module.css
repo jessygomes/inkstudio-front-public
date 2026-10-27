@@ -1,0 +1,109 @@
+.panels {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.panel {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  min-height: 240px;
+  overflow: hidden;
+  border-radius: 16px;
+  background: var(--color-noir-800);
+  outline: none;
+  isolation: isolate;
+  transition: flex-grow 500ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.panel:focus-visible {
+  outline: 2px solid var(--color-tertiary-400);
+  outline-offset: 4px;
+}
+
+.image {
+  object-fit: cover;
+  transition: transform 700ms ease;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, color-mix(in srgb, var(--color-noir-800) 82%, transparent), color-mix(in srgb, var(--color-noir-800) 42%, transparent) 35%, transparent 75%);
+}
+
+.overlay::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background: linear-gradient(to top, color-mix(in srgb, var(--color-noir-800) 55%, transparent), color-mix(in srgb, var(--color-noir-800) 30%, transparent) 30%, transparent 65%);
+  opacity: 0;
+  transition: opacity 350ms ease;
+}
+
+.content {
+  position: relative;
+  align-self: flex-end;
+  width: 100%;
+  padding: 24px;
+}
+
+.details {
+  display: none;
+  grid-template-rows: 1fr;
+  opacity: 1;
+  visibility: visible;
+  transition: grid-template-rows 400ms ease, opacity 300ms ease;
+}
+
+@media (min-width: 768px) {
+  .details {
+    display: grid;
+  }
+
+  .panels {
+    flex-direction: row;
+  }
+
+  .panel {
+    flex: 1 1 0%;
+    min-height: 360px;
+  }
+}
+
+/* On larger touch screens, descriptions remain visible without a hover. */
+@media (min-width: 768px) and (hover: hover) and (pointer: fine) {
+  .details {
+    grid-template-rows: 0fr;
+    opacity: 0;
+    visibility: hidden;
+  }
+
+  .panel:is(:hover, :focus-within) {
+    flex-grow: 1.8;
+  }
+
+  .panel:is(:hover, :focus-within) .details {
+    grid-template-rows: 1fr;
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .panel:is(:hover, :focus-within) .overlay::after {
+    opacity: 1;
+  }
+
+  .panel:is(:hover, :focus-within) .image {
+    transform: scale(1.04);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel,
+  .image,
+  .details,
+  .overlay::after {
+    transition: none;
+  }
+}

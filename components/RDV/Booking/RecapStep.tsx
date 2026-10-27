@@ -114,7 +114,7 @@ export default function RecapStep({
         <div className="overflow-hidden rounded-xl border border-tertiary-400/20 bg-tertiary-400/5">
           <div className="flex flex-wrap items-center justify-between gap-2 border-b border-tertiary-400/10 px-4 py-3">
             <span className="text-sm font-semibold text-white font-one">{serviceLabel}</span>
-            <span className="rounded-full border border-white/10 bg-noir-700/50 px-2 py-1 text-[10px] text-white/60">Au salon</span>
+            <span className="rounded-full border border-white/10 bg-noir-800/50 px-2 py-1 text-[10px] text-white/60">Au salon</span>
           </div>
           <div className="grid gap-4 p-4 sm:grid-cols-2">
             <SummaryFact icon={<CalendarDays size={16} />} label="Date" value={selectedDate ? formatDateKeyForDisplay(selectedDate) : "À choisir"} />
@@ -141,7 +141,7 @@ export default function RecapStep({
         </Section>
         <Section title="Votre prestation" eyebrow="Le projet" icon={<PenTool size={18} />}>
           <div className="mb-3 flex justify-end"><AppButton type="button" variant="secondary" onClick={() => onEdit?.(2)} className="px-3! py-1.5! text-xs! shadow-none!">Modifier le projet</AppButton></div>
-          {selectedFlash && <div className="mb-4 flex items-center gap-3 rounded-xl border border-white/8 bg-noir-700/50 p-2.5">{selectedFlash.imageUrl && <Image src={selectedFlash.imageUrl} alt={selectedFlash.title || selectedFlash.name || "Flash"} width={56} height={56} className="size-14 rounded-lg object-cover" />}<div className="min-w-0"><p className="text-[10px] text-white/40">Flash choisi</p><p className="mt-1 break-words text-xs text-white/85">{selectedFlash.title || selectedFlash.name || "Flash"}</p>{typeof selectedFlash.price === "number" && <p className="mt-1 text-xs text-tertiary-400">{selectedFlash.price} €</p>}</div></div>}
+          {selectedFlash && <div className="mb-4 flex items-center gap-3 rounded-xl border border-white/8 bg-noir-800/50 p-2.5">{selectedFlash.imageUrl && <Image src={selectedFlash.imageUrl} alt={selectedFlash.title || selectedFlash.name || "Flash"} width={56} height={56} className="size-14 rounded-lg object-cover" />}<div className="min-w-0"><p className="text-[10px] text-white/40">Flash choisi</p><p className="mt-1 break-words text-xs text-white/85">{selectedFlash.title || selectedFlash.name || "Flash"}</p>{typeof selectedFlash.price === "number" && <p className="mt-1 text-xs text-tertiary-400">{selectedFlash.price} €</p>}</div></div>}
           <dl className="space-y-3">
             <SummaryRow label="Prestation" value={serviceLabel} />
             {prestation === "PIERCING" && <><SummaryRow label="Zone" value={piercingZoneLabel} />{piercingService && <SummaryRow label="Piercing" value={getPiercingServiceLabel(piercingService, piercingZoneLabel)} />}</>}
@@ -150,7 +150,7 @@ export default function RecapStep({
             {formData?.details?.colorStyle && <SummaryRow label="Style et couleurs" value={formData.details.colorStyle} />}
             {selectedSkinTone && <SummaryRow label="Teinte de peau" value={<span className="inline-flex items-center gap-2"><span className="size-3 rounded-full border border-white/15" style={{backgroundColor: selectedSkinTone.previewHex}} />{selectedSkinTone.label}</span>} />}
           </dl>
-          {formData?.details?.description && <div className="mt-4 rounded-xl border border-white/5 bg-noir-700/60 p-3"><p className="mb-1 text-[10px] text-white/40">Description du projet</p><p className="whitespace-pre-wrap break-words text-xs leading-6 text-white/75">{formData.details.description}</p></div>}
+          {formData?.details?.description && <div className="mt-4 rounded-xl border border-white/5 bg-noir-800/60 p-3"><p className="mb-1 text-[10px] text-white/40">Description du projet</p><p className="whitespace-pre-wrap break-words text-xs leading-6 text-white/75">{formData.details.description}</p></div>}
           <ReferenceImages referenceFile={referenceFile} sketchFile={sketchFile} />
         </Section>
       </div>

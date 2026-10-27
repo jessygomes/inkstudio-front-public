@@ -9,7 +9,7 @@ interface StepIndicatorProps {
 export default function StepIndicator({ steps, currentStep, onStepClick }: StepIndicatorProps) {
   return (
     <nav aria-label="Étapes de la réservation" className="mb-6">
-      <ol className="grid grid-cols-4 gap-1 rounded-2xl border border-white/8 bg-noir-700 p-1.5">
+      <ol className="grid grid-cols-4 gap-1 rounded-2xl border border-white/8 bg-noir-800 p-1.5">
         {steps.map((label, index) => {
           const number = index + 1;
           const complete = currentStep > number;

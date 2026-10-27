@@ -7,3 +7,8 @@
   }
   return [...cities.values()].sort((a, b) => a.localeCompare(b, "fr"));
 }
+
+export function formatCityLabel(value: string): string {
+  const city = value.trim().toLocaleLowerCase("fr-FR");
+  return city.charAt(0).toLocaleUpperCase("fr-FR") + city.slice(1);
+}

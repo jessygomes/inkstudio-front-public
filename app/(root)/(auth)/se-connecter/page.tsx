@@ -1,45 +1,17 @@
-// import { LoginForm } from "@/components/Auth/Form/LoginForm";
-// import { currentUser } from "@/lib/authAction/auth";
 import { Login } from "@/components/Auth/Login";
+import AuthPageShell from "@/components/Auth/AuthPageShell";
 import { currentUser } from "@/lib/auth.server";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-// import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
 export const metadata: Metadata = {
-  title: "Se connecter",
-  description:
-    "Connectez-vous à votre compte Inkera Studio pour gérer votre salon de tatouage, vos rendez-vous clients, votre portfolio et développer votre activité. Interface intuitive et sécurisée.",
-  keywords: [
-    "connexion tatoueur",
-    "compte Inkera Studio",
-    "gestion salon tatouage",
-    "rendez-vous tatouage",
-    "portfolio tattoo",
-  ],
+  title: "Se connecter à votre espace client | Inkera",
+  description: "Retrouvez vos moodboards, vos favoris, vos rendez-vous et vos échanges avec les artistes dans votre espace client Inkera.",
 };
 
-export default async function page() {
+export default async function LoginPage() {
   const user = await currentUser();
-  if (user) {
-    redirect("/mon-profil"); // Redirigez vers le tableau de bord si l'utilisateur est déjà connecté
-  }
-
-  return (
-    <section className="-mt-16 md:-mt-12">
-      <div
-        className="flex min-h-screen w-full bg-cover bg-center items-center justify-center px-2"
-        style={{
-          backgroundImage: "url('/images/bv.png')",
-          backgroundSize: "cover",
-        }}
-      >
-        {/* Ajoutez ici d'autres éléments si nécessaire */}
-        <Suspense>
-          <Login />
-        </Suspense>
-      </div>
-    </section>
-  );
+  if (user) redirect("/mon-profil");
+  return <AuthPageShell><Suspense fallback={<p role="status" className="min-h-96 text-sm text-white/55">Chargement du formulaire…</p>}><Login /></Suspense></AuthPageShell>;
 }

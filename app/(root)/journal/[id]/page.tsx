@@ -96,7 +96,7 @@ export default async function ArticleDetailPage({ params }: PageProps) {
     }
 
     return (
-      <section className="bg-noir-700 py-20 sm:py-24">
+      <section className="bg-noir-800 py-20 sm:py-24">
         <div className="mx-4 sm:mx-8 lg:mx-20">
           <div className="mx-auto max-w-3xl rounded-3xl border border-red-400/20 bg-red-500/10 p-8 text-center text-red-100 font-one">
             <p>Une erreur est survenue lors du chargement de l&apos;article.</p>

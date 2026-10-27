@@ -94,7 +94,7 @@ function getFlashDimensions(flash: FlashProps): string | null {
 }
 
   const Empty = ({ children }: { children: React.ReactNode }) => (
-    <div className="rounded-xl border border-dashed border-white/10 bg-noir-700/30 px-4 py-6 text-center text-sm text-white/50">
+    <div className="rounded-xl border border-dashed border-white/10 bg-noir-800/30 px-4 py-6 text-center text-sm text-white/50">
       <Images size={22} className="mx-auto mb-2 text-white/30" aria-hidden="true" />
       {children}
     </div>
@@ -125,7 +125,7 @@ function getFlashDimensions(flash: FlashProps): string | null {
               }
             }}
             disabled={current === 1}
-            className="cursor-pointer min-h-11 px-3 py-1.5 rounded-lg text-xs font-one bg-noir-700/80  hover:bg-noir-700/20  disabled:opacity-50 disabled:cursor-not-allowed text-white border border-white/15 transition"
+            className="cursor-pointer min-h-11 px-3 py-1.5 rounded-lg text-xs font-one bg-noir-800/80  hover:bg-noir-800/20  disabled:opacity-50 disabled:cursor-not-allowed text-white border border-white/15 transition"
           >
             Précédent
           </button>
@@ -164,7 +164,7 @@ function getFlashDimensions(flash: FlashProps): string | null {
               }
             }}
             disabled={current === total}
-            className="cursor-pointer min-h-11 px-3 py-1.5 rounded-lg text-xs font-one bg-noir-700/80  hover:bg-noir-700/20 disabled:opacity-50 disabled:cursor-not-allowed text-white border border-white/15 transition"
+            className="cursor-pointer min-h-11 px-3 py-1.5 rounded-lg text-xs font-one bg-noir-800/80  hover:bg-noir-800/20 disabled:opacity-50 disabled:cursor-not-allowed text-white border border-white/15 transition"
           >
             Suivant
           </button>
@@ -458,12 +458,12 @@ export default function SalonTabs({
 
   return (
     <section id="creations" className="scroll-mt-28" ref={sectionRef}>
-      <div className="bg-noir-700 rounded-2xl border border-white/10 p-4 font-one sm:p-6">
+      <div className="bg-noir-800 rounded-2xl border border-white/10 p-4 font-one sm:p-6">
         <div className="mb-5 flex items-center gap-3">
           <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-tertiary-400/15 bg-tertiary-400/8 text-tertiary-400"><Images size={17} aria-hidden="true" /></span>
           <div><p className="mb-1 text-[9px] uppercase tracking-[0.16em] text-white/35">En images</p><h2 className="text-lg font-medium text-white/90">L’univers du salon</h2><p className="mt-1 text-[11px] leading-5 text-white/40">Le lieu, les réalisations et vos prochaines inspirations.</p></div>
         </div>
-        <div role="tablist" aria-label="Contenus du salon" className="mb-4 grid grid-cols-2 gap-1.5 rounded-xl border border-white/8 bg-noir-700 p-1.5 sm:grid-cols-4">
+        <div role="tablist" aria-label="Contenus du salon" className="mb-4 grid grid-cols-2 gap-1.5 rounded-xl border border-white/8 bg-noir-800 p-1.5 sm:grid-cols-4">
           {([
             { key: "photos", label: "Le salon", count: counts.photos, Icon: ImageIcon },
             { key: "portfolio", label: "Portfolio", count: counts.portfolio, Icon: Palette },
@@ -490,7 +490,7 @@ export default function SalonTabs({
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-white/8 bg-white/[0.015] px-3 py-2.5">
           <p className="text-[11px] leading-5 text-white/45">{{ photos: "Découvrez le lieu et son ambiance.", portfolio: "Les réalisations des artistes du salon.", flashes: "Des dessins disponibles pour votre prochain tatouage.", products: "Les produits proposés par le salon." }[active]}</p>
           <div className="flex flex-wrap items-center gap-2">
-            {showSortControl && <select value={flashSort} onChange={(event) => { setFlashSort(event.target.value as FlashSort); setFlashesPage(1); }} aria-label="Trier les flashs" className="min-h-9 rounded-lg border border-white/10 bg-noir-700 px-2.5 font-one text-[11px] text-white/75"><option value="default">Ordre par défaut</option><option value="price-asc">Prix croissant</option><option value="price-desc">Prix décroissant</option><option value="name-asc">Nom A → Z</option></select>}
+            {showSortControl && <select value={flashSort} onChange={(event) => { setFlashSort(event.target.value as FlashSort); setFlashesPage(1); }} aria-label="Trier les flashs" className="min-h-9 rounded-lg border border-white/10 bg-noir-800 px-2.5 font-one text-[11px] text-white/75"><option value="default">Ordre par défaut</option><option value="price-asc">Prix croissant</option><option value="price-desc">Prix décroissant</option><option value="name-asc">Nom A → Z</option></select>}
             {showExpandControl && <AppButton type="button" variant="secondary" onClick={() => openLightbox(0)} className="min-h-9! px-2.5! py-1.5! text-[11px]! rounded-lg! shadow-none!"><Expand size={13} aria-hidden="true" />Agrandir</AppButton>}
           </div>
         </div>
@@ -629,7 +629,7 @@ export default function SalonTabs({
                     >
                       <button
                         type="button"
-                        className="relative block aspect-4/3 w-full shrink-0 cursor-zoom-in bg-noir-700 text-left disabled:cursor-default"
+                        className="relative block aspect-4/3 w-full shrink-0 cursor-zoom-in bg-noir-800 text-left disabled:cursor-default"
                         onClick={() => {
                           if (typeof imageIndex === "number") {
                             openLightbox(imageIndex);
@@ -716,7 +716,7 @@ export default function SalonTabs({
                     key={p.id}
                     className="group flex min-w-0 flex-col rounded-xl border border-white/8 bg-white/[0.015] overflow-hidden transition hover:border-tertiary-400/30"
                   >
-                    <div className="relative aspect-4/3 shrink-0 bg-noir-700">
+                    <div className="relative aspect-4/3 shrink-0 bg-noir-800">
                       <Image
                         src={p.imageUrl}
                         alt={p.name}

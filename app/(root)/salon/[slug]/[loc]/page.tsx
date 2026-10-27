@@ -505,7 +505,7 @@ export default async function ProfilPublicSalonPage({ params, searchParams }: Pa
       loc={resolvedParams.loc}
     >
       <div
-        className="min-h-screen bg-noir-700 font-one pb-8 [&_a:focus-visible]:outline-2 [&_a:focus-visible]:outline-offset-4 [&_a:focus-visible]:outline-tertiary-400 [&_button:focus-visible]:outline-2 [&_button:focus-visible]:outline-offset-4 [&_button:focus-visible]:outline-tertiary-400"
+        className="min-h-screen bg-noir-800 font-one pb-8 [&_a:focus-visible]:outline-2 [&_a:focus-visible]:outline-offset-4 [&_a:focus-visible]:outline-tertiary-400 [&_button:focus-visible]:outline-2 [&_button:focus-visible]:outline-offset-4 [&_button:focus-visible]:outline-tertiary-400"
         style={customStyle}
       >
 
@@ -517,7 +517,7 @@ export default async function ProfilPublicSalonPage({ params, searchParams }: Pa
         <SalonSectionNav showTeam={shouldShowTeamSection && sortedTatoueurs.length > 0} className="my-6 lg:hidden" />
         <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)] xl:gap-8">
           <aside id="informations" className="order-2 min-w-0 scroll-mt-28 space-y-4 lg:sticky lg:top-24">
-            <section aria-label="Votre prochain projet" className="rounded-2xl border border-tertiary-400/20 bg-linear-to-br from-tertiary-400/10 via-tertiary-500/5 to-noir-700 p-4">
+            <section aria-label="Votre prochain projet" className="rounded-2xl border border-tertiary-400/20 bg-linear-to-br from-tertiary-400/10 via-tertiary-500/5 to-noir-800 p-4">
               <div className="mb-3 flex items-start gap-2.5"><span className="grid size-8 shrink-0 place-items-center rounded-xl border border-tertiary-400/15 bg-tertiary-400/8 text-tertiary-400"><CalendarDays size={15} aria-hidden="true" /></span><div className="min-w-0"><h2 className="text-sm font-medium leading-5 text-white/90">Votre prochain projet commence ici</h2><p className="mt-1 text-[11px] leading-5 text-white/40">Une idée ? Échangez avec {salon.salonName}.</p></div></div>
               <div className="space-y-2"><AppButton href={!canBookAppointments ? "#contact" : "/salon/" + slug + "/" + loc + "/reserver"} variant="primary" fullWidth className="min-h-9! px-3! py-2! text-xs! shadow-none! hover:translate-y-0!">{!canBookAppointments ? "Contacter le salon" : "Prendre rendez-vous"}<ArrowUpRight size={14} /></AppButton>
                 {!isFree && <StartInkeraConversationButton variant="compact" targetUserId={salon.id} recipientName={salon.salonName || "ce tatoueur"} className="min-h-9! px-3! py-2! text-xs! shadow-none!" />}

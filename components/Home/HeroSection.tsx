@@ -1,49 +1,13 @@
 "use client";
 
 import Image from "next/image";
+import { homePhotos as allHeroPhotos } from "@/lib/data/homePhotos";
 import React from "react";
 import { motion } from "framer-motion";
 import AppButton from "../Shared/AppButton";
 import { IoSearch } from "react-icons/io5";
 
 export default function HeroSection() {
-  const allHeroPhotos = [
-    "/photos/aakaaaaaa.jpg",
-    "/photos/Jordan Clarkson.jpg",
-    "/photos/Luka Sabbat.jpg",
-    "/photos/old fart.jpg",
-    "/photos/Instagram.jpg",
-    "/photos/steve lacy bby.jpg",
-    "/photos/Village Green Fest 2013.jpg",
-    "/photos/AI Art.jpg",
-    "/photos/girls night out.jpg",
-    "/photos/Gorgeous.jpg",
-    "/photos/Lakeith Stanfield.jpg",
-    "/photos/LYNNPINNEDIT ✰_.jpg",
-    "/photos/mennonoiseless.jpg",
-    "/photos/Polynesian Tattoos in the Marquesas Islands.jpg",
-    "/photos/Sak Yant Tattoo Festival Day One, A Must-See in Thailand.jpg",
-    "/photos/Semerkaoriginal inst.jpg",
-    "/photos/Tahitian dance.jpg",
-    "/photos/When Anthony Bourdain got a hand-tap tattoo in Malaysia__GM x.jpg",
-    "/photos/_samm_roberts_  fit.jpg",
-    "/photos/sensitive.jpg",
-    "/photos/casqu.jpg",
-    "/photos/assis.jpg",
-    "/photos/jam.jpg",
-    "/photos/red.jpg",
-    "/photos/goth.jpg",
-    "/photos/blk.jpg",
-    "/photos/gun.jpg",
-    "/photos/drink.jpg",
-    "/photos/cre.jpg",
-    "/photos/sit.jpg",
-    "/photos/ot.jpg",
-    "/photos/fbb.jpg",
-    "/photos/metro.jpg",
-    "/photos/bi.jpg",
-    "/photos/bed.jpg",
-  ];
 
   const [heroPhotos, setHeroPhotos] = React.useState(allHeroPhotos.slice(0, 9));
 
@@ -82,7 +46,7 @@ export default function HeroSection() {
   };
 
   return (
-    <section className="w-full -mt-16 md:-mt-21 min-h-screen grid grid-cols-1 lg:grid-cols-2 gap-0 lg:gap-12 items-center z-20 bg-noir-700">
+    <section className="w-full -mt-16 md:-mt-21 min-h-screen grid grid-cols-1 lg:grid-cols-2 gap-0 lg:gap-12 items-center z-20 bg-noir-800">
       <motion.div
         className="relative w-full h-[55vh] max-h-[55vh] md:h-[55vh] md:max-h-[55vh] lg:h-screen lg:max-h-screen p-3 grid grid-cols-3 grid-rows-3 gap-2 overflow-hidden"
         variants={containerVariants}
@@ -106,7 +70,7 @@ export default function HeroSection() {
           </motion.div>
         ))}
 
-        <div className="pointer-events-none absolute inset-0 bg-noir-700/60 flex items-center justify-center">
+        <div className="pointer-events-none absolute inset-0 bg-noir-800/60 flex items-center justify-center">
           <motion.div
             variants={logoVariants}
             initial="hidden"
@@ -135,12 +99,12 @@ export default function HeroSection() {
             et prenez rendez-vous en ligne.
           </p>
         </div>
-        <div className="flex items-center flex-col sm:flex-row gap-2">
+        <div className="grid w-full max-w-lg grid-cols-2 items-stretch gap-2 sm:flex sm:w-auto sm:max-w-none">
         <AppButton
           href="/trouver-un-salon"
           variant="primary"
           icon={<IoSearch />}
-          className="w-fit sm:min-w-48 whitespace-nowrap"
+          className="w-full min-w-0 whitespace-nowrap px-2! text-[11px]! sm:w-fit sm:min-w-48 sm:px-5! sm:text-sm!"
         >
           Trouver un tatoueur
         </AppButton>
@@ -148,7 +112,7 @@ export default function HeroSection() {
         <AppButton
           href={"/inspiration"}
           variant="secondary"
-          className="whitespace-nowrap w-fit sm:min-w-48"
+          className="w-full min-w-0 whitespace-nowrap px-2! text-[11px]! sm:w-fit sm:min-w-48 sm:px-5! sm:text-sm!"
         >
           Découvrir des tatouages
         </AppButton>

@@ -65,7 +65,7 @@ export default function ConfirmActionModal({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-120 flex items-center justify-center bg-noir-700/75 p-3 backdrop-blur-sm sm:p-4"
+      className="fixed inset-0 z-120 flex items-center justify-center bg-noir-800/75 p-3 backdrop-blur-sm sm:p-4"
       onClick={() => {
         if (!loading) onClose();
       }}
@@ -74,7 +74,7 @@ export default function ConfirmActionModal({
       aria-label={title}
     >
       <div
-        className="w-full max-w-md rounded-3xl border border-white/12 bg-noir-700 p-4 shadow-2xl sm:p-5"
+        className="w-full max-w-md rounded-3xl border border-white/12 bg-noir-800 p-4 shadow-2xl sm:p-5"
         onClick={(event) => event.stopPropagation()}
       >
         <div className="space-y-2">

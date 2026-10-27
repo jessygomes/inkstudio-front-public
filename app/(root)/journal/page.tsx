@@ -20,7 +20,7 @@ export default async function ArticlesPage() {
 
   return (
     <>
-    <section className="bg-noir-700 py-20 sm:py-0 sm:pt-10 sm:pb-24">
+    <section className="bg-noir-800 py-20 sm:py-0 sm:pt-10 sm:pb-24">
       <div className="mx-4 sm:mx-8 lg:mx-20">
         <header className="pb-6 pt-3 font-one sm:pb-8 sm:pt-5">
           <p className="mb-4 text-xs uppercase tracking-[0.2em] text-tertiary-400">

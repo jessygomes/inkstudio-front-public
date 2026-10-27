@@ -1,44 +1,16 @@
 import Register from "@/components/Auth/Register";
+import AuthPageShell from "@/components/Auth/AuthPageShell";
 import { currentUser } from "@/lib/auth.server";
-
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-// import { redirect } from "next/navigation";
-import { Suspense } from "react";
 
 export const metadata: Metadata = {
-  title: "Créer un compte",
-  description:
-    "Rejoignez Inkera et transformez votre passion du tatouage en business florissant. Créez votre compte professionnel pour gérer clients, rendez-vous et développer votre réputation.",
-  keywords: [
-    "inscription tatoueur",
-    "créer compte Inkera Studio",
-    "salon de tatouage",
-    "tatoueur professionnel",
-    "business tattoo",
-  ],
+  title: "Créer votre compte client gratuit | Inkera",
+  description: "Créez votre compte client Inkera : rassemblez et partagez vos inspirations, gardez vos favoris et échangez directement avec les artistes.",
 };
 
-export default async function page() {
+export default async function RegisterPage() {
   const user = await currentUser();
-  if (user) {
-    redirect("/");
-  }
-
-  return (
-    <section className=" md:-mt-12">
-      <div
-        className="flex min-h-screen w-full bg-cover bg-center items-center justify-center px-4"
-        style={{
-          backgroundImage: "url('/images/bv.png')",
-          backgroundSize: "cover",
-        }}
-      >
-        {/* Ajoutez ici d'autres éléments si nécessaire */}
-        <Suspense>
-          <Register />
-        </Suspense>
-      </div>
-    </section>
-  );
+  if (user) redirect("/");
+  return <AuthPageShell><Register /></AuthPageShell>;
 }

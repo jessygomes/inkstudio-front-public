@@ -1,4 +1,3 @@
-/* eslint-disable react/no-unescaped-entities */
 "use client";
 
 import { useEffect, useState } from "react";
@@ -6,15 +5,15 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
+import AppButton from "@/components/Shared/AppButton";
+import AuthField from "./AuthField";
+import AuthFeedback from "./AuthFeedback";
+import AuthGoogleButton from "./AuthGoogleButton";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 import { signIn } from "next-auth/react";
 
-import { FormError } from "@/components/Shared/FormError";
-import { FormSuccess } from "@/components/Shared/FormSuccess";
 import { parseRateLimit } from "../../lib/auth-rate-limit";
-import { CardWrapper } from "./Wrapper/CardWrapper";
-import { FaGoogle } from "react-icons/fa";
 
 // Schema de validation pour l'inscription client
 const registerSchema = z
@@ -54,8 +53,6 @@ type RegisterForm = z.infer<typeof registerSchema>;
 
 export default function Register() {
   const router = useRouter();
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isPending, setIsPending] = useState(false);
   const [isGooglePending, setIsGooglePending] = useState(false);
   const [cooldownSeconds, setCooldownSeconds] = useState(0);
@@ -79,19 +76,14 @@ export default function Register() {
   });
 
   useEffect(() => {
-    if (cooldownSeconds <= 0) {
-      if (hasRateLimitError) {
+    if (cooldownSeconds <= 0) return;
+
+    const intervalId = window.setInterval(() => {
+      setCooldownSeconds(previous => Math.max(0, previous - 1));
+      if (cooldownSeconds <= 1 && hasRateLimitError) {
         setError("");
         setHasRateLimitError(false);
       }
-
-      return;
-    }
-
-    const intervalId = window.setInterval(() => {
-      setCooldownSeconds((previousSeconds) =>
-        previousSeconds > 0 ? previousSeconds - 1 : 0,
-      );
     }, 1000);
 
     return () => window.clearInterval(intervalId);
@@ -142,7 +134,7 @@ export default function Register() {
 
       const registerData = await registerResponse.json().catch(() => null);
 
-      if (!registerResponse.ok || registerData.error) {
+      if (!registerResponse.ok || registerData?.error) {
         throw new Error(
           registerData?.message || "Échec de l'inscription. Veuillez réessayer.",
         );
@@ -194,327 +186,37 @@ export default function Register() {
     }
   };
 
+  const busy = isPending || isGooglePending;
+
   return (
-    <div className="">
-      <CardWrapper headerLabel="Créer mon compte">
-        <form
-          method="post"
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="relative text-white"
-        >
-          <div className="flex flex-col gap-3">
-            <div className="sr-only" aria-hidden="true">
-              <label htmlFor="website">Site web</label>
-              <input
-                id="website"
-                type="text"
-                tabIndex={-1}
-                autoComplete="off"
-                {...form.register("website")}
-              />
-            </div>
-
-            {/* Nom et Prénom */}
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
-              <div className="flex flex-col gap-1 font-one">
-                <label htmlFor="firstName" className="text-xs">
-                  Prénom *
-                </label>
-                <input
-                  id="firstName"
-                  placeholder="Votre prénom"
-                  type="text"
-                  required
-                  className="bg-white/30 py-2.5 px-4 rounded-2xl text-sm w-full"
-                  {...form.register("firstName")}
-                />
-                {form.formState.errors.firstName && (
-                  <p className="text-red-500 text-sm">
-                    {form.formState.errors.firstName.message}
-                  </p>
-                )}
-              </div>
-
-              <div className="flex flex-col gap-1 font-one">
-                <label htmlFor="lastName" className="text-xs">
-                  Nom *
-                </label>
-                <input
-                  id="lastName"
-                  placeholder="Votre nom"
-                  type="text"
-                  required
-                  className="bg-white/30 py-2.5 px-4 rounded-2xl text-sm w-full"
-                  {...form.register("lastName")}
-                />
-                {form.formState.errors.lastName && (
-                  <p className="text-red-500 text-sm">
-                    {form.formState.errors.lastName.message}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* Email */}
-            <div className="flex flex-col gap-1 font-one">
-              <label htmlFor="email" className="text-xs">
-                Email *
-              </label>
-              <input
-                id="email"
-                placeholder="votre.email@exemple.com"
-                type="email"
-                required
-                className="bg-white/30 py-2.5 px-4 rounded-2xl text-sm w-full"
-                {...form.register("email")}
-              />
-              {form.formState.errors.email && (
-                <p className="text-red-500 text-sm">
-                  {form.formState.errors.email.message}
-                </p>
-              )}
-            </div>
-
-            {/* Date de naissance */}
-            <div className="flex flex-col gap-1 font-one">
-              <label htmlFor="birthDate" className="text-xs">
-                Date de naissance
-              </label>
-              <input
-                id="birthDate"
-                type="date"
-                className="bg-white/30 py-2.5 px-4 rounded-2xl text-sm w-full"
-                {...form.register("birthDate")}
-              />
-              {form.formState.errors.birthDate && (
-                <p className="text-red-500 text-sm">
-                  {form.formState.errors.birthDate.message}
-                </p>
-              )}
-            </div>
-
-            {/* Mot de passe */}
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
-            <div className="flex flex-col gap-1 font-one">
-              <label htmlFor="password" className="text-xs">
-                Mot de passe *
-              </label>
-              <div className="relative">
-                <input
-                  id="password"
-                  placeholder="••••••••"
-                  type={showPassword ? "text" : "password"}
-                  required
-                  className="bg-white/30 py-2.5 px-4 pr-10 rounded-2xl text-sm w-full"
-                  {...form.register("password")}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/70 hover:text-white transition-colors"
-                >
-                  {showPassword ? (
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"
-                      />
-                    </svg>
-                  ) : (
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                      />
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                      />
-                    </svg>
-                  )}
-                </button>
-              </div>
-              {form.formState.errors.password && (
-                <p className="text-red-500 text-sm">
-                  {form.formState.errors.password.message}
-                </p>
-              )}
-            </div>
-
-            {/* Confirmation mot de passe */}
-            <div className="flex flex-col gap-1 font-one">
-              <label htmlFor="confirmPassword" className="text-xs">
-                Confirmer le mot de passe *
-              </label>
-              <div className="relative">
-                <input
-                  id="confirmPassword"
-                  placeholder="••••••••"
-                  type={showConfirmPassword ? "text" : "password"}
-                  required
-                  className="bg-white/30 py-2.5 px-4 pr-10 rounded-2xl text-sm w-full"
-                  {...form.register("confirmPassword")}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/70 hover:text-white transition-colors"
-                >
-                  {showConfirmPassword ? (
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"
-                      />
-                    </svg>
-                  ) : (
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                      />
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                      />
-                    </svg>
-                  )}
-                </button>
-              </div>
-              {form.formState.errors.confirmPassword && (
-                <p className="text-red-500 text-sm">
-                  {form.formState.errors.confirmPassword.message}
-                </p>
-              )}
-            </div>
-            </div>
-
-            {/* Acceptation des conditions */}
-            <div className="flex items-start gap-3">
-              <input
-                type="checkbox"
-                id="acceptTerms"
-                {...form.register("acceptTerms")}
-                className="w-4 h-4 mt-0.5 text-tertiary-500 focus:ring-tertiary-400 bg-transparent border-white/30 rounded-2xl"
-              />
-              <label
-                htmlFor="acceptTerms"
-                className="text-xs text-white/80 font-one leading-relaxed"
-              >
-                J'accepte les{" "}
-                <Link
-                  href="/conditions-utilisation"
-                  className="text-tertiary-400 hover:text-tertiary-300 underline"
-                >
-                  conditions d'utilisation
-                </Link>{" "}
-                et la{" "}
-                <Link
-                  href="/politique-confidentialite"
-                  className="text-tertiary-400 hover:text-tertiary-300 underline"
-                >
-                  politique de confidentialité
-                </Link>
-              </label>
-            </div>
-            {form.formState.errors.acceptTerms && (
-              <p className="text-red-500 text-sm">
-                {form.formState.errors.acceptTerms.message}
-              </p>
-            )}
-
-            <FormError message={error} />
-            <FormSuccess message={success} />
-
-            {/* Bouton de soumission */}
-            <button
-              className="cursor-pointer w-full px-6 py-2.5 bg-linear-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white rounded-2xl transition-all duration-300 font-medium disabled:opacity-50 disabled:cursor-not-allowed font-one text-sm lg:text-xs"
-              type="submit"
-              disabled={isPending || isBlocked}
-            >
-              {isBlocked
-                ? `Réessayer dans ${cooldownSeconds}s`
-                : isPending
-                  ? "Inscription en cours..."
-                  : "Créer mon compte"}
-            </button>
-
-            <div className="flex items-center gap-3 text-white/70 text-xs">
-              <span className="h-px flex-1 bg-white/30" />
-              <span>ou</span>
-              <span className="h-px flex-1 bg-white/30" />
-            </div>
-
-              <button
-              type="button"
-              onClick={handleGoogleSignIn}
-              className="cursor-pointer group relative flex w-full items-center justify-center gap-3 overflow-hidden rounded-2xl border border-white/15 bg-white/8 px-6 py-3 text-white shadow-lg shadow-black/20 backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:border-tertiary-400/40 hover:bg-white/12 hover:shadow-xl hover:shadow-tertiary-500/10 disabled:cursor-not-allowed disabled:opacity-70 font-one text-sm lg:text-xs"
-              disabled={isGooglePending}
-            >
-              <span className="absolute inset-0 bg-linear-to-r from-white/8 via-transparent to-tertiary-400/8 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-              <span className="relative flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white text-[#EA4335] shadow-md shadow-black/10">
-                <FaGoogle className="text-sm" />
-              </span>
-              <span className="relative font-medium tracking-[0.02em]">
-                {isGooglePending
-                  ? "Connexion Google..."
-                  : "Continuer avec Google"}
-              </span>
-            </button>
+    <div className="font-one">
+      <div className="mb-6"><p className="text-[10px] uppercase tracking-[0.18em] text-tertiary-400">Compte client · Gratuit</p><h1 className="mt-3 font-two text-3xl font-medium tracking-tight text-white">Faites place à vos idées.</h1><p className="mt-3 text-sm leading-7 text-white/55">Créez votre compte pour garder vos inspirations et échanger avec les artistes.</p></div>
+      <div className="mb-5"><AuthFeedback error={error} success={success} /></div>
+      <AuthGoogleButton onClick={handleGoogleSignIn} pending={isGooglePending} disabled={busy} />
+      <div className="my-5 flex items-center gap-3 text-[10px] text-white/35"><span className="h-px flex-1 bg-white/10" />ou avec votre e-mail<span className="h-px flex-1 bg-white/10" /></div>
+      <form method="post" noValidate onSubmit={form.handleSubmit(onSubmit)} aria-busy={isPending}>
+        <fieldset disabled={busy} className="space-y-4">
+          <legend className="sr-only">Créer un compte par e-mail</legend>
+          <div className="sr-only" aria-hidden="true"><label htmlFor="register-website">Site web</label><input id="register-website" type="text" tabIndex={-1} autoComplete="off" {...form.register("website")} /></div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <AuthField id="register-firstName" label="Prénom" autoComplete="given-name" placeholder="Votre prénom" required error={form.formState.errors.firstName?.message} {...form.register("firstName")} />
+            <AuthField id="register-lastName" label="Nom" autoComplete="family-name" placeholder="Votre nom" required error={form.formState.errors.lastName?.message} {...form.register("lastName")} />
           </div>
-        </form>
-      </CardWrapper>
-
-      <div className="relative flex flex-col gap-2 justify-center items-center">
-        <p className="text-white text-xs text-center font-two mt-2">
-          Vous avez déjà un compte ?{" "}
-          <Link
-            className="text-tertiary-400 hover:text-tertiary-500 transition-all ease-in-out duration-150"
-            href="/se-connecter"
-          >
-            Se connecter
-          </Link>
-        </p>
-        {/* <div className="h-[1px] bg-white w-[300px]"></div> */}
-        {/* <Link
-          className="text-white text-xs text-center font-two mt-2 hover:text-white/70 transition-all ease-in-out duration-150"
-          href="/"
-        >
-          Retour à l'accueil
-        </Link> */}
-      </div>
+          <AuthField id="register-email" label="Adresse e-mail" type="email" autoComplete="email" placeholder="vous@exemple.fr" required error={form.formState.errors.email?.message} {...form.register("email")} />
+          <AuthField id="register-birthDate" label="Date de naissance (facultatif)" type="date" autoComplete="bday" error={form.formState.errors.birthDate?.message} {...form.register("birthDate")} />
+          <div className="grid gap-4 sm:grid-cols-2">
+            <AuthField id="register-password" label="Mot de passe" type="password" autoComplete="new-password" placeholder="Votre mot de passe" aria-describedby="password-requirements" required error={form.formState.errors.password?.message} {...form.register("password")} />
+            <AuthField id="register-confirmPassword" label="Confirmer le mot de passe" type="password" autoComplete="new-password" placeholder="Une seconde fois" required error={form.formState.errors.confirmPassword?.message} {...form.register("confirmPassword")} />
+          </div>
+          <p id="password-requirements" className="text-[11px] leading-5 text-white/45">8 caractères minimum, avec une majuscule, une minuscule et un chiffre.</p>
+          <div>
+            <div className="flex items-start gap-2.5"><input id="register-acceptTerms" type="checkbox" aria-invalid={!!form.formState.errors.acceptTerms} aria-describedby={form.formState.errors.acceptTerms ? "register-terms-error" : undefined} className="mt-1 size-4 shrink-0 accent-tertiary-400" {...form.register("acceptTerms")} /><label htmlFor="register-acceptTerms" className="text-xs leading-6 text-white/60">J’accepte les <Link href="/conditions-d-utilisation" className="text-white/85 underline decoration-white/25 underline-offset-4 hover:text-tertiary-400">conditions d’utilisation</Link> et la <Link href="/politique-de-confidentialite" className="text-white/85 underline decoration-white/25 underline-offset-4 hover:text-tertiary-400">politique de confidentialité</Link>.</label></div>
+            {form.formState.errors.acceptTerms && <p id="register-terms-error" className="mt-2 text-xs text-red-400">{form.formState.errors.acceptTerms.message}</p>}
+          </div>
+          <AppButton type="submit" fullWidth disabled={busy || isBlocked} icon={<ArrowUpRight size={16} aria-hidden="true" />} className="min-h-11 px-4!">{isBlocked ? "Réessayer dans " + cooldownSeconds + " s" : isPending ? "Création du compte…" : "Créer mon compte"}</AppButton>
+        </fieldset>
+      </form>
+      <p className="mt-6 border-t border-white/10 pt-5 text-center text-xs leading-6 text-white/55">Déjà un compte ? <Link href="/se-connecter" className="rounded-sm text-tertiary-400 transition hover:text-white focus-visible:outline-2 focus-visible:outline-tertiary-400">Me connecter</Link></p>
     </div>
   );
 }

@@ -5,7 +5,7 @@ type Props = { description?: string | null; prestations: string[]; styles: strin
 export default function SalonPresentation({ description, prestations, styles }: Props) {
   const serviceLabels: Record<string, string> = { TATTOO: "Tatouage", PIERCING: "Piercing", PROJET: "Consultation projet", RETOUCHE: "Retouche" };
   return (
-    <section id="presentation" aria-labelledby="presentation-heading" className="scroll-mt-28 overflow-hidden rounded-2xl border border-white/10 bg-noir-700 font-one">
+    <section id="presentation" aria-labelledby="presentation-heading" className="scroll-mt-28 overflow-hidden rounded-2xl border border-white/10 bg-noir-800 font-one">
       <div className="p-5 sm:p-6">
         <div className="mb-5 flex items-start gap-3"><span className="grid size-9 shrink-0 place-items-center rounded-xl border border-tertiary-400/15 bg-tertiary-400/8 text-tertiary-400"><Sparkles size={17} aria-hidden="true" /></span><div><p className="mb-1 text-[9px] font-medium uppercase tracking-[0.16em] text-white/35">Une rencontre, un univers</p><h2 id="presentation-heading" className="text-lg font-medium text-white/90">À propos</h2></div></div>
         <div className="rounded-xl border border-white/8 bg-white/[0.015] p-4 sm:p-5"><p className="whitespace-pre-line break-words text-sm leading-7 text-white/65">{description?.trim() || "Ce profil n’a pas encore renseigné sa présentation."}</p></div>

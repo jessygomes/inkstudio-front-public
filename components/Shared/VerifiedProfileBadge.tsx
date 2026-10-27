@@ -52,7 +52,7 @@ export default function VerifiedProfileBadge({ className = "", iconSize = 15 }: 
       {position && createPortal(
         <div id={id} ref={tooltipRef} role="tooltip" onMouseEnter={cancelClose} onMouseLeave={scheduleClose}
           style={{ top: position.top, left: position.left, width: position.width, transform: position.above ? "translateY(-100%)" : undefined }}
-          className="fixed z-100000 overflow-hidden rounded-2xl border border-white/12 bg-noir-700 p-4 font-one text-white shadow-[0_12px_48px_rgba(0,0,0,0.55)]">
+          className="fixed z-100000 overflow-hidden rounded-2xl border border-white/12 bg-noir-800 p-4 font-one text-white shadow-[0_12px_48px_rgba(0,0,0,0.55)]">
           <div className="flex items-center gap-3">
             <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-emerald-400/20 bg-emerald-400/10 text-emerald-300"><ShieldCheck size={21} aria-hidden="true" /></span>
             <div><p className="text-[10px] uppercase tracking-[0.16em] text-emerald-300/70">Vérifié par Inkera</p><p className="mt-0.5 text-sm font-semibold">Un professionnel vérifié</p></div>

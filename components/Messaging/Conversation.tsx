@@ -234,7 +234,7 @@ export default function Conversation() {
 
   if (error) {
     return (
-      <div className="w-full bg-noir-700 rounded-xl border border-white/20 p-6">
+      <div className="w-full bg-noir-800 rounded-xl border border-white/20 p-6">
         <div className="text-center py-8">
           <div className="w-12 h-12 bg-red-900/50 rounded-full flex items-center justify-center mx-auto mb-4">
             <svg
@@ -268,7 +268,7 @@ export default function Conversation() {
 
   if (!conversation) {
     return (
-      <div className="w-full bg-noir-700 rounded-xl border border-white/20 p-6">
+      <div className="w-full bg-noir-800 rounded-xl border border-white/20 p-6">
         <div className="text-center py-8">
           <p className="text-white/70 font-one">Aucune conversation trouvée</p>
         </div>
@@ -281,7 +281,7 @@ export default function Conversation() {
       <div className="grid h-[calc(100dvh-4rem)] min-h-0 w-full gap-4 lg:h-[calc(100dvh-100px)] lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
         <section
           aria-label="Conversation"
-          className="flex min-h-0 min-w-0 flex-col overflow-hidden rounded-3xl border border-white/10 bg-noir-700/50 shadow-lg"
+          className="flex min-h-0 min-w-0 flex-col overflow-hidden rounded-3xl border border-white/10 bg-noir-800/50 shadow-lg"
         >
           <ConversationHeader
             conversation={conversation}

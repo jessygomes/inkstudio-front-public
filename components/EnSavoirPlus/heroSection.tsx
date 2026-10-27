@@ -55,7 +55,7 @@ export default function HeroSection() {
 	};
 
 	return (
-		<section className="relative isolate min-h-[calc(100vh-4.75rem)] overflow-hidden bg-noir-700 lg:min-h-[calc(100vh-5.25rem)]">
+		<section className="relative isolate min-h-[calc(100vh-4.75rem)] overflow-hidden bg-noir-800 lg:min-h-[calc(100vh-5.25rem)]">
 			<motion.div
 				className="absolute inset-0 grid grid-cols-3 grid-rows-3 gap-2 p-2"
 				variants={gridVariants}
@@ -80,7 +80,7 @@ export default function HeroSection() {
 				))}
 			</motion.div>
 
-			<div className="pointer-events-none absolute inset-0 bg-linear-to-b from-noir-700/70 to-noir-700/85" />
+			<div className="pointer-events-none absolute inset-0 bg-linear-to-b from-noir-800/70 to-noir-800/85" />
 
 			<motion.div
 				className="relative z-10 container mx-auto flex min-h-[calc(100vh-4.75rem)] items-center px-4 py-10 text-center lg:min-h-[calc(100vh-5.25rem)] lg:px-8"

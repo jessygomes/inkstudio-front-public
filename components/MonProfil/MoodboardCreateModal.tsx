@@ -16,7 +16,7 @@ type Props = {
   onClose: () => void;
 };
 
-const inputClass = "mt-1.5 w-full min-w-0 rounded-xl border border-white/10 bg-noir-700/70 px-3.5 py-2.5 text-sm text-white outline-none transition placeholder:text-white/25 focus:border-tertiary-400/45 focus:ring-2 focus:ring-tertiary-400/10 disabled:opacity-50";
+const inputClass = "mt-1.5 w-full min-w-0 rounded-xl border border-white/10 bg-noir-800/70 px-3.5 py-2.5 text-sm text-white outline-none transition placeholder:text-white/25 focus:border-tertiary-400/45 focus:ring-2 focus:ring-tertiary-400/10 disabled:opacity-50";
 
 export default function MoodboardCreateModal({ open, name, description, busy, onNameChange, onDescriptionChange, onSubmit, onClose }: Props) {
   const formId = useId();

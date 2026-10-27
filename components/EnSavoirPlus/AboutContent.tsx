@@ -13,7 +13,7 @@ const titleClass = "mt-4 text-balance font-two text-3xl font-semibold leading-ti
 
 export default function AboutContent() {
   return (
-    <div className="bg-noir-700 font-one">
+    <div className="bg-noir-800 font-one">
       {/* <div className="border-y border-white/10">
         <nav aria-label="Découvrir Inkera" className="mx-auto flex max-w-7xl gap-6 overflow-x-auto px-4 sm:gap-10 sm:px-8 lg:px-12">
           {chapters.map((chapter, index) => <a key={chapter.id} href={`#${chapter.id}`} className="inline-flex min-h-16 shrink-0 items-center gap-2 border-b-2 border-transparent py-4 text-sm text-white/65 transition-colors hover:border-tertiary-400 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-tertiary-400"><span aria-hidden="true" className="text-xs text-tertiary-400">0{index + 1}</span>{chapter.label}</a>)}
@@ -93,7 +93,7 @@ export default function AboutContent() {
         </div>
       </section>
 
-      <section id="rejoindre-inkera" aria-labelledby="join-title" className="scroll-mt-24 border-t border-white/10 bg-linear-to-br from-secondary-500/60 via-noir-700 to-noir-700">
+      <section id="rejoindre-inkera" aria-labelledby="join-title" className="scroll-mt-24 border-t border-white/10 bg-linear-to-br from-secondary-500/60 via-noir-800 to-noir-800">
         <div className="mx-auto grid max-w-7xl gap-8 px-4 py-16 sm:px-8 sm:py-20 lg:grid-cols-[1.2fr_1fr] lg:items-center lg:gap-16 lg:px-12">
           <div>
             <p className={labelClass}>04 — La suite, ensemble</p>

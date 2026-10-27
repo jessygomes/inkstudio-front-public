@@ -63,7 +63,7 @@ function VerifyEmailContent() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 bg-noir-700">
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 bg-noir-800">
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -86,7 +86,7 @@ export default function VerifyEmailPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex flex-col items-center justify-center px-4 bg-noir-700">
+        <div className="min-h-screen flex flex-col items-center justify-center px-4 bg-noir-800">
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}

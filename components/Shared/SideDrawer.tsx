@@ -38,7 +38,7 @@ export default function SideDrawer({ open, title, description, busy, onClose, he
         if (!first) { event.preventDefault(); return; }
         if (event.shiftKey && (document.activeElement === first || document.activeElement === event.currentTarget)) { event.preventDefault(); last.focus(); }
         else if (!event.shiftKey && (document.activeElement === last || document.activeElement === event.currentTarget)) { event.preventDefault(); first.focus(); }
-      }} className="absolute inset-y-0 right-0 flex h-dvh w-full flex-col border-l border-white/10 bg-noir-700 font-one text-white shadow-2xl outline-none sm:w-[min(100%,560px)] lg:w-1/3 lg:min-w-[440px]">
+      }} className="absolute inset-y-0 right-0 flex h-dvh w-full flex-col border-l border-white/10 bg-noir-800 font-one text-white shadow-2xl outline-none sm:w-[min(100%,560px)] lg:w-1/3 lg:min-w-[440px]">
         <header className="shrink-0 border-b border-white/8 px-4 py-4 sm:px-6 sm:py-5">
           <div className="flex min-w-0 items-center gap-2">
             <h2 id={titleId} className="min-w-0 flex-1 text-sm font-semibold tracking-tight sm:text-base">{title}</h2>

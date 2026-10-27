@@ -1,95 +1,30 @@
 import Image from "next/image";
-import { FaRegCalendarCheck, FaRegChartBar } from "react-icons/fa";
-import { BsPeople, BsShieldCheck } from "react-icons/bs";
+import { ArrowUpRight, CalendarDays, MessagesSquare, PenTool, Sparkles } from "lucide-react";
 import AppButton from "@/components/Shared/AppButton";
 
-const perks = [
-  {
-    icon: FaRegCalendarCheck,
-    title: "Gestion des rendez-vous",
-    description: "Centralisez vos demandes et organisez votre planning facilement.",
-  },
-  {
-    icon: BsPeople,
-    title: "Visibilité accrue",
-    description: "Attirez de nouveaux clients grâce à la plateforme Inkera.",
-  },
-  {
-    icon: FaRegChartBar,
-    title: "Statistiques & suivi",
-    description: "Analysez vos performances et développez votre activité.",
-  },
-  {
-    icon: BsShieldCheck,
-    title: "Espace sécurisé",
-    description: "Gérez votre salon en toute confiance, vos données sont protégées.",
-  },
+const benefits = [
+  { Icon: CalendarDays, label: "Rendez-vous organisés" },
+  { Icon: MessagesSquare, label: "Clients et échanges réunis" },
+  { Icon: Sparkles, label: "Votre travail mis en lumière" },
 ];
 
 export default function TatoueurCtaSection() {
   return (
-    <section className="relative overflow-hidden border-t border-tertiary-400/80 bg-noir-700 py-32">
-       <div className="absolute top-0 inset-x-0 h-px bg-linear-to-r from-transparent via-tertiary-400/25 to-transparent" />
-      {/* Background photo */}
-      <Image
-        src="/images/bv.png"
-        alt="Tatoueur Inkera"
-        fill
-        className="object-cover"
-        sizes="100vw"
-        priority
-      />
-      {/* Overlay */}
-      <div className="absolute inset-0 bg-noir-700/80" />
-
-      {/* Content */}
-      <div className="relative z-10 mx-4 sm:mx-8 lg:mx-20 py-20 flex flex-col items-center gap-10 text-center">
-        {/* Header */}
-        <div className="flex flex-col items-center gap-3">
-          <div className="flex items-center gap-3">
-            <span className="h-px w-10 bg-tertiary-400/60" />
-            <span className="text-xs font-semibold uppercase tracking-[0.3em] text-tertiary-400 font-one">
-              Espace tatoueur
-            </span>
-            <span className="h-px w-10 bg-tertiary-400/60" />
-          </div>
-          <h2 className="text-4xl font-bold text-white font-two sm:text-5xl">
-            Je suis tatoueur
-          </h2>
-          <p className="max-w-lg text-base text-white/90 font-one">
-            Rejoignez Inkera Studio pour gérer votre salon (rendez-vous, clients, stocks, etc.) et développer votre clientèle en toute simplicité.
-          </p>
+    <section aria-labelledby="studio-title" className="bg-noir-800 font-one">
+      <div className="mx-4 grid overflow-hidden rounded-2xl border border-white/10 bg-noir-800 sm:mx-8 lg:mx-20 lg:grid-cols-[1.2fr_0.8fr]">
+        <div className="p-6 sm:p-8 lg:p-10">
+          <div className="flex flex-wrap items-center gap-3 text-[10px]"><span className="flex items-center gap-2 text-white/80"><PenTool size={14} className="text-tertiary-400" aria-hidden="true" />INKERA STUDIO</span><span className="h-3 w-px bg-white/15" aria-hidden="true" /><span className="text-white/40">Je suis tatoueur.se</span></div>
+          <h2 id="studio-title" className="mt-5 max-w-lg font-two text-3xl font-semibold leading-tight tracking-tight text-white sm:text-4xl">Vous faites de l’art.<br /><span className="text-white/40">On simplifie le reste.</span></h2>
+          <p className="mt-4 max-w-md text-sm leading-7 text-white/50">Un espace pensé pour les artistes et les salons. Moins de dispersion dans votre quotidien, plus de temps pour vos projets.</p>
+          <ul className="mt-5 flex flex-col gap-3 text-xs text-white/65">{benefits.map(({ Icon, label }) => <li key={label} className="flex items-center gap-2.5"><Icon size={15} className="text-tertiary-400" aria-hidden="true" />{label}</li>)}</ul>
+          <AppButton href="https://www.inkera-studio.com/" icon={<ArrowUpRight size={16} aria-hidden="true" />} className="mt-6 px-5!">Découvrir Inkera Studio</AppButton>
         </div>
-
-        <div className="flex flex-col items-center justify-center gap-3">
-          <AppButton
-            href="https://www.inkera-studio.com/"
-            variant="primary"
-          >
-            Accéder à Inkera Studio
-          </AppButton>
+        <div className="relative min-h-48 overflow-hidden border-t border-white/10 lg:min-h-0 lg:border-l lg:border-t-0">
+          <Image src="/images/bv.png" alt="" fill sizes="(min-width: 1024px) 38vw, 100vw" className="object-cover grayscale" />
+          <div className="absolute inset-0 bg-noir-800/25" />
+          <div className="absolute inset-0 bg-linear-to-t from-noir-800 via-transparent to-transparent lg:bg-linear-to-r" />
+          <div className="absolute bottom-5 left-6 right-6 flex items-end justify-between gap-4"><p className="font-two text-2xl leading-tight tracking-wide text-white/85">L’art est à vous.<br /><span className="text-white/45">Les outils aussi.</span></p><PenTool size={25} className="shrink-0 text-tertiary-400" aria-hidden="true" /></div>
         </div>
-
-        {/* Perks */}
-        {/* <div className="grid w-full grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4 max-w-6xl">
-          {perks.map(({ icon: Icon, title, description }) => (
-            <div
-              key={title}
-              className="group flex gap-4 rounded-2xl border border-white/10 bg-noir-700/40 p-5 backdrop-blur-lg transition-all duration-300 hover:border-tertiary-400/30 hover:bg-noir-900/55 text-left"
-            >
-              <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-tertiary-500/25 ring-1 ring-tertiary-400/25 transition-colors duration-300 group-hover:bg-tertiary-500/40">
-                <Icon size={20} className="text-tertiary-400 text-sm" />
-              </div>
-              <div>
-                <h3 className="text-md font-bold text-white font-two">{title}</h3>
-                <p className="mt-0.5 text-sm leading-relaxed text-white/80 font-one">{description}</p>
-              </div>
-            </div>
-          ))}
-        </div> */}
-
-        {/* CTA button */}
-        
       </div>
     </section>
   );

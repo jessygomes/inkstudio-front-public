@@ -34,7 +34,7 @@ export default function Header() {
         className={`hidden lg:block transition-all duration-300 ${
           showTransparentHeader
             ? "bg-transparent"
-            : "bg-noir-700 backdrop-blur-sm"
+            : "bg-noir-800 backdrop-blur-sm"
         }`}
       >
         <Navbar showLogo={shouldShowLogo} />
@@ -44,7 +44,7 @@ export default function Header() {
         className={`lg:hidden py-2 px-4 flex justify-between items-center transition-all duration-300 ${
           showTransparentHeader
             ? "bg-transparent"
-            : "bg-noir-700 backdrop-blur-sm"
+            : "bg-noir-800 backdrop-blur-sm"
         } w-full max-w-full`}
       >
         <Link href={"/"} className=" flex items-center">

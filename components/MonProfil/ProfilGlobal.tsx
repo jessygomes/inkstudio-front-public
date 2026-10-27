@@ -86,7 +86,7 @@ export default function ProfilGlobal(user: User) {
     return (
       <div role="status" aria-label="Chargement du profil" className="mx-auto px-4 py-6 sm:px-6 lg:px-8 xl:px-12">
         <div aria-hidden="true" className="mb-6 space-y-3 motion-safe:animate-pulse sm:space-y-4">
-          <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-noir-700 p-4 sm:gap-5 sm:p-6">
+          <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-noir-800 p-4 sm:gap-5 sm:p-6">
             <div className="size-14 shrink-0 rounded-2xl bg-white/5 sm:size-18" />
             <div className="min-w-0 flex-1 space-y-2"><div className="h-2 w-24 rounded bg-white/5" /><div className="h-6 w-2/3 max-w-56 rounded-lg bg-white/10" /><div className="hidden h-3 w-3/4 max-w-80 rounded bg-white/5 sm:block" /></div>
             <div className="size-11 shrink-0 rounded-xl bg-white/5 sm:w-36" />
@@ -100,7 +100,7 @@ export default function ProfilGlobal(user: User) {
 
   if (!profileData) {
     return (
-      <div className="min-h-screen bg-noir-700 pt-20 flex items-center justify-center">
+      <div className="min-h-screen bg-noir-800 pt-20 flex items-center justify-center">
         <div className="text-center">
           <p className="text-white/60 font-one mb-4">
             Erreur lors du chargement du profil
@@ -117,8 +117,8 @@ export default function ProfilGlobal(user: User) {
     
       <div className="relative mx-auto px-4 sm:px-6 py-6 lg:px-8 xl:px-12">
         <section aria-label="Mon profil" className="mb-6 space-y-3 font-one sm:mb-7 sm:space-y-4">
-          <header className="relative flex min-w-0 flex-wrap items-center gap-3 overflow-hidden rounded-2xl border border-white/10 bg-noir-700 p-4 sm:gap-5 sm:p-6">
-            <div className="relative grid size-14 shrink-0 place-items-center overflow-hidden rounded-2xl border border-white/15 bg-noir-700 ring-4 ring-white/3 sm:size-18">
+          <header className="relative flex min-w-0 flex-wrap items-center gap-3 overflow-hidden rounded-2xl border border-white/10 bg-noir-800 p-4 sm:gap-5 sm:p-6">
+            <div className="relative grid size-14 shrink-0 place-items-center overflow-hidden rounded-2xl border border-white/15 bg-noir-800 ring-4 ring-white/3 sm:size-18">
               {profileData.image ? <Image src={profileData.image} alt="Photo de profil" fill sizes="(min-width: 640px) 72px, 56px" className="object-cover" priority /> : <span aria-hidden="true" className="text-xl font-semibold text-tertiary-400 sm:text-2xl">{initials || <UserRound size={22} />}</span>}
             </div>
             <div className="min-w-0 flex-1">
@@ -141,7 +141,7 @@ export default function ProfilGlobal(user: User) {
               const Icon = item.icon;
               const count = item.key === "moodboard" ? proposalCount : item.key === "messagerie" ? messageCount : 0;
               const selected = activeTab === item.key;
-              return <button key={item.key} type="button" aria-current={selected ? "page" : undefined} aria-controls="profile-content" onClick={() => handleTabChange(item.key)} style={selected ? { background: "linear-gradient(90deg, color-mix(in srgb, var(--color-tertiary-500) 22%, var(--color-noir-700)), color-mix(in srgb, var(--color-cuatro-600) 22%, var(--color-noir-700))) padding-box, linear-gradient(90deg, color-mix(in srgb, var(--color-tertiary-500) 60%, transparent), color-mix(in srgb, var(--color-cuatro-600) 60%, transparent)) border-box" } : undefined} className={`group relative flex min-h-14 min-w-0 cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border px-1.5 py-2 text-[11px] transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary-400 sm:min-h-11 sm:flex-row sm:justify-start sm:gap-2 sm:px-2.5 sm:text-xs lg:flex-col lg:justify-center xl:flex-row xl:justify-start ${selected ? "border-transparent font-semibold text-white" : "border-white/8 bg-noir-700 text-white/50 hover:border-white/15 hover:bg-white/4 hover:text-white/80"}`}>
+              return <button key={item.key} type="button" aria-current={selected ? "page" : undefined} aria-controls="profile-content" onClick={() => handleTabChange(item.key)} style={selected ? { background: "linear-gradient(90deg, color-mix(in srgb, var(--color-tertiary-500) 22%, var(--color-noir-800)), color-mix(in srgb, var(--color-cuatro-600) 22%, var(--color-noir-800))) padding-box, linear-gradient(90deg, color-mix(in srgb, var(--color-tertiary-500) 60%, transparent), color-mix(in srgb, var(--color-cuatro-600) 60%, transparent)) border-box" } : undefined} className={`group relative flex min-h-14 min-w-0 cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border px-1.5 py-2 text-[11px] transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary-400 sm:min-h-11 sm:flex-row sm:justify-start sm:gap-2 sm:px-2.5 sm:text-xs lg:flex-col lg:justify-center xl:flex-row xl:justify-start ${selected ? "border-transparent font-semibold text-white" : "border-white/8 bg-noir-800 text-white/50 hover:border-white/15 hover:bg-white/4 hover:text-white/80"}`}>
                 <span className={`grid size-6 shrink-0 place-items-center rounded-lg transition-colors ${selected ? "bg-black/15 text-white" : "bg-white/4 text-white/35 group-hover:text-white/60"}`}><Icon size={15} aria-hidden="true" /></span>
                 <span className="min-w-0 text-center leading-4 sm:text-left lg:text-center xl:text-left">{item.label}</span>
                 {count > 0 && <span className={`absolute right-1.5 top-1.5 grid min-h-4 min-w-4 place-items-center rounded-md px-1 text-[9px] font-semibold leading-none ${selected ? "bg-black/20 text-white" : "bg-tertiary-400/15 text-tertiary-400"}`} aria-hidden="true">{count > 99 ? "99+" : count}</span>}

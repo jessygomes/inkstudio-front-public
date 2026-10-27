@@ -1,6 +1,6 @@
 ﻿export default function LoadingSalonProfile() {
   return (
-    <div role="status" aria-label="Chargement du profil salon" className="min-h-screen bg-noir-700 px-4 py-10 sm:px-6 lg:px-8 xl:px-16">
+    <div role="status" aria-label="Chargement du profil salon" className="min-h-screen bg-noir-800 px-4 py-10 sm:px-6 lg:px-8 xl:px-16">
       <span className="sr-only">Chargement du profil salon…</span>
       <div aria-hidden="true" className="mx-auto max-w-7xl lg:max-w-none motion-safe:animate-pulse">
         <div className="mb-6 h-5 w-32 rounded bg-white/10" />

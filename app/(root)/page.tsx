@@ -3,7 +3,7 @@ import { Metadata } from "next";
 import ClientAccountPromoSection from "@/components/Auth/ClientAccountPromoSection";
 import Parcours from "@/components/Home/Parcours";
 import FinalCtaSection from "@/components/Home/FinalCtaSection";
-import TatoueurCtaSection from "@/components/Home/TatoueurCtaSection";
+// import TatoueurCtaSection from "@/components/Home/TatoueurCtaSection";
 import HeroSection from "@/components/Home/HeroSection";
 import ArticleAccueil from "@/components/Articles/ArticleAccueil";
 
@@ -122,18 +122,13 @@ export default function Home() {
       {/* Hero Section */}
       <HeroSection />
 
-      {/* Navigation des features */}
-      <Parcours />
-
-      {/* Section avantages compte client */}
-      <ClientAccountPromoSection />
-
-      <ArticleAccueil />
-
-      {/* Section Tatoueur CTA */}
-      <TatoueurCtaSection />
-
-      <FinalCtaSection />
+      <div className="flex w-full flex-col gap-16 bg-noir-800 pb-16 pt-14 sm:gap-24 sm:pb-20 sm:pt-20">
+        <Parcours />
+        <ArticleAccueil />
+        {/* <TatoueurCtaSection /> */}
+        <ClientAccountPromoSection />
+        <FinalCtaSection />
+      </div>
     </>
   );
 }

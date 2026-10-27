@@ -663,7 +663,7 @@ export default function RendezVousTab() {
           >
             <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" />
             <div
-              className="relative z-10 w-full max-w-2xl max-h-[85vh] flex flex-col rounded-3xl border border-white/15 bg-noir-700 shadow-2xl overflow-hidden"
+              className="relative z-10 w-full max-w-2xl max-h-[85vh] flex flex-col rounded-3xl border border-white/15 bg-noir-800 shadow-2xl overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header */}
@@ -767,7 +767,7 @@ export default function RendezVousTab() {
           >
             <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" />
             <div
-              className="relative z-10 w-full max-w-lg max-h-[80vh] flex flex-col rounded-3xl border border-white/15 bg-noir-700 shadow-2xl overflow-hidden"
+              className="relative z-10 w-full max-w-lg max-h-[80vh] flex flex-col rounded-3xl border border-white/15 bg-noir-800 shadow-2xl overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header */}

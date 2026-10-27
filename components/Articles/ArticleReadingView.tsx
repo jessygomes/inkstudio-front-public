@@ -15,7 +15,7 @@ export default function ArticleReadingView({ article, headings, children }: {
   const hasDate = !Number.isNaN(date.getTime());
   const hasContents = headings.length > 1;
   return (
-    <section id="article-top" className="scroll-mt-24 bg-noir-700 px-4 pb-16 pt-20 font-one sm:px-8 sm:pb-24 lg:px-20">
+    <section id="article-top" className="scroll-mt-24 bg-noir-800 px-4 pb-16 pt-20 font-one sm:px-8 sm:pb-24 lg:px-20">
       <div className="mx-auto max-w-7xl">
         <nav aria-label="Fil d’Ariane" className="mb-8 flex items-center gap-2 text-xs text-white/50 sm:mb-12">
           <Link href="/" className="inline-flex min-h-11 items-center hover:text-white focus-visible:outline-2 focus-visible:outline-tertiary-400">Accueil</Link>

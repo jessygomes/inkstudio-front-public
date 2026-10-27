@@ -19,11 +19,11 @@ export default function MoodboardCard({ moodboard, proposalCount, isActive, isDe
   return (
     <article className={`group min-w-0 overflow-hidden rounded-2xl border bg-noir-500 font-one transition-colors ${isActive ? "border-tertiary-400/40" : "border-white/10 hover:border-white/25"}`}>
       <button type="button" onClick={() => onOpen(moodboard.id)} disabled={isDeleting} aria-label={`Ouvrir ${moodboard.name}, ${imageCount} images`} className="block w-full cursor-pointer text-left focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-tertiary-400 disabled:opacity-50">
-        <div className={`relative grid aspect-[16/9] gap-1 overflow-hidden bg-noir-700 ${previews.length > 1 ? "grid-cols-[2fr_1fr]" : "grid-cols-1"}`}>
+        <div className={`relative grid aspect-[16/9] gap-1 overflow-hidden bg-noir-800 ${previews.length > 1 ? "grid-cols-[2fr_1fr]" : "grid-cols-1"}`}>
           {previews.length > 0 ? previews.map((image, index) => <div key={image.id} className={`relative overflow-hidden ${index === 0 && previews.length === 3 ? "row-span-2" : ""}`}><Image src={image.url} alt="" fill sizes="(min-width:1280px) 25vw, (min-width:640px) 40vw, 100vw" className="object-cover transition-transform duration-300 motion-safe:group-hover:scale-105" /></div>) : <div className="grid place-items-center bg-linear-to-br from-tertiary-400/8 to-transparent text-white/30"><Images size={32} /></div>}
           <span className="absolute bottom-2 right-2 inline-flex items-center gap-1.5 rounded-lg bg-black/60 px-2 py-1 text-[11px] text-white backdrop-blur-sm"><Images size={12} />{imageCount}</span>
           {moodboard.projectStatus && moodboard.projectStatus !== "PRIVATE" && (
-            <span className="absolute bottom-2 left-2 inline-flex items-center gap-1.5 rounded-lg border border-tertiary-400/20 bg-noir-700/90 px-2 py-1 text-[11px] font-medium text-tertiary-400 backdrop-blur-sm">
+            <span className="absolute bottom-2 left-2 inline-flex items-center gap-1.5 rounded-lg border border-tertiary-400/20 bg-noir-800/90 px-2 py-1 text-[11px] font-medium text-tertiary-400 backdrop-blur-sm">
               <MessageSquare size={12} aria-hidden="true" />
               {proposalCount === undefined ? "… propositions" : `${proposalCount} proposition${proposalCount > 1 ? "s" : ""}`}
             </span>

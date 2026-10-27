@@ -16,5 +16,5 @@ function FilePreview({ file, label }: { file: File; label: string }) {
     if (imageRef.current) imageRef.current.src = url;
     return () => URL.revokeObjectURL(url);
   }, [file]);
-  return <div className="flex min-w-0 items-center gap-3 rounded-xl border border-white/8 bg-noir-700/40 p-2"><img ref={imageRef} alt={label} className="size-12 shrink-0 rounded-lg bg-white/5 object-cover" /><div className="min-w-0"><p className="text-[10px] text-white/40">{label}</p><p className="mt-1 truncate text-[11px] text-white/75">{file.name}</p></div></div>;
+  return <div className="flex min-w-0 items-center gap-3 rounded-xl border border-white/8 bg-noir-800/40 p-2"><img ref={imageRef} alt={label} className="size-12 shrink-0 rounded-lg bg-white/5 object-cover" /><div className="min-w-0"><p className="text-[10px] text-white/40">{label}</p><p className="mt-1 truncate text-[11px] text-white/75">{file.name}</p></div></div>;
 }

@@ -1,322 +1,99 @@
-/* eslint-disable react/no-unescaped-entities */
 "use client";
+
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { MdMenu, MdClose } from "react-icons/md";
-import { FaUser } from "react-icons/fa";
-import { FaInstagram, FaTiktok } from "react-icons/fa";
+import { ArrowUpRight, CalendarDays, Heart, Home, Images, Menu, MessageCircle, Newspaper, Search, Sparkles, UserRound, X } from "lucide-react";
 import { useMessagingContext } from "@/components/Context/MessageProvider";
 import AppButton from "@/components/Shared/AppButton";
+import NavbarSocialLinks from "./NavbarSocialLinks";
+
+const links = [
+  { href: "/", label: "Accueil", Icon: Home },
+  { href: "/trouver-un-salon", label: "Trouver un salon", Icon: Search },
+  { href: "/inspiration", label: "Inspirations", Icon: Images },
+  { href: "/journal", label: "Le journal", Icon: Newspaper },
+  { href: "/en-savoir-plus", label: "Découvrir Inkera", Icon: Sparkles },
+];
 
 export default function NavbarMobile() {
   const { data: session, status } = useSession();
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
   const { unreadCount, proposalCount, messageCount } = useMessagingContext();
-  const navRef = useRef<HTMLDivElement>(null);
-  const scrollYRef = useRef(0);
-
-  const handleOpen = () => setIsOpen(true);
-  const handleClose = () => setIsOpen(false);
-
-  const links = [
-    { href: "/", label: "Accueil" },
-    { href: "/trouver-un-salon", label: "Trouver un salon" },
-    { href: "/inspiration", label: "Inspirations" },
-    { href: "/journal", label: "Journal" },
-    { href: "/en-savoir-plus", label: "En savoir plus" },
-    // { href: "/je-suis-tatoueur", label: "Je suis tatoueur ?" },
-  ];
-
-  const socialLinks = [
-    {
-      href: "https://www.instagram.com/the.inkera",
-      label: "Instagram Inkera",
-      icon: FaInstagram,
-    },
-    {
-      href: "https://www.tiktok.com/@inkera2?_r=1&_t=ZN-96K7CgxVqsw",
-      label: "TikTok Inkera",
-      icon: FaTiktok,
-    },
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const authenticated = status === "authenticated" && !!session?.user;
+  const close = () => setIsOpen(false);
+  const accountLinks = [
+    { href: "/mon-profil?tab=rdv", label: "Rendez-vous", Icon: CalendarDays, count: 0 },
+    { href: "/mon-profil?tab=messagerie", label: "Messagerie", Icon: MessageCircle, count: messageCount },
+    { href: "/mon-profil?tab=moodboard", label: "Moodboards", Icon: Images, count: proposalCount },
+    { href: "/mon-profil?tab=favoris", label: "Favoris", Icon: Heart, count: 0 },
   ];
 
   useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (isOpen) {
-      scrollYRef.current = window.scrollY;
-
-      document.documentElement.style.overflow = "hidden";
-      document.body.style.overflow = "hidden";
-      document.body.style.position = "fixed";
-      document.body.style.top = `-${scrollYRef.current}px`;
-      document.body.style.left = "0";
-      document.body.style.right = "0";
-      document.body.style.width = "100%";
-
-      const handleEsc = (event: KeyboardEvent) => {
-        if (event.key === "Escape") {
-          setIsOpen(false);
-        }
-      };
-
-      document.addEventListener("keydown", handleEsc);
-
-      return () => {
-        document.removeEventListener("keydown", handleEsc);
-      };
-    } else {
-      document.documentElement.style.overflow = "";
-      document.body.style.overflow = "";
-      document.body.style.position = "";
-      document.body.style.top = "";
-      document.body.style.left = "";
-      document.body.style.right = "";
-      document.body.style.width = "";
-
-      if (scrollYRef.current > 0) {
-        window.scrollTo(0, scrollYRef.current);
-      }
-    }
-
+    if (!isOpen) return;
+    const dialog = dialogRef.current;
+    const trigger = triggerRef.current;
+    const bodyOverflow = document.body.style.overflow;
+    const rootOverflow = document.documentElement.style.overflow;
+    dialog?.showModal();
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
     return () => {
-      document.documentElement.style.overflow = "";
-      document.body.style.overflow = "";
-      document.body.style.position = "";
-      document.body.style.top = "";
-      document.body.style.left = "";
-      document.body.style.right = "";
-      document.body.style.width = "";
+      dialog?.close();
+      document.body.style.overflow = bodyOverflow;
+      document.documentElement.style.overflow = rootOverflow;
+      trigger?.focus();
     };
   }, [isOpen]);
 
   return (
-    <nav className="w-full max-w-full overflow-x-clip">
-      <div className="flex gap-3 items-center justify-between text-white">
-        {/* Avatar ou bouton connexion - Modernisé */}
-        {status === "authenticated" && session?.user ? (
-          <Link href="/mon-profil" className="group relative ml-auto">
-            <div className="relative w-9 h-9 rounded-full overflow-hidden group-hover:border-tertiary-400 transition-all duration-300 cursor-pointer group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-tertiary-400/25">
-              {session.user.image ? (
-                <Image
-                  src={session.user.image}
-                  alt={`${session.user.firstName} ${session.user.lastName}`}
-                  fill
-                  sizes="36px"
-                  className="object-cover"
-                />
-              ) : (
-                <div className="w-full h-full bg-linear-to-br from-tertiary-400/40 to-tertiary-500/40 flex items-center justify-center">
-                  <FaUser className="w-4 h-4 text-tertiary-300" />
-                </div>
-              )}
-            </div>
-            {unreadCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-4 h-4 flex items-center justify-center text-[10px]">
-                {unreadCount > 99 ? "99+" : unreadCount}
-              </span>
-            )}
+    <nav aria-label="Navigation mobile" className="ml-auto font-one">
+      <div className="flex items-center gap-2 text-white">
+        {authenticated ? (
+          <Link href="/mon-profil" aria-label="Mon compte client" className="relative flex size-10 items-center justify-center rounded-xl border border-white/15 bg-noir-800 focus-visible:outline-2 focus-visible:outline-tertiary-400">
+            {session.user.image ? <Image src={session.user.image} alt="" fill sizes="40px" className="rounded-xl object-cover" /> : <UserRound size={18} aria-hidden="true" />}
+            {unreadCount > 0 && <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-tertiary-500 px-1 text-[9px] text-white">{unreadCount > 99 ? "99+" : unreadCount}</span>}
           </Link>
-        ) : (
-          <Link href="/se-connecter" className="group ml-auto">
-            <div className="cursor-pointer w-fit px-2 sm:px-6 py-2 bg-linear-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-400 text-white rounded-2xl transition-all duration-300 font-medium disabled:opacity-50 disabled:cursor-not-allowed font-two text-xs shadow-lg shadow-tertiary-500/25 group-hover:shadow-tertiary-500/40 transform text-center">
-              Connexion
-            </div>
-          </Link>
-        )}
-
-        <button
-          onClick={handleOpen}
-          className="text-2xl p-2 rounded-2xl hover:bg-white/10 transition-all duration-300 backdrop-blur-sm"
-        >
-          <MdMenu size={28} className="text-white" />
-        </button>
+        ) : <AppButton href="/se-connecter" className="px-3! text-xs! shadow-none!">Connexion</AppButton>}
+        <button ref={triggerRef} type="button" onClick={() => setIsOpen(true)} aria-label="Ouvrir le menu" aria-expanded={isOpen} aria-controls="mobile-navigation" className="flex size-10 items-center justify-center rounded-xl border border-white/15 text-white/85 transition hover:bg-white/5 focus-visible:outline-2 focus-visible:outline-tertiary-400"><Menu size={21} aria-hidden="true" /></button>
       </div>
 
-      {isMounted &&
-        createPortal(
-          <>
-            {/* Overlay avec blur */}
-            <div
-              className={`fixed inset-0 z-90 bg-noir-700/80 backdrop-blur-sm transition-opacity duration-300 ${
-                isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
-              }`}
-              onClick={handleClose}
-            />
+      {isOpen && createPortal(
+        <dialog ref={dialogRef} id="mobile-navigation" aria-labelledby="mobile-navigation-title" onCancel={close} onClick={event => { if (event.target === event.currentTarget) close(); }} className="fixed inset-y-0 left-auto right-0 m-0 ml-auto h-dvh max-h-dvh w-[calc(100%_-_1rem)] max-w-[390px] border-0 border-l border-white/10 bg-noir-800 p-0 text-white shadow-2xl backdrop:bg-black/65 backdrop:backdrop-blur-sm">
+          <div className="flex h-full flex-col">
+            <div className="flex shrink-0 items-center justify-between gap-4 border-b border-white/10 px-5 py-5">
+              <Link href="/" onClick={close}><Image src="/logo/logo_inline_people_white.png" alt="Inkera People — Accueil" width={150} height={50} className="h-auto w-32" /></Link>
+              <button type="button" onClick={close} aria-label="Fermer le menu" className="flex size-9 items-center justify-center rounded-xl border border-white/10 text-white/60 transition hover:bg-white/5 hover:text-white focus-visible:outline-2 focus-visible:outline-tertiary-400"><X size={18} aria-hidden="true" /></button>
+            </div>
 
-            {/* Sidebar Menu - Modernisé */}
-            <div
-              ref={navRef}
-              className={`fixed top-0 right-0 z-100 w-72 max-w-[85vw] h-dvh bg-noir-700 bg-linear-to-b from-noir-600 to-noir-800 backdrop-blur-xl text-white transform transition-all duration-500 ease-out ${
-                isOpen
-                  ? "translate-x-0 opacity-100"
-                  : "translate-x-full opacity-0 pointer-events-none"
-              } border-l border-white/10 shadow-2xl`}
-            >
-              {/* Header moderne avec gradient */}
-              <div className="flex items-center justify-between p-6 border-b border-white/10 bg-linear-to-r from-white/5 to-white/2">
-                <div className="flex items-center gap-3">
-                  <h2 className="text-lg font-bold font-two tracking-wider">
-                    <Image
-                      src="/logo/logo_inline_people_white.png"
-                      alt="Logo"
-                      width={150}
-                      height={50}
-                    />
-                  </h2>
-                </div>
-                <button
-                  onClick={handleClose}
-                  className="text-2xl p-2 rounded-lg hover:bg-white/10 transition-all duration-300 active:scale-95"
-                >
-                  <MdClose />
-                </button>
-              </div>
+            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-6">
+              <h2 id="mobile-navigation-title" className="mb-4 text-[10px] uppercase tracking-[0.18em] text-white/40">Explorer Inkera</h2>
+              <ul className="space-y-1.5">
+                {links.map(({ href, label, Icon }) => {
+                  const active = pathname === href || (href !== "/" && pathname.startsWith(href + "/"));
+                  return <li key={href}><Link href={href} onClick={close} aria-current={active ? "page" : undefined} className={"group flex items-center gap-3 rounded-xl border px-3 py-3 text-sm transition focus-visible:outline-2 focus-visible:outline-tertiary-400 " + (active ? "border-tertiary-400/20 bg-tertiary-400/10 text-white" : "border-transparent text-white/65 hover:bg-white/5 hover:text-white")}><Icon size={18} strokeWidth={1.5} aria-hidden="true" className={active ? "text-tertiary-400" : "text-white/40"} /><span className="flex-1">{label}</span><ArrowUpRight size={14} aria-hidden="true" className={active ? "text-tertiary-400" : "text-white/20 group-hover:text-white/60"} /></Link></li>;
+                })}
+              </ul>
 
-              {/* Navigation links - Modernisés */}
-              <div className="flex-1 px-4 py-6 overflow-y-auto h-[calc(100dvh-88px)]">
-                <ul className="space-y-2 mb-6">
-                  {links.map((link, index) => {
-                    const isActive =
-                      pathname === link.href ||
-                      (link.href === "#cestquoi" && pathname === "/");
-
-                    return (
-                      <li key={index}>
-                        <Link
-                          href={
-                            link.href === "#cestquoi" && pathname !== "/"
-                              ? `/#cestquoi`
-                              : link.href
-                          }
-                          onClick={handleClose}
-                          className={`flex items-center gap-3 px-4 py-2 rounded-2xl transition-all duration-300 group ${
-                            isActive
-                              ? "bg-linear-to-r from-tertiary-400/25 to-tertiary-500/15 border border-tertiary-400/40 text-white shadow-lg shadow-tertiary-400/10"
-                              : "hover:bg-white/5 text-white/80 hover:text-white border border-transparent"
-                          }`}
-                        >
-                          <div className="flex-1">
-                            <span className="text-base font-medium font-one tracking-wide">
-                              {link.label}
-                            </span>
-                          </div>
-                          <div
-                            className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                              isActive
-                                ? "bg-tertiary-400 shadow-lg shadow-tertiary-400/50"
-                                : "bg-transparent group-hover:bg-white/30"
-                            }`}
-                          />
-                        </Link>
-                      </li>
-                    );
-                  })}
-                </ul>
-
-                <div className="mb-6">
-                  <p className="mb-3 px-1 text-xs uppercase tracking-wider text-white/45 font-one">
-                    Réseaux sociaux
-                  </p>
-                  <div className="grid grid-cols-2 gap-2">
-                    {socialLinks.map((item) => {
-                      const Icon = item.icon;
-
-                      return (
-                        <a
-                          key={item.href}
-                          href={item.href}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          onClick={handleClose}
-                          aria-label={item.label}
-                          title={item.label}
-                          className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/12 bg-white/5 px-3 py-2 text-sm text-white/85 transition-all duration-300 hover:border-white/25 hover:bg-white/10 hover:text-white"
-                        >
-                          <Icon className="h-4 w-4" />
-                          <span className="font-one">{item.label.split(" ")[0]}</span>
-                        </a>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Divider */}
-                <div className="h-px bg-linear-to-r from-transparent via-white/10 to-transparent my-6" />
-
-                {/* User Section */}
-                {status === "authenticated" && session?.user ? (
-                  <div className="space-y-4">
-                    {/* User Profile Card */}
-                    <Link href="/mon-profil" onClick={handleClose}>
-                      <div className="bg-linear-to-br from-white/8 to-white/2 border border-white/10 rounded-xl p-4 hover:from-white/12 hover:to-white/6 hover:border-white/20 transition-all duration-300 group cursor-pointer">
-                        <div className="flex items-center gap-3">
-                          <div className="relative w-10 h-10 rounded-full overflow-hidden border-2 border-tertiary-400/50 group-hover:border-tertiary-400 transition-all duration-300">
-                            {session.user.image ? (
-                              <Image
-                                src={session.user.image}
-                                alt={`${session.user.firstName} ${session.user.lastName}`}
-                                fill
-                                sizes="40px"
-                                className="object-cover"
-                              />
-                            ) : (
-                              <div className="w-full h-full bg-linear-to-br from-tertiary-400/40 to-tertiary-500/40 flex items-center justify-center">
-                                <FaUser className="w-4 h-4 text-tertiary-300" />
-                              </div>
-                            )}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-white font-one font-semibold truncate text-sm">
-                              {session.user.firstName} {session.user.lastName}
-                            </p>
-                            <p className="text-white/60 font-one text-xs truncate">
-                              {session.user.email}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </Link>
-                    <Link href="/mon-profil?tab=messagerie" onClick={handleClose} className="flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-one text-white/85 transition hover:bg-white/10">
-                      <span>Messagerie</span>
-                      {messageCount > 0 && <span aria-label={`${messageCount} messages non lus`} className="flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-[10px] font-bold text-white">{messageCount > 99 ? "99+" : messageCount}</span>}
-                    </Link>
-                    <Link href="/mon-profil?tab=moodboard" onClick={handleClose} className="flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-one text-white/85 transition hover:bg-white/10">
-                      <span>Moodboard</span>
-                      {proposalCount > 0 && <span aria-label={`${proposalCount} propositions en attente`} className="flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-[10px] font-bold text-white">{proposalCount > 99 ? "99+" : proposalCount}</span>}
-                    </Link>
-                  </div>
-                ) : (
-                  <div className="flex flex-col gap-4">
-                    <AppButton
-                      href="/se-connecter"
-                      onClick={handleClose}
-                      variant="primary"
-                    >
-                      Se connecter
-                    </AppButton>
-                    <AppButton
-                      href="/creer-un-compte"
-                      onClick={handleClose}
-                      variant="secondary"
-                    >
-                      Créer un compte
-                    </AppButton>
-                  </div>
-                )}
+              <div className="mt-6 border-t border-white/10 pt-5">
+                <h3 className="mb-4 text-[10px] uppercase tracking-[0.18em] text-white/40">Mon espace client</h3>
+                {authenticated ? <>
+                  <Link href="/mon-profil" onClick={close} className="mb-3 flex items-center gap-3 rounded-xl border border-white/10 p-3 transition hover:border-white/20 focus-visible:outline-2 focus-visible:outline-tertiary-400"><span className="relative flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white/5">{session.user.image ? <Image src={session.user.image} alt="" fill sizes="40px" className="object-cover" /> : <UserRound size={18} aria-hidden="true" />}</span><span className="min-w-0 flex-1"><span className="block truncate text-sm text-white/85">{session.user.firstName} {session.user.lastName}</span><span className="mt-1 block text-[11px] text-white/45">Voir mon profil</span></span><ArrowUpRight size={14} aria-hidden="true" className="text-white/35" /></Link>
+                  <div className="grid grid-cols-2 gap-2">{accountLinks.map(({ href, label, Icon, count }) => <Link key={href} href={href} onClick={close} className="flex min-w-0 items-center gap-2 rounded-xl border border-white/10 px-3 py-3 text-xs text-white/65 transition hover:bg-white/5 focus-visible:outline-2 focus-visible:outline-tertiary-400"><Icon size={14} aria-hidden="true" className="shrink-0 text-white/40" /><span className="truncate">{label}</span>{count > 0 && <span aria-label={count + " notifications"} className="ml-auto rounded-full bg-tertiary-400/15 px-1.5 text-[9px] text-tertiary-400">{count > 99 ? "99+" : count}</span>}</Link>)}</div>
+                </> : <><p className="mb-4 text-xs leading-6 text-white/55">Vos inspirations, vos favoris et vos échanges, au même endroit.</p><div className="grid grid-cols-2 gap-2"><AppButton href="/se-connecter" onClick={close} className="px-3! text-xs! shadow-none!">Me connecter</AppButton><AppButton href="/creer-un-compte" onClick={close} variant="secondary" className="px-3! text-xs!">Créer un compte</AppButton></div></>}
               </div>
             </div>
-          </>,
-          document.body,
-        )}
+
+            <div className="shrink-0 border-t border-white/10 px-5 pb-[max(20px,env(safe-area-inset-bottom))] pt-4"><p className="mb-3 text-[10px] uppercase tracking-[0.18em] text-white/40">Suivre Inkera</p><NavbarSocialLinks expanded onNavigate={close} /></div>
+          </div>
+        </dialog>, document.body
+      )}
     </nav>
   );
 }

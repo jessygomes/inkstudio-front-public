@@ -25,8 +25,8 @@ export const metadata: Metadata = {
 
 export default function ConditionsDUtilisation() {
   return (
-    <main className="min-h-screen bg-linear-to-b from-noir-700 via-noir-600 to-noir-700 pt-20">
-      <section className="bg-linear-to-r from-noir-700 to-noir-800 py-20 relative overflow-hidden">
+    <main className="min-h-screen bg-linear-to-b from-noir-800 via-noir-600 to-noir-800 pt-20">
+      <section className="bg-linear-to-r from-noir-800 to-noir-800 py-20 relative overflow-hidden">
         <div className="container mx-auto px-4 sm:px-8 max-w-4xl relative z-10 text-center">
           <div className="inline-flex items-center gap-2 bg-tertiary-500/10 border border-tertiary-400/20 rounded-full px-4 py-2 mb-6">
             <FaFileContract size={16} className="text-tertiary-400" />

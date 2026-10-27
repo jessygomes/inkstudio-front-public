@@ -19,7 +19,7 @@ export default function CancelAppointmentModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-noir-700/80 backdrop-blur-sm flex items-center justify-center z-10000 p-4">
+    <div className="fixed inset-0 bg-noir-800/80 backdrop-blur-sm flex items-center justify-center z-10000 p-4">
       <div className="bg-gradient-to-br from-white/[0.12] to-white/[0.06] backdrop-blur-xl border border-white/20 rounded-xl p-6 max-w-md w-full shadow-2xl">
         <h3 className="text-white font-one font-semibold text-xl mb-4">
           Annuler le rendez-vous

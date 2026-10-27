@@ -33,14 +33,14 @@ export default function ConversationRDVModal({
       ref={dialogRef}
       onCancel={onClose}
       aria-label="Détails du rendez-vous"
-      className="fixed inset-0 m-0 max-h-none max-w-none overflow-hidden bg-noir-700 p-0 text-white backdrop:bg-black/60 lg:hidden"
+      className="fixed inset-0 m-0 max-h-none max-w-none overflow-hidden bg-noir-800 p-0 text-white backdrop:bg-black/60 lg:hidden"
       style={{
         height: "100dvh",
         width: "100vw",
       }}
     >
       <div className="w-full h-full">
-        <div className="flex h-full min-h-0 w-full flex-col overflow-hidden bg-linear-to-br from-noir-500 to-noir-700">
+        <div className="flex h-full min-h-0 w-full flex-col overflow-hidden bg-linear-to-br from-noir-500 to-noir-800">
           <div className="flex-1 overflow-y-auto min-h-0">
             <ConversationRDVDetails conversation={conversation} />
           </div>

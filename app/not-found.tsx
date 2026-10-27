@@ -2,7 +2,7 @@ import BtnBack from "@/components/Shared/BtnBack";
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-noir-700 flex flex-col justify-center items-center px-4">
+    <div className="min-h-screen bg-noir-800 flex flex-col justify-center items-center px-4">
       <div className="max-w-2xl w-full text-center py-20">
         {/* Error code avec style du site */}
         <div className="relative mb-12">

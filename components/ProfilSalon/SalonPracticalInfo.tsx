@@ -51,10 +51,10 @@ export default function SalonPracticalInfo(props: Props) {
     }
   };
   const rowClass = "group flex min-h-10 items-center gap-2.5 rounded-xl border border-white/8 bg-white/[0.015] p-2.5 transition hover:border-tertiary-400/25 hover:bg-white/3";
-  const iconClass = "grid h-7 w-7 shrink-0 place-items-center rounded-lg border border-white/8 bg-noir-700 text-tertiary-400/70";
+  const iconClass = "grid h-7 w-7 shrink-0 place-items-center rounded-lg border border-white/8 bg-noir-800 text-tertiary-400/70";
 
   return (
-    <section aria-labelledby={`${id}-heading`} className="overflow-hidden rounded-2xl border border-white/10 bg-noir-700 font-one">
+    <section aria-labelledby={`${id}-heading`} className="overflow-hidden rounded-2xl border border-white/10 bg-noir-800 font-one">
       <div className="flex items-center gap-2.5 px-4 pb-3 pt-4"><span className="grid size-8 shrink-0 place-items-center rounded-xl border border-tertiary-400/15 bg-tertiary-400/8 text-tertiary-400"><MapPin size={17} aria-hidden="true" /></span><div><p className="mb-1 text-[9px] uppercase tracking-[0.14em] text-white/35">Préparer votre venue</p><h2 id={id + "-heading"} className="text-base font-medium text-white/90">Informations pratiques</h2></div></div>
       <div className="space-y-1.5 px-3 pb-3">
         {fullAddress && <div className="rounded-xl border border-white/8 bg-white/[0.015] p-2.5">

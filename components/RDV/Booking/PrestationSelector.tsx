@@ -48,7 +48,7 @@ export default function PrestationSelector({
                 "group relative cursor-pointer grid grid-cols-[auto_minmax(0,1fr)] content-start gap-x-2.5 rounded-xl border px-3 py-3 pr-7 text-left transition-colors duration-200 hover:border-tertiary-400/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tertiary-400/50",
                 isSelected
                   ? "border-tertiary-400/50 bg-tertiary-400/8"
-                  : "border-white/10 bg-noir-700/60 hover:bg-white/4",
+                  : "border-white/10 bg-noir-800/60 hover:bg-white/4",
               )}
             >
               <span className="row-span-2 flex size-8 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-tertiary-400" aria-hidden="true">{p === "TATTOO" ? <PenTool size={15} /> : p === "PIERCING" ? <Sparkles size={15} /> : p === "PROJET" ? <MessageCircle size={15} /> : <RefreshCw size={15} />}</span>

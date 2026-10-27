@@ -49,7 +49,7 @@ interface TokenValidation {
 // Loading fallback component
 function LoadingFallback() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-noir-700 to-noir-500 flex items-center justify-center">
+    <div className="min-h-screen bg-gradient-to-br from-noir-800 to-noir-500 flex items-center justify-center">
       <div className="text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-tertiary-400 mx-auto mb-4"></div>
         <p className="text-white font-one">Chargement...</p>
@@ -208,7 +208,7 @@ function RdvRequestContent() {
 
   if (tokenValidation.isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-noir-700 to-noir-500 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-noir-800 to-noir-500 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-tertiary-400 mx-auto mb-4"></div>
           <p className="text-white font-one">Vérification du lien...</p>
@@ -220,7 +220,7 @@ function RdvRequestContent() {
   // Error state
   if (!tokenValidation.isValid) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-noir-700 to-noir-500 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-noir-800 to-noir-500 flex items-center justify-center">
         <div className="max-w-md mx-auto text-center bg-white/5 rounded-2xl p-8 border border-red-500/30">
           <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
             <svg
@@ -255,7 +255,7 @@ function RdvRequestContent() {
   // Success state (affiché après acceptation ou refus)
   if (isSuccessful) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-noir-700 to-noir-500 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-noir-800 to-noir-500 flex items-center justify-center">
         <div className="my-8 max-w-2xl mx-auto text-center bg-gradient-to-br from-noir-500/20 to-noir-500/10 backdrop-blur-lg rounded-3xl p-8 border border-white/20 shadow-2xl">
           <div className="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
             <svg
@@ -337,7 +337,7 @@ function RdvRequestContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-noir-700 to-noir-500 z-[9999]">
+    <div className="min-h-screen bg-gradient-to-br from-noir-800 to-noir-500 z-[9999]">
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
           {/* Header */}

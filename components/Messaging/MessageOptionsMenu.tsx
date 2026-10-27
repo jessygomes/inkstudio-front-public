@@ -67,7 +67,7 @@ export default function MessageOptionsMenu({
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 top-6 z-50 min-w-[140px] bg-noir-700 border border-white/10 rounded-lg shadow-lg overflow-hidden">
+        <div className="absolute right-0 top-6 z-50 min-w-[140px] bg-noir-800 border border-white/10 rounded-lg shadow-lg overflow-hidden">
           <button
             onClick={handleCopy}
             className="cursor-pointer flex items-center gap-2 w-full px-3 py-2 text-left text-xs text-white/80 hover:bg-white/5 transition-colors"

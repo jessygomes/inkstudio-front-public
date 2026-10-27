@@ -153,34 +153,34 @@ export default function ContactForm() {
               required
               className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:border-tertiary-400/50 focus:ring-2 focus:ring-tertiary-400/20 focus:bg-white/10 transition-all duration-300 font-one appearance-none cursor-pointer"
             >
-              <option value="" className="bg-noir-700 text-white">
+              <option value="" className="bg-noir-800 text-white">
                 Sélectionnez une option
               </option>
               <option
                 value="question-generale"
-                className="bg-noir-700 text-white"
+                className="bg-noir-800 text-white"
               >
                 Question générale
               </option>
               <option
                 value="support-technique"
-                className="bg-noir-700 text-white"
+                className="bg-noir-800 text-white"
               >
                 Support technique
               </option>
-              <option value="partenariat" className="bg-noir-700 text-white">
+              <option value="partenariat" className="bg-noir-800 text-white">
                 Partenariat
               </option>
               <option
                 value="salon-inscription"
-                className="bg-noir-700 text-white"
+                className="bg-noir-800 text-white"
               >
                 Inscription salon
               </option>
-              <option value="signalement" className="bg-noir-700 text-white">
+              <option value="signalement" className="bg-noir-800 text-white">
                 Signalement
               </option>
-              <option value="autre" className="bg-noir-700 text-white">
+              <option value="autre" className="bg-noir-800 text-white">
                 Autre
               </option>
             </select>

@@ -17,7 +17,7 @@ export default function CookieBanner() {
 
       {/* Bannière */}
       <div className="fixed bottom-0 left-0 right-0 z-[9999] p-4">
-        <div className="max-w-4xl mx-auto bg-gradient-to-r from-noir-700 to-noir-600 rounded-2xl border border-white/20 shadow-2xl backdrop-blur-lg">
+        <div className="max-w-4xl mx-auto bg-gradient-to-r from-noir-800 to-noir-600 rounded-2xl border border-white/20 shadow-2xl backdrop-blur-lg">
           {!showDetails ? (
             /* Vue simple compacte */
             <div className="p-4">

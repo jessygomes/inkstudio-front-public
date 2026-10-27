@@ -111,7 +111,7 @@ export default function DeleteMessageButton({
       {/* Modal de Confirmation */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-md z-50 flex items-center justify-center p-4">
-          <div className="bg-noir-700 border border-white/10 rounded-xl shadow-2xl max-w-sm w-full animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-noir-800 border border-white/10 rounded-xl shadow-2xl max-w-sm w-full animate-in fade-in zoom-in-95 duration-200">
             {/* Header */}
             <div className="border-b border-white/10 px-6 py-4">
               <h2 className="text-white text-lg font-one">
@@ -137,7 +137,7 @@ export default function DeleteMessageButton({
               <button
                 onClick={() => setIsModalOpen(false)}
                 disabled={isDeleting}
-                className="cursor-pointer px-4 py-2 rounded-lg bg-noir-700 border border-white/10 text-white/70 hover:text-white hover:bg-noir-700/80 transition-all duration-200 text-sm font-one disabled:opacity-50 disabled:cursor-not-allowed"
+                className="cursor-pointer px-4 py-2 rounded-lg bg-noir-800 border border-white/10 text-white/70 hover:text-white hover:bg-noir-800/80 transition-all duration-200 text-sm font-one disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Annuler
               </button>

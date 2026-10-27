@@ -275,7 +275,7 @@ const EditAppointmentModal: React.FC<EditAppointmentModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-10000 flex items-center justify-center bg-noir-700/80 backdrop-blur-sm p-4">
+    <div className="fixed inset-0 z-10000 flex items-center justify-center bg-noir-800/80 backdrop-blur-sm p-4">
       <div className="w-full max-w-2xl rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.12] to-white/[0.04] p-5 shadow-2xl">
         <div className="flex items-center justify-between mb-4">
           <div>

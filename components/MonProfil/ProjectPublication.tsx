@@ -18,8 +18,8 @@ export type ProjectFields = {
   projectRadiusKm?: number | null;
 };
 const inputClass =
-  "mt-1.5 min-h-11 w-full min-w-0 rounded-xl border border-white/10 bg-noir-700/70 px-3.5 py-2.5 text-sm text-white outline-none transition placeholder:text-white/25 focus:border-tertiary-400/45 focus:bg-white/[0.045] focus:ring-2 focus:ring-tertiary-400/10 [color-scheme:dark] disabled:opacity-50";
-const selectClass = `${inputClass} !bg-noir-700 focus:!bg-noir-700 [&_option]:bg-noir-700 [&_option]:text-white`;
+  "mt-1.5 min-h-11 w-full min-w-0 rounded-xl border border-white/10 bg-noir-800/70 px-3.5 py-2.5 text-sm text-white outline-none transition placeholder:text-white/25 focus:border-tertiary-400/45 focus:bg-white/[0.045] focus:ring-2 focus:ring-tertiary-400/10 [color-scheme:dark] disabled:opacity-50";
+const selectClass = `${inputClass} !bg-noir-800 focus:!bg-noir-800 [&_option]:bg-noir-800 [&_option]:text-white`;
 
 export default function ProjectPublication({
   board,

@@ -122,8 +122,8 @@ export default function MoodboardAddImageModal({
   }
 
   return createPortal(
-    <div className="fixed inset-0 z-120 flex items-center justify-center bg-noir-700/75 p-0 backdrop-blur-sm sm:p-4">
-      <div className="h-screen w-screen overflow-hidden border-0 border-white/12 bg-noir-700 shadow-2xl sm:h-auto sm:w-full sm:max-w-2xl sm:rounded-3xl sm:border">
+    <div className="fixed inset-0 z-120 flex items-center justify-center bg-noir-800/75 p-0 backdrop-blur-sm sm:p-4">
+      <div className="h-screen w-screen overflow-hidden border-0 border-white/12 bg-noir-800 shadow-2xl sm:h-auto sm:w-full sm:max-w-2xl sm:rounded-3xl sm:border">
         <div className="flex items-center justify-between border-b border-white/10 px-4 py-3 sm:px-5">
           <div className="flex items-center gap-2 font-one">
             <div className="flex h-7 w-7 items-center justify-center rounded-xl border border-tertiary-400/25 bg-tertiary-500/15">
@@ -147,7 +147,7 @@ export default function MoodboardAddImageModal({
 
         <div className="flex h-[calc(100vh-57px)] flex-col gap-3 overflow-y-auto p-4 sm:h-auto sm:p-5">
           <div className="space-y-3 rounded-2xl border border-white/10 bg-white/4 p-3 sm:p-4">
-            <div className="relative overflow-hidden rounded-2xl border border-white/12 bg-noir-700/70">
+            <div className="relative overflow-hidden rounded-2xl border border-white/12 bg-noir-800/70">
               {localPreviewUrl ? (
                 <div className="relative h-72 w-full">
                   <Image

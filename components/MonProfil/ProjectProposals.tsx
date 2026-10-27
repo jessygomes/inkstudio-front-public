@@ -141,7 +141,7 @@ export default function ProjectProposals({
                   maxLength={3000}
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
-                  className="mt-1 w-full rounded-lg border border-white/20 bg-noir-700 p-2"
+                  className="mt-1 w-full rounded-lg border border-white/20 bg-noir-800 p-2"
                 />
               </label>
               <button

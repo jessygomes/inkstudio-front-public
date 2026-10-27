@@ -23,7 +23,7 @@ export default function AppointmentDrawer({ id, onClose, children }: { id: strin
   return createPortal(
     <div className="fixed inset-0 z-1000 bg-black/60 backdrop-blur-sm" onClick={(event) => { if (event.target === event.currentTarget) onClose(); }}>
       <aside id={id} ref={panelRef} role="dialog" aria-modal="true" aria-labelledby={`${id}-title`} tabIndex={-1}
-        className="absolute inset-y-0 right-0 flex h-dvh w-full flex-col border-l border-white/10 bg-noir-700 text-white shadow-2xl outline-none md:w-2/3 lg:w-1/3"
+        className="absolute inset-y-0 right-0 flex h-dvh w-full flex-col border-l border-white/10 bg-noir-800 text-white shadow-2xl outline-none md:w-2/3 lg:w-1/3"
         onKeyDown={(event) => {
           if (!panelRef.current?.contains(document.activeElement)) return;
           if (event.key === "Escape") { event.stopPropagation(); closeRef.current(); }

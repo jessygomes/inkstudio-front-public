@@ -269,7 +269,7 @@ export default function FavorisTab() {
             return (
               <article key={salon.id} className="group min-w-0 overflow-hidden rounded-2xl border border-white/10 bg-noir-500 transition-colors hover:border-tertiary-400/25">
                 <div className="flex items-start gap-3 p-3">
-                  <Link href={href} aria-label={`Découvrir ${salon.salonName}`} className="relative block h-24 w-20 shrink-0 overflow-hidden rounded-xl bg-noir-700 sm:w-24">
+                  <Link href={href} aria-label={`Découvrir ${salon.salonName}`} className="relative block h-24 w-20 shrink-0 overflow-hidden rounded-xl bg-noir-800 sm:w-24">
                     {salon.image ? <Image src={salon.image} alt="" fill sizes="96px" className="object-cover transition-transform duration-300 motion-safe:group-hover:scale-105" /> : <span className="grid h-full place-items-center bg-tertiary-400/5 text-3xl text-white/30">{salon.salonName.charAt(0)}</span>}
                   </Link>
                   <div className="min-w-0 flex-1">
@@ -294,7 +294,7 @@ export default function FavorisTab() {
       ) : (
         <div className="grid grid-cols-2 items-start gap-3 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
           {favoritePortfolioImages.map((image,index) => <article key={image.id} className="group overflow-hidden rounded-2xl border border-white/10 bg-noir-500 transition hover:border-white/25">
-            <div className="relative aspect-square bg-noir-700">
+            <div className="relative aspect-square bg-noir-800">
               <button type="button" onClick={() => setLightboxIndex(index)} aria-label={`Agrandir ${image.title || "l’image favorite"}`} className="absolute inset-0 cursor-zoom-in"><Image src={image.imageUrl} alt={image.title || "Image favorite"} fill sizes="(min-width:1280px) 25vw, (min-width:1024px) 33vw, 50vw" className="object-contain p-2" /><span className="absolute bottom-2 right-2 grid h-8 w-8 place-items-center rounded-lg bg-black/50 text-white"><Expand size={14} /></span></button>
               <div className="absolute right-2 top-2"><FavoritePortfolioBtn portfolioId={image.id} initialFavorite variant="icon-only" onToggle={(isFav) => { if (!isFav) fetchFavoritePortfolio(); }} /></div>
             </div>
@@ -372,7 +372,7 @@ export default function FavorisTab() {
 
             {/* Panneau infos */}
             <aside
-              className="max-h-[45vh] shrink-0 overflow-y-auto lg:max-h-screen border-t border-white/10 bg-noir-700/95 p-4 lg:flex lg:w-80 lg:flex-col lg:justify-between lg:border-t-0 lg:border-l lg:p-6"
+              className="max-h-[45vh] shrink-0 overflow-y-auto lg:max-h-screen border-t border-white/10 bg-noir-800/95 p-4 lg:flex lg:w-80 lg:flex-col lg:justify-between lg:border-t-0 lg:border-l lg:p-6"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="space-y-5">

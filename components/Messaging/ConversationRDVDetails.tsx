@@ -100,7 +100,7 @@ export default function ConversationRDVDetails({
 
   if (error || !appointment) {
     return (
-      <div className={`h-full min-h-0 w-full overflow-y-auto bg-noir-700 p-4 ${embedded ? "" : "rounded-2xl border border-white/15"}`}>
+      <div className={`h-full min-h-0 w-full overflow-y-auto bg-noir-800 p-4 ${embedded ? "" : "rounded-2xl border border-white/15"}`}>
         {onBack && <button type="button" onClick={onBack} aria-label="Retour aux détails de la conversation" className="grid size-9 cursor-pointer place-items-center rounded-lg text-white/50 hover:bg-white/5"><ArrowLeft size={17} /></button>}
         <ConversationMoodboards key={conversation.id} conversationId={conversation.id} />
         <p className="mt-5 text-xs text-white/40">Aucun rendez-vous associé</p>
@@ -127,7 +127,7 @@ export default function ConversationRDVDetails({
   const clientImage = (conversation.client as { image?: string | null }).image;
 
   return (
-    <div className={`flex h-full min-h-0 w-full flex-col overflow-hidden bg-noir-700 font-one [&_a]:cursor-pointer [&_button]:cursor-pointer [&_button]:disabled:cursor-not-allowed ${embedded ? "" : "border border-white/15 shadow-2xl sm:rounded-3xl"}`}>
+    <div className={`flex h-full min-h-0 w-full flex-col overflow-hidden bg-noir-800 font-one [&_a]:cursor-pointer [&_button]:cursor-pointer [&_button]:disabled:cursor-not-allowed ${embedded ? "" : "border border-white/15 shadow-2xl sm:rounded-3xl"}`}>
       <div className={`shrink-0 border-b border-white/10 bg-noir-600 ${embedded ? "px-4 py-3" : "px-4 py-3 sm:rounded-t-3xl"}`}>
         <div className={`${embedded ? "mb-2" : "mb-4"} flex items-center gap-2`}>
           {onBack && <button type="button" onClick={onBack} aria-label="Retour aux rendez-vous" title="Retour aux rendez-vous" className="cursor-pointer disabled:cursor-not-allowed grid h-8 w-8 shrink-0 place-items-center rounded-lg text-white/60 transition hover:bg-white/10 hover:text-white focus-visible:outline-2 focus-visible:outline-tertiary-400"><ArrowLeft size={17} /></button>}
@@ -155,7 +155,7 @@ export default function ConversationRDVDetails({
                 </div>
               )}
               <span
-                className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-noir-700 ${statusCfg.dot}`}
+                className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-noir-800 ${statusCfg.dot}`}
               />
           </div>
 
