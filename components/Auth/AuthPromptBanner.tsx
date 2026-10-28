@@ -11,7 +11,19 @@ export default function AuthPromptBanner({ compact = false }: { compact?: boolea
     return null;
   }
 
-  if (compact) return <aside className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-white/8 py-4 text-[11px]"><p className="text-white/40">Un compte pour retrouver et gérer vos rendez-vous.</p><div className="flex gap-4"><Link href="/se-connecter" className="text-white/60 hover:text-white">Se connecter</Link><Link href="/creer-un-compte" className="text-tertiary-400/80 hover:text-tertiary-400">Créer un compte</Link></div></aside>;
+  if (compact) return (
+    <aside aria-label="Votre espace client" className="mb-6 rounded-2xl border border-tertiary-400/20 bg-tertiary-400/5 p-4 sm:p-5">
+      <p className="text-sm font-medium text-white/90">Vos rendez-vous et vos échanges au même endroit</p>
+      <p className="mt-2 text-xs leading-6 text-white/65">
+        Connectez-vous ou créez un compte gratuit pour retrouver la liste de vos rendez-vous et envoyer des messages à votre salon ou à votre tatoueur professionnel.
+      </p>
+      <p className="mt-2 text-xs leading-5 text-white/55">Le compte est facultatif : vous pouvez continuer votre réservation sans vous connecter.</p>
+      <div className="mt-4 flex flex-wrap gap-3">
+        <Link href="/se-connecter" className="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/15 px-4 py-2 text-xs font-medium text-white/80 transition hover:border-white/30 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary-400">Se connecter</Link>
+        <Link href="/creer-un-compte" className="inline-flex min-h-11 items-center justify-center rounded-xl border border-tertiary-400/30 bg-tertiary-400/10 px-4 py-2 text-xs font-medium text-tertiary-400 transition hover:bg-tertiary-400/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary-400">Créer un compte gratuit</Link>
+      </div>
+    </aside>
+  );
 
   return (
     <div className="relative overflow-hidden rounded-2xl border border-tertiary-500/30 bg-gradient-to-br from-tertiary-500/10 via-tertiary-600/5 to-purple-500/5 backdrop-blur-lg shadow-lg p-6 mb-6">

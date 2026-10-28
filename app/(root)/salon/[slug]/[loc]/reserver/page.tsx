@@ -289,8 +289,8 @@ export default async function ReserverPage({
             </div>
           </aside>
           <main className="order-1 min-w-0 lg:order-2">
-            <BookingFlowNew salon={salonSummary} apiBase={process.env.NEXT_PUBLIC_BACK_URL} defaultTatoueurId={null} defaultPrestation={defaultPrestation} flashes={availableFlashes} defaultFlashId={defaultFlashId} />
             <AuthPromptBanner compact />
+            <BookingFlowNew salon={salonSummary} apiBase={process.env.NEXT_PUBLIC_BACK_URL} defaultTatoueurId={null} defaultPrestation={defaultPrestation} flashes={availableFlashes} defaultFlashId={defaultFlashId} />
           </main>
         </div>
       </div>

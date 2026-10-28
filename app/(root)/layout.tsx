@@ -10,6 +10,7 @@ import { UserProvider } from "@/components/Context/UserContext";
 import { Toaster } from "@/components/Shared/Sonner";
 import Footer from "@/components/Shared/Footer";
 import Header from "@/components/Shared/Header";
+import SiteFrame from "@/components/Shared/SiteFrame";
 
 export default async function RootLayout({
   children,
@@ -55,13 +56,9 @@ export default async function RootLayout({
             <Toaster />
             <CookieBanner />
             <UserProvider user={user}>
-              <div>
-                <div className="sticky top-0 left-0 w-full z-30 ">
-                  <Header />
-                </div>
+              <SiteFrame header={<Header />} footer={<Footer />}>
                 {children}
-                <Footer />
-              </div>
+              </SiteFrame>
             </UserProvider>
           </CookieConsentProvider>
         </EditAppointmentProvider>

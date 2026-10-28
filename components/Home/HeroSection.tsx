@@ -46,7 +46,7 @@ export default function HeroSection() {
   };
 
   return (
-    <section className="w-full -mt-16 md:-mt-21 min-h-screen grid grid-cols-1 lg:grid-cols-2 gap-0 lg:gap-12 items-center z-20 bg-noir-800">
+    <section className="w-full -mt-16 md:-mt-21 lg:-mt-16 min-h-screen grid grid-cols-1 lg:grid-cols-2 gap-0 lg:gap-12 items-center z-20 bg-noir-800">
       <motion.div
         className="relative w-full h-[55vh] max-h-[55vh] md:h-[55vh] md:max-h-[55vh] lg:h-screen lg:max-h-screen p-3 grid grid-cols-3 grid-rows-3 gap-2 overflow-hidden"
         variants={containerVariants}
