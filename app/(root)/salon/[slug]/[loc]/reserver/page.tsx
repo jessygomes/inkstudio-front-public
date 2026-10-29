@@ -185,7 +185,7 @@ export default async function ReserverPage({
   const bookingTatoueurs = tatoueurs.map((tatoueur) => ({
     ...tatoueur,
     rdvBookingEnabled: tatoueur.rdvBookingEnabled === true,
-    bookingHref: getLinkedBookingHref(tatoueur),
+    bookingHref: tatoueur.bookingHref || getLinkedBookingHref(tatoueur),
   }));
 
   const resolvedAgendaMode =

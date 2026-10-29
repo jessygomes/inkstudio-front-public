@@ -1170,7 +1170,10 @@ export function useBookingLogic({
       toast.info(
         "Ce tatoueur possède son propre compte. Redirection vers sa page de réservation.",
       );
-      router.push(selectedArtist.bookingHref + (selectedArtist.bookingHref.includes("?") ? "&" : "?") + "venueSalonId=" + encodeURIComponent(salon.id));
+      const destination = new URL(selectedArtist.bookingHref, window.location.origin);
+      destination.searchParams.set("venueSalonId", salon.id);
+      if (prestation) destination.searchParams.set("prestation", prestation);
+      router.push(destination.pathname + destination.search);
       return;
     }
 
