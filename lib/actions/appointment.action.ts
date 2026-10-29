@@ -187,10 +187,11 @@ type CreateAppointmentByClientResult = {
 export const createAppointmentByClient = async (
   salonId: string,
   rdvBody: RdvBody,
-  clientUserId?: string,
 ) : Promise<CreateAppointmentByClientResult> => {
   try {
     const headers = await getAuthHeaders();
+    const booking = { ...rdvBody } as RdvBody & { clientUserId?: string };
+    delete booking.clientUserId;
 
     const backUrl = process.env.NEXT_PUBLIC_BACK_URL || "";
 
@@ -200,8 +201,7 @@ export const createAppointmentByClient = async (
       body: JSON.stringify({
         salonId,
         userId: salonId,
-        rdvBody: rdvBody,
-        clientUserId,
+        rdvBody: booking,
       }),
     });
 

@@ -87,7 +87,7 @@ export default function MoodboardAddImageModal({
         initialQuality: 0.78,
       });
 
-      const uploaded = await startUpload([compressed]);
+      const uploaded = await startUpload([compressed], {});
       const uploadedUrl = uploaded?.[0]?.url;
 
       if (!uploadedUrl) {

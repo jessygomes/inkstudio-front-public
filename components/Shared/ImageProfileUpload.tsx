@@ -45,7 +45,7 @@ export default function SalonImageUploader({ currentImage, onImageUpload, onImag
     setProgress(0);
     try {
       const compressed = await imageCompression(file, { maxSizeMB: 1, maxWidthOrHeight: 1920, useWebWorker: true, fileType: "image/webp", initialQuality: 0.8 });
-      const result = await startUpload([compressed]);
+      const result = await startUpload([compressed], {});
       if (!result?.[0]?.url) throw new Error("Envoi incomplet");
       onImageUpload(result[0].url);
     } catch {

@@ -1,20 +1,22 @@
 import { createUploadthing, type FileRouter } from "uploadthing/next";
-
+import {
+  finishUpload,
+  prepareUpload,
+  uploadContextSchema,
+} from "@/lib/upload-permits";
 const f = createUploadthing();
-
 export const fileRouter = {
-  imageUploader: f({
-    image: { maxFileSize: "8MB", maxFileCount: 5 },
-  })
-    .middleware(async () => {
-      // Pour l'instant, on autorise tout le monde
-      return { userId: "salon-user" };
-    })
+  imageUploader: f(
+    { image: { maxFileSize: "8MB", maxFileCount: 5 } },
+    { presignedURLTTL: "10 minutes", awaitServerData: true },
+  )
+    .input(uploadContextSchema)
+    .middleware(({ files, input }) =>
+      prepareUpload("imageUploader", files, input),
+    )
     .onUploadComplete(async ({ file, metadata }) => {
-      console.log("Upload complete for userId:", metadata.userId);
-      console.log("File URL:", file.url);
+      await finishUpload(file, metadata);
       return { uploadedBy: metadata.userId };
     }),
 } satisfies FileRouter;
-
 export type OurFileRouter = typeof fileRouter;

@@ -7,7 +7,11 @@
     "dev:turbo": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "eslint .",
+    "test:security-images": "node --test tests/image-pipeline.test.cjs",
+    "test:security-auth": "node --test tests/auth-security.test.cjs",
+    "test:security-uploads": "node --test tests/upload-security.test.cjs tests/upload-permits.test.cjs",
+    "test:security-booking": "node --test tests/booking-identity.test.cjs"
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",
@@ -17,8 +21,8 @@
     "browser-image-compression": "^2.0.2",
     "lucide-react": "^0.555.0",
     "motion": "^12.38.0",
-    "next": "^16.2.3",
-    "next-auth": "^5.0.0-beta.30",
+    "next": "16.4.3",
+    "next-auth": "5.0.0-beta.32",
     "next-themes": "^0.4.6",
     "query-string": "^9.3.1",
     "react": "19.1.0",
@@ -40,7 +44,7 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "eslint": "^9.39.4",
-    "eslint-config-next": "^16.2.3",
+    "eslint-config-next": "16.4.3",
     "tailwindcss": "^4.2.2",
     "typescript": "^5.9.3"
   }

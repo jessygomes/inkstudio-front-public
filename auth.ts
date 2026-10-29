@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import NextAuth from "next-auth";
 import authConfig from "./auth.config";
+import { refreshSessionProfile, withBackendTokenStatus } from "./lib/auth-security";
 
 function normalizeAuthBaseUrl(): string | undefined {
   const candidates = [
@@ -42,6 +43,7 @@ declare module "next-auth" {
       clientProfile?: any;
     };
     accessToken: string;
+    error?: "AccessTokenExpired";
   }
 
   interface User {
@@ -78,7 +80,7 @@ export const {
      * Callback JWT - Ajoute les données personnalisées au token JWT
      * Appelé quand le token est créé ou mis à jour
      */
-    async jwt({ token, user, trigger, session, account, profile }) {
+    async jwt({ token, user, trigger, account, profile }) {
       // Connexion via Google -> on crée/valide l'utilisateur côté backend et on récupère le token métier
       if (account?.provider === "google") {
         try {
@@ -88,26 +90,13 @@ export const {
             throw new Error("NEXT_PUBLIC_BACK_URL n'est pas configuré");
           }
 
+          if (typeof account.id_token !== "string" || !account.id_token) throw new Error("Missing Google ID token");
           const response = await fetch(`${backendUrl}/auth/google`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({
-              email: profile?.email ?? user?.email,
-              firstName:
-                (profile as any)?.given_name ??
-                profile?.name?.split(" ")?.[0] ??
-                "",
-              lastName:
-                (profile as any)?.family_name ??
-                profile?.name?.split(" ")?.slice(1).join(" ") ??
-                "",
-              avatar: profile?.picture ?? user?.image ?? null,
-              googleId: account.providerAccountId,
-              idToken: account.id_token,
-              accessToken: account.access_token,
-            }),
+            body: JSON.stringify({ idToken: account.id_token }),
           });
 
           const data = await response.json();
@@ -160,8 +149,11 @@ export const {
       }
 
       // Support pour la mise à jour de session
-      if (trigger === "update" && session) {
-        token = { ...token, ...session.user };
+      if (user || account?.provider === "google") token.error = undefined;
+      token = withBackendTokenStatus(token);
+      if (token.error === "AccessTokenExpired") return token;
+      if (trigger === "update") {
+        token = await refreshSessionProfile(token, "client");
       }
 
       return token;
@@ -183,6 +175,7 @@ export const {
         session.user.image = token.image as string | null;
         session.user.clientProfile = token.clientProfile;
         session.accessToken = token.accessToken as string;
+        if (token.error === "AccessTokenExpired") session.error = token.error;
       } else {
         console.warn("⚠️  [Session Callback] Token non disponible");
       }
@@ -196,7 +189,7 @@ export const {
   },
   cookies: {
     sessionToken: {
-      name: "client_access_token",
+      name: process.env.NODE_ENV === "production" ? "__Secure-inkera_client_session_v2" : "inkera_client_session_v2",
       options: {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",

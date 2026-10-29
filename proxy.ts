@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { auth } from "@/auth";
+import { hasUsableSession } from "@/lib/auth-security";
 
 export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
@@ -21,7 +22,7 @@ export async function proxy(req: NextRequest) {
   if (isProtectedRoute) {
     const session = await auth();
 
-    if (!session?.user) {
+    if (!hasUsableSession(session)) {
       // Rediriger vers la page de connexion
       const loginUrl = new URL("/se-connecter", req.url);
       loginUrl.searchParams.set("redirect", pathname);

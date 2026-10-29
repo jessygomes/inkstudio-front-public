@@ -992,6 +992,7 @@ export function useBookingLogic({
         const compressed = await compressImage(sketchFile);
         const urls = await uploadFiles("imageUploader", {
           files: [compressed],
+          input: { bookingSalonId: salon.id },
         });
         if (urls.length > 0)
           uploadedFileUrls.sketch =
@@ -1003,6 +1004,7 @@ export function useBookingLogic({
         const compressed = await compressImage(referenceFile);
         const urls = await uploadFiles("imageUploader", {
           files: [compressed],
+          input: { bookingSalonId: salon.id },
         });
         if (urls.length > 0)
           uploadedFileUrls.reference =
@@ -1101,7 +1103,6 @@ export function useBookingLogic({
       const result = await createAppointmentByClient(
         salon.id,
         payload,
-        isAuthenticated ? sessionUserId : undefined,
       );
 
       if (

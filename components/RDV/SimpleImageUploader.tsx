@@ -62,7 +62,7 @@ export default function SimpleImageUploader({
         initialQuality: 0.78,
       });
 
-      await startUpload([compressed]);
+      await startUpload([compressed], {});
     } catch (error) {
       console.error("Erreur lors de la compression:", error);
       alert("Erreur lors du traitement de l'image");
