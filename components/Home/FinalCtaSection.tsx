@@ -46,7 +46,7 @@ export default function FinalCtaSection() {
           <h2 id="home-closing-title" className="mt-4 font-two text-3xl font-medium leading-[1.15] tracking-tight sm:text-4xl xl:text-5xl">
             <span className="block text-white">Toutes les histoires.</span>{" "}
             <span className="block text-white/65">Tous les styles.</span>{" "}
-            <span className="block bg-linear-to-r from-tertiary-400 to-tertiary-500 bg-clip-text text-transparent">Toutes les peaux.</span>
+            <span className="block bg-linear-to-r from-tertiary-400 via-tertiary-500 to-cuatro-500 bg-clip-text text-transparent">Toutes les peaux.</span>
           </h2>
           <p className="mt-5 max-w-sm text-sm leading-7 text-white/60">À chacun son univers. Trouvez l’artiste qui fera vivre le vôtre.</p>
           <div className="mt-6 flex w-full flex-col justify-center gap-3 sm:w-auto sm:flex-row">

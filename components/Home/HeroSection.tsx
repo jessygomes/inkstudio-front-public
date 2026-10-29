@@ -91,7 +91,7 @@ export default function HeroSection() {
         <div className="relative z-10 flex flex-col justify-center items-center md:items-start gap-1 sm:gap-2">
           <h1 className="hidden md:block md:text-center lg:text-left text-white font-two">INKERA <span className="text-white/30">PEOPLE</span></h1>
           <h2 className="text-2xl md:text-4xl font-bold text-center md:text-left text-white uppercase font-two tracking-wide">
-            Trouvez votre tatoueur idéal
+            Trouvez votre tatoueur <span className="inline-block bg-linear-to-r from-tertiary-400 via-tertiary-500 to-cuatro-500 bg-clip-text text-transparent">idéal</span>
           </h2>
           <p className="text-center md:text-left text-white/50 text-sm font-one max-w-xl">
             Trouvez facilement le tatoueur/tatoueuse qui vous convient proche de

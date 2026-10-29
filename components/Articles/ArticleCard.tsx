@@ -1,79 +1,33 @@
+import Image from "next/image";
 import Link from "next/link";
-import { PublicArticle } from "@/lib/actions/article.action";
+import { ArrowUpRight, BookOpen, Clock3 } from "lucide-react";
+import type { PublicArticle } from "@/lib/actions/article.action";
 
-const toExcerpt = (text: string, maxLength = 130) => {
-  if (!text) return "";
-  if (text.length <= maxLength) return text;
-  return `${text.slice(0, maxLength).trim()}...`;
-};
+function excerpt(content: string) {
+  return content.replace(/<[^>]*>/g, " ").replace(/!\[[^\]]*\]\([^)]*\)/g, "").replace(/\[([^\]]+)\]\([^)]*\)/g, "$1").replace(/(^|\n)#{1,6}\s*/g, "$1").replace(/[*_~`]/g, "").replace(/\s+/g, " ").trim();
+}
 
-type ArticleCardProps = {
-  article: PublicArticle;
-};
-
-export default function ArticleCard({ article }: ArticleCardProps) {
-  const formattedDate = new Date(article.createdAt).toLocaleDateString("fr-FR", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
-
+export default function ArticleCard({ article }: { article: PublicArticle }) {
+  const date = new Date(article.createdAt);
+  const hasDate = !Number.isNaN(date.getTime());
+  const text = excerpt(article.content);
+  const minutes = Math.max(1, Math.ceil(text.split(/\s+/).filter(Boolean).length / 200));
   return (
-    <article className="group relative flex flex-col overflow-hidden rounded-3xl border border-white/10 bg-white/4 backdrop-blur-sm transition-all duration-300 hover:border-tertiary-400/40 hover:bg-white/6 hover:shadow-xl hover:shadow-tertiary-500/10 hover:-translate-y-1">
-      {/* Image */}
-      <div className="relative h-48 w-full shrink-0 overflow-hidden bg-noir-900/60">
-        {article.imageUrls?.[0] ? (
-          <img
-            src={article.imageUrls[0]}
-            alt={article.title}
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-          />
-        ) : (
-          <div className="flex h-full items-center justify-center">
-            <span className="text-xs uppercase tracking-[0.22em] text-white/30 font-one">
-              Inkera
-            </span>
-          </div>
-        )}
-        {/* Gradient bas */}
-        <div className="absolute inset-0 bg-linear-to-t from-noir-900/70 via-transparent to-transparent" />
-
-        {/* Badge auteur */}
-        <div className="absolute bottom-3 left-4 right-4 flex items-center justify-between">
-          <span className="rounded-full border border-white/15 bg-noir-900/60 px-2.5 py-1 text-[10px] uppercase tracking-[0.14em] text-white/70 font-one backdrop-blur-sm">
-            {article.author}
-          </span>
-          <span className="rounded-full border border-white/10 bg-noir-900/60 px-2.5 py-1 text-[10px] text-white/50 font-one backdrop-blur-sm">
-            {formattedDate}
-          </span>
+    <article className="group h-full min-w-0">
+      <Link href={`/journal/${article.id}`} className="flex h-full flex-col overflow-hidden rounded-2xl border border-white/8 bg-linear-to-br from-white/[0.035] to-transparent transition-colors hover:border-tertiary-400/30 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-tertiary-400">
+        <div className="relative aspect-[16/9] shrink-0 overflow-hidden bg-white/[0.025]">
+          {article.imageUrls?.[0] ? <Image src={article.imageUrls[0]} alt="" fill sizes="(min-width: 1280px) 33vw, (min-width: 640px) 50vw, 100vw" className="object-cover transition-transform duration-500 motion-safe:group-hover:scale-105" /> : <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-linear-to-br from-tertiary-400/10 to-transparent text-tertiary-400/40"><BookOpen size={28} aria-hidden="true" /><span className="text-[9px] uppercase tracking-[0.2em]">Le journal Inkera</span></div>}
+          <div aria-hidden="true" className="absolute inset-0 bg-linear-to-t from-black/35 via-transparent to-transparent" />
+          <span className="absolute bottom-3 left-3 inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-black/50 px-2.5 py-1 text-[10px] text-white/85 backdrop-blur-md"><Clock3 size={11} aria-hidden="true" />{minutes} min de lecture</span>
+          <span aria-hidden="true" className="absolute right-3 top-3 grid size-8 place-items-center rounded-full border border-white/15 bg-black/25 text-white/80 backdrop-blur-sm transition-colors group-hover:bg-tertiary-400 group-hover:text-black"><ArrowUpRight size={16} /></span>
         </div>
-      </div>
-
-      {/* Contenu */}
-      <div className="flex flex-1 flex-col p-5">
-        <h3 className="line-clamp-2 text-lg font-bold leading-snug text-white font-two transition-colors duration-300 group-hover:text-tertiary-100">
-          {article.title}
-        </h3>
-        <p className="mt-3 line-clamp-3 flex-1 text-sm leading-relaxed text-white/65 font-one">
-          {toExcerpt(article.content)}
-        </p>
-
-        <div className="mt-5 flex items-center justify-between border-t border-white/8 pt-4">
-          <Link
-            href={`/journal/${article.id}`}
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-tertiary-300 transition-all duration-300 hover:text-tertiary-200 font-one"
-          >
-            Lire l&apos;article
-            <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
-          </Link>
-
-          {/* Accent dot */}
-          <span className="h-1.5 w-1.5 rounded-full bg-tertiary-400/50 group-hover:bg-tertiary-400 transition-colors duration-300" />
+        <div className="flex flex-1 flex-col p-4">
+          <div className="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px] text-white/40">{article.author && <span className="break-words text-white/60">{article.author}</span>}{article.author && hasDate && <span aria-hidden="true" className="size-0.5 rounded-full bg-white/25" />}{hasDate && <time dateTime={date.toISOString()}>{date.toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric", timeZone: "Europe/Paris" })}</time>}</div>
+          <h3 className="line-clamp-2 wrap-anywhere text-base font-medium leading-snug tracking-tight text-white/90 transition-colors group-hover:text-tertiary-400 sm:text-lg">{article.title}</h3>
+          <p className="mb-4 mt-2 line-clamp-2 wrap-anywhere text-xs leading-5 text-white/45">{text}</p>
+          <div className="mt-auto flex items-center justify-between border-t border-white/8 pt-3 text-[11px]"><span className="text-white/60 transition-colors group-hover:text-white">Lire l’article</span><span className="text-tertiary-400/65" aria-hidden="true">Journal Inkera</span></div>
         </div>
-      </div>
-
-      {/* Accent line au hover */}
-      <div className="absolute inset-x-0 bottom-0 h-px bg-linear-to-r from-transparent via-tertiary-400/60 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+      </Link>
     </article>
   );
 }

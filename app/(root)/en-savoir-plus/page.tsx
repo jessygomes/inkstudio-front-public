@@ -111,10 +111,10 @@ export default function EnSavoirPlusPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      {/* Hero Section */}
-      <HeroSection />
-
-      <AboutContent />
+      <main>
+        <HeroSection />
+        <AboutContent />
+      </main>
     </>
   );
 }

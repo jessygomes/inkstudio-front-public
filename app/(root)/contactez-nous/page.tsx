@@ -1,14 +1,7 @@
-/* eslint-disable react/no-unescaped-entities */
-import React from "react";
-import {
-  FaEnvelope,
-  FaQuestionCircle,
-  FaHandshake,
-  FaLifeRing,
-} from "react-icons/fa";
 import type { Metadata } from "next";
 import Script from "next/script";
-import Image from "next/image";
+import { ArrowUpRight, CalendarDays, ChevronDown, CircleHelp, Clock3, HeartHandshake, LifeBuoy, Mail, MessagesSquare } from "lucide-react";
+import AppButton from "@/components/Shared/AppButton";
 
 export const dynamic = "force-dynamic";
 
@@ -70,7 +63,7 @@ export default function ContactPage() {
     mainEntity: {
       "@type": "ContactPoint",
       contactType: "Customer Service",
-      email: "contact.inkera@gmail.com",
+      email: "contact@inkera-studio.com",
       name: "Support Inkera",
       description:
         "Support technique et commercial pour les salons de tatouage",
@@ -108,201 +101,52 @@ export default function ContactPage() {
     },
   };
 
+  const email = "contact@inkera-studio.com";
+  const channels = [
+    { Icon: CircleHelp, title: "Une question sur Inkera", text: "Une idée, une suggestion ou une question sur la plateforme.", subject: "Question sur Inkera" },
+    { Icon: LifeBuoy, title: "Besoin d’un coup de main", text: "Un problème de compte ou une difficulté technique ? Écrivez-nous.", subject: "Assistance Inkera" },
+    { Icon: HeartHandshake, title: "Un projet à partager", text: "Inscription de votre salon, collaboration ou partenariat.", subject: "Projet et partenariat Inkera" },
+  ];
+  const questions = [
+    { question: "Comment faire découvrir mon salon sur Inkera ?", answer: "Découvrez Inkera Studio pour les professionnels, ou écrivez-nous en précisant le nom de votre salon et votre ville. Nous pourrons vous guider dans vos premières étapes." },
+    { question: "Quelles informations envoyer pour un problème technique ?", answer: "Décrivez ce qui se passe, la page concernée et les étapes qui provoquent le problème. Précisez aussi votre appareil et votre navigateur. N’envoyez jamais votre mot de passe." },
+    { question: "Quand recevrai-je une réponse ?", answer: "Nous répondons généralement sous 24 à 48 heures ouvrées. Pour faciliter le suivi, utilisez un objet précis et regroupez les informations utiles dans votre message." },
+    { question: "Puis-je contacter un tatoueur ici ?", answer: "Cette page permet de joindre l’équipe Inkera. Pour discuter d’un tatouage, connaître un tarif ou modifier un rendez-vous, contactez directement le salon ou l’artiste depuis son profil." },
+  ];
+
   return (
     <>
-      {/* JSON-LD Script */}
-      <Script
-        id="contact-jsonld"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      <Script id="contact-jsonld" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <main className="min-h-[65vh] bg-noir-800 px-4 pb-14 pt-4 font-one sm:px-6 sm:pb-20 sm:pt-5 lg:px-10 xl:px-16">
+        <header className="flex items-start gap-3 py-1 sm:py-2">
+          <span className="mt-0.5 grid size-9 shrink-0 place-items-center rounded-xl border border-tertiary-400/15 bg-tertiary-400/8 text-tertiary-400"><MessagesSquare size={17} aria-hidden="true" /></span>
+          <div><p className="mb-1 text-[9px] uppercase tracking-[0.16em] text-white/35">Gardons le lien</p><h1 className="text-xl font-medium leading-tight tracking-tight text-white sm:text-2xl">Parlons de ce qui vous amène.</h1><p className="mt-1 text-xs leading-5 text-white/45">Une question, une idée ou besoin d’aide ? L’équipe Inkera est à votre écoute.</p></div>
+        </header>
 
-      <div className="min-h-screen bg-linear-to-b from-noir-800 via-noir-600 to-noir-800">
-        {/* Hero Section */}
-        <section className="bg-linear-to-r from-noir-800 to-noir-800 pt-20 relative overflow-hidden">
-          {/* <div className="absolute top-0 right-0 w-80 h-80 bg-tertiary-400/5 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-0 left-0 w-96 h-96 bg-tertiary-500/3 rounded-full blur-3xl"></div> */}
-
-          <div className="container mx-auto px-4 sm:px-8 max-w-4xl relative z-10">
-            <div className="text-center">
-              <div className="inline-flex items-center gap-2">
-                <Image
-                  src="/logo/logo16.png"
-                  alt="Logo"
-                  width={50}
-                  height={50}
-                />
-              </div>
-
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-two uppercase text-white font-bold leading-tight tracking-widest mb-6">
-                Contactez{" "}
-                <span className="bg-linear-to-r from-tertiary-400 via-tertiary-500 to-cuatro-500 bg-clip-text text-transparent">
-                  Nous
-                </span>
-              </h1>
-
-              <div className="w-24 h-1 bg-linear-to-r from-tertiary-400 to-tertiary-500 rounded-full mx-auto mb-8"></div>
-
-              <p className="text-lg text-white/70 font-one leading-relaxed max-w-3xl mx-auto">
-                Une question, une suggestion ou besoin d'aide ?{" "}
-                <span className="text-tertiary-400 font-semibold">
-                  Notre équipe est là pour vous accompagner.
-                </span>
-              </p>
+        <div className="mt-6 grid items-start gap-5 lg:grid-cols-[1.1fr_0.9fr] lg:gap-8">
+          <section aria-labelledby="contact-title" className="overflow-hidden rounded-2xl border border-white/8 bg-linear-to-br from-white/[0.035] to-transparent">
+            <div className="border-b border-white/8 p-5 sm:p-6">
+              <div className="flex items-start justify-between gap-3"><span className="grid size-10 place-items-center rounded-xl border border-tertiary-400/15 bg-tertiary-400/8 text-tertiary-400"><Mail size={19} aria-hidden="true" /></span><span className="inline-flex items-center gap-1.5 rounded-full border border-white/8 bg-white/[0.025] px-2.5 py-1 text-[10px] text-white/45"><Clock3 size={11} aria-hidden="true" />24–48 h ouvrées</span></div>
+              <h2 id="contact-title" className="mt-5 text-xl font-medium tracking-tight text-white/90 sm:text-2xl">Un message, et on échange.</h2>
+              <p className="mt-2 max-w-md text-xs leading-6 text-white/45">Choisissez le sujet qui correspond à votre demande pour nous écrire directement depuis votre messagerie.</p>
+              <a href={`mailto:${email}`} className="mt-4 inline-flex min-h-10 max-w-full items-center gap-2 text-sm text-tertiary-400 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-tertiary-400"><span className="break-all">{email}</span><ArrowUpRight size={15} className="shrink-0" aria-hidden="true" /></a>
             </div>
+            <div className="space-y-2 p-3 sm:p-4">{channels.map(({ Icon, title, text, subject }) => <a key={title} href={`mailto:${email}?subject=${encodeURIComponent(subject)}`} className="group flex items-start gap-3 rounded-xl border border-transparent p-3 transition-colors hover:border-white/8 hover:bg-white/[0.03] focus-visible:outline-2 focus-visible:outline-tertiary-400"><span className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-lg bg-white/5 text-white/50 transition-colors group-hover:bg-tertiary-400/8 group-hover:text-tertiary-400"><Icon size={15} aria-hidden="true" /></span><div className="min-w-0 flex-1"><h3 className="text-xs font-medium text-white/85">{title}</h3><p className="mt-1 text-[11px] leading-5 text-white/40">{text}</p></div><ArrowUpRight size={14} aria-hidden="true" className="mt-1 shrink-0 text-white/25 transition-colors group-hover:text-tertiary-400" /></a>)}</div>
+          </section>
+
+          <div className="space-y-5">
+            <section aria-labelledby="contact-faq-title" className="rounded-2xl border border-white/8 bg-white/[0.015] p-4 sm:p-5">
+              <div className="mb-2 flex items-center gap-2"><CircleHelp size={16} className="text-tertiary-400/80" aria-hidden="true" /><h2 id="contact-faq-title" className="text-sm font-medium text-white/85">Une réponse vous attend peut-être ici.</h2></div>
+              <div className="divide-y divide-white/8">{questions.map(({ question, answer }) => <details key={question} className="group"><summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 py-3 text-xs leading-5 text-white/65 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-tertiary-400 [&::-webkit-details-marker]:hidden"><span>{question}</span><ChevronDown size={14} aria-hidden="true" className="shrink-0 text-white/30 transition-transform group-open:rotate-180" /></summary><p className="pb-4 pr-5 text-xs leading-6 text-white/45">{answer}</p></details>)}</div>
+            </section>
+            <aside className="rounded-2xl border border-tertiary-400/15 bg-linear-to-br from-tertiary-400/[0.06] to-transparent p-4 sm:p-5">
+              <div className="flex items-start gap-3"><CalendarDays size={18} aria-hidden="true" className="mt-0.5 shrink-0 text-tertiary-400/80" /><div><h2 className="text-sm font-medium text-white/85">Votre prochain tatouage ?</h2><p className="mt-2 text-xs leading-6 text-white/45">Pour un projet, un devis ou un rendez-vous, le bon interlocuteur est votre artiste.</p><AppButton href="/trouver-un-salon" variant="secondary" className="mt-4 min-h-10 px-3! text-[11px]! shadow-none!">Trouver un salon ou un artiste<ArrowUpRight size={13} aria-hidden="true" /></AppButton></div></div>
+            </aside>
           </div>
-        </section>
+        </div>
 
-        {/* Section informations de contact */}
-        <section className="py-16">
-          <div className="container mx-auto px-4 sm:px-8 max-w-6xl">
-            <div className="grid grid-cols-1 lg:grid-cols-1 gap-12">
-              {/* Formulaire de contact */}
-              {/* <div>
-                <ContactForm />
-              </div> */}
-
-              {/* Informations et FAQ */}
-              <div className="space-y-8">
-                {/* Informations de contact */}
-                <div className="bg-linear-to-br from-noir-600/40 to-noir-800/40 backdrop-blur-xl rounded-3xl p-8 border border-white/10">
-                  <div className="flex items-center gap-4 mb-6">
-                    <div className="w-16 h-16 bg-linear-to-br from-tertiary-500/20 to-tertiary-600/20 rounded-2xl flex items-center justify-center">
-                      <FaEnvelope size={24} className="text-tertiary-400" />
-                    </div>
-                    <h2 className="text-2xl font-bold text-white font-two">
-                      Autres moyens de contact
-                    </h2>
-                  </div>
-
-                  <div className="space-y-6 text-white/80 font-one leading-relaxed">
-                    <div className="flex items-start gap-4">
-                      <div className="w-10 h-10 bg-tertiary-500/20 rounded-lg flex items-center justify-center shrink-0 mt-1">
-                        <FaLifeRing className="w-4 h-4 text-tertiary-400" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-white mb-2">
-                          Support technique
-                        </h3>
-                        <a
-                          href="mailto:contact@inkera-studio.com"
-                          className="text-tertiary-400 hover:text-tertiary-300 transition-colors font-semibold underline"
-                        >
-                          contact.inkera@gmail.com
-                        </a>
-                        <p className="text-sm text-white/60 mt-1">
-                          Pour les problèmes techniques
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start gap-4">
-                      <div className="w-10 h-10 bg-tertiary-500/20 rounded-lg flex items-center justify-center shrink-0 mt-1">
-                        <FaHandshake className="w-4 h-4 text-tertiary-400" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-white mb-2">
-                          Partenariats
-                        </h3>
-                        <a
-                          href="mailto:contact@inkera-studio.com"
-                          className="text-tertiary-400 hover:text-tertiary-300 transition-colors font-semibold underline"
-                        >
-                          contact.inkera@gmail.com
-                        </a>
-                        <p className="text-sm text-white/60 mt-1">
-                          Collaborations et partenariats
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Questions fréquentes */}
-                <div className="bg-linear-to-br from-tertiary-500/10 to-tertiary-600/15 backdrop-blur-xl rounded-3xl p-8 border border-tertiary-400/20">
-                  <div className="flex items-center gap-4 mb-6">
-                    <div className="w-16 h-16 bg-linear-to-br from-tertiary-500/20 to-tertiary-600/20 rounded-2xl flex items-center justify-center">
-                      <FaQuestionCircle
-                        size={24}
-                        className="text-tertiary-400"
-                      />
-                    </div>
-                    <h2 className="text-2xl font-bold text-white font-two">
-                      Questions fréquentes
-                    </h2>
-                  </div>
-
-                  <div className="space-y-6">
-                    <div className="bg-white/5 rounded-2xl p-6">
-                      <h3 className="font-semibold text-tertiary-300 mb-3 font-one">
-                        Comment inscrire mon salon sur Inkera ?
-                      </h3>
-                      <p className="text-white/80 font-one text-sm leading-relaxed">
-                        Contactez-nous via le formulaire en sélectionnant
-                        "Inscription salon" ou envoyez-nous un email
-                        directement. Nous vous guiderons dans le processus.
-                      </p>
-                    </div>
-
-                    <div className="bg-white/5 rounded-2xl p-6">
-                      <h3 className="font-semibold text-tertiary-300 mb-3 font-one">
-                        J'ai un problème technique, que faire ?
-                      </h3>
-                      <p className="text-white/80 font-one text-sm leading-relaxed">
-                        Sélectionnez "Support technique" dans le formulaire ou
-                        contactez directement contact@inkera-studio.com en
-                        décrivant précisément votre problème.
-                      </p>
-                    </div>
-
-                    <div className="bg-white/5 rounded-2xl p-6">
-                      <h3 className="font-semibold text-tertiary-300 mb-3 font-one">
-                        Combien de temps pour une réponse ?
-                      </h3>
-                      <p className="text-white/80 font-one text-sm leading-relaxed">
-                        Nous nous engageons à répondre dans les 24-48h ouvrées
-                        maximum. Les demandes urgentes sont traitées en
-                        priorité.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Engagement */}
-                <div className="bg-linear-to-br from-noir-600/40 to-noir-800/40 backdrop-blur-xl rounded-3xl p-8 border border-white/10">
-                  <h3 className="text-xl font-bold text-white font-two mb-4">
-                    Notre engagement
-                  </h3>
-                  <div className="space-y-3 text-white/80 font-one leading-relaxed">
-                    <div className="flex items-start gap-3">
-                      <span className="text-tertiary-400 mt-1">✓</span>
-                      <span className="text-sm">
-                        Réponse rapide et personnalisée
-                      </span>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <span className="text-tertiary-400 mt-1">✓</span>
-                      <span className="text-sm">Support technique réactif</span>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <span className="text-tertiary-400 mt-1">✓</span>
-                      <span className="text-sm">
-                        Accompagnement dans vos démarches
-                      </span>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <span className="text-tertiary-400 mt-1">✓</span>
-                      <span className="text-sm">
-                        Respect de la confidentialité
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      </div>
+        <aside className="mt-6 flex flex-col justify-between gap-4 border-t border-white/8 pt-5 sm:flex-row sm:items-center"><div><p className="text-xs font-medium text-white/65">Vous êtes tatoueur ou gérez un salon ?</p><p className="mt-1 text-[11px] leading-5 text-white/35">Découvrez les outils Inkera dédiés aux professionnels.</p></div><AppButton href="https://www.inkera-studio.com/" variant="secondary" className="min-h-10 self-start px-3! text-[11px]! shadow-none! sm:self-auto">Découvrir Inkera Studio<ArrowUpRight size={13} aria-hidden="true" /></AppButton></aside>
+      </main>
     </>
   );
 }

@@ -35,7 +35,7 @@ const renderArticleContent = (content: string) => {
     if (line.startsWith("- ")) {
       return (
         <p key={`bullet-${index}`} className="flex items-start gap-2 text-inherit">
-          <span className="mt-3.5 h-1.5 w-1.5 shrink-0 rounded-full bg-tertiary-400" />
+          <span className="mt-3 h-1 w-1 shrink-0 rounded-full bg-tertiary-400" />
           <span>{line.slice(2).trim()}</span>
         </p>
       );
@@ -54,7 +54,7 @@ const renderArticleContent = (content: string) => {
     if (isHeading(line)) {
       const cleanSubtitle = line.replace(/^#{1,3}\s*/, "").trim();
       return (
-        <h2 id={`section-${index}`} key={`heading-${index}`} className="scroll-mt-28 pt-6 font-two text-2xl font-semibold leading-snug tracking-tight text-white sm:text-3xl">
+        <h2 id={`section-${index}`} key={`heading-${index}`} className="scroll-mt-28 pt-4 font-one text-xl font-medium leading-snug tracking-tight text-white/90 sm:text-2xl">
           {cleanSubtitle}
         </h2>
       );
