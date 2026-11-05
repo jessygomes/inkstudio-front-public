@@ -64,7 +64,7 @@ export default function PeopleInboxWorkspace() {
 
   const {
     isConnected, messages: liveMessages, joinConversation, leaveConversation,
-    sendMessage, markAsRead, typingUsers,
+    sendMessage, markAsRead, typingUsers, startTyping, stopTyping,
   } = useMessaging(session?.accessToken);
 
   const refreshThreads = useCallback(async () => {
@@ -192,9 +192,32 @@ export default function PeopleInboxWorkspace() {
     if (container) container.scrollTop = container.scrollHeight;
   }, [selectedId, latestMessageId]);
 
+  // Indicateur « en train d'écrire » chez le professionnel : un signal au début de la frappe, un arrêt après 2 s d'inactivité.
+  const typingRef = useRef<{ active: boolean; timer: ReturnType<typeof setTimeout> | null }>({ active: false, timer: null });
+  const endTyping = useCallback((id: string | null) => {
+    const state = typingRef.current;
+    if (state.timer) clearTimeout(state.timer);
+    state.timer = null;
+    if (state.active && id) stopTyping(id);
+    state.active = false;
+  }, [stopTyping]);
+
+  const handleInputChange = (value: string) => {
+    if (!selectedId) return;
+    if (!value) { endTyping(selectedId); return; }
+    const state = typingRef.current;
+    if (!state.active) { startTyping(selectedId); state.active = true; }
+    if (state.timer) clearTimeout(state.timer);
+    state.timer = setTimeout(() => endTyping(selectedId), 2000);
+  };
+
+  // Changement de conversation ou fermeture : on arrête l'indicateur de la conversation quittée.
+  useEffect(() => () => endTyping(selectedId), [selectedId, endTyping]);
+
   const handleSendMessage = async (message: string, attachments?: AttachmentDto[]) => {
     if (!selectedId || !isConnected) throw new Error("Connexion à la messagerie indisponible");
     sendMessage(selectedId, message || (attachments?.length ? "📷 Photo" : ""), attachments);
+    endTyping(selectedId);
     requestAnimationFrame(() => {
       const container = messagesScrollRef.current;
       if (container) container.scrollTop = container.scrollHeight;
@@ -234,7 +257,7 @@ export default function PeopleInboxWorkspace() {
             <div className="flex shrink-0 items-center gap-2 border-b border-white/10 px-3 py-2 sm:px-4"><button type="button" aria-label="Retour aux conversations" onClick={() => setMobilePane("list")} className="cursor-pointer disabled:cursor-not-allowed rounded-lg p-2 hover:bg-white/10 lg:hidden"><ArrowLeft size={17}/></button><div className="flex min-w-0 flex-1 items-center gap-3"><p className="truncate text-sm font-semibold">{conversation ? name : "Conversation"}</p><p className="shrink-0 text-[11px] text-white/50">{isConnected ? "En ligne" : "Reconnexion…"}</p></div><button type="button" onClick={() => setMobilePane("details")} className="cursor-pointer disabled:cursor-not-allowed inline-flex items-center gap-1.5 rounded-xl border border-white/15 px-3 py-2 text-xs hover:bg-white/10 xl:hidden"><Info size={15}/> Afficher les détails</button><button type="button" aria-label={detailsCollapsed ? "Afficher les détails" : "Replier les détails"} aria-expanded={!detailsCollapsed} onClick={() => setDetailsCollapsed((v) => !v)} className="cursor-pointer disabled:cursor-not-allowed hidden h-8 w-8 shrink-0 items-center justify-center text-white/60 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-tertiary-400 xl:flex">{detailsCollapsed ? <PanelRightOpen size={18}/> : <PanelRightClose size={18}/>}</button></div>
             {loadingDetail ? <p className="m-auto text-xs text-white/50">Chargement des messages…</p> : detailError ? <div className="m-auto px-4 text-center text-xs text-red-300">{detailError}<button onClick={() => void loadDetail(selectedId)} className="cursor-pointer disabled:cursor-not-allowed mt-3 block underline">Réessayer</button></div> : <>
               <div ref={messagesScrollRef} role="log" aria-label="Messages de la conversation" className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-6 sm:px-8"><MessageBubbles compact messages={displayedMessages} currentUserId={session?.user?.id}/>{typingUsers.size > 0 && <p className="text-xs italic text-white/40">En train d’écrire…</p>}</div>
-              <div className="shrink-0 border-t border-white/10 bg-noir-800 p-2 sm:px-3 sm:py-2"><MessageInput compact key={selectedId} onSendMessage={handleSendMessage} disabled={!isConnected}/></div>
+              <div className="shrink-0 border-t border-white/10 bg-noir-800 p-2 sm:px-3 sm:py-2"><MessageInput compact key={selectedId} onSendMessage={handleSendMessage} onInputChange={handleInputChange} disabled={!isConnected}/></div>
             </>}
           </>}
         </div>

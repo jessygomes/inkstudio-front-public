@@ -84,10 +84,13 @@ export const useMessaging = (token?: string) => {
       auth: { token },
       withCredentials: true,
       transports: ["websocket", "polling"],
+      // Sans cette option, un échec du websocket (proxy, réseau d'entreprise…) n'essaie jamais le polling HTTP.
+      tryAllTransports: true,
       reconnection: true,
       reconnectionDelay: 1000,
       reconnectionDelayMax: 5000,
-      reconnectionAttempts: 5,
+      // Pas de limite : avec 5 essais, une coupure un peu longue (déploiement, réseau) laissait la messagerie hors ligne jusqu'au rechargement.
+      reconnectionAttempts: Infinity,
     });
 
     // Événements de connexion
@@ -117,6 +120,16 @@ export const useMessaging = (token?: string) => {
     socket.on("new-message", (message: NewMessageEvent) => {
       if (message.conversationId === currentConversationIdRef.current) {
         setMessages((prev) => prev.some((item) => item.id === message.id) ? prev : [...prev, message]);
+        // Son auteur vient d'envoyer : il n'est plus « en train d'écrire ».
+        const authorId = message.sender?.id;
+        if (authorId) {
+          setTypingUsers((prev) => {
+            if (!prev.has(authorId)) return prev;
+            const next = new Set(prev);
+            next.delete(authorId);
+            return next;
+          });
+        }
       }
       if (typeof window !== "undefined") {
         window.dispatchEvent(new Event("unreadCountRefresh"));
