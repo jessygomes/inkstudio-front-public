@@ -87,10 +87,7 @@ export default function MentionsLegales() {
                         PINTO BARRETO Jessy
                       </strong>
                     </p>
-                    <p>
-                      Entreprise individuelle enregistrée sous le numéro{" "}
-                      <strong className="text-white">[SIRET]</strong>
-                    </p>
+                    <p>Entreprise en cours de création</p>
                     <p>
                       <strong className="text-white">Adresse :</strong> [
                       adresse professionnelle]

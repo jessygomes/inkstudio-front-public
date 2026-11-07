@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import NextAuth from "next-auth";
 import authConfig from "./auth.config";
-import { refreshSessionProfile, withBackendTokenStatus } from "./lib/auth-security";
+import { refreshSessionProfile, renewBackendToken, revokeBackendSession, withBackendTokenStatus } from "./lib/auth-security";
 
 function normalizeAuthBaseUrl(): string | undefined {
   const candidates = [
@@ -56,6 +56,7 @@ declare module "next-auth" {
     image?: string | null;
     role: string;
     accessToken: string;
+    refreshToken?: string;
     clientProfile?: any;
   }
 }
@@ -113,6 +114,7 @@ export const {
           }
 
           token.accessToken = data.access_token;
+          token.refreshToken = data.refresh_token;
           token.id = String(data.id);
           token.role = data.role ?? "client";
           token.email = data.email ?? profile?.email ?? user?.email ?? "";
@@ -137,6 +139,7 @@ export const {
       // Connexion classique via credentials
       if (user && (!account || account.provider === "credentials")) {
         token.accessToken = user.accessToken;
+        token.refreshToken = user.refreshToken;
         token.id = user.id as string;
         token.role = user.role;
         token.email = user.email as string;
@@ -150,6 +153,8 @@ export const {
 
       // Support pour la mise à jour de session
       if (user || account?.provider === "google") token.error = undefined;
+      // Jeton d'accès bientôt expiré : renouvelé avec le jeton de rafraîchissement (la session reste ouverte).
+      token = await renewBackendToken(token);
       token = withBackendTokenStatus(token);
       if (token.error === "AccessTokenExpired") return token;
       if (trigger === "update") {
@@ -183,9 +188,16 @@ export const {
       return session;
     },
   },
+  // Déconnexion : le backend ferme aussi la session (jeton de rafraîchissement).
+  events: {
+    async signOut(message) {
+      const token = "token" in message ? message.token : null;
+      await revokeBackendSession(token?.refreshToken);
+    },
+  },
   session: {
     strategy: "jwt",
-    maxAge: 7 * 24 * 60 * 60, // 7 jours
+    maxAge: 30 * 24 * 60 * 60, // 30 jours, renouvelés tant que le jeton de rafraîchissement l'est (backend : 60 jours)
   },
   cookies: {
     sessionToken: {

@@ -116,6 +116,7 @@ export default {
               image: data.image || null,
               role: data.role,
               accessToken: data.access_token,
+              refreshToken: data.refresh_token,
               clientProfile: data.clientProfile,
             };
             return userObject;
