@@ -45,6 +45,8 @@ function normalizeFlashId(value?: string | string[]): string | undefined {
 type BookingTatoueur = {
   id: string;
   name: string;
+  img?: string | null;
+  profileImage?: string | null;
   rdvBookingEnabled?: boolean;
   isLinkedUser?: boolean | null;
   profileUserId?: string | null;

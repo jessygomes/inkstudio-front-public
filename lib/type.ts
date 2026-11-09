@@ -340,6 +340,7 @@ export type Tatoueur = {
   id: string;
   name: string;
   img?: string | null;
+  profileImage?: string | null;
   instagram?: string | null;
   rdvBookingEnabled: boolean;
   isLinkedUser?: boolean | null;

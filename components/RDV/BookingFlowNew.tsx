@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { ArrowLeft, ArrowRight, Check, ChevronRight, LoaderCircle, UserRound, Info } from "lucide-react";
 import styles from "./Booking/BookingFlow.module.css";
 import { FormProvider } from "react-hook-form";
@@ -179,9 +180,61 @@ export default function BookingFlow({
         }}>
           <fieldset id="booking-fields" disabled={busy} className="min-w-0 space-y-4 border-0 p-0">
             <div key={step} className={styles.step}>
-              {step === 1 && <div className="space-y-4">
+              {step === 1 && <div className="space-y-6">
                 <PrestationSelector prestations={salon.prestations} onPrestationChange={handlePrestationChange} projectAppointmentDurationMinutes={projectAppointmentDurationMinutes} projectAppointmentIsFree={projectAppointmentIsFree} projectAppointmentPrice={projectAppointmentResolvedPrice} />
-                {(isParTatoueurMode || artists.some(artist => artist.isLinkedUser)) && <section className="rounded-2xl border border-white/10 bg-noir-500 p-4 sm:p-5"><div className="mb-4 flex items-center gap-2.5"><span className="flex size-8 items-center justify-center rounded-xl bg-tertiary-400/8 text-tertiary-400"><UserRound size={16} /></span><div><h2 className="text-sm font-medium text-white/90">Avec quel artiste ?</h2><p className="mt-1 text-[11px] text-white/40">Choisissez qui vous accompagnera.</p></div></div><div className="grid gap-2 sm:grid-cols-2">{artists.map(artist => <button key={artist.id} type="button" aria-pressed={selectedTatoueur === artist.id} onClick={() => handleTatoueurChange(artist.id)} className={`flex items-center gap-3 rounded-xl border px-3 py-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tertiary-400/40 ${selectedTatoueur === artist.id ? "border-tertiary-400/50 bg-tertiary-400/5" : "border-white/10 bg-noir-800/40 hover:border-white/25"}`}><span className="grid size-8 shrink-0 place-items-center rounded-full bg-white/5 text-xs text-white/55">{artist.name?.slice(0, 1).toUpperCase()}</span><span className="min-w-0 flex-1"><span className="block truncate text-xs text-white/85">{artist.name}</span>{artist.isLinkedUser && <span className="mt-0.5 block text-[10px] text-white/35">Réservation sur son profil personnel</span>}</span>{selectedTatoueur === artist.id && <Check size={14} className="text-tertiary-400" />}</button>)}</div>{!artists.length && <p className="text-xs text-white/50">Aucun artiste n’est réservable en ligne actuellement.</p>}</section>}
+                {(isParTatoueurMode || artists.some(artist => artist.isLinkedUser)) && (
+                  <section className="rounded-2xl border border-white/10 bg-noir-800 p-4 sm:p-5">
+                    <div className="mb-5 flex items-center gap-3">
+                      <span className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-tertiary-400/20 bg-tertiary-400/10 text-tertiary-400" aria-hidden="true">
+                        <UserRound size={18} />
+                      </span>
+                      <div>
+                        <h2 className="text-sm font-semibold text-white/90 font-one">Avec quel artiste ?</h2>
+                        <p className="mt-1 text-xs text-white/45">Choisissez qui vous accompagnera.</p>
+                      </div>
+                    </div>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      {artists.map(artist => {
+                        const isSelected = selectedTatoueur === artist.id;
+                        const profileImage = artist.profileImage || artist.img;
+
+                        return (
+                          <button
+                            key={artist.id}
+                            type="button"
+                            aria-pressed={isSelected}
+                            onClick={() => handleTatoueurChange(artist.id)}
+                            className={`group flex min-h-20 items-center gap-3 rounded-2xl border p-3 text-left transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tertiary-400/50 ${isSelected ? "border-tertiary-400/50 bg-tertiary-400/8 shadow-[0_0_24px_rgba(212,175,55,0.07)]" : "border-white/10 bg-white/[0.025] hover:border-white/20 hover:bg-white/[0.045]"}`}
+                          >
+                            <span className="relative grid size-14 shrink-0 place-items-center overflow-hidden rounded-full border border-white/10 bg-white/5 text-base text-white/55">
+                              {profileImage ? (
+                                <Image
+                                  src={profileImage}
+                                  alt={`Portrait de ${artist.name}`}
+                                  fill
+                                  sizes="56px"
+                                  className="object-cover transition-transform duration-300 motion-safe:group-hover:scale-105"
+                                />
+                              ) : (
+                                artist.name?.trim().slice(0, 1).toUpperCase() || <UserRound size={20} />
+                              )}
+                            </span>
+                            <span className="min-w-0 flex-1">
+                              <span className="block truncate text-sm font-medium text-white/90 font-one">{artist.name}</span>
+                              {artist.isLinkedUser && <span className="mt-1 block text-[11px] leading-4 text-white/45">Réservation sur son profil personnel</span>}
+                            </span>
+                            {isSelected && (
+                              <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-tertiary-400 text-noir-900" aria-label="Sélectionné">
+                                <Check size={14} strokeWidth={3} />
+                              </span>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {!artists.length && <p className="text-xs text-white/50">Aucun artiste n’est réservable en ligne actuellement.</p>}
+                  </section>
+                )}
               </div>}
               {step === 2 && <ClientInfoForm prestation={prestation} errors={methods.formState.errors} sketchFile={sketchFile} onSketchChange={setSketchFile} referenceFile={referenceFile} onReferenceChange={setReferenceFile} piercingZones={piercingZones} selectedPiercingZone={selectedPiercingZone} selectedPiercingService={selectedPiercingService} onPiercingZoneChange={setSelectedPiercingZone} onPiercingServiceChange={setSelectedPiercingService} isLoadingPiercingZones={isLoadingPiercingZones} flashes={flashes} selectedFlashId={selectedFlashId} onFlashChange={handleFlashChange} skinToneOptions={skinToneOptions} isLoadingSkinTones={isLoadingSkinTones} moodboards={moodboards} selectedMoodboardId={selectedMoodboardId} onMoodboardChange={handleMoodboardChange} isAuthenticated={isAuthenticated} isLoadingMoodboards={isLoadingMoodboards} />}
               {step === 3 && <div className="space-y-4">

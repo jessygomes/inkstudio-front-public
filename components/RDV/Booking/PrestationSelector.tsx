@@ -1,11 +1,24 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
 import { useFormContext } from "react-hook-form";
-import Section from "./Section";
-import { Sparkles, PenTool, MessageCircle, RefreshCw } from "lucide-react";
+import { Check, Sparkles, PenTool, MessageCircle, RefreshCw } from "lucide-react";
 
 const classNames = (...c: (string | false | null | undefined)[]) =>
   c.filter(Boolean).join(" ");
+
+const prestationOrder = ["PROJET", "TATTOO", "RETOUCHE", "PIERCING"];
+const prestationLabels: Record<string, string> = {
+  TATTOO: "Tatouage",
+  PIERCING: "Piercing",
+  PROJET: "Projet / consultation",
+  RETOUCHE: "Retouche",
+};
+const prestationDescriptions: Record<string, string> = {
+  TATTOO: "En ligne, vous pouvez réserver uniquement un flash. Pour un projet personnalisé, échangez avec le salon ou le tatoueur, qui fixera ensuite le rendez-vous avec vous.",
+  PIERCING: "Le rendez-vous pendant lequel vous vous faites percer.",
+  PROJET: "Un rendez-vous pour discuter de votre projet avec le salon, sans réaliser le tatouage.",
+  RETOUCHE: "Pour une retouche, échangez d’abord avec le salon ou le tatoueur, qui fixera ensuite le rendez-vous avec vous.",
+};
 
 interface PrestationSelectorProps {
   prestations: string[];
@@ -26,11 +39,30 @@ export default function PrestationSelector({
 }: PrestationSelectorProps) {
   const { watch, setValue } = useFormContext();
   const prestation = watch("prestation");
+  const orderedPrestations = [...prestations].sort((a, b) => {
+    const aIndex = prestationOrder.indexOf(a);
+    const bIndex = prestationOrder.indexOf(b);
+    return (aIndex === -1 ? prestationOrder.length : aIndex) -
+      (bIndex === -1 ? prestationOrder.length : bIndex);
+  });
 
   return (
-    <Section title="Quelle est votre envie ?" description="Choisissez le type de rendez-vous que vous souhaitez réserver." icon={<PenTool size={18} />}>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-        {prestations.map((p) => {
+    <>
+      <div className="mb-5 flex items-start gap-3">
+        <span aria-hidden="true" className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-tertiary-400/20 bg-tertiary-400/10 text-tertiary-400">
+          <PenTool size={18} />
+        </span>
+        <div>
+          <h2 className="text-base font-semibold tracking-tight text-white/90 font-one">
+            Quelle est votre envie ?
+          </h2>
+          <p className="mt-1 text-xs leading-5 text-white/45 font-two">
+            Choisissez le rendez-vous adapté : discuter d’un projet, réserver un flash, faire retoucher un tatouage ou vous faire percer.
+          </p>
+        </div>
+      </div>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        {orderedPrestations.map((p) => {
           const isSelected = prestation === p;
           const isProject = p === "PROJET";
 
@@ -45,44 +77,45 @@ export default function PrestationSelector({
                 else setValue("prestation", p, { shouldDirty: true, shouldValidate: true });
               }}
               className={classNames(
-                "group relative cursor-pointer grid grid-cols-[auto_minmax(0,1fr)] content-start gap-x-2.5 rounded-xl border px-3 py-3 pr-7 text-left transition-colors duration-200 hover:border-tertiary-400/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tertiary-400/50",
+                "group relative flex h-full min-h-40 cursor-pointer flex-col rounded-2xl border p-4 text-left transition duration-200 motion-safe:hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tertiary-400/50",
                 isSelected
                   ? "border-tertiary-400/50 bg-tertiary-400/8"
-                  : "border-white/10 bg-noir-800/60 hover:bg-white/4",
+                  : "border-white/10 bg-white/[0.025] hover:border-white/20 hover:bg-white/[0.045]",
               )}
             >
-              <span className="row-span-2 flex size-8 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-tertiary-400" aria-hidden="true">{p === "TATTOO" ? <PenTool size={15} /> : p === "PIERCING" ? <Sparkles size={15} /> : p === "PROJET" ? <MessageCircle size={15} /> : <RefreshCw size={15} />}</span>
-              <div className="self-center text-xs font-one font-semibold text-white/90">
-                {{ TATTOO: "Tatouage", PIERCING: "Piercing", PROJET: "Projet / consultation", RETOUCHE: "Retouche" }[p] || p}
+              <div className="flex items-center gap-3">
+                <span className={classNames(
+                  "flex size-10 shrink-0 items-center justify-center rounded-xl border transition-colors",
+                  isSelected
+                    ? "border-tertiary-400/30 bg-tertiary-400/15 text-tertiary-300"
+                    : "border-white/10 bg-white/5 text-white/65 group-hover:text-tertiary-300",
+                )} aria-hidden="true">
+                  {p === "TATTOO" ? <PenTool size={18} /> : p === "PIERCING" ? <Sparkles size={18} /> : p === "PROJET" ? <MessageCircle size={18} /> : <RefreshCw size={18} />}
+                </span>
+                <span className="text-sm font-one font-semibold text-white/90">
+                  {prestationLabels[p] || p}
+                </span>
+                {isSelected && (
+                  <span className="ml-auto flex size-6 items-center justify-center rounded-full bg-tertiary-400 text-noir-900" aria-label="Sélectionné">
+                    <Check size={14} strokeWidth={3} />
+                  </span>
+                )}
               </div>
 
-              <p className="col-start-2 mt-1 text-[11px] leading-4 text-white/45 font-two">{{ TATTOO: "Une création qui vous ressemble.", PIERCING: "Choisissez votre zone et votre bijou.", PROJET: "Un premier échange pour préparer votre idée.", RETOUCHE: "Apportez la dernière touche à votre tatouage." }[p]}</p>
+              <p className="mt-4 text-xs leading-5 text-white/55 font-one">
+                {prestationDescriptions[p]}
+              </p>
               {isProject && (
-                <div className="col-start-2 mt-2 flex flex-wrap gap-x-3 gap-y-0.5 text-white/60">
-                  <p className="text-[10px] text-white/60 font-one leading-4">
+                <div className="mt-auto flex flex-wrap gap-2 pt-4">
+                  <p className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10px] leading-4 text-white/65 font-one">
                     Durée : {projectAppointmentDurationMinutes} min
                   </p>
-                  <p className="text-[10px] text-white/60 font-one leading-4">
+                  <p className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10px] leading-4 text-white/65 font-one">
                     Prix : {projectAppointmentIsFree ? "Gratuit" : `${projectAppointmentPrice}€`}
                   </p>
                 </div>
               )}
 
-              {isSelected && (
-                <div className="absolute top-2 right-2 w-4 h-4 rounded-full bg-tertiary-500 flex items-center justify-center">
-                  <svg
-                    className="w-2.5 h-2.5 text-white"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </div>
-              )}
             </button>
           );
         })}
@@ -93,6 +126,6 @@ export default function PrestationSelector({
           {String(errors.prestation?.message)}
         </p>
       )}
-    </Section>
+    </>
   );
 }

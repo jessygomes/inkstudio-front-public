@@ -6,11 +6,12 @@ interface SectionProps {
   description?: string;
   eyebrow?: string;
   icon?: React.ReactNode;
+  unboxed?: boolean;
 }
 
-export default function Section({ title, children, description, eyebrow, icon }: SectionProps) {
+export default function Section({ title, children, description, eyebrow, icon, unboxed = false }: SectionProps) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-noir-500 p-4 sm:p-6">
+    <div className={unboxed ? "min-w-0" : "rounded-2xl border border-white/10 bg-noir-500 p-4 sm:p-6"}>
       <div className="mb-5 flex items-start gap-3">
         {icon && <span aria-hidden="true" className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-tertiary-400/20 bg-tertiary-400/10 text-tertiary-400">{icon}</span>}
         <div>
@@ -18,7 +19,7 @@ export default function Section({ title, children, description, eyebrow, icon }:
         <h2 className="text-white/90 font-one text-base tracking-tight font-semibold">
           {title}
         </h2>
-        {description && <p className="mt-1 text-xs leading-5 text-white/45 font-two">{description}</p>}
+        {description && <p className={`mt-1 text-xs leading-5 text-white/45 ${unboxed ? "font-one" : "font-two"}`}>{description}</p>}
         </div>
       </div>
       {children}
