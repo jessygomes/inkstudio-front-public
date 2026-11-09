@@ -14,6 +14,7 @@ import {
   resolveSlotDisplayMode,
   addMinutesToIsoInTimeZone,
   toDateInputValue,
+  toHourLabel,
 } from "@/lib/utils/date";
 import { parseSalonHours } from "@/lib/horaireHelper";
 import Section from "./Section";
@@ -141,9 +142,16 @@ export default function SlotSelection({
     return { key: toDateInputValue(date), date };
   });
   const formatStart = (value: string) => slotDisplayMode === "timezone" ? getTimeInTimeZone(value) : getIsoTimePart(value);
-  const formatEnd = (value: string) => slotDisplayMode === "timezone" ? addMinutesToIsoInTimeZone(value, 30) : addMinutesToTime(getIsoTimePart(value), 30);
-  const availableStarts = timeSlots.map(slot => slot.start);
-  const bookableStarts = displayedSlotStarts.filter(value => getBookingSlotRange(value, slotCount, availableStarts, start => isSlotBlocked(start) || isSlotOccupied(start)) !== null);
+  const formatEnd = (value: string) => slotDisplayMode === "timezone" ? addMinutesToIsoInTimeZone(value, 30) : addMinutesToTime(getIsoTimePart(value), 30);  const availableStarts = timeSlots.map(slot => slot.start);
+  const toMinutes = (time: string) => { const match = /(\d{1,2})\D+(\d{2})/.exec(time); return match ? Number(match[1]) * 60 + Number(match[2]) : NaN; };
+  const parsedClosing = openingForSelectedDate?.end ? toMinutes(openingForSelectedDate.end) : NaN;
+  const closingMinutes = Number.isNaN(parsedClosing) ? null : (parsedClosing || 24 * 60);
+  // Le rendez-vous complet doit se terminer au plus tard à la fermeture du salon.
+  const endsBeforeClosing = (range: string[]) => closingMinutes === null || (toMinutes(formatEnd(range[range.length - 1])) || 24 * 60) <= closingMinutes;
+  const bookableStarts = displayedSlotStarts.filter(value => {
+    const range = getBookingSlotRange(value, slotCount, availableStarts, start => isSlotBlocked(start) || isSlotOccupied(start));
+    return range !== null && endsBeforeClosing(range);
+  });
   const periods = [
     { label: "Matin", starts: bookableStarts.filter(value => Number(formatStart(value).split(":")[0]) < 12) },
     { label: "Après-midi", starts: bookableStarts.filter(value => { const hour = Number(formatStart(value).split(":")[0]); return hour >= 12 && hour < 18; }) },
@@ -216,20 +224,21 @@ export default function SlotSelection({
                 ) : !selectedDate ? (
                   <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-white/10 p-5 text-center"><CalendarSearch size={23} className="text-white/25" /><p className="text-xs text-white/50">Choisissez un jour pour afficher les horaires.</p></div>
                 ) : bookableStarts.length ? (
-                  <div className="space-y-3">{periods.filter(period => period.starts.length).map(period => <div key={period.label}><p className="mb-2 text-[9px] font-medium uppercase tracking-[0.1em] text-white/35">{period.label}</p><div className="grid grid-cols-3 gap-2 sm:grid-cols-5">{period.starts.map(start => {
+                  <div className="space-y-3">{periods.filter(period => period.starts.length).map(period => <div key={period.label}><p className="mb-2 text-[9px] font-medium uppercase tracking-[0.1em] text-white/35">{period.label}</p><div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">{period.starts.map(start => {
                     const active = sortedSelection[0] === start;
-                    return <button key={start} type="button" aria-pressed={active} onClick={() => onSlotSelection(start, slotCount)} className={`flex min-h-11 items-center justify-center gap-1.5 rounded-xl border px-2 py-2.5 text-xs font-medium tabular-nums transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tertiary-400/50 ${active ? "border-tertiary-400/60 bg-tertiary-400/10 text-tertiary-400" : "border-white/10 bg-noir-800/40 text-white/75 hover:border-tertiary-400/40 hover:bg-tertiary-400/5"}`}>{active && <Check size={12} />}{formatStart(start)}</button>;
+                    const inRange = sortedSelection.some(value => Date.parse(value) === Date.parse(start));
+                    return <button key={start} type="button" aria-pressed={inRange} onClick={() => onSlotSelection(start, slotCount)} className={`flex min-h-11 items-center justify-center gap-1.5 rounded-xl border px-2 py-2.5 text-xs font-medium tabular-nums transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tertiary-400/50 ${active ? "border-tertiary-400/60 bg-tertiary-400/10 text-tertiary-400" : inRange ? "border-tertiary-400/40 bg-tertiary-400/10 text-tertiary-400/90" : "border-white/10 bg-noir-800/40 text-white/75 hover:border-tertiary-400/40 hover:bg-tertiary-400/5"}`}>{inRange && <Check size={12} />}{toHourLabel(formatStart(start))} – {toHourLabel(formatEnd(start))}</button>;
                   })}</div></div>)}</div>
                 ) : (
                   <div role="status" className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-white/10 p-5 text-center"><CalendarSearch size={23} className="text-white/25" /><p className="text-xs font-medium text-white/80">Aucun horaire pour cette durée</p><p className="text-[11px] leading-5 text-white/45">Choisissez un autre jour{!fixedDuration ? " ou une durée plus courte" : ""}.</p></div>
                 )}
               </div>
-              {fixedDuration && <p className="mt-3 text-[10px] leading-5 text-white/40"><span className="text-white/65">Durée : {requestedMinutes} min.</span> Les créneaux nécessaires sont réservés automatiquement.</p>}
+              {fixedDuration && <p className="mt-3 text-[10px] leading-5 text-white/40"><span className="text-white/65">Durée : {requestedMinutes} min.</span> Chaque case dure 30 min : les cases nécessaires sont sélectionnées automatiquement à partir de l’heure choisie.</p>}
               {(prestation === "TATTOO" || prestation === "RETOUCHE") && <p className="mt-1 text-[10px] leading-5 text-white/40">Minimum une heure. L’artiste pourra ajuster la durée ; vous serez prévenu par email.</p>}
             </div>
           ) : <p role="status" className="self-center text-xs text-white/50">Sélectionnez un artiste pour consulter ses horaires.</p>}
 
-          {!!sortedSelection.length && <div aria-live="polite" className="flex flex-wrap items-center gap-3 rounded-xl border border-tertiary-400/20 bg-tertiary-400/5 p-3"><span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-tertiary-400/10 text-tertiary-400"><Check size={15} /></span><div className="min-w-0 flex-1"><p className="text-xs font-medium text-white/90">{formatStart(sortedSelection[0])} – {formatEnd(sortedSelection[sortedSelection.length - 1])}</p><p className="mt-1 text-[10px] text-white/45">{formatDateKeyForDisplay(selectedDate)} · {sortedSelection.length * 30} min réservées</p></div><AppButton type="button" variant="secondary" onClick={onClearSelection} className="px-2.5! py-1.5! text-[11px]! shadow-none!">Effacer</AppButton></div>}
+          {!!sortedSelection.length && <div aria-live="polite" className="flex flex-wrap items-center gap-3 rounded-xl border border-tertiary-400/20 bg-tertiary-400/5 p-3"><span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-tertiary-400/10 text-tertiary-400"><Check size={15} /></span><div className="min-w-0 flex-1"><p className="text-xs font-medium text-white/90">{toHourLabel(formatStart(sortedSelection[0]))} – {toHourLabel(formatEnd(sortedSelection[sortedSelection.length - 1]))}</p><p className="mt-1 text-[10px] text-white/45">{formatDateKeyForDisplay(selectedDate)} · {sortedSelection.length * 30} min réservées</p></div><AppButton type="button" variant="secondary" onClick={onClearSelection} className="px-2.5! py-1.5! text-[11px]! shadow-none!">Effacer</AppButton></div>}
         </div>
       )}
     </Section>

@@ -1,6 +1,7 @@
 "use client";
 import type { ReactNode } from "react";
 import Image from "next/image";
+import { toHourLabel } from "@/lib/utils/date";
 import { CalendarDays, Clock3, CreditCard, FileText, UserRound } from "lucide-react";
 const openImageInNewTab = (url: string) => window.open(url, "_blank", "noopener,noreferrer");
 const formatSkinTone = (skin: string) => skin;
@@ -42,7 +43,7 @@ export function RdvPlanningCard({ appointment }: {
 }) {
     const start = new Date(appointment.start);
     const end = new Date(appointment.end);
-    const time = (date: Date) => date.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+    const time = (date: Date) => toHourLabel(date.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }));
     const minutes = Math.round((end.getTime() - start.getTime()) / 60000);
     const artist = appointment.performerUser?.salonName || [appointment.performerUser?.firstName, appointment.performerUser?.lastName].filter(Boolean).join(" ") || appointment.tatoueur?.name;
     return <section aria-label="Planning du rendez-vous" className={panel}>

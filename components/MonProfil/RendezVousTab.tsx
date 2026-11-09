@@ -12,6 +12,7 @@ import {
 } from "react-icons/fa";
 import { getAllRdvClient } from "@/lib/actions/appointment.action";
 import { toast } from "sonner";
+import { toHourLabel } from "@/lib/utils/date";
 import Image from "next/image";
 import { cancelAppointmentByClient } from "@/lib/actions/appointment.action";
 import { createReview } from "@/lib/actions/review.action";
@@ -312,10 +313,12 @@ export default function RendezVousTab() {
   };
 
   const formatTime = (dateString: string) => {
-    return new Date(dateString).toLocaleTimeString("fr-FR", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    return toHourLabel(
+      new Date(dateString).toLocaleTimeString("fr-FR", {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+    );
   };
 
   const formatPhoneDisplay = (phone?: string | null) => {

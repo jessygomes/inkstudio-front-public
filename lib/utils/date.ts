@@ -206,6 +206,11 @@ export function resolveSlotDisplayMode(
   return rawDiff <= zonedDiff ? "raw" : "timezone";
 }
 
+/** Affiche les heures au format français : "09:00 – 09:30" -> "09h00 – 09h30". */
+export function toHourLabel(text: string) {
+  return text.replace(/(\d{1,2}):(\d{2})/g, "$1h$2");
+}
+
 export function addMinutesToTime(time: string, minutesToAdd: number) {
   const [hours, minutes] = time.split(":").map(Number);
   const totalMinutes = hours * 60 + minutes + minutesToAdd;

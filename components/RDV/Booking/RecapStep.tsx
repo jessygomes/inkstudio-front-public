@@ -9,6 +9,7 @@ import {
   getWeekdayKeyFromDate,
   resolveSlotDisplayMode,
   addMinutesToIsoInTimeZone,
+  toHourLabel,
 } from "@/lib/utils/date";
 import { parseSalonHours } from "@/lib/horaireHelper";
 import Section from "./Section";
@@ -104,7 +105,7 @@ export default function RecapStep({
   const orderedSlots = [...selectedSlots].sort();
   const start = orderedSlots[0];
   const end = orderedSlots[orderedSlots.length - 1];
-  const timeLabel = start && end ? (slotDisplayMode === "timezone" ? getTimeInTimeZone(start) + " – " + addMinutesToIsoInTimeZone(end, 30) : getIsoTimePart(start) + " – " + addMinutesToTime(getIsoTimePart(end), 30)) : "À choisir";
+  const timeLabel = start && end ? toHourLabel(slotDisplayMode === "timezone" ? getTimeInTimeZone(start) + " – " + addMinutesToIsoInTimeZone(end, 30) : getIsoTimePart(start) + " – " + addMinutesToTime(getIsoTimePart(end), 30)) : "À choisir";
   const serviceLabel = ({ TATTOO: "Tatouage", PIERCING: "Piercing", PROJET: "Consultation projet", RETOUCHE: "Retouche" } as Record<string, string>)[prestation] || prestation;
 
   return (

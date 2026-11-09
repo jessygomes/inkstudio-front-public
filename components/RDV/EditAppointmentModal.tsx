@@ -15,6 +15,7 @@ import {
   getWeekdayKeyFromDate,
   resolveSlotDisplayMode,
   toDateInputValue,
+  toHourLabel,
 } from "@/lib/utils/date";
 import { parseSalonHours } from "@/lib/horaireHelper";
 import { toSlug } from "@/lib/utils";
@@ -376,10 +377,11 @@ const EditAppointmentModal: React.FC<EditAppointmentModalProps> = ({
               {timeSlots.map((slot) => {
                 const available = isSlotAvailable(slot.start);
                 const selected = selectedSlot === slot.start;
-                const label =
+                const label = toHourLabel(
                   slotDisplayMode === "timezone"
                     ? `${getTimeInTimeZone(slot.start)} - ${getTimeInTimeZone(slot.end)}`
-                    : formatTimeRange(slot.start, slot.end);
+                    : formatTimeRange(slot.start, slot.end),
+                );
 
                 return (
                   <button
