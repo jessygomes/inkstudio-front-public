@@ -56,7 +56,7 @@ export default function PrestationSelector({
           <h2 className="text-base font-semibold tracking-tight text-white/90 font-one">
             Quelle est votre envie ?
           </h2>
-          <p className="mt-1 text-xs leading-5 text-white/45 font-two">
+          <p className="mt-1 text-xs leading-5 text-white/45 font-one">
             Choisissez le rendez-vous adapté : discuter d’un projet, réserver un flash, faire retoucher un tatouage ou vous faire percer.
           </p>
         </div>

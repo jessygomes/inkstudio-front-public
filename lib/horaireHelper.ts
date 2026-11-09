@@ -65,7 +65,8 @@ export function hoursToLines(hours: HoursMap | null) {
   return order.map(({ key, label }) => {
     const v = hours[key];
     return v && v.start && v.end
-      ? { day: label, value: `${v.start} – ${v.end}` }
+      ? { day: label, value: toHourLabel(`${v.start} – ${v.end}`) }
       : { day: label, value: "Fermé" };
   });
 }
+import { toHourLabel } from "@/lib/utils/date";

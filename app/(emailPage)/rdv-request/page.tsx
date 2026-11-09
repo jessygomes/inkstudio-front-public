@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react/no-unescaped-entities */
 "use client";
+import { toHourLabel } from "@/lib/utils/date";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import React, { useEffect, useState, Suspense } from "react";
@@ -330,10 +331,10 @@ function RdvRequestContent() {
   function formatHeure(dateStr: string) {
     if (!dateStr) return "";
     const date = new Date(dateStr);
-    return date.toLocaleTimeString("fr-FR", {
+    return toHourLabel(date.toLocaleTimeString("fr-FR", {
       hour: "2-digit",
       minute: "2-digit",
-    });
+    }));
   }
 
   return (

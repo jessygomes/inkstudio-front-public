@@ -1,4 +1,5 @@
 import React from "react";
+import { toHourLabel } from "@/lib/utils/date";
 import Image from "next/image";
 import { MdOutlineMessage } from "react-icons/md";
 import MessageOptionsMenu from "./MessageOptionsMenu";
@@ -156,10 +157,10 @@ export default function MessageBubbles({
               </div>
 
               <span className="mt-1.5 px-1 text-[11px] text-white/50 font-one">
-                {new Date(message.createdAt).toLocaleTimeString("fr-FR", {
+                {toHourLabel(new Date(message.createdAt).toLocaleTimeString("fr-FR", {
                   hour: "2-digit",
                   minute: "2-digit",
-                })}
+                }))}
               </span>
 
               {message.type && message.type === "SYSTEM" && (

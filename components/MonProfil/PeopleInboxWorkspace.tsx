@@ -1,5 +1,6 @@
 "use client";
 
+import { toHourLabel } from "@/lib/utils/date";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
@@ -283,7 +284,7 @@ export default function PeopleInboxWorkspace() {
                       <span className="mt-0.5 text-[9px] uppercase text-white/60">{date.toLocaleDateString("fr-FR", { month: "short" })}</span>
                       <span className="mt-0.5 text-[9px] text-white/40">{date.getFullYear()}</span>
                     </time>
-                    <span className="min-w-0 flex-1"><span className="block truncate text-xs font-semibold">{item.title}</span><span className="mt-1 flex items-center gap-2 text-[11px] text-white/50"><span className="min-w-0 truncate">{item.prestation.replaceAll("_", " ")}</span><span className="shrink-0 text-white/35">{date.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}</span></span></span>
+                    <span className="min-w-0 flex-1"><span className="block truncate text-xs font-semibold">{item.title}</span><span className="mt-1 flex items-center gap-2 text-[11px] text-white/50"><span className="min-w-0 truncate">{item.prestation.replaceAll("_", " ")}</span><span className="shrink-0 text-white/35">{toHourLabel(date.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }))}</span></span></span>
                     <ChevronRight size={15} className="shrink-0 text-white/35"/>
                   </button>;
                 })}</div>

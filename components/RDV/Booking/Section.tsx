@@ -19,7 +19,7 @@ export default function Section({ title, children, description, eyebrow, icon, u
         <h2 className="text-white/90 font-one text-base tracking-tight font-semibold">
           {title}
         </h2>
-        {description && <p className={`mt-1 text-xs leading-5 text-white/45 ${unboxed ? "font-one" : "font-two"}`}>{description}</p>}
+        {description && <p className={`mt-1 text-xs leading-5 text-white/45 font-one`}>{description}</p>}
         </div>
       </div>
       {children}

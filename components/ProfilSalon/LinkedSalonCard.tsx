@@ -1,4 +1,5 @@
 "use client";
+import { toHourLabel } from "@/lib/utils/date";
 import { presenceDescription } from "@/lib/residency-presence";
 import Image from "next/image";
 import Link from "next/link";
@@ -124,7 +125,7 @@ export function LinkedSalonCard({ salon }: { salon: LinkedSalonProps }) {
           <ul className="mt-2 space-y-1 text-xs text-white/65">
             {[...salon.schedule].sort((a, b) => a.day - b.day || a.start.localeCompare(b.start)).map((hours, index) => (
               <li key={`${hours.day}-${hours.start}-${index}`}>
-                {["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"][hours.day - 1]} : {hours.start} – {hours.end}
+                {["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"][hours.day - 1]} : {toHourLabel(`${hours.start} – ${hours.end}`)}
               </li>
             ))}
           </ul>

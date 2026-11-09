@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { toHourLabel } from "@/lib/utils/date";
 import { ArrowUpRight, CalendarDays, Clock3, MapPin, PenTool } from "lucide-react";
 import VerifiedProfileBadge from "@/components/Shared/VerifiedProfileBadge";
 import FavoriteBtn from "@/components/Shared/FavoriteBtn";
@@ -36,7 +37,7 @@ export default function DesktopSalonHeader({ salonId, name, cover, portrait, cit
       <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
         {city && <span className="inline-flex items-center gap-1.5 text-xs text-white/80"><MapPin size={14} className="shrink-0 text-tertiary-400" aria-hidden="true" />{city.toLocaleUpperCase("fr-FR")}{postalCode && <span className="text-white/45">{postalCode}</span>}</span>}
         {hasHours && <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] ${open ? "border-emerald-400/20 bg-emerald-400/10 text-emerald-300" : "border-white/10 bg-black/20 text-white/60"}`}><span className={`size-1.5 rounded-full ${open ? "bg-emerald-400" : "bg-white/40"}`} aria-hidden="true" />{open ? "Ouvert maintenant" : "Actuellement fermé"}</span>}
-        {today && <span className="inline-flex items-center gap-1.5 text-[11px] tabular-nums text-white/55"><Clock3 size={12} aria-hidden="true" />{today.start} – {today.end}</span>}
+        {today && <span className="inline-flex items-center gap-1.5 text-[11px] tabular-nums text-white/55"><Clock3 size={12} aria-hidden="true" />{toHourLabel(`${today.start} – ${today.end}`)}</span>}
       </div>
     </div>
   );

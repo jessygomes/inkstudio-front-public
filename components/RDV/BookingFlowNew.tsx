@@ -155,13 +155,13 @@ export default function BookingFlow({
     try { await goNext(); } finally { setIsAdvancing(false); }
   };
 
-  if (salon.publicBookingAllowed === false) return <div className="rounded-2xl border border-white/10 bg-noir-500 p-6"><Info size={22} className="mb-4 text-tertiary-400" /><h1 className="text-xl text-white">La réservation en ligne est indisponible</h1><p className="mt-2 text-sm leading-6 text-white/50">Contactez le salon pour organiser votre rendez-vous.</p></div>;
+  if (salon.publicBookingAllowed === false) return <div className="rounded-2xl border border-white/10 bg-noir-500 p-6 font-one"><Info size={22} className="mb-4 text-tertiary-400" /><h1 className="text-xl text-white">La réservation en ligne est indisponible</h1><p className="mt-2 text-sm leading-6 text-white/50">Contactez le salon pour organiser votre rendez-vous.</p></div>;
 
   if (appointmentCreated && step === 5) return <ConfirmationStep salon={effectiveSalon} addConfirmationEnabled={bookingConfirmationEnabled} />;
 
   return (
     <FormProvider {...methods}>
-      <div className="min-w-0 pb-4">
+      <div className="min-w-0 pb-4 font-one">
         <header className="mb-6">
           <p className="mb-3 flex items-center gap-2 text-[10px] font-medium uppercase tracking-[0.16em] text-tertiary-400"><span className="h-px w-5 bg-tertiary-400/50" />Réserver chez {salon.name}</p>
           <h1 ref={headingRef} tabIndex={-1} className="scroll-mt-6 text-2xl font-semibold tracking-tight text-white outline-none font-one sm:text-3xl">{titles[step - 1]}</h1>
@@ -245,10 +245,13 @@ export default function BookingFlow({
             </div>
             {navigationError && <div ref={errorRef} tabIndex={-1} role="alert" className="outline-none flex items-start gap-2 rounded-xl border border-red-400/20 bg-red-400/5 p-3 text-xs leading-5 text-red-200"><Info size={15} className="mt-0.5 shrink-0" />{navigationError}</div>}
             <footer className="sticky bottom-3 z-20 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-white/10 bg-noir-800 p-2 shadow-xl shadow-black/20 backdrop-blur-xl">
-              {step > 1 ? <AppButton type="button" variant="secondary" onClick={goPrev} disabled={busy} icon={<ArrowLeft size={14} />} className="px-3! py-2! text-xs! rounded-lg! shadow-none!">Retour</AppButton> : <span className="px-2 text-[10px] text-white/35">Étape 1 sur 4</span>}
-              <AppButton type="submit" disabled={busy || confirmDisabled} className="ml-auto px-3.5! py-2.5! text-xs! rounded-lg! shadow-none! hover:translate-y-0!">
+              <span className="px-2 text-[10px] text-white/35">Étape {step} sur 4</span>
+              <div className="ml-auto flex items-center gap-2">
+              {step > 1 && <AppButton type="button" variant="secondary" onClick={goPrev} disabled={busy} icon={<ArrowLeft size={14} />} className="px-3! py-2! text-xs! rounded-lg! shadow-none!">Retour</AppButton>}
+              <AppButton type="submit" disabled={busy || confirmDisabled} className="px-3.5! py-2.5! text-xs! rounded-lg! shadow-none! hover:translate-y-0!">
                 {busy ? <><LoaderCircle size={14} className="animate-spin" />{isSubmitting ? "Envoi en cours…" : "Vérification…"}</> : <>{step === 1 ? "Décrire ma demande" : step === 2 ? "Choisir un horaire" : step === 3 ? "Vérifier ma demande" : bookingConfirmationEnabled ? "Envoyer ma demande" : "Confirmer le rendez-vous"}{step === 4 ? <Check size={14} /> : <ArrowRight size={14} />}</>}
               </AppButton>
+              </div>
             </footer>
           </fieldset>
         </form>
