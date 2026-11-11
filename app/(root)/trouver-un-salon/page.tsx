@@ -141,7 +141,7 @@ export default async function TrouverUnSalonPage() {
     <>
       <Script id="search-jsonld" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <div className="min-h-screen bg-noir-800 font-one">
-        <div className="w-full space-y-6 px-4 py-5 sm:px-6 sm:py-7 lg:px-10 xl:px-16">
+        <div className="w-full space-y-6 py-5 sm:py-7 px-page">
           <header className="flex flex-wrap items-start justify-between gap-4"><div className="flex items-start gap-3"><span className="mt-0.5 grid size-9 shrink-0 place-items-center rounded-xl border border-tertiary-400/15 bg-tertiary-400/8 text-tertiary-400"><SearchIcon size={17} /></span><div><p className="mb-1 text-[9px] uppercase tracking-[0.16em] text-white/35">Une rencontre, un projet</p><h1 className="text-xl font-medium leading-tight tracking-tight text-white sm:text-2xl">Trouvez votre prochain artiste</h1><p className="mt-1 text-xs leading-6 text-white/45">Explorez les profils des salons et tatoueurs déjà présents sur Inkera.</p></div></div></header>
           <div className="rounded-2xl border border-white/10 bg-noir-800 p-3 sm:p-4"><Suspense fallback={<SearchFallback />}><SearchContent /></Suspense></div>
           <Suspense fallback={<SalonListFallback />}><SalonListContent /></Suspense>

@@ -100,8 +100,18 @@ type InspirationActionOptions = InspirationFilters & {
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 12;
 const MAX_LIMIT = 50;
+// Images de démonstration : uniquement si on les active explicitement (NEXT_PUBLIC_USE_INSPIRATION_MOCK=true).
+// En production, la page affiche toujours les vraies photos des portfolios.
+const IS_PRODUCTION = process.env.NODE_ENV === "production";
 const USE_INSPIRATION_MOCK_DATA =
-	process.env.NEXT_PUBLIC_USE_INSPIRATION_MOCK !== "false";
+	!IS_PRODUCTION && process.env.NEXT_PUBLIC_USE_INSPIRATION_MOCK === "true";
+
+/** Réponse vide « API » : en production, on n’affiche jamais d’images de démo, même si l’API échoue. */
+const emptyPhotosResponse = (limit: number): InspirationPhotosResponse => ({
+	photos: [],
+	pagination: { page: 1, pageSize: limit, total: 0, totalPages: 1, hasNextPage: false, hasPreviousPage: false },
+	source: "api",
+});
 
 const MOCK_INSPIRATION_PHOTOS: InspirationPhoto[] = [
 	{
@@ -561,10 +571,11 @@ export const getInspirationPortfolioPhotosAction = async (
 		return await fetchInspirationPhotosFromApi(page, limit, filters);
 	} catch (error) {
 		console.error(
-			"Erreur lors de la récupération des images d'inspiration, fallback mock activé :",
+			"Erreur lors de la récupération des images d'inspiration :",
 			error,
 		);
-		return buildMockResponse(page, limit, filters);
+		// Démo uniquement en développement ; en production, liste vide plutôt que de fausses images.
+		return IS_PRODUCTION ? emptyPhotosResponse(limit) : buildMockResponse(page, limit, filters);
 	}
 };
 
@@ -638,9 +649,9 @@ export const getInspirationFilterOptionsAction = async (): Promise<InspirationFi
 		};
 	} catch (error) {
 		console.error(
-			"Erreur lors de la récupération des filtres inspiration, fallback mock activé :",
+			"Erreur lors de la récupération des filtres inspiration :",
 			error,
 		);
-		return buildMockFilterOptions();
+		return IS_PRODUCTION ? { cities: [], styles: [], categories: [], source: "api" } : buildMockFilterOptions();
 	}
 };

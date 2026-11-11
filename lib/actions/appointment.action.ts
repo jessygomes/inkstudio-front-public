@@ -132,7 +132,8 @@ export const modifyAppointmentByClient = async (
       const message =
         data?.message ||
         `Erreur lors de la modification du rendez-vous (${response.status})`;
-      return { ok: false, error: true, status: response.status, message, data };
+      const code: string | undefined = typeof data?.code === "string" ? data.code : undefined;
+      return { ok: false, error: true, status: response.status, message, code, data };
     }
     return { ok: true, error: false, status: response.status, data };
   } catch (error) {
@@ -172,6 +173,14 @@ type RdvBody = {
   piercingZoneCorps?: string | null;
   piercingZoneMicrodermal?: string | null;
   moodboardId?: string;
+  // RDV Projet uniquement
+  desiredTattooPeriod?: string | null;
+  desiredTattooDate?: string | null;
+  desiredTattooStartDate?: string | null;
+  desiredTattooEndDate?: string | null;
+  projectBudgetMinCents?: number | null;
+  projectBudgetMaxCents?: number | null;
+  isFirstTattoo?: boolean | null;
 };
 
 type CreateAppointmentByClientResult = {

@@ -3,7 +3,6 @@ import { useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight, ChevronLeft, ChevronRight, MapPin, PenTool, UsersRound } from "lucide-react";
-import AppButton from "@/components/Shared/AppButton";
 import { SalonProps } from "@/lib/type";
 import { toSlug } from "@/lib/utils";
 import { getTattooStyleOptions } from "@/lib/utils/tattooStyles";
@@ -29,24 +28,46 @@ export function SalonCard({ salon, returnTo }: { salon: SearchProfile; returnTo?
   const href = returnTo ? `${profileHref}?${new URLSearchParams({ returnTo })}` : profileHref;
   const displayName = salon.displayName || salon.salonName;
   return (
-    <article className="group flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-white/10 bg-noir-800 font-one transition hover:border-tertiary-400/25 focus-within:ring-2 focus-within:ring-tertiary-400/30">
-      <div className="relative aspect-[2/1] overflow-hidden bg-linear-to-br from-tertiary-400/8 via-white/3 to-noir-800">
+    <article className="group flex h-full min-w-0 flex-col rounded-3xl bg-noir-700 p-2 font-one transition-colors hover:bg-noir-500 focus-within:ring-2 focus-within:ring-tertiary-400/40">
+      {/* Visuel */}
+      <div className="relative aspect-4/3 overflow-hidden rounded-2xl bg-linear-to-br from-tertiary-400/15 via-white/3 to-cuatro-500/10">
         <Link href={href} aria-label={`Découvrir ${displayName}`} className="absolute inset-0">
-          {images.length > 0 && <Image src={images[imageIndex]} alt={displayName} fill sizes="(min-width: 1024px) 23vw, (min-width: 640px) 45vw, 100vw" className="object-cover transition duration-500 group-hover:scale-[1.03] motion-reduce:transform-none" />}
-          <span className="absolute inset-0 bg-linear-to-t from-noir-800/70 via-transparent to-transparent" />
+          {images.length > 0 && <Image src={images[imageIndex]} alt={displayName} fill sizes="(min-width: 1024px) 23vw, (min-width: 640px) 45vw, 100vw" className="object-cover transition duration-500 group-hover:scale-[1.04] motion-reduce:transform-none" />}
+          <span className="absolute inset-0 bg-linear-to-t from-noir-900/60 via-transparent to-noir-900/20" />
         </Link>
-        {salon.role && <span className="pointer-events-none absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-black/45 px-2.5 py-1 text-[9px] text-white/80 backdrop-blur-md"><PenTool size={10} />{isArtist ? "Artiste tatoueur.se" : "Salon de tatouage"}</span>}
-        {images.length > 1 && <div role="group" aria-label={`Photos de ${displayName}`} className="absolute bottom-3 right-3 flex items-center gap-1.5 rounded-lg border border-white/10 bg-black/45 p-1 backdrop-blur-md"><button type="button" aria-label="Photo précédente" onClick={() => setCurrent((imageIndex - 1 + images.length) % images.length)} className="grid size-7 place-items-center rounded-md text-white/70 hover:bg-white/10 hover:text-white"><ChevronLeft size={13} /></button><span aria-live="polite" className="min-w-7 text-center text-[9px] tabular-nums text-white/65">{imageIndex + 1}/{images.length}</span><button type="button" aria-label="Photo suivante" onClick={() => setCurrent((imageIndex + 1) % images.length)} className="grid size-7 place-items-center rounded-md text-white/70 hover:bg-white/10 hover:text-white"><ChevronRight size={13} /></button></div>}
+        {salon.role && <span className="pointer-events-none absolute left-2.5 top-2.5 inline-flex items-center gap-1.5 rounded-xl bg-noir-900/50 px-2.5 py-1 text-[10px] text-white/85 backdrop-blur-md"><PenTool size={11} className="text-tertiary-400" />{isArtist ? "Artiste" : "Salon"}</span>}
+        {images.length > 1 && (
+          <div role="group" aria-label={`Photos de ${displayName}`} className="absolute bottom-2.5 right-2.5 flex items-center gap-0.5 rounded-xl bg-noir-900/50 p-0.5 backdrop-blur-md opacity-100 transition sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100">
+            <button type="button" aria-label="Photo précédente" onClick={() => setCurrent((imageIndex - 1 + images.length) % images.length)} className="grid size-7 cursor-pointer place-items-center rounded-xl text-white/75 hover:bg-white/10 hover:text-white"><ChevronLeft size={14} /></button>
+            <span aria-live="polite" className="min-w-8 text-center text-[10px] tabular-nums text-white/70">{imageIndex + 1}/{images.length}</span>
+            <button type="button" aria-label="Photo suivante" onClick={() => setCurrent((imageIndex + 1) % images.length)} className="grid size-7 cursor-pointer place-items-center rounded-xl text-white/75 hover:bg-white/10 hover:text-white"><ChevronRight size={14} /></button>
+          </div>
+        )}
       </div>
-      <div className="relative flex min-w-0 flex-1 flex-col px-3 pb-3">
-        <div className="relative -mt-5 mb-2.5 grid size-10 shrink-0 place-items-center overflow-hidden rounded-xl border-[3px] border-noir-800 bg-noir-800 text-lg text-white/40 shadow-md">{portrait ? <Image src={portrait} alt={`Profil de ${displayName}`} fill sizes="40px" className="object-cover" /> : displayName?.charAt(0).toUpperCase()}</div>
-        <Link href={href} className="w-fit max-w-full"><h3 className="break-words text-base font-medium leading-snug tracking-tight text-white/90 transition hover:text-tertiary-400">{displayName}</h3></Link>
-        {(salon.city || salon.postalCode) && <p className="mt-1.5 flex items-start gap-1.5 text-[10px] text-white/40"><MapPin size={12} className="mt-0.5 shrink-0 text-tertiary-400/70" />{[salon.city?.toLocaleUpperCase("fr-FR"), salon.postalCode].filter(Boolean).join(" · ")}</p>}
-        {!isArtist && artists.length > 0 && <p className="mt-2 flex items-center gap-1.5 text-[10px] text-white/40"><UsersRound size={12} />{artists.length} artiste{artists.length > 1 ? "s" : ""}{artists.length === 1 && artists[0].name ? ` · ${artists[0].name}` : ""}</p>}
-        {salon.description?.trim() && <p className="mt-2 line-clamp-2 break-words text-[11px] leading-4 text-white/45">{salon.description}</p>}
-        {!!services.length && <div className="mt-2 flex flex-wrap gap-1">{services.slice(0, 3).map(service => <span key={service} className="max-w-full break-words rounded-md border border-tertiary-400/10 bg-tertiary-400/5 px-2 py-1 text-[9px] text-tertiary-400/80">{serviceLabels[service.toUpperCase()] || service}</span>)}{services.length > 3 && <span className="px-1 py-1 text-[9px] text-white/35">+{services.length - 3}</span>}</div>}
-        {!!styles.length && <div className="mt-2 flex flex-wrap gap-1">{styles.slice(0, 3).map(style => <span key={style} className="max-w-full break-words rounded-md border border-white/8 bg-white/[0.025] px-2 py-1 text-[9px] text-white/50">{style}</span>)}{styles.length > 3 && <span className="px-1 py-1 text-[9px] text-white/35">+{styles.length - 3}</span>}</div>}
-        <div className="mt-auto pt-3"><AppButton href={href} fullWidth className="min-h-9! justify-between! rounded-lg! px-3! py-2! text-xs! shadow-none! hover:translate-y-0!">Découvrir le profil<ArrowUpRight size={14} /></AppButton></div>
+
+      {/* Identité */}
+      <div className="flex min-w-0 flex-1 flex-col px-2 pb-1.5 pt-3.5">
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="relative grid size-11 shrink-0 place-items-center overflow-hidden rounded-xl bg-white/6 text-base text-white/50">{portrait ? <Image src={portrait} alt={`Profil de ${displayName}`} fill sizes="44px" className="object-cover" /> : displayName?.charAt(0).toUpperCase()}</div>
+          <div className="min-w-0">
+            <Link href={href} className="block w-fit max-w-full"><h3 className="truncate text-base font-semibold leading-snug tracking-tight text-white transition hover:text-tertiary-400">{displayName}</h3></Link>
+            <p className="mt-0.5 flex min-w-0 items-center gap-1.5 truncate text-[11px] text-white/45">
+              {(salon.city || salon.postalCode) && <><MapPin size={11} className="shrink-0 text-tertiary-400" />{[salon.city?.toLocaleUpperCase("fr-FR"), salon.postalCode].filter(Boolean).join(" ")}</>}
+              {!isArtist && artists.length > 0 && <><span aria-hidden="true">·</span><UsersRound size={11} className="shrink-0" />{artists.length} artiste{artists.length > 1 ? "s" : ""}</>}
+            </p>
+          </div>
+        </div>
+        {salon.description?.trim() && <p className="mt-3 line-clamp-2 break-words text-xs leading-5 text-white/50">{salon.description}</p>}
+        {(services.length > 0 || styles.length > 0) && (
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {services.slice(0, 2).map(service => <span key={service} className="max-w-full break-words rounded-xl bg-linear-to-r from-tertiary-400/20 to-cuatro-500/15 px-2.5 py-1 text-[10px] text-white/85">{serviceLabels[service.toUpperCase()] || service}</span>)}
+            {styles.slice(0, 2).map(style => <span key={style} className="max-w-full break-words rounded-xl bg-white/6 px-2.5 py-1 text-[10px] text-white/60">{style}</span>)}
+            {services.length + styles.length > 4 && <span className="rounded-xl px-1.5 py-1 text-[10px] text-white/35">+{Math.max(0, services.length - 2) + Math.max(0, styles.length - 2)}</span>}
+          </div>
+        )}
+        <div className="mt-auto pt-4">
+          <Link href={href} className="flex min-h-10 items-center justify-between rounded-xl bg-white/6 px-3.5 text-xs font-medium text-white/85 transition group-hover:bg-linear-to-r group-hover:from-tertiary-400 group-hover:to-tertiary-500 group-hover:text-white focus-visible:outline-2 focus-visible:outline-tertiary-400">Découvrir le profil<ArrowUpRight size={15} /></Link>
+        </div>
       </div>
     </article>
   );

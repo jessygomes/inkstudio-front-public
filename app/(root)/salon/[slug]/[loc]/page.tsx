@@ -38,6 +38,8 @@ type SalonTatoueur = {
   description?: string | null;
   instagram?: string | null;
   style?: string[] | null;
+  tattooPractices?: string[] | null;
+  tattooPracticeDetails?: string | null;
   skills?: string[] | null;
   isLinkedUser?: boolean;
   profileUserId?: string | null;
@@ -509,20 +511,20 @@ export default async function ProfilPublicSalonPage({ params, searchParams }: Pa
         style={customStyle}
       >
 
-      <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:max-w-none lg:px-8 lg:py-10 xl:px-16">
-        <Link href={previousSearch} className="mb-6 inline-flex min-h-10 items-center gap-2 text-sm text-white/65 transition hover:text-white">
-          <ArrowLeft size={16} /> {previousSearch.includes("?") ? "Retour aux résultats" : "Tous les salons"}
+      <section className="px-page py-6 lg:py-10">
+        <Link href={previousSearch} className="mb-6 inline-flex min-h-10 items-center gap-2 rounded-xl bg-white/5 px-4 text-xs text-white/70 transition hover:bg-white/10 hover:text-white">
+          <ArrowLeft size={14} /> {previousSearch.includes("?") ? "Retour aux résultats" : "Tous les salons"}
         </Link>
         <DesktopSalonHeader variant="mobile" salonId={salon.id} name={salon.displayName || salon.salonName} cover={heroSrc} portrait={profileSrc} city={salon.city} postalCode={salon.postalCode} verified={isVerifiedSalon} artist={isTatoueurRole} hasHours={hours.length > 0} open={openNow.open} today={openNow.today} bookingHref={!canBookAppointments ? "#contact" : "/salon/" + slug + "/" + loc + "/reserver"} canBook={canBookAppointments} />
         <SalonSectionNav showTeam={shouldShowTeamSection && sortedTatoueurs.length > 0} className="my-6 lg:hidden" />
         <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)] xl:gap-8">
           <aside id="informations" className="order-2 min-w-0 scroll-mt-28 space-y-4 lg:sticky lg:top-24">
-            <section aria-label="Votre prochain projet" className="rounded-2xl border border-tertiary-400/20 bg-linear-to-br from-tertiary-400/10 via-tertiary-500/5 to-noir-800 p-4">
-              <div className="mb-3 flex items-start gap-2.5"><span className="grid size-8 shrink-0 place-items-center rounded-xl border border-tertiary-400/15 bg-tertiary-400/8 text-tertiary-400"><CalendarDays size={15} aria-hidden="true" /></span><div className="min-w-0"><h2 className="text-sm font-medium leading-5 text-white/90">Votre prochain projet commence ici</h2><p className="mt-1 text-[11px] leading-5 text-white/40">Une idée ? Échangez avec {salon.displayName || salon.salonName}.</p></div></div>
-              <div className="space-y-2"><AppButton href={!canBookAppointments ? "#contact" : "/salon/" + slug + "/" + loc + "/reserver"} variant="primary" fullWidth className="min-h-9! px-3! py-2! text-xs! shadow-none! hover:translate-y-0!">{!canBookAppointments ? "Contacter le salon" : "Prendre rendez-vous"}<ArrowUpRight size={14} /></AppButton>
-                {!isFree && <StartInkeraConversationButton variant="compact" targetUserId={salon.id} recipientName={salon.displayName || salon.salonName || "ce tatoueur"} className="min-h-9! px-3! py-2! text-xs! shadow-none!" />}
+            <section aria-label="Votre prochain projet" className="relative overflow-hidden rounded-3xl bg-linear-to-br from-tertiary-400/25 via-tertiary-500/12 to-cuatro-500/20 p-5">
+              <div className="mb-4 flex items-start gap-3"><span className="grid size-10 shrink-0 place-items-center rounded-2xl bg-noir-900/30 text-tertiary-400 backdrop-blur"><CalendarDays size={17} aria-hidden="true" /></span><div className="min-w-0"><h2 className="text-base font-semibold leading-5 tracking-tight text-white">Votre prochain projet commence ici</h2><p className="mt-1 text-xs leading-5 text-white/60">Une idée ? Échangez avec {salon.displayName || salon.salonName}.</p></div></div>
+              <div className="space-y-2"><AppButton href={!canBookAppointments ? "#contact" : "/salon/" + slug + "/" + loc + "/reserver"} variant="primary" fullWidth className="min-h-11! rounded-xl! px-4! py-2.5! text-sm! hover:translate-y-0!">{!canBookAppointments ? "Contacter le salon" : "Prendre rendez-vous"}<ArrowUpRight size={14} /></AppButton>
+                {!isFree && <StartInkeraConversationButton variant="compact" targetUserId={salon.id} recipientName={salon.displayName || salon.salonName || "ce tatoueur"} className="min-h-11! rounded-xl! border-0! bg-noir-900/35! px-4! py-2.5! text-sm! shadow-none! hover:bg-noir-900/50!" />}
               </div>
-              {!isFree && <a href="#contact" className="mt-2 flex items-center justify-center gap-1 py-1 text-[11px] text-white/40 transition hover:text-white">Poser une question<ArrowUpRight size={11} /></a>}
+              {!isFree && <a href="#contact" className="mt-3 flex items-center justify-center gap-1 py-1 text-[11px] text-white/55 transition hover:text-white">Poser une question<ArrowUpRight size={11} /></a>}
             </section>
             <SalonPracticalInfo
               address={salon.address}
@@ -541,7 +543,7 @@ export default async function ProfilPublicSalonPage({ params, searchParams }: Pa
           </aside>
 
           {/* Main Content */}
-          <div className="order-1 min-w-0 space-y-8">
+          <div className="order-1 min-w-0 space-y-6">
             <DesktopSalonHeader
               salonId={salon.id}
               name={salon.displayName || salon.salonName}
@@ -556,7 +558,7 @@ export default async function ProfilPublicSalonPage({ params, searchParams }: Pa
               today={openNow.today}
             />
             <SalonSectionNav showTeam={shouldShowTeamSection && sortedTatoueurs.length > 0} className="hidden lg:flex" />
-            <SalonPresentation description={salon.description} prestations={prestations} styles={styles} />
+            <SalonPresentation description={salon.description} prestations={prestations} styles={styles} tattooPractices={(salon as any).tattooPractices} tattooPracticeDetails={(salon as any).tattooPracticeDetails} />
 
             {/* Tabs : Photos → Portfolio → Produits */}
             <SalonTabs
@@ -577,18 +579,18 @@ export default async function ProfilPublicSalonPage({ params, searchParams }: Pa
             {/* Équipe */}
             {shouldShowTeamSection && sortedTatoueurs.length > 0 && (
               <section id="equipe" className="scroll-mt-28">
-                <div className="flex items-center justify-between mb-5">
-                  <h3 className="text-white/95 font-one text-xl">
+                <div className="mb-5 flex items-center justify-between px-1">
+                  <h3 className="font-one text-xl font-semibold tracking-tight text-white">
                     Les artistes du salon
                   </h3>
-                  <span className="text-white/60 font-one text-sm">
+                  <span className="rounded-xl bg-white/6 px-3 py-1 font-one text-xs text-white/65">
                     {sortedTatoueurs.length}{" "}
                     {sortedTatoueurs.length > 1 ? "tatoueurs" : "tatoueur"}
                   </span>
                 </div>
 
                 <div
-                  className={`grid grid-cols-1 gap-4 ${
+                  className={`grid grid-cols-1 gap-3 ${
                     sortedTatoueurs.length > 1
                       ? "sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2"
                       : ""
@@ -602,6 +604,8 @@ export default async function ProfilPublicSalonPage({ params, searchParams }: Pa
                         description={t.description}
                         instagram={t.instagram}
                         style={t.style}
+                        tattooPractices={t.tattooPractices}
+                        tattooPracticeDetails={t.tattooPracticeDetails}
                         skills={t.skills}
                         isLinkedUser={t.isLinkedUser}
                         profileUserId={t.profileUserId}
@@ -616,11 +620,11 @@ export default async function ProfilPublicSalonPage({ params, searchParams }: Pa
             {/* Salons liés (tatoueur) */}
             {isTatoueurRole && linkedSalons.length > 0 && (
               <section>
-                <div className="flex items-center justify-between mb-5">
-                  <h3 className="text-white/95 font-one text-md tracking-wider uppercase">
+                <div className="mb-5 flex items-center justify-between px-1">
+                  <h3 className="font-one text-xl font-semibold tracking-tight text-white">
                     Salons liés
                   </h3>
-                  <span className="text-white/60 font-one text-sm">
+                  <span className="rounded-xl bg-white/6 px-3 py-1 font-one text-xs text-white/65">
                     {linkedSalons.length}{" "}
                     {linkedSalons.length > 1 ? "salons" : "salon"}
                   </span>

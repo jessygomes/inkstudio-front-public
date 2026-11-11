@@ -99,7 +99,7 @@ export default function ImageUploader({
             <button
               type="button"
               onClick={handleRemoveFile}
-              className={`absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-full ${
+              className={`absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-xl ${
                 compact ? "w-6 h-6 text-xs" : "w-8 h-8"
               } flex items-center justify-center transition-colors z-10`}
             >
@@ -183,7 +183,7 @@ export default function ImageUploader({
             };
             input.click();
           }}
-          className="w-full py-3 px-4 bg-tertiary-400/20 hover:bg-tertiary-400/30 text-white rounded-[20px] border border-tertiary-400/50 transition-colors"
+          className="w-full py-3 px-4 bg-tertiary-400/20 hover:bg-tertiary-400/30 text-white rounded-xl border border-tertiary-400/50 transition-colors"
         >
           📷 Choisir une image
         </button>

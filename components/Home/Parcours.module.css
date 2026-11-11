@@ -8,9 +8,9 @@
   position: relative;
   display: flex;
   min-width: 0;
-  min-height: 240px;
+  min-height: 300px;
   overflow: hidden;
-  border-radius: 16px;
+  border-radius: 24px;
   background: var(--color-noir-800);
   outline: none;
   isolation: isolate;
@@ -46,7 +46,7 @@
   position: relative;
   align-self: flex-end;
   width: 100%;
-  padding: 24px;
+  padding: 28px;
 }
 
 .details {
@@ -68,7 +68,7 @@
 
   .panel {
     flex: 1 1 0%;
-    min-height: 360px;
+    min-height: 440px;
   }
 }
 

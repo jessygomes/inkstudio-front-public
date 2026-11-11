@@ -63,4 +63,5 @@ export interface SalonSummary {
   projectAppointmentDurationMinutes?: number | null;
   projectAppointmentIsFree?: boolean | null;
   projectAppointmentPrice?: number | null;
+  allowSameDayBooking?: boolean;
 }

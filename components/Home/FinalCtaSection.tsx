@@ -37,7 +37,7 @@ export default function FinalCtaSection() {
 
   return (
     <section aria-labelledby="home-closing-title" className="bg-noir-800 font-one">
-      <div className="relative isolate mx-4 grid items-center gap-6 bg-noir-800 py-6 sm:mx-8 sm:py-8 lg:mx-20 xl:grid-cols-[minmax(0,1fr)_minmax(0,2.5fr)_minmax(0,1fr)]">
+      <div className="relative isolate grid items-center gap-6 bg-noir-800 py-6 sm:py-8 xl:grid-cols-[minmax(0,1fr)_minmax(0,2.5fr)_minmax(0,1fr)] mx-page">
         <PhotoCluster photos={photos.slice(0, 3)} />
 
         <div className="relative mx-auto flex w-full max-w-2xl flex-col items-center text-center">

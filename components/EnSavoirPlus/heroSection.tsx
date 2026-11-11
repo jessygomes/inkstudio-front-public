@@ -90,7 +90,7 @@ export default function HeroSection() {
 				animate="visible"
 			>
                 <div className="mx-auto w-full max-w-4xl font-one">
-                  <p className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/15 bg-black/20 px-3 py-1.5 text-[10px] uppercase tracking-[0.18em] text-white/70 backdrop-blur-md"><span aria-hidden="true" className="size-1.5 rounded-full bg-tertiary-400" />L’esprit Inkera</p>
+                  <p className="mb-6 inline-flex items-center gap-2 rounded-xl border border-white/15 bg-black/20 px-3 py-1.5 text-[10px] uppercase tracking-[0.18em] text-white/70 backdrop-blur-md"><span aria-hidden="true" className="size-1.5 rounded-full bg-tertiary-400" />L’esprit Inkera</p>
                   <h1 className="text-balance text-4xl font-medium leading-[1.08] tracking-tight text-white sm:text-6xl lg:text-7xl">L’art sur la peau.<br /><span className="inline-block bg-linear-to-r from-tertiary-400 via-tertiary-500 to-cuatro-500 bg-clip-text text-transparent">Le lien avant tout.</span></h1>
                   <p className="mx-auto mt-6 max-w-lg text-sm leading-7 text-white/70 sm:text-base">Derrière chaque tatouage, il y a une rencontre. Inkera rapproche les personnes, les artistes et les univers qui leur ressemblent.</p>
                   <div className="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">

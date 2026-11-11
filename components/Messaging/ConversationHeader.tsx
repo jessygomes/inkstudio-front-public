@@ -52,7 +52,7 @@ export default function ConversationHeader({
           {conversation.subject}
         </p>
       </div>
-      <span className="shrink-0 rounded-full border border-white/10 bg-white/5 px-2 py-1 text-[11px] text-white/75 font-one">
+      <span className="shrink-0 rounded-xl border border-white/10 bg-white/5 px-2 py-1 text-[11px] text-white/75 font-one">
         {STATUS_LABELS[conversation.status]}
       </span>
       <span

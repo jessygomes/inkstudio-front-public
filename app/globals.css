@@ -115,3 +115,36 @@ body {
     cursor: not-allowed;
   }
 }
+
+/* ------------------------------------------------------------------
+   Marges latérales des pages (navbar, contenu, footer).
+   Modifier uniquement ces valeurs pour changer la marge de tout le site.
+   Classes : px-page (padding), mx-page (margin), bleed-page (déborde
+   jusqu'au bord, ex. une barre qui défile sur mobile).
+   ------------------------------------------------------------------ */
+:root {
+  --page-gutter: 1.25rem; /* mobile : 20px */
+}
+@media (min-width: 40rem) {
+  :root { --page-gutter: 2.5rem; } /* sm : 40px */
+}
+@media (min-width: 64rem) {
+  :root { --page-gutter: 4rem; } /* lg : 64px */
+}
+@media (min-width: 80rem) {
+  :root { --page-gutter: 7rem; } /* xl : 112px */
+}
+@media (min-width: 96rem) {
+  :root { --page-gutter: 9rem; } /* 2xl : 144px */
+}
+
+@utility px-page {
+  padding-inline: var(--page-gutter);
+}
+@utility mx-page {
+  margin-inline: var(--page-gutter);
+}
+@utility bleed-page {
+  margin-inline: calc(var(--page-gutter) * -1);
+  padding-inline: var(--page-gutter);
+}

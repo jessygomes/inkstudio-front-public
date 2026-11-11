@@ -30,7 +30,7 @@ export default function PolitiqueDeConfidentialite() {
   return (
     <main className="min-h-screen bg-linear-to-b from-noir-800 via-noir-600 to-noir-800 pt-20">
       <section className="bg-linear-to-r from-noir-800 to-noir-800 py-20 relative overflow-hidden">
-        <div className="container mx-auto px-4 sm:px-8 max-w-4xl relative z-10 text-center">
+        <div className="px-page relative z-10 text-center">
           <div className="inline-flex items-center gap-2 bg-tertiary-500/10 border border-tertiary-400/20 rounded-full px-4 py-2 mb-6">
             <FaShieldAlt size={16} className="text-tertiary-400" />
             <span className="text-tertiary-400 font-one text-sm font-semibold">
@@ -56,7 +56,7 @@ export default function PolitiqueDeConfidentialite() {
       </section>
 
       <section className="py-16">
-        <div className="container mx-auto px-4 sm:px-8 max-w-5xl space-y-8">
+        <div className="px-page space-y-8">
           <div className="bg-linear-to-br from-tertiary-500/10 to-tertiary-600/15 backdrop-blur-xl rounded-3xl p-8 border border-tertiary-400/20">
             <p className="text-white/80 font-one leading-relaxed text-lg">
               Cette politique explique comment Inkera collecte, utilise et

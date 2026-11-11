@@ -1,13 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useId, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Pencil, Expand } from "lucide-react";
 import Image from "next/image";
-import { FaArrowLeft, FaPlus, FaSave, FaTrash } from "react-icons/fa";
+import { FaArrowLeft, FaPlus, FaTrash } from "react-icons/fa";
 import { Moodboard } from "@/lib/actions/moodboard.action";
 import AppButton from "../Shared/AppButton";
 import MoodboardAddImageModal from "./MoodboardAddImageModal";
+import MoodboardEditModal from "./MoodboardEditModal";
 import ProjectPublication from "./ProjectPublication";
 import type { ProjectFields } from "./ProjectPublication";
 import ProjectProposals from "./ProjectProposals";
@@ -52,9 +53,7 @@ export default function MoodboardSelectedPanel({
   const [isAddImageModalOpen, setIsAddImageModalOpen] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
-  const formId = useId();
   const lightboxRef = useRef<HTMLDivElement>(null);
-  const hasChanges = editName !== selectedMoodboard.name || editDescription !== (selectedMoodboard.description || "");
 
   const activeImages = useMemo(
     () =>
@@ -113,34 +112,29 @@ export default function MoodboardSelectedPanel({
   return (
     <div className="space-y-5 font-one [&_button:focus-visible]:outline-2 [&_button:focus-visible]:outline-offset-2 [&_button:focus-visible]:outline-tertiary-400">
       <div className="pb-3">
-        {isEditing ? (
-          <form onSubmit={async (event) => { event.preventDefault(); if (!savingInfos && await onSaveInfos()) setIsEditing(false); }} className="space-y-2.5" aria-busy={savingInfos}>
-            <div className="flex flex-wrap items-center gap-2">
-              <button type="button" onClick={onBack} aria-label="Tous mes moodboards" title="Tous mes moodboards" className="grid h-8 w-8 shrink-0 cursor-pointer place-items-center rounded-lg text-white/60 transition hover:bg-white/5 hover:text-white"><FaArrowLeft size={13} /></button>
-              <label htmlFor={`${formId}-name`} className="sr-only">Nom du moodboard</label>
-              <input autoFocus id={`${formId}-name`} value={editName} onChange={(event) => onEditNameChange(event.target.value)} required disabled={savingInfos} className="h-9 min-w-0 flex-1 rounded-lg border border-white/15 bg-noir-800 px-3 text-sm text-white outline-none focus:border-tertiary-400" />
-              <span className="shrink-0 rounded-md bg-white/5 px-2 py-0.5 text-xs text-white/45">{selectedMoodboard.images?.length || 0}</span>
-              <button type="button" disabled={savingInfos} onClick={() => { onEditNameChange(selectedMoodboard.name); onEditDescriptionChange(selectedMoodboard.description || ""); setIsEditing(false); }} className="h-9 cursor-pointer rounded-lg border border-white/10 px-3 text-xs text-white/60 hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-50">Annuler</button>
-              <AppButton type="submit" variant="secondary" disabled={savingInfos || !editName.trim()} icon={<FaSave size={12} />} className="h-9 cursor-pointer !rounded-lg !px-3 !py-0 !text-xs">{savingInfos ? "Enregistrement…" : "Valider"}</AppButton>
+        <>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2"><button type="button" onClick={onBack} aria-label="Tous mes moodboards" title="Tous mes moodboards" className="grid h-8 w-8 shrink-0 cursor-pointer place-items-center rounded-xl text-white/60 transition hover:bg-white/5 hover:text-white"><FaArrowLeft size={13} /></button><h3 className="min-w-0 break-words text-base font-medium text-white">{selectedMoodboard.name}</h3><span className="shrink-0 rounded-xl bg-white/5 px-2 py-0.5 text-xs text-white/45">{selectedMoodboard.images?.length || 0}</span></div>
+            <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
+              <ProjectPublication board={selectedMoodboard} onUpdated={onProjectUpdated} />
+              <button type="button" onClick={() => { onEditNameChange(selectedMoodboard.name); onEditDescriptionChange(selectedMoodboard.description || ""); setIsEditing(true); }} className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-xl bg-white/6 px-3 text-xs font-medium text-white/75 transition hover:bg-white/10 hover:text-white focus-visible:outline-2 focus-visible:outline-tertiary-400"><Pencil size={15} />Modifier</button>
+              <AppButton type="button" onClick={() => setIsAddImageModalOpen(true)} icon={<FaPlus size={11} />} className="h-8 cursor-pointer !rounded-xl !px-3 !py-0 !text-xs">Ajouter une image</AppButton>
             </div>
-            <label htmlFor={`${formId}-description`} className="sr-only">Description (facultative)</label>
-            <textarea id={`${formId}-description`} value={editDescription} onChange={(event) => onEditDescriptionChange(event.target.value)} rows={2} placeholder="Description (facultative)" disabled={savingInfos} className="w-full resize-y rounded-lg border border-white/15 bg-noir-800 px-3 py-2 text-xs text-white outline-none placeholder:text-white/35 focus:border-tertiary-400" />
-            {hasChanges && <p className="text-[11px] text-white/45">Modifications non enregistrées</p>}
-          </form>
-        ) : (
-          <>
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2"><button type="button" onClick={onBack} aria-label="Tous mes moodboards" title="Tous mes moodboards" className="grid h-8 w-8 shrink-0 cursor-pointer place-items-center rounded-lg text-white/60 transition hover:bg-white/5 hover:text-white"><FaArrowLeft size={13} /></button><h3 className="min-w-0 break-words text-base font-medium text-white">{selectedMoodboard.name}</h3><span className="shrink-0 rounded-md bg-white/5 px-2 py-0.5 text-xs text-white/45">{selectedMoodboard.images?.length || 0}</span></div>
-              <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
-                <ProjectPublication board={selectedMoodboard} onUpdated={onProjectUpdated} />
-                <button type="button" onClick={() => { onEditNameChange(selectedMoodboard.name); onEditDescriptionChange(selectedMoodboard.description || ""); setIsEditing(true); }} className="inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-lg border border-white/10 px-2.5 text-xs text-white/60 transition hover:bg-white/5 hover:text-white"><Pencil size={12} />Modifier</button>
-                <AppButton type="button" onClick={() => setIsAddImageModalOpen(true)} icon={<FaPlus size={11} />} className="h-8 cursor-pointer !rounded-lg !px-3 !py-0 !text-xs">Ajouter une image</AppButton>
-              </div>
-            </div>
-            {selectedMoodboard.description && <p className="mt-2 whitespace-pre-line break-words text-xs leading-5 text-white/55">{selectedMoodboard.description}</p>}
-          </>
-        )}
+          </div>
+          {selectedMoodboard.description && <p className="mt-2 whitespace-pre-line break-words text-xs leading-5 text-white/55">{selectedMoodboard.description}</p>}
+        </>
       </div>
+
+      <MoodboardEditModal
+        open={isEditing}
+        name={editName}
+        description={editDescription}
+        busy={savingInfos}
+        onNameChange={onEditNameChange}
+        onDescriptionChange={onEditDescriptionChange}
+        onSubmit={async () => { if (await onSaveInfos()) setIsEditing(false); }}
+        onClose={() => { onEditNameChange(selectedMoodboard.name); onEditDescriptionChange(selectedMoodboard.description || ""); setIsEditing(false); }}
+      />
 
       <ProjectProposals moodboardId={selectedMoodboard.id} />
 
@@ -155,7 +149,7 @@ export default function MoodboardSelectedPanel({
       />
 
       {(selectedMoodboard.images || []).length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-white/15 bg-noir-500 px-4 py-12 text-center">
+        <div className="rounded-2xl bg-noir-700 px-4 py-12 text-center">
           <p className="text-sm text-white/60 font-one">
             Votre moodboard attend ses premières inspirations.
           </p>
@@ -165,7 +159,7 @@ export default function MoodboardSelectedPanel({
           {selectedMoodboard.images.map((image, index) => (
             <div
               key={image.id}
-              className="group overflow-hidden rounded-2xl border border-white/10 bg-white/5"
+              className="group overflow-hidden rounded-2xl bg-white/5"
             >
               <button
                 type="button"
@@ -235,7 +229,7 @@ export default function MoodboardSelectedPanel({
               <button
                 onClick={closeLightbox}
                 aria-label="Fermer"
-                className="min-h-11 min-w-11 cursor-pointer absolute top-3 right-3 rounded-2xl border border-white/20 bg-white/10 px-2 py-0.5 text-white hover:bg-white/20"
+                className="min-h-11 min-w-11 cursor-pointer absolute top-3 right-3 rounded-xl bg-white/10 px-2 py-0.5 text-white hover:bg-white/20"
               >
                 ✕
               </button>
@@ -245,14 +239,14 @@ export default function MoodboardSelectedPanel({
                   <button
                     onClick={prev}
                     aria-label="Précédent"
-                    className="min-h-11 min-w-11 cursor-pointer absolute left-3 top-1/2 rounded-2xl border border-white/20 bg-white/10 px-3 pb-0.5 text-2xl text-white -translate-y-1/2 hover:bg-white/20"
+                    className="min-h-11 min-w-11 cursor-pointer absolute left-3 top-1/2 rounded-xl bg-white/10 px-3 pb-0.5 text-2xl text-white -translate-y-1/2 hover:bg-white/20"
                   >
                     ‹
                   </button>
                   <button
                     onClick={next}
                     aria-label="Suivant"
-                    className="min-h-11 min-w-11 cursor-pointer absolute right-3 top-1/2 rounded-2xl border border-white/20 bg-white/10 px-3 pb-0.5 text-2xl text-white -translate-y-1/2 hover:bg-white/20"
+                    className="min-h-11 min-w-11 cursor-pointer absolute right-3 top-1/2 rounded-xl bg-white/10 px-3 pb-0.5 text-2xl text-white -translate-y-1/2 hover:bg-white/20"
                   >
                     ›
                   </button>

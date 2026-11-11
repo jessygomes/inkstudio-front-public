@@ -1,5 +1,6 @@
 import { image } from "motion/react-client";
 import * as z from "zod";
+import { DESIRED_TATTOO_PERIODS, PROJECT_BUDGET_RANGES, isDateKey } from "@/lib/booking-link";
 
 const skinToneValues = [
   "tres_claire",
@@ -85,8 +86,34 @@ export const appointmentRequestSchema = z
     moodboardId: z.string().optional(),
 
     message: z.string().optional(),
+
+    // Informations facultatives d'un RDV Projet (envoyées uniquement pour PROJET).
+    project: z
+      .object({
+        desiredTattooPeriod: z.enum(["", ...DESIRED_TATTOO_PERIODS]).optional(),
+        desiredTattooDate: z.string().optional(),
+        desiredTattooStartDate: z.string().optional(),
+        desiredTattooEndDate: z.string().optional(),
+        budget: z.enum(["", ...PROJECT_BUDGET_RANGES.map((range) => range.key)]).optional(),
+        isFirstTattoo: z.enum(["", "yes", "no"]).optional(),
+      })
+      .optional(),
   })
   .superRefine((data, ctx) => {
+    if (data.prestation === "PROJET" && data.project) {
+      const { desiredTattooPeriod, desiredTattooDate, desiredTattooStartDate, desiredTattooEndDate } = data.project;
+      if (desiredTattooPeriod === "EXACT_DATE" && !isDateKey(desiredTattooDate)) {
+        ctx.addIssue({ code: "custom", message: "Choisissez une date", path: ["project", "desiredTattooDate"] });
+      }
+      if (desiredTattooPeriod === "DATE_RANGE") {
+        if (!isDateKey(desiredTattooStartDate)) ctx.addIssue({ code: "custom", message: "Date de début requise", path: ["project", "desiredTattooStartDate"] });
+        if (!isDateKey(desiredTattooEndDate)) ctx.addIssue({ code: "custom", message: "Date de fin requise", path: ["project", "desiredTattooEndDate"] });
+        if (isDateKey(desiredTattooStartDate) && isDateKey(desiredTattooEndDate) && desiredTattooStartDate > desiredTattooEndDate) {
+          ctx.addIssue({ code: "custom", message: "La fin doit être après le début", path: ["project", "desiredTattooEndDate"] });
+        }
+      }
+    }
+
     const requiresSkin = ["TATTOO", "PROJET", "RETOUCHE"].includes(
       data.prestation,
     );

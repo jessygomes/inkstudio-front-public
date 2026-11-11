@@ -434,7 +434,7 @@ export default function MoodboardTab() {
 
   if (loading) {
     return (
-      <div className="rounded-3xl border border-white/10 bg-linear-to-br from-noir-500/6 to-white/3 p-4 shadow-xl backdrop-blur-lg sm:p-6">
+      <div className="rounded-3xl bg-linear-to-br from-noir-500/6 to-white/3 p-4 shadow-xl backdrop-blur-lg sm:p-6">
         <div className="py-12 text-center">
           <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-tertiary-400 border-t-transparent"></div>
           <p className="font-one text-white/60">Chargement des moodboards...</p>
@@ -450,7 +450,7 @@ export default function MoodboardTab() {
           <header className="flex min-w-0 items-center gap-2 pb-3">
             <button type="button" onClick={() => setShowAllProposals(false)} aria-label="Retour aux moodboards" title="Retour aux moodboards" className="grid size-10 shrink-0 cursor-pointer place-items-center rounded-xl text-white/50 transition hover:bg-white/5 hover:text-white focus-visible:outline-2 focus-visible:outline-tertiary-400"><ArrowLeft size={17} aria-hidden="true" /></button>
             <h2 className="min-w-0 text-sm font-semibold text-white sm:text-base">Propositions pour vos projets</h2>
-            {proposalCounts && <span className="ml-auto shrink-0 rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-[11px] text-white/45">{Object.values(proposalCounts).reduce((sum, count) => sum + count, 0)}</span>}
+            {proposalCounts && <span className="ml-auto shrink-0 rounded-xl bg-white/5 px-2 py-0.5 text-[11px] text-white/45">{Object.values(proposalCounts).reduce((sum, count) => sum + count, 0)}</span>}
           </header>
           <ProjectProposals onLoaded={handleProposalsLoaded} />
         </div>
@@ -480,12 +480,12 @@ export default function MoodboardTab() {
 
           <AppButton type="button" variant="secondary" onClick={() => setShowAllProposals(true)} icon={<MessageSquare size={14} />} className="min-h-11 shrink-0 cursor-pointer !px-3 !text-xs">
             Toutes les propositions
-            {proposalCounts && <span className="rounded-md bg-white/5 px-1.5 py-0.5 text-[10px] text-white/60">{Object.values(proposalCounts).reduce((sum, count) => sum + count, 0)}</span>}
+            {proposalCounts && <span className="rounded-xl bg-white/5 px-1.5 py-0.5 text-[10px] text-white/60">{Object.values(proposalCounts).reduce((sum, count) => sum + count, 0)}</span>}
           </AppButton>
           </div>
 
           {moodboards.length === 0 ? (
-            <div className="rounded-2xl border border-white/10 bg-white/5 py-10 text-center">
+            <div className="rounded-2xl bg-white/5 py-10 text-center">
               <p className="font-one text-sm text-white/65">
                 Aucun moodboard pour le moment.
               </p>

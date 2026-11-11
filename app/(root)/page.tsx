@@ -122,7 +122,7 @@ export default function Home() {
       {/* Hero Section */}
       <HeroSection />
 
-      <div className="flex w-full flex-col gap-16 bg-noir-800 pb-16 pt-14 sm:gap-24 sm:pb-20 sm:pt-20">
+      <div id="home-content" className="flex w-full scroll-mt-20 flex-col gap-16 bg-noir-800 pb-16 pt-14 sm:gap-24 sm:pb-20 sm:pt-20">
         <Parcours />
         <ArticleAccueil />
         {/* <TatoueurCtaSection /> */}

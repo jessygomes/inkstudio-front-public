@@ -43,7 +43,7 @@ export default function SideDrawer({ open, title, description, busy, onClose, he
           <div className="flex min-w-0 items-center gap-2">
             <h2 id={titleId} className="min-w-0 flex-1 text-sm font-semibold tracking-tight sm:text-base">{title}</h2>
             {headerAction}
-            <button type="button" disabled={busy} onClick={onClose} aria-label="Fermer" className="grid size-9 shrink-0 cursor-pointer place-items-center rounded-lg text-white/40 transition hover:bg-white/5 hover:text-white focus-visible:outline-2 focus-visible:outline-tertiary-400 disabled:opacity-40"><X size={17} /></button>
+            <button type="button" disabled={busy} onClick={onClose} aria-label="Fermer" className="grid size-9 shrink-0 cursor-pointer place-items-center rounded-xl text-white/40 transition hover:bg-white/5 hover:text-white focus-visible:outline-2 focus-visible:outline-tertiary-400 disabled:opacity-40"><X size={17} /></button>
           </div>
           {description && <p className="mt-1.5 break-words text-xs leading-5 text-white/40">{description}</p>}
         </header>

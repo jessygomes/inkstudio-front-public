@@ -622,7 +622,7 @@ function RdvRequestContent() {
               <div className="flex flex-col md:flex-row gap-4 justify-center items-center mt-4">
                 <button
                   disabled={!selectedSlotId}
-                  className="cursor-pointer w-[175px] flex justify-center items-center gap-2 py-2 bg-gradient-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white rounded-lg transition-all duration-300 font-medium font-one text-xs shadow-lg"
+                  className="cursor-pointer w-[175px] flex justify-center items-center gap-2 py-2 bg-gradient-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white rounded-xl transition-all duration-300 font-medium font-one text-xs shadow-lg"
                   onClick={handleAccept}
                 >
                   <svg
@@ -642,7 +642,7 @@ function RdvRequestContent() {
                 </button>
                 <div className="flex flex-col items-center">
                   <button
-                    className="cursor-pointer w-[175px] flex justify-center items-center gap-2 py-2 bg-gradient-to-r from-red-500 to-red-700 hover:from-red-600 hover:to-red-800 text-white rounded-lg transition-all duration-300 font-medium font-one text-xs shadow-lg"
+                    className="cursor-pointer w-[175px] flex justify-center items-center gap-2 py-2 bg-gradient-to-r from-red-500 to-red-700 hover:from-red-600 hover:to-red-800 text-white rounded-xl transition-all duration-300 font-medium font-one text-xs shadow-lg"
                     onClick={handleDecline}
                   >
                     <svg

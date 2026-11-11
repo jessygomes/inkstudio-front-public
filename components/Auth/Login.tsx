@@ -15,6 +15,7 @@ import AuthFeedback from "./AuthFeedback";
 import AuthGoogleButton from "./AuthGoogleButton";
 
 import { userLoginSchema } from "@/lib/zod/validator-schema";
+import { clearAuthReturnPath, peekAuthReturnPath } from "@/lib/booking-link";
 
 export const Login = () => {
   const router = useRouter();
@@ -97,8 +98,14 @@ export const Login = () => {
       setSuccess("Connexion réussie !");
       setSuccess("Redirection vers l'app...");
 
-      // Attendre un peu avant de rediriger
+      // Retour vers la page d'origine (ex. lien de réservation) : navigation complète, chemin interne uniquement.
+      const returnPath = peekAuthReturnPath();
       setTimeout(() => {
+        if (returnPath) {
+          clearAuthReturnPath();
+          window.location.assign(returnPath);
+          return;
+        }
         router.push("/");
       }, 500);
     } catch (error) {
@@ -116,7 +123,7 @@ export const Login = () => {
     setIsGooglePending(true);
 
     try {
-      await signIn("google", { callbackUrl: "/" });
+      await signIn("google", { callbackUrl: peekAuthReturnPath() || "/" });
     } catch (err) {
       console.error("❌ [Login] Erreur Google:", err);
       setError("Impossible de se connecter avec Google.");

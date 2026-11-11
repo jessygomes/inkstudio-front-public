@@ -257,7 +257,7 @@ export default function Conversation() {
           <p className="text-red-400 mb-4 text-sm">{error}</p>
           <button
             onClick={fetchConversation}
-            className="cursor-pointer px-4 py-2 bg-tertiary-600 text-white rounded-lg hover:bg-tertiary-700 transition-colors text-sm font-medium"
+            className="cursor-pointer px-4 py-2 bg-tertiary-600 text-white rounded-xl hover:bg-tertiary-700 transition-colors text-sm font-medium"
           >
             Réessayer
           </button>

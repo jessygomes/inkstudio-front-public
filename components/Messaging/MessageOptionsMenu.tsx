@@ -60,7 +60,7 @@ export default function MessageOptionsMenu({
     <div className="relative" ref={menuRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="cursor-pointer p-1 rounded-full hover:bg-white/10 transition-colors opacity-0 group-hover:opacity-100"
+        className="cursor-pointer p-1 rounded-xl hover:bg-white/10 transition-colors opacity-0 group-hover:opacity-100"
         aria-label="Options du message"
       >
         <MdMoreVert className="w-4 h-4 text-white/60" />

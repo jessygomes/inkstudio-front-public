@@ -132,7 +132,7 @@ export default function FavoriteBtn({
     return (
       <button
         disabled
-        className={`group cursor-pointer w-10 h-10 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center transition-all duration-300 ${className}`}
+        className={`group cursor-pointer w-10 h-10 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center transition-all duration-300 ${className}`}
       >
         <div className="w-4 h-4 border-2 border-white/40 border-t-transparent rounded-full animate-spin" />
       </button>
@@ -144,7 +144,7 @@ export default function FavoriteBtn({
       <button
         onClick={handleToggle}
         disabled={isPending}
-        className={`group cursor-pointer w-8 h-8 rounded-2xl transition-all duration-300 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed ${
+        className={`group cursor-pointer w-8 h-8 rounded-xl transition-all duration-300 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed ${
           favorite
             ? "bg-linear-to-br from-pink-500/30 to-red-500/30 border border-pink-500/50 hover:from-pink-500/40 hover:to-red-500/40"
             : "bg-white/10 border border-white/20 hover:bg-white/20"

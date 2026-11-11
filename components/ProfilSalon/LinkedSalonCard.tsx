@@ -49,7 +49,7 @@ export function LinkedSalonCard({ salon }: { salon: LinkedSalonProps }) {
   const prestRemaining = prestUnique.length > MAX ? prestUnique.length - MAX : 0;
 
   return (
-    <li className={`${salon.isCurrentSalon ? "ring-2 ring-tertiary-400/60 " : ""}group relative flex flex-col list-none overflow-hidden rounded-3xl border border-white/10 bg-linear-to-b from-noir-500/8 to-white/2 p-3.5 sm:p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-tertiary-400/35 lg:h-full lg:min-h-88`}>
+    <li className={`${salon.isCurrentSalon ? "ring-2 ring-tertiary-400/60 " : ""}group relative flex flex-col list-none overflow-hidden rounded-3xl bg-noir-500 p-3.5 sm:p-4 transition-all duration-300 hover:-translate-y-0.5 lg:h-full lg:min-h-88`}>
       {/* Header */}
       <div className="relative -mx-3.5 -mt-3.5 mb-3 flex sm:flex-col items-center gap-3.5 rounded-none px-3.5 py-4 sm:-mx-4 sm:-mt-4 sm:px-4 sm:py-5 lg:mb-4 lg:min-h-64 lg:justify-center lg:rounded-t-3xl lg:py-8">
         {imgSrc ? (
@@ -102,7 +102,7 @@ export function LinkedSalonCard({ salon }: { salon: LinkedSalonProps }) {
         {/* Bouton expansion mobile */}
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="relative z-10 lg:hidden inline-flex items-center justify-center h-8 w-8 rounded-lg border border-white/10 bg-white/5 text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+          className="relative z-10 lg:hidden inline-flex items-center justify-center h-8 w-8 rounded-xl bg-white/6 text-white/70 transition-colors hover:bg-white/10 hover:text-white"
           aria-label={isExpanded ? "Réduire" : "Développer"}
         >
           <svg
@@ -116,8 +116,8 @@ export function LinkedSalonCard({ salon }: { salon: LinkedSalonProps }) {
         </button>
       </div>
 
-      <div className="rounded-2xl border border-tertiary-400/20 bg-tertiary-400/5 p-3">
-        <p className="mb-1 text-[10px] uppercase tracking-wider text-tertiary-300 font-one">
+      <div className="rounded-2xl bg-linear-to-br from-tertiary-400/12 to-cuatro-500/8 p-3.5">
+        <p className="mb-1 text-[10px] uppercase tracking-wider text-tertiary-400 font-one">
           Présence du tatoueur
         </p>
         <p className="text-sm text-white/80">{presenceDescription(salon.presence)}</p>
@@ -156,7 +156,7 @@ export function LinkedSalonCard({ salon }: { salon: LinkedSalonProps }) {
         )}
 
         {/* Prestations */}
-        <div className="rounded-2xl border border-white/10 bg-white/2 p-2.5">
+        <div className="rounded-2xl bg-white/4 p-3">
           <p className="mb-2 text-[10px] uppercase tracking-[0.16em] text-white/60 font-one">
             Prestations
           </p>
@@ -165,14 +165,14 @@ export function LinkedSalonCard({ salon }: { salon: LinkedSalonProps }) {
               {prestChips.map((p, i) => (
                 <span
                   key={`prest-${p}-${i}`}
-                  className="rounded-full border border-tertiary-500/20 bg-tertiary-500/10 px-2 py-0.5 text-[11px] text-tertiary-300 font-one"
+                  className="rounded-xl bg-tertiary-500/10 px-2 py-0.5 text-[11px] text-tertiary-400 font-one"
                   title={p}
                 >
                   {p}
                 </span>
               ))}
               {prestRemaining > 0 && (
-                <span className="rounded-full border border-tertiary-500/20 bg-tertiary-500/10 px-2 py-0.5 text-[11px] text-tertiary-300 font-one">
+                <span className="rounded-xl bg-tertiary-500/10 px-2 py-0.5 text-[11px] text-tertiary-400 font-one">
                   +{prestRemaining}
                 </span>
               )}
@@ -184,7 +184,7 @@ export function LinkedSalonCard({ salon }: { salon: LinkedSalonProps }) {
 
         {/* Footer */}
         <div className="mt-auto pt-3">
-          <div className="flex items-center justify-between border-t border-white/10 pt-3">
+          <div className="flex items-center justify-between pt-3">
             <p className="text-xs text-white/55 font-one">Salon</p>
             <div className="flex items-center gap-2">
               {salonHref && (
@@ -202,7 +202,7 @@ export function LinkedSalonCard({ salon }: { salon: LinkedSalonProps }) {
                   href={salon.website.startsWith("http") ? salon.website : `https://${salon.website}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex h-7 w-7 items-center justify-center rounded-2xl bg-linear-to-br from-emerald-500/20 to-emerald-600/20 border border-emerald-500/30 text-emerald-400 transition-all duration-300 hover:border-emerald-400/50 hover:text-emerald-300 hover:scale-110"
+                  className="inline-flex h-7 w-7 items-center justify-center rounded-2xl bg-linear-to-br from-emerald-500/20 to-emerald-600/20 text-emerald-400 transition-all duration-300 hover:text-emerald-300 hover:scale-110"
                   title="Site web"
                 >
                   <TfiWorld className="h-3.5 w-3.5" />
@@ -214,7 +214,7 @@ export function LinkedSalonCard({ salon }: { salon: LinkedSalonProps }) {
                   href={instaUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex h-7 w-7 items-center justify-center rounded-2xl bg-linear-to-br from-pink-500/20 to-purple-500/20 border border-pink-500/30 text-pink-400 transition-all duration-300 hover:border-pink-400/50 hover:text-pink-300 hover:scale-110"
+                  className="inline-flex h-7 w-7 items-center justify-center rounded-2xl bg-linear-to-br from-pink-500/20 to-purple-500/20 text-pink-400 transition-all duration-300 hover:text-pink-300 hover:scale-110"
                   title="Instagram"
                   aria-label={`Instagram de ${salon.salonName}`}
                 >

@@ -104,7 +104,7 @@ export default function SimpleImageUploader({
             <button
               type="button"
               onClick={onImageRemove}
-              className="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 text-xs flex items-center justify-center transition-colors z-10"
+              className="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-xl w-6 h-6 text-xs flex items-center justify-center transition-colors z-10"
             >
               ✕
             </button>

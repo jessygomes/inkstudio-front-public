@@ -18,8 +18,8 @@ export type ProjectFields = {
   projectRadiusKm?: number | null;
 };
 const inputClass =
-  "mt-1.5 min-h-11 w-full min-w-0 rounded-xl border border-white/10 bg-noir-800/70 px-3.5 py-2.5 text-sm text-white outline-none transition placeholder:text-white/25 focus:border-tertiary-400/45 focus:bg-white/[0.045] focus:ring-2 focus:ring-tertiary-400/10 [color-scheme:dark] disabled:opacity-50";
-const selectClass = `${inputClass} !bg-noir-800 focus:!bg-noir-800 [&_option]:bg-noir-800 [&_option]:text-white`;
+  "mt-1.5 min-h-11 w-full min-w-0 rounded-2xl bg-white/5 px-4 py-2.5 text-sm text-white outline-none hover:bg-white/7 focus:bg-white/8 transition placeholder:text-white/25 focus:ring-2 focus:ring-tertiary-400/40 [color-scheme:dark] disabled:opacity-50";
+const selectClass = `${inputClass} [&_option]:bg-noir-800 [&_option]:text-white`;
 
 export default function ProjectPublication({
   board,
@@ -110,7 +110,7 @@ export default function ProjectPublication({
   return (
     <>
       <button type="button" onClick={() => setOpen(true)} className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-xl bg-tertiary-400/10 px-3 text-xs font-medium text-tertiary-400 transition hover:bg-tertiary-400/20 focus-visible:outline-2 focus-visible:outline-tertiary-400"><Share2 size={15} />{savedStatus === "PRIVATE" ? "Partager" : "Gérer le partage"}</button>
-      <SideDrawer open={open} title="Partager mon projet" description={board.name} busy={busy} onClose={() => setOpen(false)} headerAction={savedStatus !== "PRIVATE" && <button type="button" disabled={busy} onClick={() => void makePrivate()} className="inline-flex min-h-9 shrink-0 cursor-pointer items-center gap-1.5 rounded-lg border border-white/10 px-2 text-[10px] text-white/60 transition hover:bg-white/5 hover:text-white focus-visible:outline-2 focus-visible:outline-tertiary-400 disabled:opacity-40 sm:px-3 sm:text-xs"><LockKeyhole size={12} />Rendre privé</button>} footer={<>
+      <SideDrawer open={open} title="Partager mon projet" description={board.name} busy={busy} onClose={() => setOpen(false)} headerAction={savedStatus !== "PRIVATE" && <button type="button" disabled={busy} onClick={() => void makePrivate()} className="inline-flex min-h-9 shrink-0 cursor-pointer items-center gap-1.5 rounded-xl px-2 text-[10px] text-white/60 transition hover:bg-white/5 hover:text-white focus-visible:outline-2 focus-visible:outline-tertiary-400 disabled:opacity-40 sm:px-3 sm:text-xs"><LockKeyhole size={12} />Rendre privé</button>} footer={<>
         <AppButton type="button" variant="secondary" disabled={busy} onClick={() => setOpen(false)} className="min-h-11 flex-1 cursor-pointer !px-4 !text-xs sm:flex-none">Annuler</AppButton>
         <AppButton type="submit" form={formId} disabled={busy} icon={<Save size={14} />} className="min-h-11 flex-1 cursor-pointer !px-4 !text-xs !shadow-none sm:flex-none">{busy ? "Enregistrement…" : "Enregistrer"}</AppButton>
       </>}>
@@ -121,7 +121,7 @@ export default function ProjectPublication({
           <p className="text-xs leading-6 text-white/55">Vous recevez leurs propositions ici, consultez leur profil et choisissez avec qui échanger. Acceptez une proposition pour ouvrir la conversation et construire votre projet ensemble.</p>
         </div>
         <form id={formId} onSubmit={submit} aria-busy={busy} className="space-y-7">
-          <fieldset disabled={busy} className="min-w-0 border-0 p-0">
+          <fieldset disabled={busy} className="min-w-0 p-0">
             <legend className="sr-only">Visibilité du projet</legend>
             <div className="mb-4 flex items-start gap-3"><span className="grid size-9 shrink-0 place-items-center rounded-xl bg-tertiary-400/10 text-tertiary-400"><Globe2 size={17} /></span><div><p className="text-[10px] uppercase tracking-widest text-white/30">01 · Publication</p><h3 className="mt-1 text-sm font-semibold text-white/85">La visibilité de votre projet</h3><p className="mt-1 text-[11px] leading-5 text-white/40">Vous pouvez retirer votre moodboard d’Explorer à tout moment en le rendant privé.</p></div></div>
           <label className="block min-w-0 text-[11px] font-medium text-white/60">
@@ -138,7 +138,7 @@ export default function ProjectPublication({
             </select>
           </label>
           </fieldset>
-          <fieldset disabled={busy} className="min-w-0 border-0 p-0">
+          <fieldset disabled={busy} className="min-w-0 p-0">
             <legend className="sr-only">Détails du tatouage</legend>
             <div className="mb-4 flex items-start gap-3"><span className="grid size-9 shrink-0 place-items-center rounded-xl bg-tertiary-400/10 text-tertiary-400"><Palette size={17} /></span><div><p className="text-[10px] uppercase tracking-widest text-white/30">02 · Vos envies</p><h3 className="mt-1 text-sm font-semibold text-white/85">Précisez votre tatouage</h3><p className="mt-1 text-[11px] leading-5 text-white/40">Ces précisions sont facultatives et peuvent être complétées plus tard.</p></div></div>
             <div className="grid min-w-0 gap-4 sm:grid-cols-2">
@@ -200,7 +200,7 @@ export default function ProjectPublication({
           </label>
             </div>
           </fieldset>
-          <fieldset disabled={busy} className="min-w-0 border-0 p-0">
+          <fieldset disabled={busy} className="min-w-0 p-0">
             <legend className="sr-only">Vos déplacements</legend>
             <div className="mb-4 flex items-start gap-3"><span className="grid size-9 shrink-0 place-items-center rounded-xl bg-tertiary-400/10 text-tertiary-400"><MapPin size={17} /></span><div><p className="text-[10px] uppercase tracking-widest text-white/30">03 · Mobilité</p><h3 className="mt-1 text-sm font-semibold text-white/85">Où réaliser votre projet ?</h3><p className="mt-1 text-[11px] leading-5 text-white/40">Seule votre ville est visible, aucune adresse précise.</p></div></div>
             <div className="grid gap-4">

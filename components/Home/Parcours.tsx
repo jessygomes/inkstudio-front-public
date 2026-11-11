@@ -12,30 +12,32 @@ const steps = [
 export default function Parcours() {
   return (
     <section aria-labelledby="journey-title" className="bg-noir-800 font-one">
-      <div className="mx-4 sm:mx-8 lg:mx-20">
-        <div className="mb-7 flex flex-col justify-between gap-4 2xl:flex-row 2xl:items-end">
-          <div>
-            <p className="text-[11px] uppercase tracking-[0.2em] text-tertiary-400">Un projet qui vous ressemble</p>
-            <h2 id="journey-title" className="mt-3 font-two text-3xl font-medium leading-tight tracking-tight text-white sm:text-4xl">De l’idée au rendez-vous<span className="text-tertiary-400">.</span></h2>
-          </div>
-          <p className="hidden text-sm leading-7 text-white/60 md:block md:whitespace-nowrap">Une inspiration, une rencontre, un premier pas. La suite s’écrit avec votre artiste.</p>
-        </div>
+      <div className="mx-page">
+        {/* En-tête centré, dans la continuité du hero (même typographie, même axe). */}
+        <header className="mx-auto mb-10 flex max-w-2xl flex-col items-center text-center sm:mb-12">
+          <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-white/60">Un projet qui vous ressemble</p>
+          <h2 id="journey-title" className="mt-1.5 font-two text-2xl font-bold uppercase leading-tight tracking-wide text-white sm:text-4xl">
+            De l’idée au rendez-vous
+          </h2>
+          <p className="mt-4 max-w-lg text-sm leading-6 text-white/55 sm:text-base sm:leading-7">Une inspiration, une rencontre, un premier pas. La suite s’écrit avec votre artiste.</p>
+          <span aria-hidden="true" className="mt-6 h-px w-24 bg-linear-to-r from-transparent via-tertiary-400/70 to-transparent" />
+        </header>
 
         <ol className={styles.panels}>
           {steps.map((step, index) => (
             <li key={step.label} tabIndex={0} aria-labelledby={"journey-step-" + index} className={styles.panel}>
               <Image src={step.image} alt="" fill sizes="(min-width: 768px) 55vw, 100vw" className={styles.image} />
               <div aria-hidden="true" className={styles.overlay} />
-              <span aria-hidden="true" className="absolute left-5 top-5 rounded-lg border border-white/20 bg-noir-800/65 px-2.5 py-1 text-xs text-white/80 backdrop-blur-sm">0{index + 1}</span>
+              <span aria-hidden="true" className="absolute left-5 top-5 grid size-9 place-items-center rounded-xl bg-noir-900/45 font-two text-xs font-bold text-white backdrop-blur-md">0{index + 1}</span>
               <div className={styles.content}>
-                <p className="text-[10px] uppercase tracking-[0.16em] text-tertiary-400">{step.label}</p>
-                <h3 id={"journey-step-" + index} className="mt-2 max-w-sm font-two text-2xl leading-snug text-white">{step.title}</h3>
+                <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-tertiary-400">{step.label}</p>
+                <h3 id={"journey-step-" + index} className="mt-2 max-w-sm font-two text-xl font-bold uppercase leading-snug tracking-wide text-white sm:text-2xl">{step.title}</h3>
                 <div className={styles.details}>
                   <div className="min-h-0 overflow-hidden">
                     <p className="mt-3 max-w-sm text-sm leading-6 text-white/80">{step.description}</p>
                   </div>
                 </div>
-                <AppButton href={step.href} variant="secondary" icon={<ArrowUpRight size={14} aria-hidden="true" />} className="mt-4 px-4! text-xs!">{step.action}</AppButton>
+                <AppButton href={step.href} variant="secondary" icon={<ArrowUpRight size={14} aria-hidden="true" />} className="mt-5 min-h-10! rounded-xl! border-0! bg-white/10! px-4! text-xs! backdrop-blur-md hover:bg-white/20!">{step.action}</AppButton>
               </div>
             </li>
           ))}

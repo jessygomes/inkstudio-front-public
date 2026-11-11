@@ -1,17 +1,15 @@
 import Image from "next/image";
 import { RdvPlanningCard, RdvPrestationCard, RdvPaymentCard } from "./RdvInformationCards";
-import React, { useId } from "react";
-import { Clock, MapPin, MessageSquare, ChevronRight, Video, Phone, ExternalLink } from "lucide-react";
+import React, { useEffect, useId, useState } from "react";
+import { getMoodboardByIdAction } from "@/lib/actions/moodboard.action";
+import { ArrowRight, CalendarClock, ExternalLink, Images, MapPin, MessageSquare, Pencil, Phone, Video, X } from "lucide-react";
 import Link from "next/link";
 import { toSlug } from "@/lib/utils";
 import AppointmentDrawer from "./AppointmentDrawer";
 import AppointmentReview from "./AppointmentReview";
-import AppButton from "@/components/Shared/AppButton";
-import {
-  FaPalette,
-} from "react-icons/fa";
 import { CiInstagram } from "react-icons/ci";
 import { TfiWorld } from "react-icons/tfi";
+import { focusRing } from "@/components/Shared/ui";
 import type { Appointment } from "./RendezVousTab";
 
 type ReviewFormState = {
@@ -48,6 +46,32 @@ export type RendezVousCardProps = {
   setReviewForm: React.Dispatch<React.SetStateAction<ReviewFormState>>;
 };
 
+const SERVICE_LABELS: Record<string, string> = { TATTOO: "Tatouage", PIERCING: "Piercing", RETOUCHE: "Retouche", PROJET: "Rendez-vous projet" };
+
+// Boutons partagés (pilules sans contour).
+const pill = `inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-xl px-4 text-xs font-medium transition disabled:cursor-not-allowed disabled:opacity-50 ${focusRing}`;
+const pillPrimary = `${pill} bg-linear-to-r from-tertiary-400 to-tertiary-500 text-white shadow-lg shadow-tertiary-500/20 hover:brightness-110`;
+const pillSoft = `${pill} bg-white/6 text-white/80 hover:bg-white/10 hover:text-white`;
+const pillDanger = `${pill} bg-red-400/10 text-red-300 hover:bg-red-400/20`;
+const iconPill = `inline-flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-xl bg-white/6 text-white/75 transition hover:bg-white/10 hover:text-white ${focusRing}`;
+
+/** Aperçu (première image) du moodboard lié, chargé à l'ouverture du détail. */
+function MoodboardThumb({ id, name }: { id: string; name: string }) {
+  const [url, setUrl] = useState<string | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    getMoodboardByIdAction(id)
+      .then(result => { if (!cancelled && result.ok && result.data) setUrl(result.data.images?.[0]?.url ?? null); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [id]);
+  return (
+    <span className="relative grid size-14 shrink-0 place-items-center overflow-hidden rounded-xl bg-linear-to-br from-tertiary-400/20 to-cuatro-500/20 text-tertiary-400">
+      {url ? <Image src={url} alt={`Aperçu du moodboard ${name}`} fill sizes="56px" className="object-cover" /> : <Images size={18} aria-hidden="true" />}
+    </span>
+  );
+}
+
 export default function RendezVousCard({
   appointment,
   isExpanded,
@@ -72,217 +96,154 @@ export default function RendezVousCard({
   const date = new Date(appointment.start);
   const validDate = !Number.isNaN(date.getTime());
   const price = appointment.prestationDetails?.price;
+  const priceLabel = typeof price === "number" ? price.toLocaleString("fr-FR", { style: "currency", currency: "EUR" }) : null;
   const serviceType = appointment.prestation.toUpperCase();
-  const serviceLabel = ({ TATTOO: "TATOUAGE", PIERCING: "PIERCING", RETOUCHE: "RETOUCHE" } as Record<string, string>)[serviceType] || serviceType;
-  const salonName = appointment.salon.salonName?.trim();
-  const salonProfileHref = `/salon/${toSlug(salonName || [appointment.salon.firstName, appointment.salon.lastName].filter(Boolean).join(" "))}/${toSlug(appointment.salon.city)}-${appointment.salon.postalCode}`;
+  const serviceLabel = SERVICE_LABELS[serviceType] || serviceType;
+  const salonName = appointment.salon.salonName?.trim() || [appointment.salon.firstName, appointment.salon.lastName].filter(Boolean).join(" ");
+  const salonProfileHref = `/salon/${toSlug(salonName)}/${toSlug(appointment.salon.city)}-${appointment.salon.postalCode}`;
   const conversationHref = appointment.conversation
     ? `/mon-profil?tab=messagerie&conversation=${encodeURIComponent(appointment.conversation.id)}`
     : null;
-  const contactLinkClass = "inline-flex h-8 shrink-0 cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs text-white/80 transition hover:bg-white/10 hover:text-white focus-visible:outline-2 focus-visible:outline-tertiary-400";
-  const contactIconClass = `${contactLinkClass} w-8 !p-0`;
+  const unread = appointment.conversation?.unreadCount || 0;
   const isIndependentArtist =
     appointment.salon.role?.toLowerCase() === "user_tatoueur" ||
     appointment.performerUser?.id === appointment.salon.id ||
     appointment.tatoueur?.id === appointment.salon.id;
   const hasDistinctArtist = appointment.tatoueur &&
-    appointment.tatoueur.name.trim().toLocaleLowerCase("fr-FR") !== salonName?.toLocaleLowerCase("fr-FR");
-  const renderSummary = (inDrawer = false) => (
-    <>
-        {inDrawer && <div className="mb-2 flex flex-wrap items-center justify-between gap-2"><span className="text-xs text-tertiary-400">{serviceLabel}</span><div className="ml-auto flex items-center gap-2">{getStatusBadge(appointment.status)}{typeof price === "number" && <span className="text-sm font-semibold tabular-nums text-white">{price.toLocaleString("fr-FR", { style: "currency", currency: "EUR" })}</span>}</div></div>}
-        <div className={`grid gap-2 ${inDrawer ? "" : "lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center lg:gap-4"}`}>
-          <div className="flex items-start gap-2.5">
-          <div className="flex w-11 shrink-0 flex-col items-center overflow-hidden rounded-xl border border-white/10 bg-white/4 text-white">
-            <span className="w-full bg-tertiary-400/10 py-1 text-center text-[11px] uppercase tracking-wider text-tertiary-400">{validDate ? date.toLocaleDateString("fr-FR", { month: "short" }) : "Date"}</span>
-            <span className="pt-0.5 text-xl leading-tight">{validDate ? date.getDate() : "—"}</span>
-            <span className="pb-1 text-[11px] text-white/45">{validDate ? date.getFullYear() : ""}</span>
-          </div>
+    appointment.tatoueur.name.trim().toLocaleLowerCase("fr-FR") !== salonName.toLocaleLowerCase("fr-FR");
+  const artistName = !isIndependentArtist && hasDistinctArtist ? appointment.tatoueur!.name : null;
+  // Heure figée au montage : suffisant pour savoir si le rendez-vous est encore à venir.
+  const [now] = useState(() => Date.now());
+  const isUpcoming = new Date(appointment.end).getTime() > now;
+  const canManage = appointment.status === "CONFIRMED" && isUpcoming;
+  const inactive = appointment.status === "CANCELED";
+  const timeRange = `${formatTime(appointment.start)} – ${formatTime(appointment.end)}`;
+  const place = appointment.visio ? "En visio" : [appointment.salon.city].filter(Boolean).join("");
+  const open = () => toggleExpand(appointment.id);
 
-            <div className="min-w-0 flex-1">
-              {appointment.title ? <>{!inDrawer && <p className="mb-1 text-xs text-tertiary-400">{serviceLabel}</p>}<h4 className="break-words text-sm leading-snug text-white">{appointment.title}</h4></> : <h4 className="text-base leading-snug text-tertiary-400">{serviceLabel}</h4>}
-              <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-white/75">
-                <span className="inline-flex min-w-0 items-center gap-2">
-                  {appointment.salon.image && <Image src={appointment.salon.image} alt="" width={24} height={24} className="h-6 w-6 shrink-0 rounded-full object-cover" />}
-                  {salonName && <Link href={salonProfileHref} className="min-w-0 cursor-pointer break-words text-white/80 underline-offset-4 hover:text-tertiary-400 hover:underline">{salonName}</Link>}
-                </span>
-                {!isIndependentArtist && hasDistinctArtist && <span className="break-words text-xs text-white/55">Avec {appointment.tatoueur!.name}</span>}
-                <span className="inline-flex shrink-0 items-center gap-1.5"><Clock size={14} className="text-white/40" />{formatTime(appointment.start)}{appointment.duration ? <span className="text-xs text-white/50">· {appointment.duration} min</span> : null}</span>
-                {appointment.visio ? <span className="inline-flex items-center gap-1.5"><Video size={14} className="shrink-0 text-white/40" />En visio</span> : appointment.salon.city && <span className="inline-flex min-w-0 items-center gap-1.5"><MapPin size={14} className="shrink-0 text-white/40" /><span className="break-words">{appointment.salon.city}</span></span>}
-              </div>
-            </div>
-          </div>
-          {!inDrawer && <div className={`flex flex-wrap items-center justify-between gap-2 border-t border-white/8 pt-2 ${inDrawer ? "" : "lg:flex-row lg:items-center lg:border-l lg:border-t-0 lg:pl-4 lg:pt-0"}`}>
-            {getStatusBadge(appointment.status)}
-            {typeof price === "number" && <span className="text-base font-semibold tabular-nums text-white">{price.toLocaleString("fr-FR", { style: "currency", currency: "EUR" })}</span>}
-            {!inDrawer && <AppButton type="button" variant="secondary" onClick={() => toggleExpand(appointment.id)} aria-haspopup="dialog" aria-controls={isExpanded ? detailsId : undefined} className="min-h-8 cursor-pointer !px-3 !py-1 !text-xs">Voir le rendez-vous<ChevronRight size={15} /></AppButton>}
-          </div>}
-        </div>
-        {!inDrawer && appointment.conversation && <Link href={`/mon-profil?tab=messagerie&conversation=${encodeURIComponent(appointment.conversation.id)}`} className="mt-2 flex min-h-8 items-center gap-2 rounded-xl bg-white/4 px-3 text-xs text-white/65 transition hover:bg-white/8 hover:text-white"><MessageSquare size={15} />Échanger avec le salon{appointment.conversation.unreadCount > 0 ? <span className="ml-auto rounded-full bg-tertiary-400/15 px-2 py-1 text-tertiary-400">{appointment.conversation.unreadCount} non lu{appointment.conversation.unreadCount > 1 ? "s" : ""}</span> : <span className="ml-auto text-white/35">Ouvrir la conversation →</span>}</Link>}
-</>);
   return (
     <>
-      <div className={`relative overflow-hidden rounded-2xl border bg-noir-500 font-one transition-colors ${isExpanded ? "border-tertiary-400/30" : "border-white/10 hover:border-white/25"}`}>
-        <button type="button" onClick={() => toggleExpand(appointment.id)} aria-label={`Voir le rendez-vous : ${appointment.title || serviceLabel}`} aria-haspopup="dialog" aria-controls={isExpanded ? detailsId : undefined} className="absolute inset-0 cursor-pointer rounded-2xl focus-visible:outline-2 focus-visible:outline-tertiary-400" />
-        <div className="pointer-events-none relative p-2.5 sm:p-3 [&_a]:pointer-events-auto [&_button]:pointer-events-auto">{renderSummary()}</div>
-      </div>
-      {isExpanded && <AppointmentDrawer id={detailsId} onClose={() => toggleExpand(appointment.id)}>
-        <div className="font-one">{renderSummary(true)}
-          <div className="mt-2.5 space-y-2.5 border-t border-white/10 pt-2.5">
-            <RdvPlanningCard appointment={appointment} /><RdvPaymentCard appointment={appointment} />
-            <div className="grid gap-2">
-              <div className="min-w-0 space-y-3 rounded-2xl border border-white/10 bg-noir-600 p-4">
-                <div className="flex items-center justify-between text-xs text-white/60">
-                  <span className="text-xs font-semibold text-white">Le salon et votre artiste</span>
+      <article aria-labelledby={`${detailsId}-title`} className={`group relative flex h-full flex-col rounded-3xl p-4 font-one transition-colors sm:p-5 ${isExpanded ? "bg-noir-500" : "bg-noir-700 hover:bg-noir-500"} ${inactive ? "opacity-55" : ""}`}>
+        {/* Toute la tuile ouvre le détail ; les liens et boutons restent cliquables au-dessus. */}
+        <button type="button" onClick={open} aria-haspopup="dialog" aria-controls={isExpanded ? detailsId : undefined} aria-label={`Voir le détail : ${appointment.title || serviceLabel}`} className={`absolute inset-0 cursor-pointer rounded-3xl ${focusRing}`} />
 
-                </div>
-                <div className="space-y-1 text-sm text-white font-one">
-                  <p className="text-white/80 text-xs">Adresse du salon</p>
-                  <p className="text-white text-xs">
-                    {appointment.salon.address && `${appointment.salon.address}, `}
-                    {appointment.salon.city} {appointment.salon.postalCode}
-                  </p>
-                </div>
+        {/* Quand */}
+        <div className="pointer-events-none relative flex items-start justify-between gap-3">
+          <div className="flex items-baseline gap-2">
+            <span className={`text-3xl font-semibold leading-none tabular-nums ${inactive ? "text-white/60" : "bg-linear-to-br from-tertiary-400 to-cuatro-500 bg-clip-text text-transparent"}`}>{validDate ? date.getDate() : "—"}</span>
+            <span className="flex flex-col text-[11px] leading-4">
+              <span className="font-medium capitalize text-white/80">{validDate ? date.toLocaleDateString("fr-FR", { weekday: "long" }) : ""}</span>
+              <span className="tabular-nums text-white/45">{timeRange}</span>
+            </span>
+          </div>
+          {getStatusBadge(appointment.status)}
+        </div>
 
-                <div className="border-t border-white/10 pt-2 font-one">
-                  <p className="text-white/60 text-xs mb-2">Contact salon</p>
-                  <div className="flex flex-wrap gap-2">
-                    {conversationHref && <Link href={conversationHref} className={contactLinkClass}><MessageSquare size={14} aria-hidden="true" />Ouvrir la conversation</Link>}
-                    <Link href={salonProfileHref} aria-label="Profil Inkera" title="Profil Inkera" className={contactIconClass}><ExternalLink size={14} aria-hidden="true" /></Link>
-                    {appointment.salon.phone && (
-                      <a
-                        href={`tel:${appointment.salon.phone}`}
-                        className={contactLinkClass}
-                      >
-                        <Phone size={14} aria-hidden="true" />
-                        <span>{formatPhoneDisplay(appointment.salon.phone)}</span>
-                      </a>
-                    )}
-                    {appointment.salon.website && (
-                      <a
-                        href={appointment.salon.website}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={contactIconClass}
-                        title="Site web"
-                        aria-label="Site web du salon"
-                      >
-                        <span>
-                          <TfiWorld className="w-3.5 h-3.5" />
-                        </span>
-                      </a>
-                    )}
-                    {appointment.salon.instagram && (
-                      <a
-                        href={appointment.salon.instagram}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={contactIconClass}
-                        title="Instagram"
-                        aria-label="Instagram"
-                      >
-                        <span>
-                          <CiInstagram className="w-4 h-4" />
-                        </span>
-                      </a>
-                    )}
-                  </div>
-                </div>
+        {/* Quoi */}
+        <div className="pointer-events-none relative mt-4 min-w-0 flex-1">
+          <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-tertiary-400">{serviceLabel}</p>
+          <h3 id={`${detailsId}-title`} className="mt-1 line-clamp-2 break-words text-base font-semibold leading-snug text-white">{appointment.title || serviceLabel}</h3>
+        </div>
 
-                <div className="border-t border-white/10 pt-2 font-one">
-                  <p className="text-white/60 text-xs mb-2">Contact tatoueur</p>
-                  {appointment.tatoueur ? (
-                    <div className="flex flex-wrap gap-2">
-                      {appointment.tatoueur.phone && (
-                        <a
-                          href={`tel:${appointment.tatoueur.phone}`}
-                          className={contactLinkClass}
-                        >
-                          <Phone size={14} aria-hidden="true" />
-                          <span>{formatPhoneDisplay(appointment.tatoueur.phone)}</span>
-                        </a>
-                      )}
-                      {appointment.tatoueur.instagram && (
-                        <a
-                          href={appointment.tatoueur.instagram}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={contactIconClass}
-                          title="Instagram"
-                        aria-label="Instagram"
-                        >
-                          <span>
-                            <CiInstagram className="w-4 h-4" />
-                          </span>
-                        </a>
-                      )}
-                    </div>
-                  ) : (
-                    <p className="text-white/50 text-xs">Non assigné</p>
-                  )}
+        {/* Où / avec qui */}
+        <div className="relative mt-4 space-y-1.5 text-xs text-white/55">
+          <Link href={salonProfileHref} className="flex min-w-0 items-center gap-2 text-white/75 transition hover:text-tertiary-400">
+            <span className="relative grid size-6 shrink-0 place-items-center overflow-hidden rounded-lg bg-white/8 text-[10px] text-white/60">
+              {appointment.salon.image ? <Image src={appointment.salon.image} alt="" fill sizes="24px" className="object-cover" /> : salonName.charAt(0).toUpperCase()}
+            </span>
+            <span className="truncate">{salonName}{artistName ? <span className="text-white/40"> · {artistName}</span> : null}</span>
+          </Link>
+          <p className="pointer-events-none flex items-center justify-between gap-2">
+            <span className="inline-flex min-w-0 items-center gap-1.5 truncate">{appointment.visio ? <Video size={12} className="shrink-0" /> : <MapPin size={12} className="shrink-0" />}{place || "—"}</span>
+            {priceLabel && <span className="shrink-0 font-semibold tabular-nums text-white/85">{priceLabel}</span>}
+          </p>
+        </div>
+
+        {/* Actions */}
+        <div className="relative mt-4 flex items-center gap-1.5">
+          {conversationHref && (
+            <Link href={conversationHref} aria-label={`Écrire au salon${unread > 0 ? ` (${unread} non lu${unread > 1 ? "s" : ""})` : ""}`} title="Écrire au salon" className={`relative inline-flex size-9 items-center justify-center rounded-xl bg-white/6 text-white/70 transition hover:bg-white/12 hover:text-white ${focusRing}`}>
+              <MessageSquare size={15} />
+              {unread > 0 && <span aria-hidden="true" className="absolute -right-1 -top-1 grid min-w-4.5 place-items-center rounded-full bg-linear-to-r from-tertiary-400 to-tertiary-500 px-1 text-[9px] font-semibold leading-4.5 text-white">{unread}</span>}
+            </Link>
+          )}
+          {canManage && <button type="button" onClick={() => handleEditClick(appointment)} aria-label="Déplacer le rendez-vous" title="Déplacer" className={`inline-flex size-9 items-center justify-center rounded-xl bg-white/6 text-white/70 transition hover:bg-white/12 hover:text-white ${focusRing}`}><Pencil size={14} /></button>}
+          <span aria-hidden="true" className="pointer-events-none ml-auto inline-flex items-center gap-1 text-xs text-white/40 transition group-hover:text-tertiary-400">Détail<ArrowRight size={14} className="transition group-hover:translate-x-0.5" /></span>
+        </div>
+      </article>
+
+      {isExpanded && <AppointmentDrawer id={detailsId} onClose={open}>
+        <div className="space-y-4 font-one">
+          {/* En-tête du détail */}
+          <div className="rounded-3xl bg-linear-to-br from-tertiary-400/15 via-tertiary-500/8 to-cuatro-500/15 p-5">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-tertiary-400">{serviceLabel}</span>
+              <span className="ml-auto">{getStatusBadge(appointment.status)}</span>
+            </div>
+            <h3 className="mt-2 break-words text-xl font-semibold tracking-tight text-white">{appointment.title || serviceLabel}</h3>
+            <p className="mt-2 flex items-center gap-2 text-sm capitalize text-white/75"><CalendarClock size={15} className="shrink-0 text-tertiary-400" />{validDate ? date.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" }) : "—"} · <span className="tabular-nums">{timeRange}</span></p>
+            {priceLabel && <p className="mt-1 text-sm font-semibold tabular-nums text-white">{priceLabel}</p>}
+          </div>
+
+          <RdvPlanningCard appointment={appointment} />
+          <RdvPaymentCard appointment={appointment} />
+
+          {/* Salon et artiste */}
+          <section className="space-y-4 rounded-3xl bg-white/4 p-5">
+            <h4 className="text-sm font-semibold text-white">Le salon et votre artiste</h4>
+            <Link href={salonProfileHref} className="group/salon flex items-center gap-3">
+              <span className="relative grid size-11 shrink-0 place-items-center overflow-hidden rounded-xl bg-white/8 text-sm text-white/60">
+                {appointment.salon.image ? <Image src={appointment.salon.image} alt="" fill sizes="44px" className="object-cover" /> : salonName.charAt(0).toUpperCase()}
+              </span>
+              <span className="min-w-0">
+                <span className="flex items-center gap-1 text-sm font-medium text-white transition group-hover/salon:text-tertiary-400">{salonName}<ExternalLink size={12} className="text-white/35" aria-hidden="true" /></span>
+                <span className="block text-xs text-white/50">{appointment.salon.address && `${appointment.salon.address}, `}{appointment.salon.city} {appointment.salon.postalCode}</span>
+              </span>
+            </Link>
+            <div className="flex flex-wrap gap-2">
+              {conversationHref && <Link href={conversationHref} className={pillPrimary}><MessageSquare size={14} aria-hidden="true" />Écrire au salon</Link>}
+              {appointment.salon.phone && <a href={`tel:${appointment.salon.phone}`} className={pillSoft}><Phone size={14} aria-hidden="true" /><span className="tabular-nums">{formatPhoneDisplay(appointment.salon.phone)}</span></a>}
+              {appointment.salon.website && <a href={appointment.salon.website} target="_blank" rel="noopener noreferrer" className={iconPill} title="Site web" aria-label="Site web du salon"><TfiWorld className="size-3.5" /></a>}
+              {appointment.salon.instagram && <a href={appointment.salon.instagram} target="_blank" rel="noopener noreferrer" className={iconPill} title="Instagram" aria-label="Instagram du salon"><CiInstagram className="size-4" /></a>}
+            </div>
+            {appointment.tatoueur && (appointment.tatoueur.phone || appointment.tatoueur.instagram || artistName) && (
+              <div className="rounded-2xl bg-white/4 p-3.5">
+                <p className="mb-2 text-xs text-white/50">Votre artiste{artistName ? ` · ${artistName}` : ""}</p>
+                <div className="flex flex-wrap gap-2">
+                  {appointment.tatoueur.phone && <a href={`tel:${appointment.tatoueur.phone}`} className={pillSoft}><Phone size={14} aria-hidden="true" /><span className="tabular-nums">{formatPhoneDisplay(appointment.tatoueur.phone)}</span></a>}
+                  {appointment.tatoueur.instagram && <a href={appointment.tatoueur.instagram} target="_blank" rel="noopener noreferrer" className={iconPill} title="Instagram" aria-label="Instagram de l’artiste"><CiInstagram className="size-4" /></a>}
                 </div>
               </div>
-
-              <RdvPrestationCard appointment={{ ...appointment, tattooDetail: appointment.prestationDetails }} piercingZoneName={appointment.prestationDetails?.piercingDetails?.zoneOreille || appointment.prestationDetails?.piercingDetails?.zoneVisage || appointment.prestationDetails?.piercingDetails?.zoneBouche || appointment.prestationDetails?.piercingDetails?.zoneCorps || appointment.prestationDetails?.piercingDetails?.zoneMicrodermal} />
-            </div>
-
-            {(appointment.moodboard || appointment.status === "CONFIRMED" || (appointment.status !== "CANCELED" && appointment.status !== "COMPLETED")) && <div className="border-t border-white/10 pt-3"><h5 className="mb-3 text-xs font-semibold text-white">Gérer mon rendez-vous</h5><div className="grid grid-cols-2 gap-2">
-
-            {appointment.visio && appointment.status === "CONFIRMED" && (
-              <span className="inline-flex items-center justify-center min-h-8 rounded-lg border border-blue-400/30 bg-blue-500/10 px-2.5 py-1.5 text-xs text-blue-200 font-one">
-                📹 Visio
-              </span>
             )}
+          </section>
 
-            {appointment.moodboard ? (
-              <button
-                onClick={() =>
-                  handleOpenMoodboard(
-                    appointment.moodboard!.id,
-                    appointment.moodboard!.name,
-                    appointment.id,
-                    appointment.status,
-                  )
-                }
-                className="cursor-pointer inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border px-3 py-2 text-xs font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tertiary-400 disabled:cursor-not-allowed disabled:opacity-50 font-one border-white/10 bg-white/[0.025] text-violet-200 hover:bg-white/5"
-              >
-                <FaPalette size={10} /> Moodboard {" "}
-                {appointment.moodboard.name}
-              </button>
-            ) : (
-              appointment.status !== "CANCELED" &&
-              appointment.status !== "COMPLETED" && (
-                <button
-                  onClick={() => handleOpenConnectModal(appointment.id)}
-                  className="cursor-pointer inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border px-3 py-2 text-xs font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tertiary-400 disabled:cursor-not-allowed disabled:opacity-50 font-one border-white/10 bg-white/[0.025] text-white/70 hover:bg-white/5"
-                >
-                  + Lier un moodboard
-                </button>
-              )
-            )}
+          <RdvPrestationCard appointment={{ ...appointment, tattooDetail: appointment.prestationDetails }} piercingZoneName={appointment.prestationDetails?.piercingDetails?.zoneOreille || appointment.prestationDetails?.piercingDetails?.zoneVisage || appointment.prestationDetails?.piercingDetails?.zoneBouche || appointment.prestationDetails?.piercingDetails?.zoneCorps || appointment.prestationDetails?.piercingDetails?.zoneMicrodermal} />
 
-            {appointment.status === "CONFIRMED" && new Date(appointment.end).getTime() > Date.now() && (
-              <>
-                <button
-                  onClick={() => handleEditClick(appointment)}
-                  className="cursor-pointer inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border px-3 py-2 text-xs font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tertiary-400 disabled:cursor-not-allowed disabled:opacity-50 font-one border-white/10 bg-white/[0.025] text-white/80 hover:bg-white/5"
-                >
-                  Modifier
-                </button>
-                <button
-                  onClick={() => handleCancelClick(appointment.id)}
-                  disabled={cancelingAppointmentId === appointment.id}
-                  className="cursor-pointer inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border px-3 py-2 text-xs font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tertiary-400 disabled:cursor-not-allowed disabled:opacity-50 font-one border-red-400/15 bg-red-400/[0.025] text-red-300 hover:bg-red-400/10"
-                >
-                  {cancelingAppointmentId === appointment.id ? "..." : "Annuler"}
-                </button>
-              </>
-            )}
+          {/* Gestion */}
+          {(appointment.moodboard || (appointment.status !== "CANCELED" && appointment.status !== "COMPLETED")) && (
+            <section className="rounded-3xl bg-white/4 p-5">
+              <h4 className="mb-3 text-sm font-semibold text-white">Gérer mon rendez-vous</h4>
+              {appointment.visio && appointment.status === "CONFIRMED" && <p className="mb-3 inline-flex items-center gap-2 rounded-xl bg-sky-400/10 px-3 py-1.5 text-xs text-sky-200"><Video size={13} />Rendez-vous en visio</p>}
+              <div className="flex flex-wrap gap-2">
+                {appointment.moodboard ? (
+                  <button type="button" onClick={() => handleOpenMoodboard(appointment.moodboard!.id, appointment.moodboard!.name, appointment.id, appointment.status)} className={`flex w-full cursor-pointer items-center gap-3 rounded-xl bg-white/5 p-2 pr-4 text-left transition hover:bg-white/8 ${focusRing}`}><MoodboardThumb id={appointment.moodboard.id} name={appointment.moodboard.name} /><span className="min-w-0 flex-1"><span className="block text-[10px] uppercase tracking-[0.12em] text-white/40">Moodboard lié</span><span className="block truncate text-sm font-medium text-white">{appointment.moodboard.name}</span></span><span className="inline-flex items-center gap-1 text-xs text-white/50">Voir<ArrowRight size={13} /></span></button>
+                ) : appointment.status !== "CANCELED" && appointment.status !== "COMPLETED" && (
+                  <button type="button" onClick={() => handleOpenConnectModal(appointment.id)} className={pillSoft}><Images size={14} />Lier un moodboard</button>
+                )}
+                {canManage && (
+                  <>
+                    <button type="button" onClick={() => handleEditClick(appointment)} className={pillSoft}><Pencil size={13} />Déplacer le rendez-vous</button>
+                    <button type="button" onClick={() => handleCancelClick(appointment.id)} disabled={cancelingAppointmentId === appointment.id} className={pillDanger}><X size={14} />{cancelingAppointmentId === appointment.id ? "Annulation…" : "Annuler"}</button>
+                  </>
+                )}
+              </div>
+            </section>
+          )}
 
-            </div></div>}
-            {appointment.status === "COMPLETED" && (
-              <AppointmentReview appointment={appointment} hasReview={hasReview} reviewForm={reviewForm} hoverRating={hoverRating} reviewSubmitting={reviewSubmitting} setHoverRating={setHoverRating} setReviewForm={setReviewForm} handleSubmitReview={handleSubmitReview} />
-            )}
-          </div></div>
+          {appointment.status === "COMPLETED" && (
+            <AppointmentReview appointment={appointment} hasReview={hasReview} reviewForm={reviewForm} hoverRating={hoverRating} reviewSubmitting={reviewSubmitting} setHoverRating={setHoverRating} setReviewForm={setReviewForm} handleSubmitReview={handleSubmitReview} />
+          )}
+        </div>
       </AppointmentDrawer>}
     </>
   );

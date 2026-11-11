@@ -73,7 +73,7 @@ export default function FavoritePortfolioBtn({
         type="button"
         onClick={handleToggle}
         disabled={isPending}
-        className={`group inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-2xl transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-50 ${
+        className={`group inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-xl transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-50 ${
           favorite
             ? "border border-pink-500/50 bg-linear-to-br from-pink-500/30 to-red-500/30 hover:from-pink-500/40 hover:to-red-500/40"
             : "border border-white/20 bg-white/10 hover:bg-white/20"

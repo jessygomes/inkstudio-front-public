@@ -20,5 +20,5 @@ export default function SiteFrame({ children, header, footer }: { children: Reac
   }, [fullscreenAuth]);
 
   if (fullscreenAuth) return <div className="h-dvh overflow-hidden bg-noir-800">{children}</div>;
-  return <div><div className="sticky left-0 top-0 z-30 w-full">{header}</div>{children}{footer}</div>;
+  return <div><div className="sticky left-0 top-0 z-30 w-full">{header}</div>{children}<div className="mt-16 sm:mt-24">{footer}</div></div>;
 }

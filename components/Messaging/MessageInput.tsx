@@ -222,7 +222,7 @@ export default function MessageInput({
               onClick={removeImage}
               aria-label="Retirer l'image"
               disabled={disabled || sendingMessage || isUploading}
-              className="cursor-pointer absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs"
+              className="cursor-pointer absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-xl w-5 h-5 flex items-center justify-center text-xs"
             >
               <MdClose />
             </button>

@@ -123,11 +123,11 @@ export default function MoodboardAddImageModal({
 
   return createPortal(
     <div className="fixed inset-0 z-120 flex items-center justify-center bg-noir-800/75 p-0 backdrop-blur-sm sm:p-4">
-      <div className="h-screen w-screen overflow-hidden border-0 border-white/12 bg-noir-800 shadow-2xl sm:h-auto sm:w-full sm:max-w-2xl sm:rounded-3xl sm:border">
-        <div className="flex items-center justify-between border-b border-white/10 px-4 py-3 sm:px-5">
+      <div className="h-screen w-screen overflow-hidden bg-noir-500 shadow-2xl sm:h-auto sm:w-full sm:max-w-2xl sm:rounded-3xl">
+        <div className="flex items-center justify-between px-4 py-3 sm:px-5">
           <div className="flex items-center gap-2 font-one">
-            <div className="flex h-7 w-7 items-center justify-center rounded-xl border border-tertiary-400/25 bg-tertiary-500/15">
-              <FaEdit className="h-3 w-3 text-tertiary-300" />
+            <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-tertiary-500/15">
+              <FaEdit className="h-3 w-3 text-tertiary-400" />
             </div>
             <div>
               <p className="text-sm font-semibold text-white tracking-widest">Ajouter une image</p>
@@ -138,7 +138,7 @@ export default function MoodboardAddImageModal({
           <button
             type="button"
             onClick={handleClose}
-            className="inline-flex h-7 w-7 items-center justify-center rounded-xl border border-white/15 bg-white/5 text-white/75 transition-all hover:bg-white/10"
+            className="inline-flex h-7 w-7 items-center justify-center rounded-xl bg-white/5 text-white/75 transition-all hover:bg-white/10"
             aria-label="Fermer la modale"
           >
             <FaTimes className="h-3 w-3" />
@@ -146,8 +146,8 @@ export default function MoodboardAddImageModal({
         </div>
 
         <div className="flex h-[calc(100vh-57px)] flex-col gap-3 overflow-y-auto p-4 sm:h-auto sm:p-5">
-          <div className="space-y-3 rounded-2xl border border-white/10 bg-white/4 p-3 sm:p-4">
-            <div className="relative overflow-hidden rounded-2xl border border-white/12 bg-noir-800/70">
+          <div className="space-y-3 rounded-2xl bg-white/4 p-3 sm:p-4">
+            <div className="relative overflow-hidden rounded-2xl bg-noir-800/70">
               {localPreviewUrl ? (
                 <div className="relative h-72 w-full">
                   <Image
@@ -169,7 +169,7 @@ export default function MoodboardAddImageModal({
               type="file"
               accept="image/*"
               onChange={(e) => handleLocalImageSelection(e.target.files)}
-              className="block w-full cursor-pointer rounded-2xl border border-white/12 bg-white/5 px-3 py-2 text-xs text-white/75 file:mr-3 file:rounded-2xl file:border-0 file:bg-tertiary-500/25 file:px-3 file:py-1.5 file:text-xs file:text-tertiary-100 font-one"
+              className="block w-full cursor-pointer rounded-2xl bg-white/5 px-3 py-2 text-xs text-white/75 file:mr-3 file:rounded-2xl file:border-0 file:bg-tertiary-500/25 file:px-3 file:py-1.5 file:text-xs file:text-tertiary-100 font-one"
             />
             {fileError && (
               <p className="text-xs text-red-300 font-one">{fileError}</p>
@@ -185,7 +185,7 @@ export default function MoodboardAddImageModal({
               onChange={(e) => onImageCaptionChange(e.target.value)}
               placeholder="Ex: Je voudrais la même couleur que celle-ci"
               rows={1}
-              className="w-full resize-none rounded-2xl border border-white/15 bg-white/5 px-3 py-2 text-sm text-white outline-none placeholder:text-white/35 focus:border-tertiary-400/40 font-one"
+              className="w-full resize-none rounded-2xl bg-white/5 px-3 py-2 text-sm text-white outline-none placeholder:text-white/35 font-one"
             />
 
             <AppButton
@@ -193,7 +193,7 @@ export default function MoodboardAddImageModal({
               onClick={handleAddImageWithUpload}
               icon={
                 addingImage || isUploading ? (
-                  <span className="h-3 w-3 animate-spin rounded-full border border-white border-t-transparent"></span>
+                  <span className="h-3 w-3 animate-spin rounded-xl border border-white border-t-transparent"></span>
                 ) : (
                   <FaPlus className="h-3 w-3" />
                 )

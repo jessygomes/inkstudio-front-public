@@ -1,116 +1,85 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Image from "next/image";
-import { ArrowLeft, ArrowRight, Check, ChevronRight, LoaderCircle, UserRound, Info } from "lucide-react";
-import styles from "./Booking/BookingFlow.module.css";
+import { ArrowLeft, ArrowRight, Check, Info, LoaderCircle, LogIn, Phone } from "lucide-react";
 import { FormProvider } from "react-hook-form";
-
-import {
-  StepIndicator,
-  PrestationSelector,
-  ClientInfoForm,
-  SlotSelection,
-  RecapStep,
-  ConfirmationStep,
-  useBookingLogic,
-} from "./Booking";
+import styles from "./Booking/BookingFlow.module.css";
+import { StepIndicator, PrestationSelector, ClientInfoForm, SlotSelection, RecapStep, ConfirmationStep, useBookingLogic } from "./Booking";
+import { ArtistPicker, FlashPicker, PiercingPicker } from "./Booking/ChoicePickers";
+import BookingSummary, { SalonIdentity, type BookingSummaryData } from "./Booking/BookingSummary";
+import SalonMessageCard from "./Booking/SalonMessageCard";
+import { PRESTATION_LABELS, formatDurationMinutes, formatPhoneNumber, getPriceLabel, getSelectedTimeRange, phoneHref } from "./Booking/bookingDisplay";
+import { getPiercingServiceLabel } from "./Booking/getPiercingServiceLabel";
+import { setAuthReturnPath } from "@/lib/booking-link";
+import { formatDateKeyForDisplay } from "@/lib/utils/date";
+import { toSlug } from "@/lib/utils";
 import { Props } from "@/lib/type";
 import AppButton from "@/components/Shared/AppButton";
+import { checkBadge, choice, focusRing, surface } from "./Booking/ui";
 
-export default function BookingFlow({
-  salon,
-  defaultTatoueurId,
-  defaultPrestation,
-  flashes = [],
-  defaultFlashId,
-}: Props) {
+const STEPS = ["Prestation", "Date et heure", "Vos informations", "Confirmation"];
+const TITLES = ["Que souhaitez-vous réserver ?", "Quand souhaitez-vous venir ?", "Faisons connaissance", "Tout est bon ?"];
+const NEXT_LABELS = ["Choisir une date", "Continuer", "Vérifier ma réservation"];
 
-
-
+export default function BookingFlow({ salon, defaultTatoueurId, defaultPrestation, flashes = [], defaultFlashId }: Props) {
   const {
-    navigationError,
-    setNavigationError,
-    handlePrestationChange,
-    bookingConfirmationEnabled,
+    navigationError, setNavigationError, handlePrestationChange, bookingConfirmationEnabled,
     linkedVenues, venueSalonId, selectedVenue, handleVenueChange,
-    methods,
-    watch,
-    handleSubmit,
-    isSubmitting,
-    step,
-    setStep,
-    confirmDisabled,
-    appointmentCreated,
-    prestation,
-    artists,
-    isParTatoueurMode,
-    projectAppointmentDurationMinutes,
-    projectAppointmentIsFree,
-    projectAppointmentResolvedPrice,
-    selectedFlashDurationMinutes,
-    requiredTattooSlots,
-    selectedTatoueur,
-    selectedDate,
-    timeSlots,
-    selectedSlots,
-    occupiedSlots,
-    blockedSlots,
-    isLoadingSlots,
-    piercingZones,
-    selectedPiercingZone,
-    setSelectedPiercingZone,
-    selectedPiercingService,
-    setSelectedPiercingService,
-    isLoadingPiercingZones,
-    piercingPrice,
-    skinToneOptions,
-    isLoadingSkinTones,
-    moodboards,
-    selectedMoodboardId,
-    isLoadingMoodboards,
-    sketchFile,
-    setSketchFile,
-    referenceFile,
-    setReferenceFile,
-    selectedFlashId,
-    handleFlashChange,
-    handleMoodboardChange,
-    goNext,
-    goPrev,
-    handleSlotSelection,
-    clearSelectedSlots,
-    handleTatoueurChange,
-    handleDateChange,
-    onSubmit,
-    isAuthenticated,
-  } = useBookingLogic({
-    salon,
-    defaultTatoueurId,
-    defaultPrestation,
-    flashes,
-    defaultFlashId,
-  });
+    methods, watch, handleSubmit, isSubmitting, step, setStep, appointmentCreated, prestation,
+    artists, isParTatoueurMode, projectAppointmentDurationMinutes, projectAppointmentIsFree, projectAppointmentResolvedPrice,
+    selectedFlashDurationMinutes, requiredTattooSlots, selectedTatoueur, selectedDate, timeSlots, selectedSlots,
+    occupiedSlots, blockedSlots, isLoadingSlots, piercingZones, selectedPiercingZone, setSelectedPiercingZone,
+    selectedPiercingService, setSelectedPiercingService, isLoadingPiercingZones, piercingPrice, skinToneOptions,
+    isLoadingSkinTones, moodboards, selectedMoodboardId, isLoadingMoodboards, sketchFile, setSketchFile,
+    referenceFile, setReferenceFile, selectedFlashId, availableFlashes, handleFlashChange, handleMoodboardChange,
+    goNext, goPrev, handleSlotSelection, clearSelectedSlots, handleTatoueurChange, handleDateChange, onSubmit, isAuthenticated, router,
+  } = useBookingLogic({ salon, defaultTatoueurId, defaultPrestation, flashes, defaultFlashId });
 
   const [isAdvancing, setIsAdvancing] = useState(false);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const errorRef = useRef<HTMLDivElement>(null);
+  const followUpRef = useRef<HTMLDivElement>(null);
   const previousStep = useRef<number | null>(null);
   const furthestStep = useRef(1);
   const busy = isSubmitting || isAdvancing;
-  const selectedArtist = artists.find(artist => artist.id === selectedTatoueur);
-  const selectedFlash = flashes.find(flash => flash.id === selectedFlashId);
-  const labels: Record<string, string> = { TATTOO: "Tatouage", PIERCING: "Piercing", PROJET: "Consultation projet", RETOUCHE: "Retouche" };
-  const steps = ["Votre envie", "Votre demande", "Date & heure", "Vérification"];
-  const titles = ["Un rendez-vous, à votre image.", "Donnons vie à votre demande.", "Trouvons le bon moment.", "Tout est prêt ?"];
-  const descriptions = ["Choisissez votre prestation et l’artiste qui vous accompagnera.", "Partagez votre projet et laissez vos coordonnées au salon.", "Choisissez une date et un horaire. Nous nous occupons de la durée.", "Un dernier regard sur les informations avant de les transmettre au salon."];
+
   const effectiveSalon = {
     ...salon,
     addConfirmationEnabled: bookingConfirmationEnabled,
-    ...(selectedVenue ? { address: selectedVenue.address, city: selectedVenue.city, postalCode: selectedVenue.postalCode, name: selectedVenue.salonName } : {}),
+    ...(selectedVenue ? {
+      address: selectedVenue.address,
+      city: selectedVenue.city,
+      postalCode: selectedVenue.postalCode,
+      name: selectedVenue.salonName,
+      profileImage: selectedVenue.profileImage || selectedVenue.image || salon.profileImage,
+      profileHref: selectedVenue.salonName && selectedVenue.city && selectedVenue.postalCode ? `/salon/${toSlug(selectedVenue.salonName)}/${toSlug(`${selectedVenue.city}-${selectedVenue.postalCode}`)}` : salon.profileHref,
+    } : {}),
   };
+  // Messagerie : même règle que le profil public (indisponible en offre FREE).
+  const messagingEnabled = salon.saasPlan !== "FREE";
 
-  // Keep browser history aligned with steps. A fresh page always starts with a valid form.
+  // Valeurs dérivées pour le résumé, le récapitulatif et la barre d'action.
+  const selectedArtist = artists.find(artist => artist.id === selectedTatoueur);
+  const selectedFlash = availableFlashes.find(flash => flash.id === selectedFlashId);
+  const piercingZone = piercingZones.find(zone => zone.id === selectedPiercingZone);
+  const piercingService = piercingZone?.services.find(service => service.id === selectedPiercingService);
+  const choiceLabel = prestation === "TATTOO" ? selectedFlash?.title || selectedFlash?.name || null : prestation === "PIERCING" && piercingService ? getPiercingServiceLabel(piercingService, piercingZone?.piercingZone) : null;
+  const durationMinutes = prestation === "PROJET" ? projectAppointmentDurationMinutes : prestation === "TATTOO" ? Math.max(60, selectedFlashDurationMinutes) : prestation === "RETOUCHE" ? 60 : selectedSlots.length * 30;
+  const priceLabel = getPriceLabel({ prestation, projectIsFree: projectAppointmentIsFree, projectPrice: projectAppointmentResolvedPrice, flashPrice: selectedFlash?.price, piercingPrice });
+  const range = getSelectedTimeRange(effectiveSalon, selectedDate, selectedSlots);
+  const summary: BookingSummaryData = {
+    prestationLabel: prestation ? PRESTATION_LABELS[prestation] : null,
+    choiceLabel,
+    artistName: selectedArtist?.name ?? null,
+    dateLabel: range && selectedDate ? formatDateKeyForDisplay(selectedDate) : null,
+    timeLabel: range ? `${range.start} – ${range.end}` : null,
+    durationLabel: durationMinutes ? formatDurationMinutes(durationMinutes) : null,
+    priceLabel,
+  };
+  const showArtistPicker = isParTatoueurMode || artists.some(artist => artist.isLinkedUser);
+  const needsFollowUp = prestation === "TATTOO" || prestation === "PIERCING" || showArtistPicker;
+
+  // Historique du navigateur aligné sur les étapes ; le titre reçoit le focus à chaque changement.
   useEffect(() => {
     if (step > 4) return;
     furthestStep.current = Math.max(furthestStep.current, step);
@@ -122,7 +91,7 @@ export default function BookingFlow({
     }
     if (previousStep.current !== null && previousStep.current !== step) {
       headingRef.current?.focus({ preventScroll: true });
-      headingRef.current?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth", block: "start" });
+      window.scrollTo({ top: 0, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
     }
     previousStep.current = step;
   }, [step]);
@@ -144,6 +113,17 @@ export default function BookingFlow({
     (invalid || errorRef.current)?.focus();
   }, [navigationError, busy]);
 
+  // Après le choix de la prestation, on amène doucement le choix suivant (flash, piercing, artiste) à l'écran.
+  useEffect(() => {
+    if (!prestation || step !== 1) return;
+    requestAnimationFrame(() => {
+      const target = followUpRef.current;
+      if (target && target.getBoundingClientRect().top > window.innerHeight - 160) {
+        target.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth", block: "start" });
+      }
+    });
+  }, [prestation, step]);
+
   const editStep = (target: number) => {
     if (busy || target >= step) return;
     setNavigationError("");
@@ -154,107 +134,129 @@ export default function BookingFlow({
     setIsAdvancing(true);
     try { await goNext(); } finally { setIsAdvancing(false); }
   };
+  const goToLogin = () => {
+    setAuthReturnPath(window.location.pathname + window.location.search);
+    router.push("/se-connecter");
+  };
 
-  if (salon.publicBookingAllowed === false) return <div className="rounded-2xl border border-white/10 bg-noir-500 p-6 font-one"><Info size={22} className="mb-4 text-tertiary-400" /><h1 className="text-xl text-white">La réservation en ligne est indisponible</h1><p className="mt-2 text-sm leading-6 text-white/50">Contactez le salon pour organiser votre rendez-vous.</p></div>;
+  if (salon.publicBookingAllowed === false) {
+    return (
+      <div className="mx-auto max-w-xl rounded-3xl bg-noir-500 p-6 font-one">
+        <Info size={22} className="mb-4 text-tertiary-400" />
+        <h1 className="text-xl text-white">La réservation en ligne est indisponible</h1>
+        <p className="mt-2 text-sm leading-6 text-white/50">Contactez le salon pour organiser votre rendez-vous.</p>
+      </div>
+    );
+  }
 
-  if (appointmentCreated && step === 5) return <ConfirmationStep salon={effectiveSalon} addConfirmationEnabled={bookingConfirmationEnabled} />;
+  if (appointmentCreated && step === 5) {
+    return <ConfirmationStep salon={effectiveSalon} addConfirmationEnabled={bookingConfirmationEnabled} summary={summary} isAuthenticated={isAuthenticated} messaging={messagingEnabled ? { targetUserId: salon.id, recipientName: salon.name } : undefined} />;
+  }
+
+  const mobileSummary = [summary.choiceLabel || summary.prestationLabel, summary.dateLabel && range ? `${formatDateKeyForDisplay(selectedDate).split(" ").slice(0, 3).join(" ")} · ${range.start}` : null].filter(Boolean).join(" · ");
 
   return (
     <FormProvider {...methods}>
-      <div className="min-w-0 pb-4 font-one">
-        <header className="mb-6">
-          <p className="mb-3 flex items-center gap-2 text-[10px] font-medium uppercase tracking-[0.16em] text-tertiary-400"><span className="h-px w-5 bg-tertiary-400/50" />Réserver chez {salon.name}</p>
-          <h1 ref={headingRef} tabIndex={-1} className="scroll-mt-6 text-2xl font-semibold tracking-tight text-white outline-none font-one sm:text-3xl">{titles[step - 1]}</h1>
-          <p className="mt-2 max-w-xl text-sm leading-6 text-white/45">{descriptions[step - 1]}</p>
-        </header>
-        <StepIndicator steps={steps} currentStep={step} onStepClick={editStep} />
-        {step > 1 && <div className="mb-5 flex flex-wrap items-center gap-x-2 gap-y-1 rounded-xl border border-white/8 bg-white/[0.02] px-3.5 py-2.5 text-[11px]"><span className="font-medium text-white/80">{labels[prestation]}</span>{selectedArtist && <><ChevronRight size={11} className="text-white/25" /><span className="text-white/45">{selectedArtist.name}</span></>}{selectedFlash && <><ChevronRight size={11} className="text-white/25" /><span className="truncate text-white/45">{selectedFlash.title || selectedFlash.name || "Flash"}</span></>}<AppButton type="button" variant="secondary" disabled={busy} onClick={() => editStep(1)} className="ml-auto px-2.5! py-1! text-[10px]! shadow-none!">Modifier</AppButton></div>}
-        <form className={styles.form} noValidate onSubmit={event => {
-          event.preventDefault();
-          if (busy) return;
-          if (step < 4) { void advance(); return; }
-          void handleSubmit(onSubmit, errors => {
-            setStep(errors.prestation ? 1 : 2);
-            setNavigationError("Vérifiez les informations indiquées avant de confirmer.");
-          })(event);
-        }}>
-          <fieldset id="booking-fields" disabled={busy} className="min-w-0 space-y-4 border-0 p-0">
-            <div key={step} className={styles.step}>
-              {step === 1 && <div className="space-y-6">
-                <PrestationSelector prestations={salon.prestations} onPrestationChange={handlePrestationChange} projectAppointmentDurationMinutes={projectAppointmentDurationMinutes} projectAppointmentIsFree={projectAppointmentIsFree} projectAppointmentPrice={projectAppointmentResolvedPrice} />
-                {(isParTatoueurMode || artists.some(artist => artist.isLinkedUser)) && (
-                  <section className="rounded-2xl border border-white/10 bg-noir-800 p-4 sm:p-5">
-                    <div className="mb-5 flex items-center gap-3">
-                      <span className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-tertiary-400/20 bg-tertiary-400/10 text-tertiary-400" aria-hidden="true">
-                        <UserRound size={18} />
-                      </span>
-                      <div>
-                        <h2 className="text-sm font-semibold text-white/90 font-one">Avec quel artiste ?</h2>
-                        <p className="mt-1 text-xs text-white/45">Choisissez qui vous accompagnera.</p>
-                      </div>
-                    </div>
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      {artists.map(artist => {
-                        const isSelected = selectedTatoueur === artist.id;
-                        const profileImage = artist.profileImage || artist.img;
-
-                        return (
-                          <button
-                            key={artist.id}
-                            type="button"
-                            aria-pressed={isSelected}
-                            onClick={() => handleTatoueurChange(artist.id)}
-                            className={`group flex min-h-20 items-center gap-3 rounded-2xl border p-3 text-left transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tertiary-400/50 ${isSelected ? "border-tertiary-400/50 bg-tertiary-400/8 shadow-[0_0_24px_rgba(212,175,55,0.07)]" : "border-white/10 bg-white/[0.025] hover:border-white/20 hover:bg-white/[0.045]"}`}
-                          >
-                            <span className="relative grid size-14 shrink-0 place-items-center overflow-hidden rounded-full border border-white/10 bg-white/5 text-base text-white/55">
-                              {profileImage ? (
-                                <Image
-                                  src={profileImage}
-                                  alt={`Portrait de ${artist.name}`}
-                                  fill
-                                  sizes="56px"
-                                  className="object-cover transition-transform duration-300 motion-safe:group-hover:scale-105"
-                                />
-                              ) : (
-                                artist.name?.trim().slice(0, 1).toUpperCase() || <UserRound size={20} />
-                              )}
-                            </span>
-                            <span className="min-w-0 flex-1">
-                              <span className="block truncate text-sm font-medium text-white/90 font-one">{artist.name}</span>
-                              {artist.isLinkedUser && <span className="mt-1 block text-[11px] leading-4 text-white/45">Réservation sur son profil personnel</span>}
-                            </span>
-                            {isSelected && (
-                              <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-tertiary-400 text-noir-900" aria-label="Sélectionné">
-                                <Check size={14} strokeWidth={3} />
-                              </span>
-                            )}
-                          </button>
-                        );
-                      })}
-                    </div>
-                    {!artists.length && <p className="text-xs text-white/50">Aucun artiste n’est réservable en ligne actuellement.</p>}
-                  </section>
-                )}
-              </div>}
-              {step === 2 && <ClientInfoForm prestation={prestation} errors={methods.formState.errors} sketchFile={sketchFile} onSketchChange={setSketchFile} referenceFile={referenceFile} onReferenceChange={setReferenceFile} piercingZones={piercingZones} selectedPiercingZone={selectedPiercingZone} selectedPiercingService={selectedPiercingService} onPiercingZoneChange={setSelectedPiercingZone} onPiercingServiceChange={setSelectedPiercingService} isLoadingPiercingZones={isLoadingPiercingZones} flashes={flashes} selectedFlashId={selectedFlashId} onFlashChange={handleFlashChange} skinToneOptions={skinToneOptions} isLoadingSkinTones={isLoadingSkinTones} moodboards={moodboards} selectedMoodboardId={selectedMoodboardId} onMoodboardChange={handleMoodboardChange} isAuthenticated={isAuthenticated} isLoadingMoodboards={isLoadingMoodboards} />}
-              {step === 3 && <div className="space-y-4">
-                {!!linkedVenues.length && <section className="rounded-2xl border border-white/10 bg-noir-500 p-4 sm:p-5"><label htmlFor="booking-venue" className="mb-1 block text-sm font-medium text-white/85">Où souhaitez-vous venir ?</label><p className="mb-3 text-[11px] text-white/40">Choisissez le salon pour afficher les disponibilités de votre artiste.</p><select id="booking-venue" value={venueSalonId} onChange={event => handleVenueChange(event.target.value)} className="h-11 w-full rounded-xl border border-white/10 bg-noir-800 px-3 text-sm text-white outline-none focus:border-tertiary-400/50 [color-scheme:dark]"><option value="">Choisir un salon</option>{linkedVenues.filter(venue => venue.publicBookingEnabled).map(venue => <option key={venue.id} value={venue.id}>{venue.salonName} · {venue.city}</option>)}</select>{selectedVenue && <p className="mt-2 text-xs text-white/45">{[selectedVenue.address, selectedVenue.postalCode, selectedVenue.city].filter(Boolean).join(" ")}</p>}{!linkedVenues.some(venue => venue.publicBookingEnabled) && <p className="mt-3 text-xs text-white/50">Aucun salon ne propose de réservation en ligne pour cet artiste.</p>}</section>}
-                {(!linkedVenues.length || selectedVenue?.publicBookingEnabled) && <SlotSelection prestation={prestation} salon={effectiveSalon} artists={artists} isParTatoueurMode={isParTatoueurMode} selectedTatoueur={selectedTatoueur} selectedDate={selectedDate} onDateChange={handleDateChange} timeSlots={timeSlots} selectedSlots={selectedSlots} onSlotSelection={handleSlotSelection} onClearSelection={clearSelectedSlots} occupiedSlots={occupiedSlots} blockedSlots={blockedSlots} isLoadingSlots={isLoadingSlots} selectedFlashId={selectedFlashId} selectedFlashDurationMinutes={selectedFlashDurationMinutes} requiredTattooSlots={requiredTattooSlots} />}
-              </div>}
-              {step === 4 && <RecapStep selectedMoodboard={moodboards.find(board => board.id === selectedMoodboardId)} piercingServiceId={selectedPiercingService} selectedFlash={selectedFlash} prestation={prestation} formData={watch()} selectedDate={selectedDate} selectedSlots={selectedSlots} selectedTatoueur={selectedTatoueur} artists={artists} piercingZones={piercingZones} piercingPrice={piercingPrice} pierc={selectedPiercingZone} salon={effectiveSalon} referenceFile={referenceFile} sketchFile={sketchFile} skinToneOptions={skinToneOptions} onEdit={editStep} />}
+      <div className="grid items-start gap-6 font-one lg:grid-cols-[minmax(0,1fr)_300px] xl:gap-10">
+        <div className="min-w-0">
+          <StepIndicator steps={STEPS} currentStep={step} onStepClick={editStep} />
+          <header className="mb-5">
+            <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-3xl bg-noir-500 p-4 lg:hidden">
+              <SalonIdentity salon={effectiveSalon} size={40} />
+              {effectiveSalon.phone && <a href={phoneHref(effectiveSalon.phone)} className="inline-flex items-center gap-1.5 text-xs tabular-nums text-white/70 hover:text-white"><Phone size={12} className="text-tertiary-400" aria-hidden="true" />{formatPhoneNumber(effectiveSalon.phone)}</a>}
             </div>
-            {navigationError && <div ref={errorRef} tabIndex={-1} role="alert" className="outline-none flex items-start gap-2 rounded-xl border border-red-400/20 bg-red-400/5 p-3 text-xs leading-5 text-red-200"><Info size={15} className="mt-0.5 shrink-0" />{navigationError}</div>}
-            <footer className="sticky bottom-3 z-20 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-white/10 bg-noir-800 p-2 shadow-xl shadow-black/20 backdrop-blur-xl">
-              <span className="px-2 text-[10px] text-white/35">Étape {step} sur 4</span>
-              <div className="ml-auto flex items-center gap-2">
-              {step > 1 && <AppButton type="button" variant="secondary" onClick={goPrev} disabled={busy} icon={<ArrowLeft size={14} />} className="px-3! py-2! text-xs! rounded-lg! shadow-none!">Retour</AppButton>}
-              <AppButton type="submit" disabled={busy || confirmDisabled} className="px-3.5! py-2.5! text-xs! rounded-lg! shadow-none! hover:translate-y-0!">
-                {busy ? <><LoaderCircle size={14} className="animate-spin" />{isSubmitting ? "Envoi en cours…" : "Vérification…"}</> : <>{step === 1 ? "Décrire ma demande" : step === 2 ? "Choisir un horaire" : step === 3 ? "Vérifier ma demande" : bookingConfirmationEnabled ? "Envoyer ma demande" : "Confirmer le rendez-vous"}{step === 4 ? <Check size={14} /> : <ArrowRight size={14} />}</>}
-              </AppButton>
+            <p className="mb-1.5 hidden text-[11px] text-white/40 lg:block">Réserver chez {effectiveSalon.name}</p>
+            <h1 ref={headingRef} tabIndex={-1} className="scroll-mt-6 text-2xl font-semibold tracking-tight text-white outline-none sm:text-3xl">{TITLES[step - 1]}</h1>
+          </header>
+
+          <form className={styles.form} noValidate onSubmit={event => {
+            event.preventDefault();
+            if (busy) return;
+            if (step < 4) { void advance(); return; }
+            void handleSubmit(onSubmit, errors => {
+              setStep(errors.prestation ? 1 : 3);
+              setNavigationError("Il manque quelques informations : vérifiez les champs indiqués.");
+            })(event);
+          }}>
+            <fieldset id="booking-fields" disabled={busy} className="min-w-0 space-y-4 border-0 p-0">
+              <div key={step} className={`${styles.step} space-y-4`}>
+                {step === 1 && <>
+                  {!isAuthenticated && (
+                    <p className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-2xl bg-white/4 px-4 py-3 text-xs text-white/60">
+                      Vous avez un compte Inkera ?
+                      <button type="button" onClick={goToLogin} className="inline-flex items-center gap-1 text-tertiary-400 underline-offset-2 hover:underline"><LogIn size={12} />Connectez-vous</button>
+                      pour préremplir vos informations.
+                    </p>
+                  )}
+                  <PrestationSelector prestations={salon.prestations} onPrestationChange={handlePrestationChange} projectAppointmentDurationMinutes={projectAppointmentDurationMinutes} projectAppointmentIsFree={projectAppointmentIsFree} projectAppointmentPrice={projectAppointmentResolvedPrice} />
+                  {prestation && needsFollowUp && (
+                    <div ref={followUpRef} className="scroll-mt-6 space-y-4">
+                      {prestation === "TATTOO" && <FlashPicker flashes={availableFlashes} selectedFlashId={selectedFlashId} onChange={handleFlashChange} onChooseProject={salon.prestations.includes("PROJET") ? () => handlePrestationChange("PROJET") : undefined} />}
+                      {prestation === "PIERCING" && <PiercingPicker zones={piercingZones} loading={isLoadingPiercingZones} selectedZone={selectedPiercingZone} selectedService={selectedPiercingService} onZoneChange={setSelectedPiercingZone} onServiceChange={setSelectedPiercingService} />}
+                      {showArtistPicker && <ArtistPicker artists={artists} selectedId={selectedTatoueur} onChange={handleTatoueurChange} required={isParTatoueurMode} />}
+                    </div>
+                  )}
+                </>}
+
+                {step === 2 && <>
+                  {linkedVenues.length > 0 && (
+                    <section className={surface} aria-labelledby="booking-venue-title">
+                      <h2 id="booking-venue-title" className="mb-4 text-base font-semibold tracking-tight text-white">Dans quel salon ?</h2>
+                      {linkedVenues.some(venue => venue.publicBookingEnabled) ? (
+                        <div className="grid gap-2.5 sm:grid-cols-2">
+                          {linkedVenues.filter(venue => venue.publicBookingEnabled).map(venue => {
+                            const active = venue.id === venueSalonId;
+                            return (
+                              <button key={venue.id} type="button" aria-pressed={active} onClick={() => handleVenueChange(venue.id)} className={`flex items-start gap-3 rounded-xl p-4 text-left ${choice(active)}`}>
+                                <span className="min-w-0 flex-1">
+                                  <span className="block truncate text-sm font-medium text-white">{venue.salonName}</span>
+                                  <span className="mt-0.5 block text-xs leading-5 text-white/50">{[venue.address, venue.postalCode, venue.city].filter(Boolean).join(" ")}</span>
+                                </span>
+                                {active && <span className={checkBadge}><Check size={12} strokeWidth={3} /></span>}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      ) : <p className="text-xs text-white/50">Aucun salon ne propose de réservation en ligne pour cet artiste.</p>}
+                    </section>
+                  )}
+                  {(!linkedVenues.length || selectedVenue?.publicBookingEnabled) && (
+                    <SlotSelection prestation={prestation} salon={effectiveSalon} artists={artists} isParTatoueurMode={isParTatoueurMode} selectedTatoueur={selectedTatoueur} selectedDate={selectedDate} onDateChange={handleDateChange} timeSlots={timeSlots} selectedSlots={selectedSlots} onSlotSelection={handleSlotSelection} onClearSelection={clearSelectedSlots} occupiedSlots={occupiedSlots} blockedSlots={blockedSlots} isLoadingSlots={isLoadingSlots} selectedFlashId={selectedFlashId} selectedFlashDurationMinutes={selectedFlashDurationMinutes} requiredTattooSlots={requiredTattooSlots} />
+                  )}
+                </>}
+
+                {step === 3 && <ClientInfoForm prestation={prestation} hasSelectedFlash={!!selectedFlashId} sketchFile={sketchFile} onSketchChange={setSketchFile} referenceFile={referenceFile} onReferenceChange={setReferenceFile} skinToneOptions={skinToneOptions} isLoadingSkinTones={isLoadingSkinTones} moodboards={moodboards} selectedMoodboardId={selectedMoodboardId} onMoodboardChange={handleMoodboardChange} isAuthenticated={isAuthenticated} isLoadingMoodboards={isLoadingMoodboards} />}
+
+                {step === 4 && <RecapStep prestation={prestation} formData={watch()} selectedDate={selectedDate} selectedSlots={selectedSlots} durationMinutes={durationMinutes} priceLabel={priceLabel} artistName={selectedArtist?.name} choiceLabel={choiceLabel} salon={effectiveSalon} referenceFile={referenceFile} sketchFile={sketchFile} skinToneOptions={skinToneOptions} selectedFlash={selectedFlash} selectedMoodboard={moodboards.find(board => board.id === selectedMoodboardId)} onEdit={editStep} />}
               </div>
-            </footer>
-          </fieldset>
-        </form>
+
+              {navigationError && (
+                <div ref={errorRef} tabIndex={-1} role="alert" className="flex items-start gap-2.5 rounded-2xl bg-red-400/10 p-4 text-xs leading-5 text-red-200 outline-none">
+                  <Info size={15} className="mt-0.5 shrink-0" />{navigationError}
+                </div>
+              )}
+
+              <footer className="sticky bottom-3 z-20 flex items-center gap-2 rounded-2xl bg-noir-500/90 p-1.5 shadow-2xl shadow-black/50 backdrop-blur-xl">
+                {step > 1 && <button type="button" onClick={goPrev} disabled={busy} aria-label="Étape précédente" className={`grid size-10 shrink-0 place-items-center rounded-xl bg-white/6 text-white/75 transition hover:bg-white/12 hover:text-white disabled:opacity-40 ${focusRing}`}><ArrowLeft size={16} /></button>}
+                <p className="min-w-0 flex-1 truncate px-3 text-[11px] text-white/50 lg:hidden">{mobileSummary || `Étape ${step} sur 4`}</p>
+                <span className="hidden flex-1 px-3 text-[11px] text-white/40 lg:block">Étape {step} sur 4</span>
+                <AppButton type="submit" disabled={busy} className="shrink-0 rounded-xl! px-5! py-2.5! text-xs! font-medium hover:translate-y-0!">
+                  {busy
+                    ? <><LoaderCircle size={14} className="animate-spin" />{isSubmitting ? "Envoi…" : "Un instant…"}</>
+                    : step < 4
+                      ? <>{NEXT_LABELS[step - 1]}<ArrowRight size={14} /></>
+                      : <>{bookingConfirmationEnabled ? "Envoyer ma demande" : "Confirmer le rendez-vous"}<Check size={14} /></>}
+                </AppButton>
+              </footer>
+            </fieldset>
+          </form>
+        </div>
+
+        <div className="hidden space-y-4 lg:sticky lg:top-24 lg:block">
+          <BookingSummary salon={effectiveSalon} data={summary} />
+          {messagingEnabled && <SalonMessageCard targetUserId={salon.id} recipientName={salon.name} />}
+        </div>
+        {messagingEnabled && step === 1 && <SalonMessageCard targetUserId={salon.id} recipientName={salon.name} className="lg:hidden" />}
       </div>
     </FormProvider>
   );

@@ -240,7 +240,7 @@ export default function FavorisTab() {
 
   if (loading) {
     return (
-      <div className="bg-linear-to-br from-noir-500/6 to-white/3 backdrop-blur-lg border border-white/10 rounded-3xl p-4 sm:p-6 shadow-xl">
+      <div className="bg-linear-to-br from-noir-500/6 to-white/3 backdrop-blur-lg rounded-3xl p-4 sm:p-6 shadow-xl">
         <div className="text-center py-12">
           <div className="animate-spin rounded-full h-8 w-8 border-2 border-tertiary-400 border-t-transparent mx-auto mb-4" />
           <p className="text-white/60 font-one">Chargement des favoris...</p>
@@ -252,13 +252,13 @@ export default function FavorisTab() {
   return (
     <div className="space-y-3 font-one [&_button:focus-visible]:outline-2 [&_button:focus-visible]:outline-offset-2 [&_button:focus-visible]:outline-tertiary-400 [&_a:focus-visible]:outline-2 [&_a:focus-visible]:outline-tertiary-400">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex flex-wrap gap-1 rounded-xl bg-noir-500 p-1" role="group" aria-label="Type de favoris">
-          {([{ key: "salons", label: "Salons & artistes", count: favoriteSalons.length, Icon: Store }, { key: "images", label: "Inspirations", count: favoritePortfolioImages.length, Icon: Images }] as const).map(({key,label,count,Icon}) => <button key={key} type="button" aria-pressed={activeView === key} onClick={() => { setActiveView(key); closeLightbox(); }} className={`inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-lg px-3 text-sm transition ${activeView === key ? "bg-white/10 text-white" : "text-white/50 hover:text-white"}`}><Icon size={15} className={activeView === key ? "text-tertiary-400" : ""} /><span>{label}</span><span className="rounded-md bg-white/5 px-1.5 py-0.5 text-[10px] text-white/50">{count}</span></button>)}
+        <div className="flex flex-wrap gap-1 rounded-xl bg-noir-700 p-1" role="group" aria-label="Type de favoris">
+          {([{ key: "salons", label: "Salons & artistes", count: favoriteSalons.length, Icon: Store }, { key: "images", label: "Inspirations", count: favoritePortfolioImages.length, Icon: Images }] as const).map(({key,label,count,Icon}) => <button key={key} type="button" aria-pressed={activeView === key} onClick={() => { setActiveView(key); closeLightbox(); }} className={`inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-xl px-3 text-sm transition ${activeView === key ? "bg-white/10 text-white" : "text-white/50 hover:text-white"}`}><Icon size={15} className={activeView === key ? "text-tertiary-400" : ""} /><span>{label}</span><span className="rounded-xl bg-white/5 px-1.5 py-0.5 text-[10px] text-white/50">{count}</span></button>)}
         </div>
         <AppButton href={activeView === "salons" ? "/trouver-un-salon" : "/inspiration"} variant="secondary" className="min-h-11" icon={<ArrowUpRight size={16} />}>Explorer</AppButton>
       </div>
       {activeCount === 0 ? (
-        <div className="rounded-2xl border border-dashed border-white/15 bg-noir-500 px-5 py-6 text-center">
+        <div className="rounded-2xl bg-noir-700 px-5 py-6 text-center">
           <Heart size={28} className="mx-auto mb-3 text-tertiary-400/60" /><h4 className="text-lg text-white">Votre sélection commence ici</h4>
           <p className="mx-auto mb-4 mt-2 max-w-md text-sm leading-6 text-white/55">{activeView === "salons" ? "Enregistrez les salons et artistes qui vous plaisent pour les retrouver facilement." : "Enregistrez vos créations préférées pour préparer votre prochain projet."}</p>
           <AppButton href={activeView === "salons" ? "/trouver-un-salon" : "/inspiration"} className="min-h-11">{activeView === "salons" ? "Découvrir les salons" : "Trouver l’inspiration"}</AppButton>
@@ -269,7 +269,7 @@ export default function FavorisTab() {
             const href = buildSalonHref(salon.salonName, salon.city, salon.postalCode);
             const instagram = normalizeInstagramProfile(salon.instagram);
             return (
-              <article key={salon.id} className="group min-w-0 overflow-hidden rounded-2xl border border-white/10 bg-noir-500 transition-colors hover:border-tertiary-400/25">
+              <article key={salon.id} className="group min-w-0 overflow-hidden rounded-2xl bg-noir-700 transition-colors">
                 <div className="flex items-start gap-3 p-3">
                   <Link href={href} aria-label={`Découvrir ${salon.displayName || salon.salonName}`} className="relative block h-24 w-20 shrink-0 overflow-hidden rounded-xl bg-noir-800 sm:w-24">
                     {salon.image ? <Image src={salon.image} alt="" fill sizes="96px" className="object-cover transition-transform duration-300 motion-safe:group-hover:scale-105" /> : <span className="grid h-full place-items-center bg-tertiary-400/5 text-3xl text-white/30">{(salon.displayName || salon.salonName).charAt(0)}</span>}
@@ -283,10 +283,10 @@ export default function FavorisTab() {
                     {salon.description && <p className="mt-1 line-clamp-2 break-words text-xs leading-5 text-white/60">{salon.description}</p>}
                   </div>
                 </div>
-                <div className="mx-3 flex flex-wrap items-center justify-between gap-2 border-t border-white/8 py-2">
-                  <Link href={href} className="inline-flex min-h-11 items-center gap-2 rounded-lg px-2 text-xs text-white/80 transition hover:bg-white/5 hover:text-tertiary-400">Découvrir le profil<ArrowUpRight size={14} /></Link>
+                <div className="mx-3 flex flex-wrap items-center justify-between gap-2 py-2">
+                  <Link href={href} className="inline-flex min-h-11 items-center gap-2 rounded-xl px-2 text-xs text-white/80 transition hover:bg-white/5 hover:text-tertiary-400">Découvrir le profil<ArrowUpRight size={14} /></Link>
                   <div className="flex items-center gap-1">
-                    {[{href:salon.website,label:"Site internet",Icon:FaGlobe},{href:instagram?.href,label:"Instagram",Icon:FaInstagram},{href:salon.facebook,label:"Facebook",Icon:FaFacebook}].filter((social) => social.href).map(({href:link,label,Icon}) => <a key={label} href={link} target="_blank" rel="noopener noreferrer" aria-label={`${label} de ${salon.displayName || salon.salonName}`} title={label} className="grid h-11 w-11 place-items-center rounded-lg text-white/40 transition hover:bg-white/5 hover:text-white"><Icon size={14} /></a>)}
+                    {[{href:salon.website,label:"Site internet",Icon:FaGlobe},{href:instagram?.href,label:"Instagram",Icon:FaInstagram},{href:salon.facebook,label:"Facebook",Icon:FaFacebook}].filter((social) => social.href).map(({href:link,label,Icon}) => <a key={label} href={link} target="_blank" rel="noopener noreferrer" aria-label={`${label} de ${salon.displayName || salon.salonName}`} title={label} className="grid h-11 w-11 place-items-center rounded-xl text-white/40 transition hover:bg-white/5 hover:text-white"><Icon size={14} /></a>)}
                   </div>
                 </div>
               </article>
@@ -295,7 +295,7 @@ export default function FavorisTab() {
         </div>
       ) : (
         <div className="grid grid-cols-2 items-start gap-3 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-          {favoritePortfolioImages.map((image,index) => <article key={image.id} className="group overflow-hidden rounded-2xl border border-white/10 bg-noir-500 transition hover:border-white/25">
+          {favoritePortfolioImages.map((image,index) => <article key={image.id} className="group overflow-hidden rounded-2xl bg-noir-700 transition">
             <div className="relative aspect-square bg-noir-800">
               <button type="button" onClick={() => setLightboxIndex(index)} aria-label={`Agrandir ${image.title || "l’image favorite"}`} className="absolute inset-0 cursor-zoom-in"><Image src={image.imageUrl} alt={image.title || "Image favorite"} fill sizes="(min-width:1280px) 25vw, (min-width:1024px) 33vw, 50vw" className="object-contain p-2" /><span className="absolute bottom-2 right-2 grid h-8 w-8 place-items-center rounded-lg bg-black/50 text-white"><Expand size={14} /></span></button>
               <div className="absolute right-2 top-2"><FavoritePortfolioBtn portfolioId={image.id} initialFavorite variant="icon-only" onToggle={(isFav) => { if (!isFav) fetchFavoritePortfolio(); }} /></div>
@@ -344,7 +344,7 @@ export default function FavorisTab() {
                 type="button"
                 onClick={closeLightbox}
                 aria-label="Fermer"
-                className="absolute top-4 right-4 z-10 inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-2xl border border-white/20 bg-white/10 text-white transition hover:bg-white/20"
+                className="absolute top-4 right-4 z-10 inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-xl bg-white/10 text-white transition hover:bg-white/20"
               >
                 <FaXmark className="h-4 w-4" />
               </button>
@@ -353,7 +353,7 @@ export default function FavorisTab() {
                 type="button"
                 onClick={(e) => { e.stopPropagation(); prevImage(); }}
                 aria-label="Image precedente"
-                className="absolute left-4 top-1/2 z-10 -translate-y-1/2 inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-2xl border border-white/20 bg-white/10 text-white transition hover:bg-white/20"
+                className="absolute left-4 top-1/2 z-10 -translate-y-1/2 inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-xl bg-white/10 text-white transition hover:bg-white/20"
               >
                 <FaArrowLeft className="h-4 w-4" />
               </button>
@@ -362,7 +362,7 @@ export default function FavorisTab() {
                 type="button"
                 onClick={(e) => { e.stopPropagation(); nextImage(); }}
                 aria-label="Image suivante"
-                className="absolute right-4 top-1/2 z-10 -translate-y-1/2 inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-2xl border border-white/20 bg-white/10 text-white transition hover:bg-white/20"
+                className="absolute right-4 top-1/2 z-10 -translate-y-1/2 inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-xl bg-white/10 text-white transition hover:bg-white/20"
               >
                 <FaArrowRight className="h-4 w-4" />
               </button>
@@ -374,7 +374,7 @@ export default function FavorisTab() {
 
             {/* Panneau infos */}
             <aside
-              className="max-h-[45vh] shrink-0 overflow-y-auto lg:max-h-screen border-t border-white/10 bg-noir-800/95 p-4 lg:flex lg:w-80 lg:flex-col lg:justify-between lg:border-t-0 lg:border-l lg:p-6"
+              className="max-h-[45vh] shrink-0 overflow-y-auto lg:max-h-screen bg-noir-800/95 p-4 lg:flex lg:w-80 lg:flex-col lg:justify-between lg:border-t-0 lg:border-l lg:p-6"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="space-y-5">
@@ -388,7 +388,7 @@ export default function FavorisTab() {
                   )}
                 </div>
 
-                <div className="space-y-1 rounded-2xl border border-white/10 bg-white/5 p-3">
+                <div className="space-y-1 rounded-2xl bg-white/5 p-3">
                   <p className="text-[11px] uppercase tracking-[0.14em] text-white/45 font-one">Salon</p>
                   <p className="text-base tracking-widest font-semibold text-white font-one">
                     {activeImage.user?.displayName || activeImage.user?.salonName || "Salon"}
@@ -401,7 +401,7 @@ export default function FavorisTab() {
                       href={activeImageSalonInstagram.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="mt-1 inline-flex items-center gap-1.5 text-xs text-tertiary-300 transition hover:text-tertiary-100"
+                      className="mt-1 inline-flex items-center gap-1.5 text-xs text-tertiary-400 transition hover:text-tertiary-100"
                     >
                       <FaInstagram className="h-4 w-4" />
                       {activeImageSalonInstagram.label}
@@ -410,7 +410,7 @@ export default function FavorisTab() {
                 </div>
 
                 {activeImage.tatoueur?.name && (
-                  <div className="space-y-1 rounded-2xl border border-white/10 bg-white/5 p-3">
+                  <div className="space-y-1 rounded-2xl bg-white/5 p-3">
                     <p className="text-[11px] uppercase tracking-[0.14em] text-white/45 font-one">Artiste</p>
                     <p className="text-sm font-semibold text-white font-one">
                       {activeImage.tatoueur.name}
@@ -420,7 +420,7 @@ export default function FavorisTab() {
                         href={activeImageArtistInstagram.href}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="mt-1 inline-flex items-center gap-1.5 text-xs text-tertiary-300 transition hover:text-tertiary-100"
+                        className="mt-1 inline-flex items-center gap-1.5 text-xs text-tertiary-400 transition hover:text-tertiary-100"
                       >
                         <FaInstagram className="h-4 w-4" />
                         {activeImageArtistInstagram.label}

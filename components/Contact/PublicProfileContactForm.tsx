@@ -116,23 +116,23 @@ export default function PublicProfileContactForm({
     });
   };
 
-  const fieldClass = "w-full min-h-11 rounded-xl border border-white/10 bg-noir-800 px-3.5 py-2.5 font-one text-sm text-white placeholder:text-white/25 outline-none transition hover:border-white/20 focus:border-tertiary-400/50 focus:ring-2 focus:ring-tertiary-400/10 disabled:opacity-60 [color-scheme:dark]";
+  const fieldClass = "w-full min-h-12 rounded-2xl bg-white/5 px-4 py-3 font-one text-sm text-white placeholder:text-white/30 outline-none transition hover:bg-white/7 focus:bg-white/8 focus:ring-2 focus:ring-tertiary-400/40 disabled:opacity-60 [color-scheme:dark]";
   const labelClass = "mb-2 block text-xs font-medium text-white/65";
 
   return (
-    <section aria-labelledby={`${id}-heading`} className="overflow-hidden rounded-2xl border border-white/10 bg-noir-800 font-one">
-      <div className="flex flex-wrap items-center gap-3 bg-white/[0.015] p-4">
-        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-tertiary-400/10 text-tertiary-400"><MessageSquare size={16} aria-hidden="true" /></span>
+    <section aria-labelledby={`${id}-heading`} className="overflow-hidden rounded-3xl bg-noir-500 font-one">
+      <div className="flex flex-wrap items-center gap-3 p-5 sm:p-6">
+        <span className="grid size-10 shrink-0 place-items-center rounded-2xl bg-linear-to-br from-tertiary-400/20 to-cuatro-500/15 text-tertiary-400"><MessageSquare size={16} aria-hidden="true" /></span>
         <div className="min-w-0 flex-1">
           <p className="mb-1 text-[9px] uppercase tracking-[0.16em] text-tertiary-400/80">Un premier échange</p>
-          <h2 id={`${id}-heading`} className="break-words text-sm font-medium text-white/90">Contacter {recipientName}</h2>
+          <h2 id={`${id}-heading`} className="break-words text-lg font-semibold tracking-tight text-white">Contacter {recipientName}</h2>
           <p className="mt-1 text-[11px] leading-5 text-white/45">Une idée en tête ? Parlez-nous de votre projet.</p>
         </div>
-        <AppButton type="button" variant="secondary" aria-expanded={expanded} aria-controls={id + "-content"} onClick={() => setExpanded(value => !value)} className="px-3! py-2! text-xs! shadow-none!">{expanded ? "Réduire" : "Écrire un message"}<ChevronDown size={14} className={expanded ? "rotate-180 transition-transform" : "transition-transform"} /></AppButton>
+        <AppButton type="button" variant="secondary" aria-expanded={expanded} aria-controls={id + "-content"} onClick={() => setExpanded(value => !value)} className="rounded-xl! border-0! bg-white/6! px-4! py-2! text-xs! shadow-none! hover:bg-white/10!">{expanded ? "Réduire" : "Écrire un message"}<ChevronDown size={14} className={expanded ? "rotate-180 transition-transform" : "transition-transform"} /></AppButton>
       </div>
 
-      <div id={id + "-content"} hidden={!expanded} className="border-t border-white/8">
-        {messagingEnabled && (status === "unauthenticated" || session?.user?.role === "client") && <aside className="mx-4 mt-4 rounded-xl border border-tertiary-400/20 bg-linear-to-br from-tertiary-400/8 to-tertiary-500/5 p-3.5">
+      <div id={id + "-content"} hidden={!expanded} className="px-1 pb-5 sm:px-2">
+        {messagingEnabled && (status === "unauthenticated" || session?.user?.role === "client") && <aside className="mx-4 mt-2 rounded-2xl bg-linear-to-br from-tertiary-400/15 to-cuatro-500/10 p-4">
           <div className="flex items-start gap-2.5"><MessageSquare size={16} className="mt-0.5 shrink-0 text-tertiary-400" aria-hidden="true" /><div className="min-w-0"><h3 className="text-xs font-medium text-white/85">Échangez directement via la messagerie Inkera</h3><p className="mt-1 text-[11px] leading-5 text-white/55">{status === "authenticated" ? "Retrouvez vos messages et les réponses du professionnel dans votre compte Inkera." : "Créez un compte client gratuit ou connectez-vous pour échanger directement avec " + recipientName + " et retrouver toutes vos conversations dans la messagerie Inkera."}</p></div></div>
           <div className="mt-3 flex flex-wrap gap-2">{status === "authenticated" ? <StartInkeraConversationButton targetUserId={targetUserId} recipientName={recipientName} variant="compact" className="min-h-9! px-3! py-2! text-xs! shadow-none!" /> : <><AppButton href="/creer-un-compte" className="px-3! py-2! text-xs! shadow-none!">Créer un compte gratuit</AppButton><AppButton href="/se-connecter" variant="secondary" className="px-3! py-2! text-xs! shadow-none!">Se connecter</AppButton></>}</div>
         </aside>}
@@ -147,8 +147,8 @@ export default function PublicProfileContactForm({
       ) : (
         <form onSubmit={onSubmit} aria-busy={isPending} className="p-4">
           <div className="grid gap-3">
-            <fieldset disabled={isPending} className="min-w-0 space-y-3 rounded-xl border border-white/8 bg-white/[0.015] p-3 sm:p-4">
-              <legend className="mb-0 flex items-center gap-2 px-2 text-xs font-medium text-white/85"><span className="grid h-6 w-6 place-items-center rounded-lg bg-linear-to-r from-tertiary-400 to-tertiary-500 text-[10px] text-white">1</span>Vos coordonnées</legend>
+            <fieldset disabled={isPending} className="min-w-0 space-y-3 rounded-2xl bg-white/3 p-4 sm:p-5">
+              <legend className="mb-0 flex items-center gap-2 px-2 text-xs font-medium text-white/85"><span className="grid size-6 place-items-center rounded-full bg-linear-to-r from-tertiary-400 to-tertiary-500 text-[10px] text-white">1</span>Vos coordonnées</legend>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div><label htmlFor={`${id}-firstName`} className={labelClass}>Prénom</label><input id={`${id}-firstName`} name="firstName" autoComplete="given-name" value={form.firstName} onChange={handleChange} required className={fieldClass} placeholder="Votre prénom" /></div>
                 <div><label htmlFor={`${id}-lastName`} className={labelClass}>Nom</label><input id={`${id}-lastName`} name="lastName" autoComplete="family-name" value={form.lastName} onChange={handleChange} required className={fieldClass} placeholder="Votre nom" /></div>
@@ -159,8 +159,8 @@ export default function PublicProfileContactForm({
                 <p id={`${id}-email-help`} className="mt-2 flex items-center gap-1.5 text-xs leading-5 text-white/50"><Mail size={13} aria-hidden="true" />Le salon vous répondra à cette adresse.</p>
               </div>
             </fieldset>
-            <fieldset disabled={isPending} className="min-w-0 space-y-3 rounded-xl border border-white/8 bg-white/[0.015] p-3 sm:p-4">
-              <legend className="mb-0 flex items-center gap-2 px-2 text-xs font-medium text-white/85"><span className="grid h-6 w-6 place-items-center rounded-lg bg-linear-to-r from-tertiary-400 to-tertiary-500 text-[10px] text-white">2</span>Votre projet</legend>
+            <fieldset disabled={isPending} className="min-w-0 space-y-3 rounded-2xl bg-white/3 p-4 sm:p-5">
+              <legend className="mb-0 flex items-center gap-2 px-2 text-xs font-medium text-white/85"><span className="grid size-6 place-items-center rounded-full bg-linear-to-r from-tertiary-400 to-tertiary-500 text-[10px] text-white">2</span>Votre projet</legend>
               <div>
                 <label htmlFor={`${id}-bodyPart`} className={labelClass}>Zone du corps</label>
                 <select id={`${id}-bodyPart`} name="bodyPart" value={form.bodyPart} onChange={handleChange} required className={fieldClass}>
@@ -174,8 +174,8 @@ export default function PublicProfileContactForm({
               </div>
             </fieldset>
           </div>
-          {feedback && isError && <p role="alert" className="mt-4 rounded-xl border border-red-400/20 bg-red-400/5 px-4 py-3 text-sm text-red-300">{feedback} Votre saisie est conservée, vous pouvez réessayer.</p>}
-          <div className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-white/8 bg-noir-800 p-3">
+          {feedback && isError && <p role="alert" className="mt-4 rounded-2xl bg-red-400/10 px-4 py-3 text-sm text-red-300">{feedback} Votre saisie est conservée, vous pouvez réessayer.</p>}
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-white/4 p-3.5">
             <p className="text-xs text-white/45">Tous les champs sont requis.</p>
             <AppButton type="submit" variant="primary" disabled={isPending} className="min-h-10! px-4! text-xs! shadow-none! cursor-pointer">
               {isPending ? <LoaderCircle size={16} className="motion-safe:animate-spin" aria-hidden="true" /> : <ArrowUpRight size={17} aria-hidden="true" />}

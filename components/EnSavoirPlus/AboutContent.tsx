@@ -8,7 +8,8 @@ const chapters = [
   { id: "nos-engagements", label: "Nos engagements" },
   { id: "rejoindre-inkera", label: "Nous rejoindre" },
 ];
-const container = "mx-auto max-w-7xl px-4 sm:px-6 lg:px-10 xl:px-16";
+// Mêmes marges latérales que la navbar.
+const container = "px-page";
 const eyebrow = "flex items-center gap-2 text-[10px] uppercase tracking-[0.16em] text-tertiary-400";
 const title = "mt-4 text-balance text-3xl font-medium leading-[1.15] tracking-tight text-white sm:text-4xl";
 const action = "min-h-11 px-4! text-xs! shadow-none! focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-tertiary-400";

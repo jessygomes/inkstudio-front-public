@@ -262,7 +262,7 @@ export default function SearchNavbar({
             <div className="border-t border-white/10 p-1">
               <button
                 onClick={() => navigateToListing(query || "")}
-                className="cursor-pointer w-full text-[11px] md:text-xs text-white/80 hover:text-white px-2 py-1 rounded-md hover:bg-white/5"
+                className="cursor-pointer w-full text-[11px] md:text-xs text-white/80 hover:text-white px-2 py-1 rounded-xl hover:bg-white/5"
               >
                 Voir tous les résultats pour “{(query || "").trim()}”
               </button>

@@ -94,7 +94,7 @@ function getFlashDimensions(flash: FlashProps): string | null {
 }
 
   const Empty = ({ children }: { children: React.ReactNode }) => (
-    <div className="rounded-xl border border-dashed border-white/10 bg-noir-800/30 px-4 py-6 text-center text-sm text-white/50">
+    <div className="rounded-2xl bg-white/3 px-4 py-8 text-center text-sm text-white/50">
       <Images size={22} className="mx-auto mb-2 text-white/30" aria-hidden="true" />
       {children}
     </div>
@@ -125,7 +125,7 @@ function getFlashDimensions(flash: FlashProps): string | null {
               }
             }}
             disabled={current === 1}
-            className="cursor-pointer min-h-11 px-3 py-1.5 rounded-lg text-xs font-one bg-noir-800/80  hover:bg-noir-800/20  disabled:opacity-50 disabled:cursor-not-allowed text-white border border-white/15 transition"
+            className="cursor-pointer min-h-10 px-4 py-1.5 rounded-xl text-xs font-one bg-white/6 hover:bg-white/10 disabled:opacity-40 disabled:cursor-not-allowed text-white transition"
           >
             Précédent
           </button>
@@ -145,7 +145,7 @@ function getFlashDimensions(flash: FlashProps): string | null {
                     onChange(p);
                     scrollToTop();
                   }}
-                  className={`cursor-pointer w-11 h-11 rounded-lg text-xs font-one transition-all ${
+                  className={`cursor-pointer w-10 h-10 rounded-xl text-xs font-one transition-all ${
                     current === p
                       ? "bg-linear-to-r from-tertiary-400 to-tertiary-500 text-white"
                       : "bg-white/10 text-white/70 hover:bg-white/20 hover:text-white"
@@ -164,7 +164,7 @@ function getFlashDimensions(flash: FlashProps): string | null {
               }
             }}
             disabled={current === total}
-            className="cursor-pointer min-h-11 px-3 py-1.5 rounded-lg text-xs font-one bg-noir-800/80  hover:bg-noir-800/20 disabled:opacity-50 disabled:cursor-not-allowed text-white border border-white/15 transition"
+            className="cursor-pointer min-h-10 px-4 py-1.5 rounded-xl text-xs font-one bg-white/6 hover:bg-white/10 disabled:opacity-40 disabled:cursor-not-allowed text-white transition"
           >
             Suivant
           </button>
@@ -458,12 +458,12 @@ export default function SalonTabs({
 
   return (
     <section id="creations" className="scroll-mt-28" ref={sectionRef}>
-      <div className="bg-noir-800 rounded-2xl border border-white/10 p-4 font-one sm:p-6">
+      <div className="bg-noir-500 rounded-3xl p-5 font-one sm:p-7">
         <div className="mb-5 flex items-center gap-3">
-          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-tertiary-400/15 bg-tertiary-400/8 text-tertiary-400"><Images size={17} aria-hidden="true" /></span>
-          <div><p className="mb-1 text-[9px] uppercase tracking-[0.16em] text-white/35">En images</p><h2 className="text-lg font-medium text-white/90">L’univers du salon</h2><p className="mt-1 text-[11px] leading-5 text-white/40">Le lieu, les réalisations et vos prochaines inspirations.</p></div>
+          <span className="grid size-10 shrink-0 place-items-center rounded-2xl bg-linear-to-br from-tertiary-400/20 to-cuatro-500/15 text-tertiary-400"><Images size={17} aria-hidden="true" /></span>
+          <div><p className="mb-0.5 text-[10px] uppercase tracking-[0.16em] text-white/35">En images</p><h2 className="text-lg font-semibold tracking-tight text-white">L’univers du salon</h2><p className="mt-1 text-[11px] leading-5 text-white/40">Le lieu, les réalisations et vos prochaines inspirations.</p></div>
         </div>
-        <div role="tablist" aria-label="Contenus du salon" className="mb-4 grid grid-cols-2 gap-1.5 rounded-xl border border-white/8 bg-noir-800 p-1.5 sm:grid-cols-4">
+        <div role="tablist" aria-label="Contenus du salon" className="mb-4 grid grid-cols-2 gap-1 rounded-2xl bg-white/4 p-1.5 sm:grid-cols-4">
           {([
             { key: "photos", label: "Le salon", count: counts.photos, Icon: ImageIcon },
             { key: "portfolio", label: "Portfolio", count: counts.portfolio, Icon: Palette },
@@ -481,17 +481,17 @@ export default function SalonTabs({
                 setTab(tabs[nextIndex]);
                 document.getElementById(`gallery-tab-${tabs[nextIndex]}`)?.focus();
               }}
-              className={`flex min-h-10 min-w-0 cursor-pointer items-center justify-center gap-1.5 rounded-lg px-2 py-2 text-[11px] transition focus-visible:outline-2 focus-visible:outline-tertiary-400 sm:text-xs ${active === key ? "bg-linear-to-r from-tertiary-400 to-tertiary-500 text-white shadow-sm" : "text-white/50 hover:bg-white/5 hover:text-white"}`}>
+              className={`flex min-h-10 min-w-0 cursor-pointer items-center justify-center gap-1.5 rounded-xl px-2 py-2 text-[11px] transition focus-visible:outline-2 focus-visible:outline-tertiary-400 sm:text-xs ${active === key ? "bg-linear-to-r from-tertiary-400 to-tertiary-500 text-white shadow-lg shadow-tertiary-500/20" : "text-white/55 hover:bg-white/5 hover:text-white"}`}>
               <Icon size={16} className={`shrink-0 ${active === key ? "text-white" : "text-white/35"}`} aria-hidden="true" /><span>{label}</span>
-              <span className={`rounded-md px-1.5 py-0.5 text-[10px] tabular-nums ${active === key ? "bg-black/15 text-white" : "bg-white/5 text-white/40"}`}>{count}</span>
+              <span className={`rounded-xl px-1.5 py-0.5 text-[10px] tabular-nums ${active === key ? "bg-black/15 text-white" : "bg-white/5 text-white/40"}`}>{count}</span>
             </button>
           ))}
         </div>
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-white/8 bg-white/[0.015] px-3 py-2.5">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 px-1">
           <p className="text-[11px] leading-5 text-white/45">{{ photos: "Découvrez le lieu et son ambiance.", portfolio: "Les réalisations des artistes du salon.", flashes: "Des dessins disponibles pour votre prochain tatouage.", products: "Les produits proposés par le salon." }[active]}</p>
           <div className="flex flex-wrap items-center gap-2">
-            {showSortControl && <select value={flashSort} onChange={(event) => { setFlashSort(event.target.value as FlashSort); setFlashesPage(1); }} aria-label="Trier les flashs" className="min-h-9 rounded-lg border border-white/10 bg-noir-800 px-2.5 font-one text-[11px] text-white/75"><option value="default">Ordre par défaut</option><option value="price-asc">Prix croissant</option><option value="price-desc">Prix décroissant</option><option value="name-asc">Nom A → Z</option></select>}
-            {showExpandControl && <AppButton type="button" variant="secondary" onClick={() => openLightbox(0)} className="min-h-9! px-2.5! py-1.5! text-[11px]! rounded-lg! shadow-none!"><Expand size={13} aria-hidden="true" />Agrandir</AppButton>}
+            {showSortControl && <select value={flashSort} onChange={(event) => { setFlashSort(event.target.value as FlashSort); setFlashesPage(1); }} aria-label="Trier les flashs" className="min-h-9 rounded-xl bg-white/6 px-3 font-one text-[11px] text-white/80 outline-none [color-scheme:dark] focus-visible:ring-2 focus-visible:ring-tertiary-400/50"><option value="default">Ordre par défaut</option><option value="price-asc">Prix croissant</option><option value="price-desc">Prix décroissant</option><option value="name-asc">Nom A → Z</option></select>}
+            {showExpandControl && <AppButton type="button" variant="secondary" onClick={() => openLightbox(0)} className="min-h-9! border-0! bg-white/6! px-3! py-1.5! text-[11px]! rounded-xl! shadow-none! hover:bg-white/10!"><Expand size={13} aria-hidden="true" />Agrandir</AppButton>}
           </div>
         </div>
 
@@ -501,11 +501,11 @@ export default function SalonTabs({
           (counts.photos === 0 ? (
             <Empty>Aucune photo du lieu.</Empty>
           ) : (
-            <ul className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
+            <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
               {photos.map((src, i) => (
                 <li
                   key={`${src}-${i}`}
-                  className="relative aspect-3/2 rounded-xl overflow-hidden border border-white/8 bg-white/3 transition hover:border-tertiary-400/35 group cursor-zoom-in"
+                  className="relative aspect-3/2 rounded-2xl overflow-hidden bg-white/3 transition group cursor-zoom-in"
 
                 >
                   <button type="button" className="absolute inset-0 h-full w-full cursor-zoom-in" aria-label={`Agrandir la photo du salon ${i + 1}`} onClick={() => openLightbox(i)}>
@@ -531,10 +531,10 @@ export default function SalonTabs({
                 <button
                   aria-pressed={portfolioTatoueurFilter === null}
                   onClick={() => selectArtist(null)}
-                  className={`cursor-pointer min-h-11 px-3 py-1.5 rounded-lg text-xs font-one transition-all duration-200 border ${
+                  className={`cursor-pointer min-h-10 px-4 py-1.5 rounded-xl text-xs font-one transition-all duration-200 ${
                     portfolioTatoueurFilter === null
-                      ? "bg-tertiary-400/20 border-tertiary-400/40 text-white"
-                      : "border-white/15 text-white/65 hover:bg-white/8 hover:text-white"
+                      ? "bg-linear-to-r from-tertiary-400/25 to-cuatro-500/20 text-white"
+                      : "bg-white/5 text-white/65 hover:bg-white/8 hover:text-white"
                   }`}
                 >
                   Tous
@@ -548,10 +548,10 @@ export default function SalonTabs({
                         portfolioTatoueurFilter === t.id ? null : t.id,
                       )
                     }
-                    className={`cursor-pointer min-h-11 px-3 py-1.5 rounded-lg text-xs font-one transition-all duration-200 border ${
+                    className={`cursor-pointer min-h-10 px-4 py-1.5 rounded-xl text-xs font-one transition-all duration-200 ${
                       portfolioTatoueurFilter === t.id
-                        ? "bg-tertiary-400/20 border-tertiary-400/40 text-white"
-                        : "border-white/15 text-white/65 hover:bg-white/8 hover:text-white"
+                        ? "bg-linear-to-r from-tertiary-400/25 to-cuatro-500/20 text-white"
+                        : "bg-white/5 text-white/65 hover:bg-white/8 hover:text-white"
                     }`}
                   >
                     {t.name}
@@ -572,7 +572,7 @@ export default function SalonTabs({
                   return (
                     <li
                       key={item.id}
-                      className="group flex min-w-0 flex-col rounded-xl border border-white/8 bg-white/[0.015] overflow-hidden transition hover:border-tertiary-400/30"
+                      className="group flex min-w-0 flex-col rounded-2xl bg-white/4 overflow-hidden transition hover:bg-white/7"
                     >
                       <button
                         className="relative block aspect-4/3 w-full shrink-0 cursor-zoom-in overflow-hidden"
@@ -625,7 +625,7 @@ export default function SalonTabs({
                   return (
                     <li
                       key={f.id}
-                      className="group flex min-w-0 flex-col rounded-xl border border-white/8 bg-white/[0.015] overflow-hidden transition hover:border-tertiary-400/30"
+                      className="group flex min-w-0 flex-col rounded-2xl bg-white/4 overflow-hidden transition hover:bg-white/7"
                     >
                       <button
                         type="button"
@@ -684,7 +684,7 @@ export default function SalonTabs({
                             <AppButton
                               href={`${bookingPath}?prestation=TATTOO&flashId=${encodeURIComponent(f.id)}`}
                               fullWidth
-                              className="min-h-9! justify-between! px-2.5! py-2! text-[11px]! rounded-lg! shadow-none! hover:translate-y-0!"
+                              className="min-h-9! justify-between! px-3.5! py-2! text-[11px]! rounded-xl! shadow-none! hover:translate-y-0!"
                             >
                               Réserver <ArrowUpRight size={13} className="text-white" aria-hidden="true" />
                             </AppButton>
@@ -714,7 +714,7 @@ export default function SalonTabs({
                 {productsPageItems.map((p) => (
                   <li
                     key={p.id}
-                    className="group flex min-w-0 flex-col rounded-xl border border-white/8 bg-white/[0.015] overflow-hidden transition hover:border-tertiary-400/30"
+                    className="group flex min-w-0 flex-col rounded-2xl bg-white/4 overflow-hidden transition hover:bg-white/7"
                   >
                     <div className="relative aspect-4/3 shrink-0 bg-noir-800">
                       <Image
@@ -783,7 +783,7 @@ export default function SalonTabs({
               <button
                 onClick={closeLightbox}
                 aria-label="Fermer"
-                className="cursor-pointer absolute top-3 right-3 px-2 py-0.5 rounded-2xl bg-white/10 hover:bg-white/20 text-white border border-white/20"
+                className="cursor-pointer absolute top-3 right-3 px-2 py-0.5 rounded-xl bg-white/10 hover:bg-white/20 text-white"
               >
                 ✕
               </button>
@@ -793,14 +793,14 @@ export default function SalonTabs({
                   <button
                     onClick={prev}
                     aria-label="Précédent"
-                    className="cursor-pointer absolute left-3 top-1/2 -translate-y-1/2 px-3 pb-0.5 rounded-2xl bg-white/10 hover:bg-white/20 text-white text-2xl border border-white/20"
+                    className="cursor-pointer absolute left-3 top-1/2 -translate-y-1/2 px-3 pb-0.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-2xl"
                   >
                     ‹
                   </button>
                   <button
                     onClick={next}
                     aria-label="Suivant"
-                    className="cursor-pointer absolute right-3 top-1/2 -translate-y-1/2 px-3 pb-0.5 rounded-2xl bg-white/10 hover:bg-white/20 text-white text-2xl border border-white/20"
+                    className="cursor-pointer absolute right-3 top-1/2 -translate-y-1/2 px-3 pb-0.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-2xl"
                   >
                     ›
                   </button>

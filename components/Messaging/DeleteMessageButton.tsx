@@ -137,14 +137,14 @@ export default function DeleteMessageButton({
               <button
                 onClick={() => setIsModalOpen(false)}
                 disabled={isDeleting}
-                className="cursor-pointer px-4 py-2 rounded-lg bg-noir-800 border border-white/10 text-white/70 hover:text-white hover:bg-noir-800/80 transition-all duration-200 text-sm font-one disabled:opacity-50 disabled:cursor-not-allowed"
+                className="cursor-pointer px-4 py-2 rounded-xl bg-noir-800 border border-white/10 text-white/70 hover:text-white hover:bg-noir-800/80 transition-all duration-200 text-sm font-one disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Annuler
               </button>
               <button
                 onClick={handleDelete}
                 disabled={isDeleting}
-                className="cursor-pointer px-4 py-2 rounded-lg bg-red-500/20 border border-red-500/50 text-red-400 hover:bg-red-500/30 hover:border-red-500/70 transition-all duration-200 text-sm font-one disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="cursor-pointer px-4 py-2 rounded-xl bg-red-500/20 border border-red-500/50 text-red-400 hover:bg-red-500/30 hover:border-red-500/70 transition-all duration-200 text-sm font-one disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
                 {isDeleting ? (
                   <>

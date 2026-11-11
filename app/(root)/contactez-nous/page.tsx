@@ -117,7 +117,7 @@ export default function ContactPage() {
   return (
     <>
       <Script id="contact-jsonld" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <main className="min-h-[65vh] bg-noir-800 px-4 pb-14 pt-4 font-one sm:px-6 sm:pb-20 sm:pt-5 lg:px-10 xl:px-16">
+      <main className="min-h-[65vh] bg-noir-800 px-page pb-14 pt-4 font-one sm:pb-20 sm:pt-5">
         <header className="flex items-start gap-3 py-1 sm:py-2">
           <span className="mt-0.5 grid size-9 shrink-0 place-items-center rounded-xl border border-tertiary-400/15 bg-tertiary-400/8 text-tertiary-400"><MessagesSquare size={17} aria-hidden="true" /></span>
           <div><p className="mb-1 text-[9px] uppercase tracking-[0.16em] text-white/35">Gardons le lien</p><h1 className="text-xl font-medium leading-tight tracking-tight text-white sm:text-2xl">Parlons de ce qui vous amène.</h1><p className="mt-1 text-xs leading-5 text-white/45">Une question, une idée ou besoin d’aide ? L’équipe Inkera est à votre écoute.</p></div>
@@ -126,7 +126,7 @@ export default function ContactPage() {
         <div className="mt-6 grid items-start gap-5 lg:grid-cols-[1.1fr_0.9fr] lg:gap-8">
           <section aria-labelledby="contact-title" className="overflow-hidden rounded-2xl border border-white/8 bg-linear-to-br from-white/[0.035] to-transparent">
             <div className="border-b border-white/8 p-5 sm:p-6">
-              <div className="flex items-start justify-between gap-3"><span className="grid size-10 place-items-center rounded-xl border border-tertiary-400/15 bg-tertiary-400/8 text-tertiary-400"><Mail size={19} aria-hidden="true" /></span><span className="inline-flex items-center gap-1.5 rounded-full border border-white/8 bg-white/[0.025] px-2.5 py-1 text-[10px] text-white/45"><Clock3 size={11} aria-hidden="true" />24–48 h ouvrées</span></div>
+              <div className="flex items-start justify-between gap-3"><span className="grid size-10 place-items-center rounded-xl border border-tertiary-400/15 bg-tertiary-400/8 text-tertiary-400"><Mail size={19} aria-hidden="true" /></span><span className="inline-flex items-center gap-1.5 rounded-xl border border-white/8 bg-white/[0.025] px-2.5 py-1 text-[10px] text-white/45"><Clock3 size={11} aria-hidden="true" />24–48 h ouvrées</span></div>
               <h2 id="contact-title" className="mt-5 text-xl font-medium tracking-tight text-white/90 sm:text-2xl">Un message, et on échange.</h2>
               <p className="mt-2 max-w-md text-xs leading-6 text-white/45">Choisissez le sujet qui correspond à votre demande pour nous écrire directement depuis votre messagerie.</p>
               <a href={`mailto:${email}`} className="mt-4 inline-flex min-h-10 max-w-full items-center gap-2 text-sm text-tertiary-400 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-tertiary-400"><span className="break-all">{email}</span><ArrowUpRight size={15} className="shrink-0" aria-hidden="true" /></a>

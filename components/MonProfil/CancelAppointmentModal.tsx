@@ -20,7 +20,7 @@ export default function CancelAppointmentModal({
 
   return (
     <div className="fixed inset-0 bg-noir-800/80 backdrop-blur-sm flex items-center justify-center z-10000 p-4">
-      <div className="bg-gradient-to-br from-white/[0.12] to-white/[0.06] backdrop-blur-xl border border-white/20 rounded-xl p-6 max-w-md w-full shadow-2xl">
+      <div className="bg-gradient-to-br from-white/[0.12] to-white/[0.06] backdrop-blur-xl rounded-xl p-6 max-w-md w-full shadow-2xl">
         <h3 className="text-white font-one font-semibold text-xl mb-4">
           Annuler le rendez-vous
         </h3>
@@ -38,7 +38,7 @@ export default function CancelAppointmentModal({
             value={reason}
             onChange={(e) => onReasonChange(e.target.value)}
             placeholder="Ex: Empêchement personnel, changement de planning..."
-            className="w-full p-3 bg-white/5 border border-white/20 rounded-lg text-white text-sm focus:outline-none focus:border-tertiary-400 focus:ring-2 focus:ring-tertiary-400/20 transition-all duration-300 resize-none"
+            className="w-full p-3 bg-white/5 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-tertiary-400/20 transition-all duration-300 resize-none"
             rows={3}
           />
         </div>
@@ -47,14 +47,14 @@ export default function CancelAppointmentModal({
           <button
             onClick={onClose}
             disabled={isLoading}
-            className="cursor-pointer flex-1 px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white border border-white/20 hover:border-white/30 rounded-lg font-one text-sm transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="cursor-pointer flex-1 px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-xl font-one text-sm transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Retour
           </button>
           <button
             onClick={onConfirm}
             disabled={isLoading}
-            className="cursor-pointer flex-1 px-4 py-2.5 bg-red-500/20 hover:bg-red-500/30 text-red-300 hover:text-red-200 border border-red-500/30 hover:border-red-400/50 rounded-lg font-one text-sm transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="cursor-pointer flex-1 px-4 py-2.5 bg-red-500/20 hover:bg-red-500/30 text-red-300 hover:text-red-200 rounded-xl font-one text-sm transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading ? (
               <span className="flex items-center justify-center gap-2">

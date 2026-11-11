@@ -56,7 +56,7 @@ export default function NavbarMobile() {
     <nav aria-label="Navigation mobile" className="ml-auto font-one">
       <div className="flex items-center gap-2 text-white">
         {authenticated ? (
-          <Link href="/mon-profil" aria-label="Mon compte client" className="relative flex size-10 items-center justify-center rounded-xl border border-white/15 bg-noir-800 focus-visible:outline-2 focus-visible:outline-tertiary-400">
+          <Link href="/mon-profil" aria-label="Mon compte client" className="relative flex size-10 items-center justify-center overflow-hidden rounded-xl bg-white/6 focus-visible:outline-2 focus-visible:outline-tertiary-400">
             {session.user.image ? <Image src={session.user.image} alt="" fill sizes="40px" className="rounded-xl object-cover" /> : <UserRound size={18} aria-hidden="true" />}
             {unreadCount > 0 && <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-tertiary-500 px-1 text-[9px] text-white">{unreadCount > 99 ? "99+" : unreadCount}</span>}
           </Link>
@@ -68,7 +68,7 @@ export default function NavbarMobile() {
         <dialog ref={dialogRef} id="mobile-navigation" aria-labelledby="mobile-navigation-title" onCancel={close} onClick={event => { if (event.target === event.currentTarget) close(); }} className="fixed inset-y-0 left-auto right-0 m-0 ml-auto h-dvh max-h-dvh w-[calc(100%_-_1rem)] max-w-[390px] border-0 border-l border-white/10 bg-noir-800 p-0 text-white shadow-2xl backdrop:bg-black/65 backdrop:backdrop-blur-sm">
           <div className="flex h-full flex-col">
             <div className="flex shrink-0 items-center justify-between gap-4 border-b border-white/10 px-5 py-5">
-              <Link href="/" onClick={close}><Image src="/logo/logo_inline_people_white.png" alt="Inkera People — Accueil" width={150} height={50} className="h-auto w-32" /></Link>
+              <Link href="/" onClick={close}><Image src="/logo/Logo16.png" alt="Inkera — Accueil" width={80} height={80} className="size-8 object-contain" /></Link>
               <button type="button" onClick={close} aria-label="Fermer le menu" className="flex size-9 items-center justify-center rounded-xl border border-white/10 text-white/60 transition hover:bg-white/5 hover:text-white focus-visible:outline-2 focus-visible:outline-tertiary-400"><X size={18} aria-hidden="true" /></button>
             </div>
 

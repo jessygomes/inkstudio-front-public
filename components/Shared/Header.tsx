@@ -41,7 +41,7 @@ export default function Header() {
       </div>
 
       <div
-        className={`lg:hidden py-2 px-4 flex justify-between items-center transition-all duration-300 ${
+        className={`lg:hidden py-2 px-page flex justify-between items-center transition-all duration-300 ${
           showTransparentHeader
             ? "bg-transparent"
             : "bg-noir-800 backdrop-blur-sm"

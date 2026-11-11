@@ -1,41 +1,81 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
-import AppButton from "@/components/Shared/AppButton";
+import { ArrowUpRight, BookOpen, Clock3 } from "lucide-react";
 import type { PublicArticle } from "@/lib/actions/article.action";
 
 function excerpt(content: string) {
   return content.replace(/<[^>]*>/g, " ").replace(/!\[[^\]]*\]\([^)]*\)/g, "").replace(/\[([^\]]+)\]\([^)]*\)/g, "$1").replace(/(^|\n)#{1,6}\s*/g, "$1").replace(/[*_~`]/g, "").replace(/\s+/g, " ").trim();
 }
 
-function JournalCard({ article, featured = false }: { article: PublicArticle; featured?: boolean }) {
-  const date = new Date(article.createdAt);
-  const image = article.imageUrls?.[0];
-  const href = "/journal/" + article.id;
+function hasAuthor(author?: string | null) {
+  return !!author && !/^(none|null|undefined)$/i.test(author.trim());
+}
 
+function meta(article: PublicArticle) {
+  const date = new Date(article.createdAt);
+  const text = excerpt(article.content);
+  return {
+    href: "/journal/" + article.id,
+    image: article.imageUrls?.[0],
+    text,
+    minutes: Math.max(1, Math.ceil(text.split(/\s+/).filter(Boolean).length / 200)),
+    date: Number.isNaN(date.getTime()) ? null : date,
+  };
+}
+
+function Visual({ image, sizes, className }: { image?: string; sizes: string; className: string }) {
   return (
-    <article className={featured
-      ? "group grid min-w-0 gap-5 bg-noir-800 sm:grid-cols-[0.85fr_1.15fr]"
-      : "group grid min-w-0 grid-cols-[72px_minmax(0,1fr)] gap-4 border-b border-white/10 bg-noir-800 pb-5 last:border-0 last:pb-0 sm:grid-cols-[88px_minmax(0,1fr)]"}>
-      <Link href={href} aria-label={"Lire l’article : " + article.title} className={featured
-        ? "relative block h-36 overflow-hidden rounded-2xl bg-noir-800 sm:h-full sm:min-h-56"
-        : "relative block h-24 overflow-hidden rounded-xl bg-noir-800 sm:h-28"}>
-        {image ? <Image src={image} alt="" fill sizes={featured ? "(min-width: 1024px) 22vw, (min-width: 640px) 35vw, 100vw" : "88px"} className="object-cover transition duration-500 motion-safe:group-hover:scale-105" />
-          : <div className="absolute inset-0 flex items-center justify-center text-center font-two text-xs tracking-widest text-white/25">INKERA<br />JOURNAL</div>}
-      </Link>
-      <div className="flex min-w-0 flex-col items-start">
-        {featured && <p className="mb-3 flex items-center gap-2 text-[10px] uppercase tracking-wider text-tertiary-400"><span className="size-1.5 rounded-full bg-tertiary-400" aria-hidden="true" />À la une</p>}
-        <div className="flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-white/55">
-          <span>{article.author}</span>
-          {!Number.isNaN(date.getTime()) && <time dateTime={date.toISOString()}>{date.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric", timeZone: "Europe/Paris" })}</time>}
-        </div>
-        <h3 className={featured ? "mt-2 line-clamp-3 wrap-anywhere font-two text-xl leading-snug text-white sm:text-[22px]" : "mt-2 line-clamp-2 wrap-anywhere font-two text-base leading-snug text-white"}>
-          <Link href={href} className="transition-colors hover:text-tertiary-400">{article.title}</Link>
-        </h3>
-        <p className={featured ? "mb-4 mt-3 line-clamp-5 wrap-anywhere text-[13px] leading-6 text-white/60" : "mb-3 mt-2 line-clamp-2 wrap-anywhere text-xs leading-6 text-white/60"}>{excerpt(article.content)}</p>
-        <div className="mt-auto"><AppButton href={href} variant="secondary" icon={<ArrowUpRight size={13} aria-hidden="true" />} aria-label={"Lire l’article : " + article.title} className="px-3! py-1.5! text-[11px]! shadow-none!">Lire l’article</AppButton></div>
+    <div className={`relative overflow-hidden rounded-2xl bg-white/4 ${className}`}>
+      {image
+        ? <Image src={image} alt="" fill sizes={sizes} className="object-cover transition-transform duration-500 motion-safe:group-hover:scale-[1.04]" />
+        : <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-linear-to-br from-tertiary-400/20 via-tertiary-500/8 to-cuatro-500/15 text-tertiary-400/60"><BookOpen size={24} aria-hidden="true" /><span className="text-[10px] uppercase tracking-[0.2em]">Le journal Inkera</span></div>}
+    </div>
+  );
+}
+
+/** Article à la une : grande carte avec visuel, extrait et durée de lecture. */
+function FeaturedCard({ article }: { article: PublicArticle }) {
+  const { href, image, text, minutes, date } = meta(article);
+  return (
+    <Link href={href} className="group flex h-full flex-col rounded-3xl bg-noir-700 p-2 transition-colors hover:bg-noir-500 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-tertiary-400">
+      <div className="relative">
+        <Visual image={image} sizes="(min-width: 1024px) 55vw, 100vw" className="aspect-16/9" />
+        <span className="absolute left-3 top-3 rounded-xl bg-linear-to-r from-tertiary-400 to-tertiary-500 px-2.5 py-1 text-[10px] font-medium uppercase tracking-wider text-white">À la une</span>
       </div>
-    </article>
+      <div className="flex flex-1 flex-col px-3 pb-3 pt-5 sm:px-4">
+        <p className="flex flex-wrap items-center gap-x-2 text-[11px] text-white/45">
+          {date && <time dateTime={date.toISOString()} className="capitalize">{date.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric", timeZone: "Europe/Paris" })}</time>}
+          <span aria-hidden="true">·</span><span className="inline-flex items-center gap-1"><Clock3 size={11} aria-hidden="true" />{minutes} min</span>
+          {hasAuthor(article.author) && <><span aria-hidden="true">·</span><span className="text-white/65">{article.author}</span></>}
+        </p>
+        <h3 className="mt-2 line-clamp-2 wrap-anywhere font-two text-xl font-bold uppercase leading-snug tracking-wide text-white transition-colors group-hover:text-tertiary-400 sm:text-2xl">{article.title}</h3>
+        {text && <p className="mt-3 line-clamp-3 wrap-anywhere text-sm leading-6 text-white/55">{text}</p>}
+        <span className="mt-auto inline-flex items-center gap-1.5 pt-5 text-xs font-medium text-white/75 transition-colors group-hover:text-tertiary-400">Lire l’article<ArrowUpRight size={14} aria-hidden="true" className="transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" /></span>
+      </div>
+    </Link>
+  );
+}
+
+/** Article secondaire : visuel plein cadre, texte posé sur un dégradé (occupe toute la hauteur disponible). */
+function CompactCard({ article }: { article: PublicArticle }) {
+  const { href, image, minutes, date } = meta(article);
+  return (
+    <Link href={href} className="group relative flex min-h-56 overflow-hidden rounded-3xl bg-noir-700 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-tertiary-400 lg:min-h-0">
+      {image
+        ? <Image src={image} alt="" fill sizes="(min-width: 1024px) 40vw, 100vw" className="object-cover transition-transform duration-500 motion-safe:group-hover:scale-[1.04]" />
+        : <div aria-hidden="true" className="absolute inset-0 bg-linear-to-br from-tertiary-400/25 via-tertiary-500/10 to-cuatro-500/20" />}
+      <div aria-hidden="true" className="absolute inset-0 bg-linear-to-t from-noir-900/95 via-noir-900/50 to-transparent" />
+      <div className="relative mt-auto flex w-full items-end justify-between gap-4 p-5">
+        <div className="min-w-0">
+          <p className="flex flex-wrap items-center gap-x-2 text-[11px] text-white/60">
+            {date && <time dateTime={date.toISOString()}>{date.toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric", timeZone: "Europe/Paris" })}</time>}
+            <span aria-hidden="true">·</span><span>{minutes} min</span>
+          </p>
+          <h3 className="mt-1.5 line-clamp-2 wrap-anywhere text-lg font-semibold leading-snug text-white transition-colors group-hover:text-tertiary-400">{article.title}</h3>
+        </div>
+        <span aria-hidden="true" className="grid size-10 shrink-0 place-items-center rounded-xl bg-white/10 text-white backdrop-blur-md transition group-hover:bg-linear-to-br group-hover:from-tertiary-400 group-hover:to-tertiary-500"><ArrowUpRight size={16} /></span>
+      </div>
+    </Link>
   );
 }
 
@@ -47,14 +87,21 @@ export default function HomeJournalView({ articles }: { articles: PublicArticle[
 
   return (
     <section aria-labelledby="home-journal-title" className="bg-noir-800 font-one">
-      <div className="mx-4 sm:mx-8 lg:mx-20">
-        <div className="mb-8 flex flex-col justify-between gap-5 sm:mb-10 sm:flex-row sm:items-end">
-          <div><p className="text-[11px] uppercase tracking-[0.2em] text-tertiary-400">Le journal Inkera</p><h2 id="home-journal-title" className="mt-3 whitespace-nowrap font-two text-[clamp(0.875rem,3.1vw,2.25rem)] font-medium uppercase leading-tight tracking-tight text-white">Un autre regard sur le tatouage<span className="text-tertiary-400">.</span></h2></div>
-          <AppButton href="/journal" variant="secondary" icon={<ArrowUpRight size={14} aria-hidden="true" />} className="self-start px-4! text-xs! sm:self-auto">Tout le journal</AppButton>
+      <div className="mx-page">
+        <header className="mb-10 flex flex-col items-center text-center sm:mb-12">
+          <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-white/60">Le journal Inkera</p>
+          <h2 id="home-journal-title" className="mt-1.5 font-two text-2xl font-bold uppercase leading-tight tracking-wide text-white sm:text-4xl">Un autre regard sur le tatouage</h2>
+          <p className="mt-4 max-w-lg text-sm leading-6 text-white/55 sm:text-base sm:leading-7">Rencontres, conseils et coulisses : tout ce qui fait vivre le tatouage aujourd’hui.</p>
+          <span aria-hidden="true" className="mt-6 h-px w-24 bg-linear-to-r from-transparent via-tertiary-400/70 to-transparent" />
+        </header>
+
+        <div className="grid gap-3 lg:grid-cols-[1.4fr_1fr] lg:gap-4">
+          <FeaturedCard article={latest} />
+          {others.length > 0 && <div className={`grid gap-3 lg:gap-4 ${others.length > 1 ? "lg:grid-rows-2" : ""}`}>{others.map(article => <CompactCard key={article.id} article={article} />)}</div>}
         </div>
-        <div className="grid items-start gap-7 lg:grid-cols-[1.3fr_1fr] lg:gap-8">
-          <JournalCard article={latest} featured />
-          {others.length > 0 && <div className="grid gap-5 border-t border-white/10 pt-6 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">{others.map(article => <JournalCard key={article.id} article={article} />)}</div>}
+
+        <div className="mt-8 flex justify-center">
+          <Link href="/journal" className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-white/6 px-5 text-sm font-medium text-white/85 transition hover:bg-white/10 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-tertiary-400">Tout le journal<ArrowUpRight size={15} aria-hidden="true" /></Link>
         </div>
       </div>
     </section>

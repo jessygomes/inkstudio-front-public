@@ -38,21 +38,21 @@ export default function CookieBanner() {
                   <div className="flex flex-wrap gap-2">
                     <button
                       onClick={acceptAll}
-                      className="cursor-pointer px-4 py-1.5 bg-gradient-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white rounded-lg transition-all duration-300 font-medium font-one text-xs"
+                      className="cursor-pointer px-4 py-1.5 bg-gradient-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white rounded-xl transition-all duration-300 font-medium font-one text-xs"
                     >
                       Accepter
                     </button>
 
                     <button
                       onClick={() => setShowDetails(true)}
-                      className="cursor-pointer px-4 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded-lg border border-white/20 transition-colors font-medium font-one text-xs"
+                      className="cursor-pointer px-4 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded-xl border border-white/20 transition-colors font-medium font-one text-xs"
                     >
                       Détails
                     </button>
 
                     {/* <button
                       onClick={rejectAll}
-                      className="cursor-pointer px-4 py-1.5 bg-white/5 hover:bg-white/10 text-white/70 hover:text-white rounded-lg transition-colors font-medium font-one text-xs"
+                      className="cursor-pointer px-4 py-1.5 bg-white/5 hover:bg-white/10 text-white/70 hover:text-white rounded-xl transition-colors font-medium font-one text-xs"
                     >
                       Refuser
                     </button> */}
@@ -61,7 +61,7 @@ export default function CookieBanner() {
 
                 <button
                   onClick={hideBanner}
-                  className="cursor-pointer w-6 h-6 bg-white/10 hover:bg-white/20 rounded-lg flex items-center justify-center text-white/70 hover:text-white transition-colors flex-shrink-0"
+                  className="cursor-pointer w-6 h-6 bg-white/10 hover:bg-white/20 rounded-xl flex items-center justify-center text-white/70 hover:text-white transition-colors flex-shrink-0"
                 >
                   <FaTimes className="w-3 h-3" />
                 </button>
@@ -122,7 +122,7 @@ function CookieDetailsModal({
         </h3>
         <button
           onClick={onClose}
-          className="cursor-pointer w-6 h-6 bg-white/10 hover:bg-white/20 rounded-lg flex items-center justify-center text-white/70 hover:text-white transition-colors"
+          className="cursor-pointer w-6 h-6 bg-white/10 hover:bg-white/20 rounded-xl flex items-center justify-center text-white/70 hover:text-white transition-colors"
         >
           <FaTimes className="w-3 h-3" />
         </button>
@@ -176,28 +176,28 @@ function CookieDetailsModal({
       <div className="flex flex-col sm:flex-row justify-end gap-3 mt-8 pt-6 border-t border-white/10">
         <button
           onClick={onBack}
-          className="cursor-pointer px-4 py-2 bg-white/5 hover:bg-white/10 text-white/70 hover:text-white rounded-lg transition-colors font-medium font-one text-sm"
+          className="cursor-pointer px-4 py-2 bg-white/5 hover:bg-white/10 text-white/70 hover:text-white rounded-xl transition-colors font-medium font-one text-sm"
         >
           ← Retour
         </button>
 
         <button
           onClick={onRejectAll}
-          className="cursor-pointer px-4 py-2 bg-red-600/80 hover:bg-red-600 text-white rounded-lg transition-colors font-medium font-one text-sm"
+          className="cursor-pointer px-4 py-2 bg-red-600/80 hover:bg-red-600 text-white rounded-xl transition-colors font-medium font-one text-sm"
         >
           Tout refuser
         </button>
 
         <button
           onClick={handleSavePreferences}
-          className="w-fit cursor-pointer px-4 py-2 bg-gradient-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white rounded-lg transition-all duration-300 font-medium font-one text-sm"
+          className="w-fit cursor-pointer px-4 py-2 bg-gradient-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white rounded-xl transition-all duration-300 font-medium font-one text-sm"
         >
           Sauvegarder
         </button>
 
         <button
           onClick={onAcceptAll}
-          className="cursor-pointer px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors font-medium font-one text-sm"
+          className="cursor-pointer px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-xl transition-colors font-medium font-one text-sm"
         >
           Tout accepter
         </button>

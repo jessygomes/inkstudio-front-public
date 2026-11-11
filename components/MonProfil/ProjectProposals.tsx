@@ -141,12 +141,12 @@ export default function ProjectProposals({
                   maxLength={3000}
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
-                  className="mt-1 w-full rounded-lg border border-white/20 bg-noir-800 p-2"
+                  className="mt-1 w-full rounded-2xl bg-white/5 p-3"
                 />
               </label>
               <button
                 disabled={busy !== null}
-                className="min-h-11 rounded-lg border border-red-300 px-3"
+                className="min-h-11 rounded-xl bg-white/6 px-4 transition hover:bg-white/10"
               >
                 Envoyer le signalement
               </button>

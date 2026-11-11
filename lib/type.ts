@@ -359,10 +359,15 @@ export type SalonSummary = {
   id: string; // = userId du salon
   name: string;
   image?: string | null;
+  profileImage?: string | null;
+  email?: string | null;
+  phone?: string | null;
   address?: string | null;
   city?: string | null;
   postalCode?: string | null;
   salonHours?: string | null;
+  /** Lien vers le profil public du salon / tatoueur. */
+  profileHref?: string | null;
   tatoueurs?: Tatoueur[] | null;
   prestations: string[];
   addConfirmationEnabled: boolean;
@@ -371,6 +376,8 @@ export type SalonSummary = {
   projectAppointmentDurationMinutes?: number | null;
   projectAppointmentIsFree?: boolean | null;
   projectAppointmentPrice?: number | null;
+  /** false : aucune réservation pour aujourd'hui (Europe/Paris). */
+  allowSameDayBooking?: boolean;
 };
 
 export type Props = {

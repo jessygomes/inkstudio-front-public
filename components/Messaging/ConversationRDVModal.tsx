@@ -49,7 +49,7 @@ export default function ConversationRDVModal({
             <button
               type="button"
               onClick={onClose}
-              className="w-full cursor-pointer rounded-lg border border-white/20 bg-white/10 py-3 text-sm font-medium text-white transition-colors hover:bg-white/20 font-one"
+              className="w-full cursor-pointer rounded-xl border border-white/20 bg-white/10 py-3 text-sm font-medium text-white transition-colors hover:bg-white/20 font-one"
             >
               Fermer
             </button>

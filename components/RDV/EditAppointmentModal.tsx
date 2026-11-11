@@ -21,6 +21,7 @@ import { parseSalonHours } from "@/lib/horaireHelper";
 import { toSlug } from "@/lib/utils";
 import { Appointment } from "@/components/MonProfil/RendezVousTab";
 import { useSession } from "next-auth/react";
+import { SAME_DAY_BOOKING_MESSAGE, addDaysToDateKey, getParisTodayKey } from "@/lib/booking-link";
 
 // Types locaux pour les données de créneaux
 type TimeSlot = {
@@ -81,6 +82,12 @@ const EditAppointmentModal: React.FC<EditAppointmentModalProps> = ({
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
   const [occupiedSlots, setOccupiedSlots] = useState<OccupiedSlot[]>([]);
   const [blockedSlots, setBlockedSlots] = useState<BlockedSlot[]>([]);
+  const [allowSameDayBooking, setAllowSameDayBooking] = useState(true);
+  const [slotsReloadKey, setSlotsReloadKey] = useState(0);
+  // « Aujourd'hui » en Europe/Paris, pas dans le fuseau du navigateur.
+  const todayKey = getParisTodayKey();
+  const minDateKey = allowSameDayBooking ? todayKey : addDaysToDateKey(todayKey, 1);
+  const sameDayBlocked = !allowSameDayBooking && selectedDate === todayKey;
 
   const parsedSalonHours = useMemo(
     () => parseSalonHours(appointment.salon.salonHours ?? null),
@@ -129,6 +136,7 @@ const EditAppointmentModal: React.FC<EditAppointmentModalProps> = ({
         const res = await fetch(url, { cache: "no-store" });
         if (!res.ok) throw new Error("Impossible de récupérer les artistes");
         const data = await res.json();
+        setAllowSameDayBooking(data?.allowSameDayBooking !== false);
         const list: Tatoueur[] = Array.isArray(data?.Tatoueur)
           ? data.Tatoueur
           : data?.Tatoueur
@@ -153,6 +161,12 @@ const EditAppointmentModal: React.FC<EditAppointmentModalProps> = ({
   useEffect(() => {
     const fetchSlots = async () => {
       if (!selectedTatoueur || !selectedDate) return;
+      if (sameDayBlocked) {
+        setTimeSlots([]);
+        setOccupiedSlots([]);
+        setBlockedSlots([]);
+        return;
+      }
       try {
         setIsLoadingSlots(true);
         const [slotsRes, occupiedRes, blockedRes] = await Promise.all([
@@ -191,7 +205,7 @@ const EditAppointmentModal: React.FC<EditAppointmentModalProps> = ({
     };
 
     fetchSlots();
-  }, [selectedDate, selectedTatoueur]);
+  }, [selectedDate, selectedTatoueur, sameDayBlocked, slotsReloadKey]);
 
   const slotSet = useMemo(
     () => new Set(timeSlots.map((s) => s.start)),
@@ -259,6 +273,14 @@ const EditAppointmentModal: React.FC<EditAppointmentModalProps> = ({
         tatoueurId: selectedTatoueur,
       });
 
+      if (!result.ok && result.code === "SAME_DAY_BOOKING_DISABLED") {
+        toast.error(`${SAME_DAY_BOOKING_MESSAGE}.`);
+        setAllowSameDayBooking(false);
+        setSelectedSlot("");
+        setSlotsReloadKey((key) => key + 1);
+        return;
+      }
+
       if (!result.ok) {
         toast.error(result.message || "Impossible de modifier le rendez-vous");
         return;
@@ -292,7 +314,7 @@ const EditAppointmentModal: React.FC<EditAppointmentModalProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="cursor-pointer px-3 py-1.5 text-white/70 hover:text-white bg-white/5 hover:bg-white/10 rounded-lg text-sm border border-white/10"
+            className="cursor-pointer px-3 py-1.5 text-white/70 hover:text-white bg-white/5 hover:bg-white/10 rounded-xl text-sm border border-white/10"
           >
             Fermer
           </button>
@@ -329,6 +351,7 @@ const EditAppointmentModal: React.FC<EditAppointmentModalProps> = ({
             <label className="text-white/80 text-xs font-one">Date</label>
             <input
               type="date"
+              min={minDateKey}
               value={selectedDate}
               onChange={(e) => {
                 setSelectedDate(e.target.value);
@@ -368,6 +391,10 @@ const EditAppointmentModal: React.FC<EditAppointmentModalProps> = ({
             <div className="flex justify-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-2 border-tertiary-400 border-t-transparent"></div>
             </div>
+          ) : sameDayBlocked ? (
+            <div className="text-white/60 text-sm font-one py-6 text-center bg-white/5 rounded-lg border border-white/10">
+              {SAME_DAY_BOOKING_MESSAGE}. Choisissez une autre date.
+            </div>
           ) : timeSlots.length === 0 ? (
             <div className="text-white/60 text-sm font-one py-6 text-center bg-white/5 rounded-lg border border-white/10">
               Aucun créneau pour cette date.
@@ -388,7 +415,7 @@ const EditAppointmentModal: React.FC<EditAppointmentModalProps> = ({
                     key={slot.start}
                     disabled={!available}
                     onClick={() => setSelectedSlot(slot.start)}
-                    className={`cursor-pointer px-3 py-2 rounded-lg text-xs font-one border transition-all duration-200 text-left ${
+                    className={`cursor-pointer px-3 py-2 rounded-xl text-xs font-one border transition-all duration-200 text-left ${
                       selected
                         ? "bg-tertiary-500 text-white border-tertiary-400 shadow-lg"
                         : available
@@ -408,7 +435,7 @@ const EditAppointmentModal: React.FC<EditAppointmentModalProps> = ({
         <div className="mt-6 flex flex-col sm:flex-row gap-3 sm:justify-end">
           <button
             onClick={onClose}
-            className="cursor-pointer px-4 py-2 rounded-lg border border-white/15 text-white/80 hover:text-white hover:bg-white/10 text-sm font-one"
+            className="cursor-pointer px-4 py-2 rounded-xl border border-white/15 text-white/80 hover:text-white hover:bg-white/10 text-sm font-one"
             disabled={isSaving}
           >
             Annuler
@@ -416,7 +443,7 @@ const EditAppointmentModal: React.FC<EditAppointmentModalProps> = ({
           <button
             onClick={handleSave}
             disabled={isSaving || isLoadingSlots || !selectedSlot}
-            className="cursor-pointer px-5 py-2 rounded-lg text-sm font-one bg-gradient-to-r from-tertiary-400 to-tertiary-500 text-white hover:from-tertiary-500 hover:to-tertiary-600 disabled:opacity-60 disabled:cursor-not-allowed shadow-lg"
+            className="cursor-pointer px-5 py-2 rounded-xl text-sm font-one bg-gradient-to-r from-tertiary-400 to-tertiary-500 text-white hover:from-tertiary-500 hover:to-tertiary-600 disabled:opacity-60 disabled:cursor-not-allowed shadow-lg"
           >
             {isSaving ? "Enregistrement..." : "Enregistrer"}
           </button>

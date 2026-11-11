@@ -15,7 +15,7 @@ import PeopleInboxWorkspace from "./PeopleInboxWorkspace";
 
 
 import Image from "next/image";
-import { CalendarDays, Heart, Images, MessageCircle, Pencil, Star, UserRound } from "lucide-react";
+import { CalendarDays, Heart, Images, MessageCircle, Pencil, Search, Star, UserRound } from "lucide-react";
 
 type TabKey = "rdv" | "messagerie" | "moodboard" | "favoris" | "mesavis" | "infos";
 const VALID_TABS: TabKey[] = ["rdv", "messagerie", "moodboard", "favoris", "mesavis", "infos"];
@@ -84,16 +84,16 @@ export default function ProfilGlobal(user: User) {
 
   if (loading) {
     return (
-      <div role="status" aria-label="Chargement du profil" className="mx-auto px-4 py-6 sm:px-6 lg:px-8 xl:px-12">
+      <div role="status" aria-label="Chargement du profil" className="py-6 px-page">
         <div aria-hidden="true" className="mb-6 space-y-3 motion-safe:animate-pulse sm:space-y-4">
-          <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-noir-800 p-4 sm:gap-5 sm:p-6">
+          <div className="flex items-center gap-4 sm:gap-5">
             <div className="size-14 shrink-0 rounded-2xl bg-white/5 sm:size-18" />
             <div className="min-w-0 flex-1 space-y-2"><div className="h-2 w-24 rounded bg-white/5" /><div className="h-6 w-2/3 max-w-56 rounded-lg bg-white/10" /><div className="hidden h-3 w-3/4 max-w-80 rounded bg-white/5 sm:block" /></div>
             <div className="size-11 shrink-0 rounded-xl bg-white/5 sm:w-36" />
           </div>
-          <div className="grid grid-cols-3 gap-1.5 lg:grid-cols-6">{Array.from({ length: 6 }, (_, index) => <div key={index} className="h-14 rounded-xl border border-white/8 bg-white/5 sm:h-11" />)}</div>
+          <div className="mt-6 flex gap-1 overflow-hidden rounded-2xl bg-noir-700 p-1.5">{Array.from({ length: 6 }, (_, index) => <div key={index} className={"h-11 w-28 shrink-0 rounded-xl lg:flex-1 " + (index === 0 ? "bg-white/8" : "bg-white/3")} />)}</div>
         </div>
-        <div aria-hidden="true" className="space-y-4 motion-safe:animate-pulse">{[0, 1, 2].map(index => <div key={index} className="h-32 rounded-2xl border border-white/10 bg-white/5" />)}</div>
+        <div aria-hidden="true" className="space-y-4 motion-safe:animate-pulse">{[0, 1, 2].map(index => <div key={index} className="h-40 rounded-3xl bg-white/5" />)}</div>
       </div>
     );
   }
@@ -110,44 +110,66 @@ export default function ProfilGlobal(user: User) {
     );
   }
 
+  const createdAt = profileData.createdAt ? new Date(profileData.createdAt) : null;
+  const memberSince = createdAt && !Number.isNaN(createdAt.getTime()) ? createdAt.toLocaleDateString("fr-FR", { month: "long", year: "numeric" }) : null;
+  const hour = new Date().getHours();
+  const greeting = hour >= 18 || hour < 5 ? "Bonsoir" : "Bonjour";
   const initials = [profileData.firstName, profileData.lastName].map((name) => name?.trim().charAt(0) || "").join("").toLocaleUpperCase("fr-FR");
 
   return (
     <div className="relative">
     
-      <div className="relative mx-auto px-4 sm:px-6 py-6 lg:px-8 xl:px-12">
-        <section aria-label="Mon profil" className="mb-6 space-y-3 font-one sm:mb-7 sm:space-y-4">
-          <header className="relative flex min-w-0 flex-wrap items-center gap-3 overflow-hidden rounded-2xl border border-white/10 bg-noir-800 p-4 sm:gap-5 sm:p-6">
-            <div className="relative grid size-14 shrink-0 place-items-center overflow-hidden rounded-2xl border border-white/15 bg-noir-800 ring-4 ring-white/3 sm:size-18">
-              {profileData.image ? <Image src={profileData.image} alt="Photo de profil" fill sizes="(min-width: 640px) 72px, 56px" className="object-cover" priority /> : <span aria-hidden="true" className="text-xl font-semibold text-tertiary-400 sm:text-2xl">{initials || <UserRound size={22} />}</span>}
+      <div className="relative py-6 px-page">
+        {/* Identité + rubriques : un seul bloc, sur le fond de l'app. */}
+        {/* Identité + rubriques : un seul bloc. */}
+        <section aria-label="Mon profil" className="mb-8 font-one">
+          <header className="flex min-w-0 flex-wrap items-center gap-x-5 gap-y-4">
+            <div className="relative shrink-0">
+              <div className="relative grid size-18 place-items-center overflow-hidden rounded-2xl bg-linear-to-br from-tertiary-400 via-tertiary-500 to-cuatro-500 shadow-xl shadow-black/40 sm:size-20">
+                {profileData.image ? <Image src={profileData.image} alt="Photo de profil" fill sizes="80px" className="object-cover" priority /> : <span aria-hidden="true" className="text-2xl font-semibold text-white">{initials || <UserRound size={24} />}</span>}
+              </div>
             </div>
             <div className="min-w-0 flex-1">
-              <p className="mb-1.5 text-[9px] font-medium uppercase tracking-[0.16em] text-tertiary-400/80 sm:text-[10px]">Mon espace Inkera</p>
-              <h1 className="wrap-anywhere text-xl font-semibold leading-tight tracking-tight text-white min-[380px]:text-2xl sm:text-3xl">{profileData.firstName} {profileData.lastName}</h1>
-              <p className="mt-1.5 hidden text-xs leading-5 text-white/40 sm:block">Vos projets, vos inspirations et vos échanges, au même endroit.</p>
+              <p className="text-xs text-white/45">{greeting},</p>
+              <div className="mt-0.5 flex min-w-0 items-center gap-1.5">
+                <h1 className="wrap-anywhere text-2xl font-semibold leading-tight tracking-tight text-white sm:text-3xl">{profileData.firstName} {profileData.lastName}</h1>
+                <Link href="/mon-profil/modifier" aria-label="Modifier mon profil" title="Modifier mon profil" className="inline-flex size-9 shrink-0 items-center justify-center rounded-xl text-white/40 transition hover:bg-white/6 hover:text-tertiary-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary-400"><Pencil size={15} aria-hidden="true" /></Link>
+              </div>
+              <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[11px] text-white/55">
+                {memberSince && <span className="rounded-xl bg-white/5 px-2.5 py-1">Membre depuis {memberSince}</span>}
+                {(messageCount > 0 || proposalCount > 0) && <span className="rounded-xl bg-tertiary-400/12 px-2.5 py-1 text-tertiary-400">{[messageCount > 0 && `${messageCount} message${messageCount > 1 ? "s" : ""} non lu${messageCount > 1 ? "s" : ""}`, proposalCount > 0 && `${proposalCount} proposition${proposalCount > 1 ? "s" : ""}`].filter(Boolean).join(" · ")}</span>}
+              </div>
             </div>
-            <Link href="/mon-profil/modifier" aria-label="Modifier mon profil" title="Modifier mon profil" className="ml-auto inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/3 px-3 text-xs text-white/55 transition hover:border-white/20 hover:bg-white/5 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary-400 sm:px-4"><Pencil size={14} aria-hidden="true" /><span className="hidden sm:inline">Modifier mon profil</span></Link>
-            <p className="w-full text-[11px] leading-5 text-white/40 sm:hidden">Vos projets, vos inspirations et vos échanges, au même endroit.</p>
+            <Link href="/trouver-un-salon" className="hidden min-h-11 items-center gap-2 rounded-xl bg-white/6 px-4 text-xs font-medium text-white/80 transition hover:bg-white/10 hover:text-white focus-visible:outline-2 focus-visible:outline-tertiary-400 sm:inline-flex"><Search size={14} aria-hidden="true" />Trouver un salon</Link>
           </header>
-          <nav aria-label="Rubriques du profil" className="grid grid-cols-3 gap-1.5 lg:grid-cols-6">
-            {([
-              { key: "rdv", icon: CalendarDays, label: "Rendez-vous" },
-              { key: "messagerie", icon: MessageCircle, label: "Messagerie" },
-              { key: "moodboard", icon: Images, label: "Moodboard" },
-              { key: "favoris", icon: Heart, label: "Favoris" },
-              { key: "mesavis", icon: Star, label: "Mes avis" },
-              { key: "infos", icon: UserRound, label: "Mes informations" },
-            ] as const).map(item => {
-              const Icon = item.icon;
-              const count = item.key === "moodboard" ? proposalCount : item.key === "messagerie" ? messageCount : 0;
-              const selected = activeTab === item.key;
-              return <button key={item.key} type="button" aria-current={selected ? "page" : undefined} aria-controls="profile-content" onClick={() => handleTabChange(item.key)} style={selected ? { background: "linear-gradient(90deg, color-mix(in srgb, var(--color-tertiary-500) 22%, var(--color-noir-800)), color-mix(in srgb, var(--color-cuatro-600) 22%, var(--color-noir-800))) padding-box, linear-gradient(90deg, color-mix(in srgb, var(--color-tertiary-500) 60%, transparent), color-mix(in srgb, var(--color-cuatro-600) 60%, transparent)) border-box" } : undefined} className={`group relative flex min-h-14 min-w-0 cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border px-1.5 py-2 text-[11px] transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary-400 sm:min-h-11 sm:flex-row sm:justify-start sm:gap-2 sm:px-2.5 sm:text-xs lg:flex-col lg:justify-center xl:flex-row xl:justify-start ${selected ? "border-transparent font-semibold text-white" : "border-white/8 bg-noir-800 text-white/50 hover:border-white/15 hover:bg-white/4 hover:text-white/80"}`}>
-                <span className={`grid size-6 shrink-0 place-items-center rounded-lg transition-colors ${selected ? "bg-black/15 text-white" : "bg-white/4 text-white/35 group-hover:text-white/60"}`}><Icon size={15} aria-hidden="true" /></span>
-                <span className="min-w-0 text-center leading-4 sm:text-left lg:text-center xl:text-left">{item.label}</span>
-                {count > 0 && <span className={`absolute right-1.5 top-1.5 grid min-h-4 min-w-4 place-items-center rounded-md px-1 text-[9px] font-semibold leading-none ${selected ? "bg-black/20 text-white" : "bg-tertiary-400/15 text-tertiary-400"}`} aria-hidden="true">{count > 99 ? "99+" : count}</span>}
-                {count > 0 && <span className="sr-only">{count} {item.key === "moodboard" ? "propositions en attente" : "messages non lus"}</span>}
-              </button>;
-            })}
+
+          {/* Rubriques : contrôle segmenté, l'onglet actif est surélevé. */}
+          <nav aria-label="Rubriques du profil" className="mt-6 sm:mt-7">
+            <div className="no-scrollbar bleed-page overflow-x-auto sm:mx-0 sm:px-0">
+              <div className="flex w-max min-w-full gap-1 rounded-2xl bg-noir-700 p-1.5 lg:grid lg:w-full lg:grid-cols-6">
+                {([
+                  { key: "rdv", icon: CalendarDays, label: "Rendez-vous" },
+                  { key: "messagerie", icon: MessageCircle, label: "Messagerie" },
+                  { key: "moodboard", icon: Images, label: "Moodboard" },
+                  { key: "favoris", icon: Heart, label: "Favoris" },
+                  { key: "mesavis", icon: Star, label: "Mes avis" },
+                  { key: "infos", icon: UserRound, label: "Mes informations" },
+                ] as const).map(item => {
+                  const Icon = item.icon;
+                  const count = item.key === "moodboard" ? proposalCount : item.key === "messagerie" ? messageCount : 0;
+                  const selected = activeTab === item.key;
+                  return (
+                    <button key={item.key} type="button" aria-current={selected ? "page" : undefined} aria-controls="profile-content" onClick={() => handleTabChange(item.key)}
+                      className={`group relative flex min-h-11 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-xl px-4 text-[13px] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary-400 ${selected ? "bg-noir-500 font-medium text-white shadow-lg shadow-black/30" : "text-white/50 hover:bg-white/4 hover:text-white/85"}`}>
+                      <Icon size={16} aria-hidden="true" className={selected ? "text-tertiary-400" : "text-white/35 transition-colors group-hover:text-white/65"} />
+                      <span className="whitespace-nowrap">{item.label}</span>
+                      {count > 0 && <span aria-hidden="true" className="grid min-h-5 min-w-5 place-items-center rounded-xl bg-linear-to-r from-tertiary-400 to-tertiary-500 px-1.5 text-[10px] font-semibold leading-none text-white">{count > 99 ? "99+" : count}</span>}
+                      {count > 0 && <span className="sr-only">{count} {item.key === "moodboard" ? "propositions en attente" : "messages non lus"}</span>}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           </nav>
         </section>
 

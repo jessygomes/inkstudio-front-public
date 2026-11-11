@@ -41,8 +41,8 @@ export default function InfosTab({ user }: Props) {
           { title: "Mon identité", Icon: UserRound, items: identity },
           { title: "Mes coordonnées", Icon: Contact, items: contact },
         ].map(({ title, Icon, items }) => (
-          <section key={title} aria-label={title} className="min-w-0 rounded-2xl border border-white/10 bg-noir-500 px-4 py-3 sm:px-5">
-            <div className="mb-1 flex items-center gap-2 border-b border-white/8 pb-3">
+          <section key={title} aria-label={title} className="min-w-0 rounded-2xl bg-noir-700 px-4 py-3 sm:px-5">
+            <div className="mb-1 flex items-center gap-2 pb-3">
               <span className="grid h-7 w-7 place-items-center rounded-lg bg-tertiary-400/10 text-tertiary-400"><Icon size={15} aria-hidden="true" /></span>
               <h4 className="text-sm font-medium text-white/90">{title}</h4>
             </div>

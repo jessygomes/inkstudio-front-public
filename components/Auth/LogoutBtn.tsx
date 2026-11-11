@@ -3,19 +3,22 @@
 import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { AiOutlineLogout } from "react-icons/ai";
+import { LogOut } from "lucide-react";
 
 interface LogoutBtnProps {
   children?: React.ReactNode;
+  className?: string;
+  onDone?: () => void;
 }
 
-export const LogoutBtn = ({ children }: LogoutBtnProps) => {
+export const LogoutBtn = ({ children, className, onDone }: LogoutBtnProps) => {
   const router = useRouter();
 
   const onClick = async () => {
     try {
       await signOut({ redirect: false });
       toast.success("Déconnexion réussie");
+      onDone?.();
       router.push("/");
     } catch (error) {
       console.error("Erreur lors de la déconnexion:", error);
@@ -24,12 +27,13 @@ export const LogoutBtn = ({ children }: LogoutBtnProps) => {
   };
 
   return (
-    <span
+    <button
+      type="button"
       onClick={onClick}
-      className="cursor-pointer w-full px-3 py-2 text-xs font-one flex items-center gap-1 rounded-2xl bg-linear-to-br hover:bg-noir-500 transition-colors"
+      className={className ?? "flex w-full cursor-pointer items-center gap-2 rounded-xl px-3 py-2 font-one text-xs transition-colors hover:bg-white/6"}
     >
-      <AiOutlineLogout size={14} className="inline-block" />
+      <LogOut size={15} aria-hidden="true" className="shrink-0" />
       {children}
-    </span>
+    </button>
   );
 };

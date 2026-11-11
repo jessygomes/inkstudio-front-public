@@ -41,8 +41,8 @@ function ReviewDate({ value }: { value?: string | null }) {
   return <time dateTime={value}>{new Date(value).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" })}</time>;
 }
 
-const buttonClass = "px-3! py-2! text-xs! rounded-lg! shadow-none!";
-const fieldClass = "mt-2 w-full rounded-xl border border-white/10 bg-noir-800 px-3.5 py-3 font-one text-sm text-white outline-none transition placeholder:text-white/25 focus:border-tertiary-400/50 focus:ring-2 focus:ring-tertiary-400/10";
+const buttonClass = "px-4! py-2! text-xs! rounded-xl! shadow-none!";
+const fieldClass = "mt-2 w-full rounded-2xl bg-white/5 px-4 py-3 font-one text-sm text-white outline-none transition placeholder:text-white/30 hover:bg-white/7 focus:bg-white/8 focus:ring-2 focus:ring-tertiary-400/40";
 
 export default function SalonReviews({ salonId, salonName }: Props) {
   const { isAuthenticated, isClient } = useUser();
@@ -108,18 +108,18 @@ export default function SalonReviews({ salonId, salonName }: Props) {
   };
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-white/10 bg-noir-800 font-one">
+    <div className="overflow-hidden rounded-3xl bg-noir-500 font-one">
       <div className="p-4 sm:p-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="flex items-start gap-3"><span className="grid size-9 shrink-0 place-items-center rounded-xl border border-tertiary-400/15 bg-tertiary-400/8 text-tertiary-400"><MessageSquare size={17} aria-hidden="true" /></span><div><p className="mb-1 text-[9px] uppercase tracking-[0.14em] text-white/35">Leurs expériences</p><h2 className="text-lg font-medium text-white/90" title={"Avis sur " + (salonName || "ce salon")}>Les avis clients</h2><p className="mt-1 text-[11px] leading-5 text-white/40">Des retours pour imaginer votre prochaine séance.</p></div></div>
+          <div className="flex items-start gap-3"><span className="grid size-10 shrink-0 place-items-center rounded-2xl bg-linear-to-br from-tertiary-400/20 to-cuatro-500/15 text-tertiary-400"><MessageSquare size={17} aria-hidden="true" /></span><div><p className="mb-1 text-[9px] uppercase tracking-[0.14em] text-white/35">Leurs expériences</p><h2 className="text-lg font-medium text-white/90" title={"Avis sur " + (salonName || "ce salon")}>Les avis clients</h2><p className="mt-1 text-[11px] leading-5 text-white/40">Des retours pour imaginer votre prochaine séance.</p></div></div>
           <AppButton type="button" variant="secondary" aria-expanded={formOpen} aria-controls={id + "-form"} onClick={() => setFormOpen(open => !open)} className={buttonClass}>{formOpen ? <X size={14} /> : <PenLine size={14} />}{formOpen ? "Fermer" : "Donner mon avis"}</AppButton>
         </div>
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-white/8 bg-white/[0.015] px-3 py-2.5">
+        <div className="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-white/4 px-4 py-3">
           {loading ? <span role="status" className="text-xs text-white/45">Chargement des avis…</span> : error ? <span role="alert" className="text-xs text-white/50">Les avis n’ont pas pu être chargés.</span> : stats.totalReviews ? <div className="flex flex-wrap items-center gap-4"><div className="flex items-baseline gap-1"><span className="text-2xl font-semibold tracking-tight text-white">{stats.averageRating.toLocaleString("fr-FR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}</span><span className="text-xs text-white/30">/ 5</span></div><div><Stars rating={stats.averageRating} /><p className="mt-1 text-[10px] text-white/40">{stats.totalReviews} avis {stats.totalReviews > 1 ? "partagés" : "partagé"}</p></div></div> : <div><p className="text-sm text-white/80">Le premier avis sera peut-être le vôtre</p><p className="mt-1 text-[11px] text-white/40">Partagez votre expérience après votre visite.</p></div>}
           {(stats.totalReviews > 0 || error) && <AppButton type="button" variant="secondary" aria-expanded={listOpen} aria-controls={id + "-reviews"} onClick={() => setListOpen(open => !open)} className={buttonClass}>{listOpen ? "Masquer les avis" : "Lire les avis"}<ChevronRight size={13} className={listOpen ? "rotate-90" : ""} /></AppButton>}
         </div>
         {formOpen && (
-          <div id={`${id}-form`} className="mt-6 rounded-2xl border border-white/10 bg-noir-800/40 p-4 sm:p-6">
+          <div id={`${id}-form`} className="mt-6 rounded-3xl bg-white/3 p-4 sm:p-6">
             {!isAuthenticated ? (
               <div className="space-y-3"><h3 className="text-lg text-white">Votre expérience compte</h3><p className="text-sm text-white/65">Connectez-vous à votre compte client pour partager votre avis.</p><AppButton href="/se-connecter" variant="secondary" className={buttonClass}>Se connecter</AppButton></div>
             ) : !isClient ? <p className="text-sm text-white/70">Les avis sont réservés aux comptes clients.</p> : (
@@ -147,36 +147,36 @@ export default function SalonReviews({ salonId, salonName }: Props) {
           </div>
         )}
       </div>
-      {listOpen && <div id={`${id}-reviews`} className="border-t border-white/10 p-4 sm:p-5">
+      {listOpen && <div id={`${id}-reviews`} className="p-4 sm:p-5">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
           <h3 className="text-sm font-medium text-white/80">Les témoignages</h3>
-          <label className="flex items-center gap-2 text-[11px] text-white/45">Trier par<select value={sort} disabled={loading} onChange={(event) => setSort(event.target.value as Sort)} className="min-h-10 rounded-lg border border-white/10 bg-noir-800 px-3 font-one text-xs text-white focus-visible:outline-tertiary-400"><option value="recent">Les plus récents</option><option value="rating">Les mieux notés</option><option value="oldest">Les plus anciens</option></select></label>
+          <label className="flex items-center gap-2 text-[11px] text-white/45">Trier par<select value={sort} disabled={loading} onChange={(event) => setSort(event.target.value as Sort)} className="min-h-10 rounded-xl bg-white/6 px-3.5 [color-scheme:dark] font-one text-xs text-white focus-visible:outline-tertiary-400"><option value="recent">Les plus récents</option><option value="rating">Les mieux notés</option><option value="oldest">Les plus anciens</option></select></label>
         </div>
         <div aria-live="polite" aria-busy={loading}>
           {loading ? (
-            <div role="status" className="space-y-3"><span className="sr-only">Chargement des avis…</span>{[0, 1].map((i) => <div key={i} aria-hidden="true" className="space-y-3 rounded-2xl border border-white/5 p-5 motion-safe:animate-pulse"><div className="h-9 w-40 rounded-lg bg-white/10" /><div className="h-3 w-full rounded bg-white/5" /><div className="h-3 w-2/3 rounded bg-white/5" /></div>)}</div>
+            <div role="status" className="space-y-3"><span className="sr-only">Chargement des avis…</span>{[0, 1].map((i) => <div key={i} aria-hidden="true" className="space-y-3 rounded-2xl p-5 motion-safe:animate-pulse"><div className="h-9 w-40 rounded-lg bg-white/10" /><div className="h-3 w-full rounded bg-white/5" /><div className="h-3 w-2/3 rounded bg-white/5" /></div>)}</div>
           ) : error ? (
-            <div role="alert" className="rounded-xl border border-white/10 p-6 text-center"><p className="mb-4 text-sm text-white/70">{error}</p><AppButton type="button" variant="secondary" onClick={() => void load(page, sort)} className={buttonClass}>Réessayer</AppButton></div>
+            <div role="alert" className="rounded-xl p-6 text-center"><p className="mb-4 text-sm text-white/70">{error}</p><AppButton type="button" variant="secondary" onClick={() => void load(page, sort)} className={buttonClass}>Réessayer</AppButton></div>
           ) : reviews.length === 0 ? (
-            <div className="rounded-xl bg-white/3 px-4 py-5 text-center"><MessageSquare size={22} className="mx-auto mb-2 text-white/35" /><p className="text-lg text-white">L’histoire reste à écrire</p><p className="mt-2 text-sm text-white/60">Aucun avis pour le moment. Partagez votre expérience avec la communauté.</p></div>
+            <div className="rounded-2xl bg-white/3 px-4 py-8 text-center"><MessageSquare size={22} className="mx-auto mb-2 text-white/35" /><p className="text-lg text-white">L’histoire reste à écrire</p><p className="mt-2 text-sm text-white/60">Aucun avis pour le moment. Partagez votre expérience avec la communauté.</p></div>
           ) : (
             <ul className="space-y-2.5">
               {reviews.map((review) => (
-                <li key={review.id} className="rounded-xl border border-white/8 bg-linear-to-br from-white/[0.035] to-transparent p-3.5 transition-colors hover:border-white/15">
+                <li key={review.id} className="rounded-2xl bg-white/4 p-4 transition-colors hover:bg-white/6">
                   <article>
                     <div className="flex items-start gap-2.5">
-                      <span aria-hidden="true" className="grid size-8 shrink-0 place-items-center rounded-full border border-white/8 bg-white/5 text-xs font-medium text-white/65">{review.author?.name?.trim().charAt(0).toUpperCase() || "C"}</span>
+                      <span aria-hidden="true" className="grid size-8 shrink-0 place-items-center rounded-full bg-white/5 text-xs font-medium text-white/65">{review.author?.name?.trim().charAt(0).toUpperCase() || "C"}</span>
                       <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
                           <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1"><p className="break-words text-xs font-medium text-white/90">{review.author?.name || "Client"}</p>{review.isVerified && <span className="inline-flex items-center gap-1 text-[9px] text-emerald-300/80"><BadgeCheck size={12} aria-hidden="true" />Vérifié</span>}</div>
                           <Stars rating={review.rating || 0} />
                         </div>
-                        <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px] text-white/35"><ReviewDate value={review.createdAt} />{review.appointment?.prestation && <span className="rounded-full bg-white/5 px-1.5 py-0.5 text-[9px] text-white/50">{review.appointment.prestation}</span>}</div>
+                        <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px] text-white/35"><ReviewDate value={review.createdAt} />{review.appointment?.prestation && <span className="rounded-xl bg-white/5 px-1.5 py-0.5 text-[9px] text-white/50">{review.appointment.prestation}</span>}</div>
                       </div>
                     </div>
                     {review.title && <h4 className="mt-2.5 break-words text-sm font-medium text-white/90">{review.title}</h4>}
                     {review.comment && <p className="mt-1.5 whitespace-pre-line break-words text-xs leading-5 text-white/65">{review.comment}</p>}
-                    {review.salonResponse && <div className="mt-3 rounded-r-lg border-l-2 border-tertiary-400/35 bg-white/[0.025] px-3 py-2.5"><div className="mb-1.5 flex flex-wrap items-center justify-between gap-2"><p className="inline-flex items-center gap-1.5 text-[11px] font-medium text-white/75"><MessageSquare size={12} className="text-tertiary-400/70" />Réponse du salon</p><span className="text-[10px] text-white/35"><ReviewDate value={review.salonRespondedAt} /></span></div><p className="whitespace-pre-line break-words text-xs leading-5 text-white/55">{review.salonResponse}</p></div>}
+                    {review.salonResponse && <div className="mt-3 rounded-r-xl border-l-2 border-tertiary-400/50 bg-white/5 px-3 py-2.5"><div className="mb-1.5 flex flex-wrap items-center justify-between gap-2"><p className="inline-flex items-center gap-1.5 text-[11px] font-medium text-white/75"><MessageSquare size={12} className="text-tertiary-400/70" />Réponse du salon</p><span className="text-[10px] text-white/35"><ReviewDate value={review.salonRespondedAt} /></span></div><p className="whitespace-pre-line break-words text-xs leading-5 text-white/55">{review.salonResponse}</p></div>}
                   </article>
                 </li>
               ))}

@@ -11,7 +11,7 @@ const benefits = [
 export default function TatoueurCtaSection() {
   return (
     <section aria-labelledby="studio-title" className="bg-noir-800 font-one">
-      <div className="mx-4 grid overflow-hidden rounded-2xl border border-white/10 bg-noir-800 sm:mx-8 lg:mx-20 lg:grid-cols-[1.2fr_0.8fr]">
+      <div className="grid overflow-hidden rounded-2xl border border-white/10 bg-noir-800 lg:grid-cols-[1.2fr_0.8fr] mx-page">
         <div className="p-6 sm:p-8 lg:p-10">
           <div className="flex flex-wrap items-center gap-3 text-[10px]"><span className="flex items-center gap-2 text-white/80"><PenTool size={14} className="text-tertiary-400" aria-hidden="true" />INKERA STUDIO</span><span className="h-3 w-px bg-white/15" aria-hidden="true" /><span className="text-white/40">Je suis tatoueur.se</span></div>
           <h2 id="studio-title" className="mt-5 max-w-lg font-two text-3xl font-semibold leading-tight tracking-tight text-white sm:text-4xl">Vous faites de l’art.<br /><span className="text-white/40">On simplifie le reste.</span></h2>

@@ -1,32 +1,22 @@
-import React from "react";
-import { UserRound, PenTool, Images, MessageSquare, Check, ChevronDown } from "lucide-react";
-import Image from "next/image";
-import AppButton from "@/components/Shared/AppButton";
-import Section from "./Section";
-import { getPiercingServiceLabel } from "./getPiercingServiceLabel";
+import { useState } from "react";
+import { useFormContext } from "react-hook-form";
+import { Check, ChevronDown, Images, PenLine, UserRound } from "lucide-react";
+import FilterSelect from "@/components/Shared/FilterSelect";
 import TextInput from "./TextInput";
 import TextArea from "./TextArea";
 import SkinToneSelect from "./SkinToneSelect";
-import ImageUploader from "../../Shared/ImageUploader";
-import { FlashProps, PiercingZone } from "@/lib/type";
+import ProjectPreferences from "./ProjectPreferences";
+import InspirationUpload from "./InspirationUpload";
 import { BookingMoodboardOption, SkinToneOption } from "./types";
+import { focusRing, iconBadge, inset, label as labelClass, surface } from "./ui";
 
 interface ClientInfoFormProps {
   prestation: string;
-  errors: Record<string, unknown>;
+  hasSelectedFlash: boolean;
   sketchFile: File | null;
   referenceFile: File | null;
   onSketchChange: (file: File | null) => void;
   onReferenceChange: (file: File | null) => void;
-  piercingZones?: PiercingZone[];
-  selectedPiercingZone: string;
-  selectedPiercingService: string;
-  onPiercingZoneChange: (zoneId: string) => void;
-  onPiercingServiceChange: (serviceId: string) => void;
-  isLoadingPiercingZones: boolean;
-  flashes?: FlashProps[];
-  selectedFlashId?: string;
-  onFlashChange?: (flashId: string) => void;
   skinToneOptions?: SkinToneOption[];
   isLoadingSkinTones?: boolean;
   moodboards?: BookingMoodboardOption[];
@@ -36,22 +26,24 @@ interface ClientInfoFormProps {
   isLoadingMoodboards?: boolean;
 }
 
+const CONTACT_FIELDS = ["firstName", "lastName", "email", "phone", "birthDate"] as const;
+
+function CardTitle({ icon, title, hint }: { icon: React.ReactNode; title: string; hint?: string }) {
+  return (
+    <div className="mb-5 flex items-start gap-3">
+      <span aria-hidden="true" className={iconBadge}>{icon}</span>
+      <div><h2 className="text-base font-semibold tracking-tight text-white">{title}</h2>{hint && <p className="mt-0.5 text-xs leading-5 text-white/45">{hint}</p>}</div>
+    </div>
+  );
+}
+
 export default function ClientInfoForm({
   prestation,
-  errors,
+  hasSelectedFlash,
   sketchFile,
   referenceFile,
   onSketchChange,
   onReferenceChange,
-  piercingZones = [],
-  selectedPiercingZone,
-  selectedPiercingService,
-  onPiercingZoneChange,
-  onPiercingServiceChange,
-  isLoadingPiercingZones,
-  flashes = [],
-  selectedFlashId = "",
-  onFlashChange,
   skinToneOptions = [],
   isLoadingSkinTones = false,
   moodboards = [],
@@ -60,122 +52,87 @@ export default function ClientInfoForm({
   isAuthenticated = false,
   isLoadingMoodboards = false,
 }: ClientInfoFormProps) {
-  const selectedZone = piercingZones.find((z) => z.id === selectedPiercingZone);
-  const selectedZoneServices = selectedZone?.services || [];
-  const selectedService = selectedZoneServices.find(
-    (s) => s.id === selectedPiercingService,
-  );
+  const { watch, getFieldState, formState } = useFormContext();
+  const client = watch("client") ?? {};
+  const contactComplete = CONTACT_FIELDS.every(field => typeof client[field] === "string" && client[field].trim());
+  const contactHasError = CONTACT_FIELDS.some(field => getFieldState(`client.${field}`, formState).invalid);
+  const [editContact, setEditContact] = useState(false);
+  // Client connecté avec un profil complet : un résumé suffit, la modification reste possible.
+  const showContactFields = !isAuthenticated || editContact || !contactComplete || contactHasError;
 
-  const getFlashDimensions = (flash?: FlashProps): string => {
-    if (!flash) return "";
-
-    const raw = flash.dimension || flash.dimensions || flash.size;
-    if (typeof raw === "string" && raw.trim()) return raw.trim();
-
-    if (typeof flash.width === "number" && typeof flash.height === "number") {
-      const unit = (flash.unit || "cm").trim();
-      return `${flash.width} x ${flash.height} ${unit}`;
-    }
-
-    return "";
-  };
-
-  const showProjectDetails =
-    prestation === "PROJET" ||
-    prestation === "TATTOO" ||
-    prestation === "RETOUCHE" ||
-    prestation === "PIERCING";
-
-  const showImageUploaders =
-    prestation === "PROJET" ||
-    prestation === "TATTOO" ||
-    prestation === "RETOUCHE";
-
-  const showFlashSelector = prestation === "TATTOO";
-  const showSkinToneField =
-    prestation === "PROJET" ||
-    prestation === "TATTOO" ||
-    prestation === "RETOUCHE";
-  const selectedFlash = flashes.find((f) => f.id === selectedFlashId);
-  const hasSelectedFlash = showFlashSelector && !!selectedFlashId;
+  const needsSkin = prestation === "PROJET" || prestation === "TATTOO" || prestation === "RETOUCHE";
+  const canAddImages = (prestation === "PROJET" || prestation === "RETOUCHE" || prestation === "TATTOO") && !hasSelectedFlash;
+  const hasExtras = !!selectedMoodboardId || !!sketchFile || !!referenceFile || !!watch("message");
 
   return (
-    <div className="space-y-8 font-one sm:space-y-10">
-      {showProjectDetails && (
-        <Section unboxed title={prestation === "PIERCING" ? "Choisissez votre piercing" : prestation === "TATTOO" ? "Le dessin qui vous ressemble" : "Parlez-nous de votre idée"}
-          description={prestation === "TATTOO" ? "La réservation d’un tatouage se fait à partir des flashs disponibles du salon." : "Quelques détails pour aider votre artiste à préparer votre rendez-vous."} icon={<PenTool size={17} />}>
-          <div className="space-y-6">
-            {showFlashSelector && (
-              <fieldset>
-                <legend className="mb-3 text-xs font-medium text-white/70">Choisissez un flash <span className="text-tertiary-400">*</span></legend>
-                {flashes.length ? <div className="grid max-h-80 grid-cols-2 gap-3 overflow-y-auto p-1 sm:grid-cols-3 xl:grid-cols-4">
-                  {flashes.map(flash => {
-                    const active = flash.id === selectedFlashId;
-                    return <button key={flash.id} type="button" aria-pressed={active} onClick={() => onFlashChange?.(active ? "" : flash.id)} className={`group relative overflow-hidden rounded-2xl border text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tertiary-400/50 ${active ? "border-tertiary-400/50 bg-tertiary-400/8" : "border-white/10 bg-white/[0.025] hover:border-white/20 hover:bg-white/[0.045]"}`}>
-                      <div className="relative aspect-[3/2] overflow-hidden bg-white/3">
-                        {flash.imageUrl ? <Image src={flash.imageUrl} alt={flash.title || flash.name || "Flash"} fill sizes="(max-width: 640px) 45vw, (max-width: 1280px) 25vw, 160px" className="object-cover transition duration-300 group-hover:scale-[1.03] motion-reduce:transform-none" /> : <span className="absolute inset-0 grid place-items-center text-white/20"><PenTool size={24} /></span>}
-                        <span className={`absolute right-2 top-2 flex size-5 items-center justify-center rounded-full border ${active ? "border-tertiary-400 bg-tertiary-400 text-noir-800" : "border-white/40 bg-black/30"}`}>{active && <Check size={12} />}</span>
-                      </div>
-                      <div className="space-y-1.5 p-3"><p className="truncate text-xs font-semibold text-white/90">{flash.title || flash.name || "Flash"}</p><div className="flex flex-wrap justify-between gap-1 text-[11px] text-white/50"><span>{getFlashDimensions(flash) || "Dimensions à préciser"}</span>{typeof flash.price === "number" && <span className="font-medium text-tertiary-400">{flash.price} €</span>}</div></div>
-                    </button>;
-                  })}
-                </div> : <div role="status" className="rounded-xl border border-white/10 bg-white/3 p-4 text-xs leading-6 text-white/55">Aucun flash disponible pour le moment. Contactez le salon pour préparer votre projet.</div>}
-                {selectedFlash && <p className="mt-3 flex items-center gap-1.5 text-[11px] text-tertiary-400"><Check size={12} />{selectedFlash.title || selectedFlash.name || "Flash"} sélectionné · Cliquez à nouveau pour le désélectionner.</p>}
-              </fieldset>
-            )}
-
-            {prestation === "PIERCING" ? <div className="space-y-6">
-              <fieldset><legend className="mb-3 text-xs font-medium text-white/70">Zone du piercing <span className="text-tertiary-400">*</span></legend>
-                {isLoadingPiercingZones ? <p role="status" className="text-xs text-white/45">Chargement des zones…</p> : piercingZones.length ? <div className="flex flex-wrap gap-2">{piercingZones.map(zone => <button key={zone.id} type="button" aria-pressed={zone.id === selectedPiercingZone} onClick={() => { onPiercingZoneChange(zone.id); onPiercingServiceChange(""); }} className={`min-h-11 rounded-xl border px-4 py-2.5 text-xs transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tertiary-400/40 ${zone.id === selectedPiercingZone ? "border-tertiary-400/50 bg-tertiary-400/8 text-white" : "border-white/10 bg-white/[0.025] text-white/60 hover:border-white/20 hover:bg-white/[0.045]"}`}>{zone.piercingZone}</button>)}</div> : <p className="text-xs text-white/45">Aucune zone disponible. Contactez le salon.</p>}
-              </fieldset>
-              {selectedPiercingZone && <fieldset><legend className="mb-3 text-xs font-medium text-white/70">Type de piercing <span className="text-tertiary-400">*</span></legend><div className="grid gap-3 sm:grid-cols-2">{selectedZoneServices.map(service => <button key={service.id} type="button" aria-pressed={service.id === selectedPiercingService} onClick={() => onPiercingServiceChange(service.id)} className={`flex min-h-12 items-center justify-between gap-3 rounded-xl border px-4 py-3 text-left text-xs transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tertiary-400/40 ${service.id === selectedPiercingService ? "border-tertiary-400/50 bg-tertiary-400/8 text-white" : "border-white/10 bg-white/[0.025] text-white/65 hover:border-white/20 hover:bg-white/[0.045]"}`}><span>{getPiercingServiceLabel(service, selectedZone?.piercingZone)}</span><span className="shrink-0 text-tertiary-400">{typeof service.price === "number" ? service.price + " €" : "Sur demande"}</span></button>)}</div>{!selectedZoneServices.length && <p className="text-xs text-white/45">Aucune prestation disponible pour cette zone.</p>}</fieldset>}
-              {selectedService && <p className="flex items-center gap-2 rounded-lg bg-tertiary-400/5 px-3 py-2 text-[11px] text-white/65"><Check size={13} className="text-tertiary-400" />{getPiercingServiceLabel(selectedService, selectedZone?.piercingZone)}{typeof selectedService.price === "number" && <span className="ml-auto text-tertiary-400">{selectedService.price} €</span>}</p>}
-            </div> : <>
-              {!hasSelectedFlash && <TextArea name="details.description" label="Votre idée en quelques mots" placeholder="Le style qui vous plaît, l’histoire du projet, vos inspirations…" />}
-              <div className="grid gap-4 sm:grid-cols-2">
-                <TextInput name="details.zone" label="Emplacement sur le corps" placeholder="Ex. : avant-bras droit" />
-                <TextInput name="details.size" label="Dimensions souhaitées" placeholder="Ex. : 10 × 15 cm" />
-              </div>
-              {!hasSelectedFlash && <TextInput name="details.colorStyle" label="Style et couleurs" placeholder="Ex. : floral, noir et gris…" />}
-            </>}
-            {showSkinToneField && <SkinToneSelect name="details.skin" label="Votre teinte de peau" options={skinToneOptions} errors={errors} loading={isLoadingSkinTones} helperText="Cette information aide l’artiste à préparer votre séance." />}
-
+    <div className="space-y-4 font-one">
+      {prestation !== "PIERCING" && (
+        <section className={surface}>
+          <CardTitle icon={<PenLine size={17} />} title={prestation === "PROJET" ? "Votre idée" : prestation === "RETOUCHE" ? "Votre retouche" : "Pour préparer votre séance"} hint={prestation === "PROJET" ? "Quelques mots suffisent, vous en parlerez en détail avec l’artiste." : undefined} />
+          <div className="space-y-5">
+            {prestation === "PROJET" && <TextArea name="details.description" label="Décrivez votre projet" placeholder="Le motif, le style, ce qu’il représente pour vous…" />}
+            {prestation === "RETOUCHE" && <TextArea name="details.description" label="Quel tatouage souhaitez-vous retoucher ?" placeholder="Son emplacement, ce que vous aimeriez corriger ou raviver…" />}
+            <div className="grid gap-4 sm:grid-cols-2">
+              <TextInput name="details.zone" label="Où sur le corps ?" placeholder="Ex. : avant-bras droit" />
+              {prestation === "PROJET" && <TextInput name="details.size" label="Taille approximative" placeholder="Ex. : 10 × 15 cm" />}
+            </div>
+            {needsSkin && <div className="pt-2"><SkinToneSelect name="details.skin" label="Votre teinte de peau" options={skinToneOptions} loading={isLoadingSkinTones} helperText="Elle aide l’artiste à adapter les encres." /></div>}
           </div>
-        </Section>
+        </section>
       )}
 
-      <Section unboxed title="Relier un moodboard" description="Partagez vos inspirations avec le salon. Ce moodboard sera associé à votre rendez-vous." icon={<Images size={17} />}>
-        {isAuthenticated ? isLoadingMoodboards ? <p role="status" className="text-xs text-white/45">Chargement de vos moodboards…</p> : moodboards.length ? <div className="space-y-3">
-          <label htmlFor="booking-moodboard" className="block text-xs text-white/65">Votre moodboard <span className="ml-1 text-[10px] text-white/35">Facultatif</span></label>
-          <select id="booking-moodboard" value={selectedMoodboardId} onChange={event => onMoodboardChange?.(event.target.value)} className="h-12 w-full rounded-xl border border-white/10 bg-white/[0.025] px-4 text-sm text-white outline-none transition hover:border-white/20 focus:border-tertiary-400/50 focus:bg-white/[0.045] focus:ring-2 focus:ring-tertiary-400/10 [color-scheme:dark]"><option value="">Ne pas associer de moodboard</option>{moodboards.map(board => <option key={board.id} value={board.id}>{board.name}</option>)}</select>
-          {selectedMoodboardId && <div className="flex items-start gap-2 rounded-xl border border-tertiary-400/20 bg-tertiary-400/5 p-3"><Check size={14} className="mt-0.5 shrink-0 text-tertiary-400" /><div><p className="text-xs text-white/80">{moodboards.find(board => board.id === selectedMoodboardId)?.name}</p><p className="mt-1 text-[11px] leading-5 text-white/45">Le salon pourra consulter vos inspirations depuis le rendez-vous.</p></div></div>}
-        </div> : <p className="text-xs leading-6 text-white/45">Vous n’avez pas encore de moodboard. Vous pouvez continuer sans en associer.</p> : <div className="flex flex-wrap items-center justify-between gap-3"><p className="text-xs leading-6 text-white/45">Connectez-vous pour retrouver et partager vos moodboards.</p><AppButton href="/se-connecter" variant="secondary" className="px-3! py-2! text-xs! shadow-none!">Se connecter</AppButton></div>}
-        {showImageUploaders && !hasSelectedFlash && <div className="mt-6 border-t border-white/8 pt-6">
-          <div className="mb-3 flex items-center gap-2"><Images size={15} className="text-tertiary-400" /><h3 className="text-xs font-medium text-white/75">Ajouter des images d’inspiration</h3><span className="ml-auto text-[10px] text-white/30">Facultatif</span></div>
-          <p className="mb-4 text-xs leading-6 text-white/45">Pas de moodboard ? Vous pouvez ajouter jusqu’à deux images d’inspiration pour partager vos idées avec le salon.</p>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div><p className="mb-2 text-[11px] text-white/50">Première inspiration</p><ImageUploader file={referenceFile} onFileSelect={onReferenceChange} compact /></div>
-            <div><p className="mb-2 text-[11px] text-white/50">Seconde inspiration</p><ImageUploader file={sketchFile} onFileSelect={onSketchChange} compact /></div>
+      {prestation === "PROJET" && <section className={surface}><ProjectPreferences /></section>}
+
+      <section className={surface}>
+        <CardTitle icon={<UserRound size={17} />} title="Vos coordonnées" hint={showContactFields ? "Pour que le salon puisse vous confirmer le rendez-vous." : undefined} />
+        {showContactFields ? (
+          <div className="grid gap-4 sm:grid-cols-2">
+            <TextInput name="client.firstName" label="Prénom" placeholder="Votre prénom" required autoComplete="given-name" />
+            <TextInput name="client.lastName" label="Nom" placeholder="Votre nom" required autoComplete="family-name" />
+            <TextInput name="client.email" label="Email" placeholder="vous@exemple.fr" type="email" required autoComplete="email" />
+            <TextInput name="client.phone" label="Téléphone" placeholder="06 12 34 56 78" type="tel" required autoComplete="tel" />
+            <TextInput name="client.birthDate" label="Date de naissance" type="date" required autoComplete="bday" />
           </div>
-        </div>}
+        ) : (
+          <div className={`flex flex-wrap items-center justify-between gap-3 ${inset} p-4`}>
+            <div className="flex min-w-0 items-center gap-3">
+              <span aria-hidden="true" className="grid size-9 shrink-0 place-items-center rounded-full bg-linear-to-br from-tertiary-400 to-tertiary-500 text-noir-900"><Check size={15} strokeWidth={3} /></span>
+              <div className="min-w-0 text-xs leading-5">
+                <p className="font-medium text-white">{client.firstName} {client.lastName}</p>
+                <p className="truncate text-white/50">{client.email} · {client.phone}</p>
+              </div>
+            </div>
+            <button type="button" onClick={() => setEditContact(true)} className={`rounded-xl bg-white/6 px-3.5 py-1.5 text-xs text-white/80 transition hover:bg-white/10 hover:text-white ${focusRing}`}>Modifier</button>
+          </div>
+        )}
+      </section>
 
-      </Section>
-
-      <Section unboxed title="Comment vous contacter ?" description="Le salon utilisera ces informations pour votre rendez-vous. Les champs marqués d’un * sont obligatoires." icon={<UserRound size={17} />}>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <TextInput name="client.firstName" label="Prénom" placeholder="Votre prénom" required autoComplete="given-name" />
-          <TextInput name="client.lastName" label="Nom" placeholder="Votre nom" required autoComplete="family-name" />
-          <TextInput name="client.email" label="Adresse email" placeholder="vous@exemple.fr" type="email" required autoComplete="email" />
-          <TextInput name="client.phone" label="Téléphone" placeholder="06 12 34 56 78" type="tel" required autoComplete="tel" />
-          <TextInput name="client.birthDate" label="Date de naissance" type="date" required autoComplete="bday" />
-        </div>
-        {isAuthenticated && <p className="mt-4 flex items-center gap-2 text-[11px] text-white/40"><Check size={12} className="text-tertiary-400" />Vos coordonnées sont préremplies depuis votre profil. Vous pouvez les ajuster.</p>}
-      </Section>
-
-      <details className="group rounded-2xl border border-white/10 bg-white/[0.025] transition-colors hover:border-white/20">
-        <summary className="flex cursor-pointer list-none items-center gap-3 p-4 text-sm font-medium text-white/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tertiary-400/50 [&::-webkit-details-marker]:hidden"><span className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-tertiary-400"><MessageSquare size={18} /></span>Une précision à ajouter ?<span className="ml-auto text-[11px] font-normal text-white/40">Facultatif</span><ChevronDown size={16} className="shrink-0 transition-transform group-open:rotate-180" /></summary>
-        <div className="space-y-4 border-t border-white/8 p-4"><TextArea name="message" label="Votre message au salon" placeholder="Une question, une contrainte ou une information utile pour votre séance…" />
-
+      <details open={hasExtras || undefined} className="group rounded-3xl bg-noir-500">
+        <summary className={`flex cursor-pointer list-none items-center gap-3 rounded-3xl p-5 text-sm text-white/85 sm:px-6 [&::-webkit-details-marker]:hidden ${focusRing}`}>
+          <span aria-hidden="true" className="grid size-10 shrink-0 place-items-center rounded-2xl bg-white/6 text-white/60"><Images size={17} /></span>
+          <span className="flex-1"><span className="block font-semibold text-white">Inspirations et message</span><span className="block text-xs text-white/40">Facultatif · images, moodboard, mot pour le salon</span></span>
+          <span aria-hidden="true" className="grid size-8 place-items-center rounded-full bg-white/5 text-white/60 transition-transform group-open:rotate-180"><ChevronDown size={16} /></span>
+        </summary>
+        <div className="space-y-6 px-5 pb-6 sm:px-6">
+          {isAuthenticated && (
+            isLoadingMoodboards ? <p role="status" className="text-xs text-white/45">Chargement de vos moodboards…</p> : moodboards.length > 0 && (
+              <div>
+                <p className={labelClass}>Joindre un de vos moodboards</p>
+                <FilterSelect label="Joindre un moodboard" placeholder="Aucun moodboard" unit="moodboard" icon={<Images size={14} />} selected={selectedMoodboardId ? [selectedMoodboardId] : []} options={moodboards.map(board => ({ value: board.id, label: board.name }))} multiple={false} onApply={values => onMoodboardChange?.(values[0] || "")} align="left"
+                  buttonClassName="flex h-12 w-full min-w-0 items-center gap-2 rounded-2xl bg-white/5 px-4 text-left text-sm text-white/80 outline-none transition hover:bg-white/7 focus-visible:ring-2 focus-visible:ring-tertiary-400/40" />
+              </div>
+            )
+          )}
+          {canAddImages && (
+            <div>
+              <p className={labelClass}>Images d’inspiration <span className="font-normal text-white/35">(2 maximum)</span></p>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <InspirationUpload file={referenceFile} onChange={onReferenceChange} label="Image de référence" />
+                <InspirationUpload file={sketchFile} onChange={onSketchChange} label="Croquis ou 2ᵉ image" />
+              </div>
+            </div>
+          )}
+          <TextArea name="message" label="Un message pour le salon" placeholder="Une question, une contrainte, une précision…" />
         </div>
       </details>
     </div>

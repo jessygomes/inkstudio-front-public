@@ -11,7 +11,7 @@ export const BackButton = ({ href, label }: BackButtonProps) => {
   return (
     <button
       type="button"
-      className="flex justify-center mx-auto text-black font-font1 rounded-lg hover:text-grey-500 transition-all ease-in-out duration-200"
+      className="flex justify-center mx-auto text-black font-font1 rounded-xl hover:text-grey-500 transition-all ease-in-out duration-200"
     >
       <Link
         href={href}

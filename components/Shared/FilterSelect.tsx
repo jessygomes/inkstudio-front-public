@@ -14,10 +14,12 @@ type FilterSelectProps = {
   onApply: (values: string[]) => void;
   align?: "left" | "right";
   multiple?: boolean;
+  /** Remplace le style du bouton déclencheur (ex. variante sans contour). */
+  buttonClassName?: string;
 };
 const identity = (value: string) => value;
 
-export default function FilterSelect({ label, placeholder, unit, icon, selected, options, normalize = identity, onApply, align = "right", multiple = true }: FilterSelectProps) {
+export default function FilterSelect({ label, placeholder, unit, icon, selected, options, normalize = identity, onApply, align = "right", multiple = true, buttonClassName }: FilterSelectProps) {
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState<string[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -34,7 +36,7 @@ export default function FilterSelect({ label, placeholder, unit, icon, selected,
   const singleLabel = options.find(option => normalize(option.value) === normalize(selected[0] || ""))?.label || selected[0];
   const displayOptions = multiple ? options : [{ value: "", label: placeholder }, ...options.filter(option => option.value)];
   return <div ref={containerRef} className="relative min-w-0 font-one">
-    <button ref={buttonRef} type="button" aria-expanded={open} aria-controls={id} onClick={() => { setDraft(selected); setOpen(value => !value); }} className="flex h-11 w-full min-w-0 items-center gap-2 rounded-xl border border-white/10 bg-noir-800 px-3 text-left text-xs text-white/70 outline-none transition hover:border-white/25 focus:border-tertiary-400/50 focus:ring-2 focus:ring-tertiary-400/10"><span className="shrink-0 text-tertiary-400/70" aria-hidden="true">{icon}</span><span className="sr-only">{label} : </span><span className="flex-1 truncate">{selected.length > 1 ? selected.length + " " + unit + "s" : singleLabel || placeholder}</span><ChevronDown size={12} aria-hidden="true" className={open ? "shrink-0 rotate-180" : "shrink-0"} /></button>
+    <button ref={buttonRef} type="button" aria-expanded={open} aria-controls={id} onClick={() => { setDraft(selected); setOpen(value => !value); }} className={buttonClassName || "flex h-11 w-full min-w-0 items-center gap-2 rounded-xl border border-white/10 bg-noir-800 px-3 text-left text-xs text-white/70 outline-none transition hover:border-white/25 focus:border-tertiary-400/50 focus:ring-2 focus:ring-tertiary-400/10"}><span className="shrink-0 text-tertiary-400/70" aria-hidden="true">{icon}</span><span className="sr-only">{label} : </span><span className="flex-1 truncate">{selected.length > 1 ? selected.length + " " + unit + "s" : singleLabel || placeholder}</span><ChevronDown size={12} aria-hidden="true" className={open ? "shrink-0 rotate-180" : "shrink-0"} /></button>
     {open && <div id={id} className={`absolute top-full z-40 mt-2 w-72 max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-white/10 bg-noir-800 shadow-xl shadow-black/30 ${align === "left" ? "left-0" : "right-0"}`}>
       <div className="border-b border-white/8 px-3 py-3"><p className="text-xs text-white/80">{label}</p><p className="mt-1 text-[10px] leading-5 text-white/40">{multiple ? `Vous pouvez sélectionner plusieurs ${unit}s.` : `Sélectionnez votre ${unit}.`}</p></div>
       <div role={multiple ? "group" : "radiogroup"} aria-label={label} className="max-h-64 overflow-y-auto p-1.5">{displayOptions.map(option => {

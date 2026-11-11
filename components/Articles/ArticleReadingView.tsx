@@ -10,12 +10,13 @@ export default function ArticleReadingView({ article, headings, children }: {
   headings: { id: string; title: string }[];
   children: ReactNode;
 }) {
+  const hasAuthor = !!article.author && !/^(none|null|undefined)$/i.test(article.author.trim());
   const minutes = Math.max(1, Math.ceil(article.content.trim().split(/\s+/).filter(Boolean).length / 200));
   const date = new Date(article.createdAt);
   const hasDate = !Number.isNaN(date.getTime());
   const hasContents = headings.length > 1;
   return (
-    <main id="article-top" className="scroll-mt-24 bg-noir-800 px-4 pb-16 pt-4 font-one sm:px-6 sm:pb-20 sm:pt-5 lg:px-10 xl:px-16">
+    <main id="article-top" className="scroll-mt-24 bg-noir-800 px-page pb-16 pt-4 font-one sm:pb-20 sm:pt-5">
       <div className="mx-auto max-w-6xl">
         <nav aria-label="Fil d’Ariane" className="mb-5 flex flex-wrap items-center justify-between gap-3 text-[11px]">
           <Link href="/journal" className="inline-flex min-h-10 items-center gap-2 text-white/50 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-tertiary-400"><ArrowLeft size={14} aria-hidden="true" />Retour au journal</Link>
@@ -26,9 +27,9 @@ export default function ArticleReadingView({ article, headings, children }: {
             <p className="mb-3 flex items-center gap-2 text-[9px] uppercase tracking-[0.16em] text-tertiary-400"><span aria-hidden="true" className="h-px w-5 bg-tertiary-400/60" />À lire dans le journal</p>
             <h1 className="wrap-anywhere text-balance text-2xl font-medium leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl">{article.title}</h1>
             <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-3 text-[11px] text-white/40">
-              {article.author && <span className="inline-flex min-w-0 items-center gap-2"><span aria-hidden="true" className="grid size-7 shrink-0 place-items-center rounded-full border border-white/10 bg-white/5 text-[10px] text-tertiary-400">{article.author.trim().charAt(0).toUpperCase()}</span><span className="break-words text-white/75">{article.author}</span></span>}
+              {hasAuthor && <span className="inline-flex min-w-0 items-center gap-2"><span aria-hidden="true" className="grid size-7 shrink-0 place-items-center rounded-full border border-white/10 bg-white/5 text-[10px] text-tertiary-400">{article.author.trim().charAt(0).toUpperCase()}</span><span className="break-words text-white/75">{article.author}</span></span>}
               {hasDate && <time dateTime={date.toISOString()}>{date.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric", timeZone: "Europe/Paris" })}</time>}
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-white/8 bg-white/[0.025] px-2.5 py-1 text-[10px]"><Clock3 size={12} aria-hidden="true" />{minutes} min de lecture</span>
+              <span className="inline-flex items-center gap-1.5 rounded-xl border border-white/8 bg-white/[0.025] px-2.5 py-1 text-[10px]"><Clock3 size={12} aria-hidden="true" />{minutes} min de lecture</span>
             </div>
           </header>
           {article.imageUrls?.[0] && <figure className="relative mb-7 aspect-[16/10] overflow-hidden rounded-2xl border border-white/8 bg-white/5 sm:mb-10 sm:aspect-[21/9]">
@@ -40,7 +41,7 @@ export default function ArticleReadingView({ article, headings, children }: {
                 <details open>
                   <summary className="min-h-9 cursor-pointer text-xs font-medium text-white/80 focus-visible:outline-2 focus-visible:outline-tertiary-400"><span className="ml-1 inline-flex items-center gap-2"><List size={13} className="text-tertiary-400" aria-hidden="true" />Dans cet article</span></summary>
                   <ol className="mt-2 space-y-1">
-                    {headings.map((heading, index) => <li key={heading.id}><a href={`#${heading.id}`} className="flex min-h-10 items-start gap-2.5 rounded-lg px-2 py-2 text-[11px] leading-5 text-white/45 transition-colors hover:bg-white/5 hover:text-white focus-visible:outline-2 focus-visible:outline-tertiary-400"><span aria-hidden="true" className="text-[9px] tabular-nums text-tertiary-400/60">{String(index + 1).padStart(2, "0")}</span><span className="wrap-anywhere">{heading.title}</span></a></li>)}
+                    {headings.map((heading, index) => <li key={heading.id}><a href={`#${heading.id}`} className="flex min-h-10 items-start gap-2.5 rounded-xl px-2 py-2 text-[11px] leading-5 text-white/45 transition-colors hover:bg-white/5 hover:text-white focus-visible:outline-2 focus-visible:outline-tertiary-400"><span aria-hidden="true" className="text-[9px] tabular-nums text-tertiary-400/60">{String(index + 1).padStart(2, "0")}</span><span className="wrap-anywhere">{heading.title}</span></a></li>)}
                   </ol>
                 </details>
               </nav>

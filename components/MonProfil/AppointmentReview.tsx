@@ -5,14 +5,14 @@ import type { RendezVousCardProps } from "./RendezVousCard";
 
 type Props = Pick<RendezVousCardProps, "appointment" | "hasReview" | "reviewForm" | "hoverRating" | "reviewSubmitting" | "setHoverRating" | "setReviewForm" | "handleSubmitReview">;
 const ratings = ["Très déçu", "Déçu", "Correct", "Satisfait", "Très satisfait"];
-const fieldClass = "w-full rounded-lg border border-white/15 bg-noir-800 px-3 py-2 text-base text-white placeholder:text-white/35 outline-none transition-colors hover:border-white/25 focus:border-tertiary-400 focus:ring-2 focus:ring-tertiary-400/15 @sm:text-sm";
+const fieldClass = "w-full rounded-2xl bg-white/5 px-4 py-2.5 text-base text-white placeholder:text-white/35 outline-none transition-colors focus:ring-2 focus:ring-tertiary-400/15 @sm:text-sm";
 
 export default function AppointmentReview({ appointment, hasReview, reviewForm, hoverRating, reviewSubmitting, setHoverRating, setReviewForm, handleSubmitReview }: Props) {
   const id = useId();
   const review = appointment.review;
   const displayedRating = hoverRating ?? reviewForm.rating;
   return (
-    <section id={`appointment-review-${appointment.id}`} aria-labelledby={`${id}-heading`} className="@container scroll-mt-28 border-t border-white/10 pt-3 font-one">
+    <section id={`appointment-review-${appointment.id}`} aria-labelledby={`${id}-heading`} className="@container scroll-mt-28 pt-3 font-one">
       <div className="grid gap-3">
         <header className="min-w-0">
           <p className="mb-1 text-[10px] uppercase tracking-[0.16em] text-tertiary-400">Votre expérience</p>
@@ -61,7 +61,7 @@ export default function AppointmentReview({ appointment, hasReview, reviewForm, 
                 <textarea id={`${id}-comment`} value={reviewForm.comment} onChange={(event) => setReviewForm((form) => ({ ...form, comment: event.target.value }))} maxLength={500} rows={2} placeholder="L’accueil, les conseils, le résultat… Qu’avez-vous pensé de votre rendez-vous ?" className={`${fieldClass} min-h-16 resize-y`} aria-describedby={`${id}-comment-count`} />
                 <p id={`${id}-comment-count`} className="mt-0.5 text-right text-[10px] tabular-nums text-white/45">{reviewForm.comment.length}/500 caractères</p>
               </div>
-              <div className="flex flex-col gap-2 border-t border-white/10 pt-2 @sm:flex-row @sm:items-center @sm:justify-between">
+              <div className="flex flex-col gap-2 pt-2 @sm:flex-row @sm:items-center @sm:justify-between">
                 <p className="text-xs leading-5 text-white/50">Une note suffit. Vous pouvez aussi détailler votre expérience.</p>
                 <AppButton type="submit" disabled={reviewSubmitting} icon={reviewSubmitting ? <LoaderCircle size={16} aria-hidden="true" className="animate-spin" /> : <Send size={16} aria-hidden="true" />} className="min-h-9 shrink-0 !px-4 !py-1.5 !text-xs cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-tertiary-400">
                   {reviewSubmitting ? "Publication…" : "Publier mon avis"}

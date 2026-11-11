@@ -41,6 +41,15 @@ const nextConfig: NextConfig = {
         ],
       },
       {
+        // Lien de réservation personnel : le token ne doit fuiter ni par le référent, ni par l'indexation, ni par un cache.
+        source: "/:slugPublic/rdv/:token",
+        headers: [
+          { key: "Referrer-Policy", value: "no-referrer" },
+          { key: "X-Robots-Tag", value: "noindex, nofollow, noarchive" },
+          { key: "Cache-Control", value: "private, no-store" },
+        ],
+      },
+      {
         source: "/sitemap.xml",
         headers: [
           {

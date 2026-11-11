@@ -263,30 +263,30 @@ export default function RendezVousTab() {
   const getStatusBadge = (status: Appointment["status"]) => {
     const configs = {
       CONFIRMED: {
-        bg: "bg-emerald-500/10",
+        bg: "bg-emerald-400/15",
         text: "text-emerald-200",
-        border: "border-emerald-400/30",
+        border: "",
         icon: <FaCheck className="w-3 h-3" />,
         label: "Confirmé",
       },
       PENDING: {
-        bg: "bg-orange-500/10",
-        text: "text-orange-200",
+        bg: "bg-amber-400/15",
+        text: "text-amber-200",
         border: "border-orange-400/30",
         icon: <FaClock className="w-3 h-3" />,
         label: "En attente",
       },
       COMPLETED: {
-        bg: "bg-blue-500/10",
-        text: "text-blue-200",
+        bg: "bg-sky-400/15",
+        text: "text-sky-200",
         border: "border-blue-400/30",
         icon: <FaCheck className="w-3 h-3" />,
         label: "Terminé",
       },
       CANCELED: {
-        bg: "bg-red-500/10",
+        bg: "bg-red-400/15",
         text: "text-red-200",
-        border: "border-red-400/30",
+        border: "",
         icon: <FaTimes className="w-3 h-3" />,
         label: "Annulé",
       },
@@ -295,7 +295,7 @@ export default function RendezVousTab() {
     const config = configs[status];
     return (
       <span
-        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-2xl text-[11px] font-one border ${config.bg} ${config.text} ${config.border}`}
+        className={`inline-flex items-center gap-1 rounded-xl px-2 py-0.5 text-[10px] font-medium font-one ${config.bg} ${config.text}`}
       >
         {config.icon}
         {config.label}
@@ -500,7 +500,7 @@ export default function RendezVousTab() {
     >
       <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
         <RendezVousFilters value={statusFilter} counts={filterCounts} onChange={handleStatusChange} />
-        <Link href="/trouver-un-salon" className="inline-flex min-h-11 shrink-0 items-center rounded-xl border border-white/15 px-3 text-xs text-white/75 transition hover:bg-white/5">Trouver un salon</Link>
+        <Link href="/trouver-un-salon" className="inline-flex min-h-11 shrink-0 items-center rounded-xl px-3 text-xs text-white/75 transition hover:bg-white/5">Trouver un salon</Link>
       </div>
 
       {/* Modal d'annulation */}
@@ -525,7 +525,7 @@ export default function RendezVousTab() {
           </p>
         </div>
       ) : loadError ? (
-        <div role="alert" className="rounded-xl border border-white/10 p-6 text-center"><p className="text-sm text-white/65">Impossible de charger vos rendez-vous.</p><button type="button" onClick={() => fetchRdvClient(statusFilter, currentPage, limit)} className="mt-3 min-h-11 cursor-pointer rounded-xl border border-white/15 px-4 text-sm text-white">Réessayer</button></div>
+        <div role="alert" className="rounded-3xl bg-noir-700 p-6 text-center"><p className="text-sm text-white/65">Impossible de charger vos rendez-vous.</p><button type="button" onClick={() => fetchRdvClient(statusFilter, currentPage, limit)} className="mt-3 min-h-11 cursor-pointer rounded-xl bg-white/8 px-5 text-sm text-white transition hover:bg-white/12">Réessayer</button></div>
       ) : !rdvData || rdvData.appointments.length === 0 ? (
         <div className="text-center py-12">
           <FaCalendarAlt className="w-12 h-12 text-white/30 mx-auto mb-4" />
@@ -536,56 +536,62 @@ export default function RendezVousTab() {
           </p>
           <Link
             href="/trouver-un-salon"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-linear-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white rounded-lg transition-all duration-300 font-one text-sm shadow-lg hover:-translate-y-0.5"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-linear-to-r from-tertiary-400 to-tertiary-500 hover:from-tertiary-500 hover:to-tertiary-600 text-white rounded-xl transition-all duration-300 font-one text-sm shadow-lg hover:-translate-y-0.5"
           >
             Prendre un rendez-vous
           </Link>
         </div>
       ) : (
         <>
-          {/* Liste des rendez-vous modernisée */}
-          <div className="grid grid-cols-1 gap-3">
-            {[...rdvData.appointments]
-              .sort((a, b) => {
-                const aUnread = a.conversation?.unreadCount || 0;
-                const bUnread = b.conversation?.unreadCount || 0;
-                return bUnread - aUnread;
-              })
-              .map((appointment) => {
-                const isExpanded = expandedAppointments.has(appointment.id);
-                const hasReview = !!appointment.review;
-
-                return (
-                  <RendezVousCard
-                    key={appointment.id}
-                    appointment={appointment}
-                    isExpanded={isExpanded}
-                    hasReview={hasReview}
-                    cancelingAppointmentId={cancelingAppointmentId}
-                    reviewForm={reviewForm}
-                    hoverRating={hoverRating}
-                    reviewSubmitting={reviewSubmitting}
-                    getStatusBadge={getStatusBadge}
-                    formatDate={formatDate}
-                    formatTime={formatTime}
-                    formatPhoneDisplay={formatPhoneDisplay}
-                    toggleExpand={toggleExpand}
-                    handleOpenMoodboard={handleOpenMoodboard}
-                    handleOpenConnectModal={handleOpenConnectModal}
-                    handleEditClick={handleEditClick}
-                    handleCancelClick={handleCancelClick}
-                    handleReviewClick={handleReviewClick}
-                    handleSubmitReview={handleSubmitReview}
-                    setHoverRating={setHoverRating}
-                    setReviewForm={setReviewForm}
-                  />
-                );
-              })}
+          {/* Rendez-vous : « À venir » puis « Passés », regroupés par mois, en grille de tuiles. */}
+          <div className="space-y-10">
+            {groupAppointments(rdvData.appointments).map(section => (
+              <section key={section.key} aria-labelledby={`rdv-section-${section.key}`}>
+                <h2 id={`rdv-section-${section.key}`} className="mb-4 flex items-center gap-2 font-one text-lg font-semibold tracking-tight text-white">
+                  {section.label}
+                  <span className="rounded-xl bg-white/6 px-2 py-0.5 text-[11px] font-medium text-white/55">{section.count}</span>
+                </h2>
+                <div className="space-y-6">
+                  {section.months.map(month => (
+                    <div key={month.key}>
+                      <p className="mb-2.5 font-one text-[11px] font-medium uppercase tracking-[0.16em] text-white/40">{month.label}</p>
+                      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                        {month.items.map((appointment) => (
+                          <RendezVousCard
+                            key={appointment.id}
+                            appointment={appointment}
+                            isExpanded={expandedAppointments.has(appointment.id)}
+                            hasReview={!!appointment.review}
+                            cancelingAppointmentId={cancelingAppointmentId}
+                            reviewForm={reviewForm}
+                            hoverRating={hoverRating}
+                            reviewSubmitting={reviewSubmitting}
+                            getStatusBadge={getStatusBadge}
+                            formatDate={formatDate}
+                            formatTime={formatTime}
+                            formatPhoneDisplay={formatPhoneDisplay}
+                            toggleExpand={toggleExpand}
+                            handleOpenMoodboard={handleOpenMoodboard}
+                            handleOpenConnectModal={handleOpenConnectModal}
+                            handleEditClick={handleEditClick}
+                            handleCancelClick={handleCancelClick}
+                            handleReviewClick={handleReviewClick}
+                            handleSubmitReview={handleSubmitReview}
+                            setHoverRating={setHoverRating}
+                            setReviewForm={setReviewForm}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            ))}
           </div>
 
           {/* Pagination modernisée */}
           {rdvData.pagination.totalPages > 1 && (
-            <div className="flex items-center justify-between gap-4 mt-6 pt-6 border-t border-white/10">
+            <div className="flex items-center justify-between gap-4 mt-6 pt-6">
               <div className="text-white/60 font-one text-xs hidden sm:block">
                 Page {rdvData.pagination.currentPage} sur{" "}
                 {rdvData.pagination.totalPages}
@@ -596,7 +602,7 @@ export default function RendezVousTab() {
                   aria-label="Page précédente"
                   onClick={() => handlePageChange(currentPage - 1)}
                   disabled={currentPage === 1}
-                  className="cursor-pointer w-11 h-11 flex items-center justify-center bg-white/5 hover:bg-white/10 disabled:bg-white/5 text-white/80 disabled:text-white/30 border border-white/10 rounded-2xl transition-all disabled:cursor-not-allowed"
+                  className="cursor-pointer w-11 h-11 flex items-center justify-center bg-white/5 hover:bg-white/10 disabled:bg-white/5 text-white/80 disabled:text-white/30 rounded-xl transition-all disabled:cursor-not-allowed"
                 >
                   <FaChevronLeft className="w-3 h-3" />
                 </button>
@@ -625,7 +631,7 @@ export default function RendezVousTab() {
                           aria-current={currentPage === pageNum ? "page" : undefined}
                           aria-label={`Page ${pageNum}`}
                           onClick={() => handlePageChange(pageNum)}
-                          className={`cursor-pointer w-11 h-11 rounded-2xl text-xs font-one font-medium transition-all ${
+                          className={`cursor-pointer w-11 h-11 rounded-xl text-xs font-one font-medium transition-all ${
                             currentPage === pageNum
                               ? "bg-tertiary-500 text-white shadow-lg shadow-tertiary-500/25"
                               : "bg-white/5 hover:bg-white/10 text-white/70"
@@ -642,7 +648,7 @@ export default function RendezVousTab() {
                   aria-label="Page suivante"
                   onClick={() => handlePageChange(currentPage + 1)}
                   disabled={currentPage === rdvData.pagination.totalPages}
-                  className="cursor-pointer w-11 h-11 flex items-center justify-center bg-white/5 hover:bg-white/10 disabled:bg-white/5 text-white/80 disabled:text-white/30 border border-white/10 rounded-2xl transition-all disabled:cursor-not-allowed"
+                  className="cursor-pointer w-11 h-11 flex items-center justify-center bg-white/5 hover:bg-white/10 disabled:bg-white/5 text-white/80 disabled:text-white/30 rounded-xl transition-all disabled:cursor-not-allowed"
                 >
                   <FaChevronRight className="w-3 h-3" />
                 </button>
@@ -666,11 +672,11 @@ export default function RendezVousTab() {
           >
             <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" />
             <div
-              className="relative z-10 w-full max-w-2xl max-h-[85vh] flex flex-col rounded-3xl border border-white/15 bg-noir-800 shadow-2xl overflow-hidden"
+              className="relative z-10 w-full max-w-2xl max-h-[85vh] flex flex-col rounded-3xl bg-noir-500 shadow-2xl overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header */}
-              <div className="flex items-center justify-between gap-3 border-b border-white/10 px-5 py-4 shrink-0">
+              <div className="flex items-center justify-between gap-3 px-5 py-4 shrink-0">
                 <div className="min-w-0 flex-1">
                   <p className="text-[11px] text-white/45 font-one uppercase tracking-wide mb-0.5">
                     Moodboard lié au rendez-vous
@@ -690,7 +696,7 @@ export default function RendezVousTab() {
                           ).then(() => setMoodboardModal(null))
                         }
                         disabled={disconnectingAppointmentId === moodboardModal.appointmentId}
-                        className="cursor-pointer inline-flex items-center gap-1.5 rounded-2xl border border-red-400/30 bg-red-500/10 px-3 py-1.5 text-xs text-red-300 transition-all hover:bg-red-500/20 disabled:opacity-50 font-one"
+                        className="cursor-pointer inline-flex items-center gap-1.5 rounded-xl bg-red-500/10 px-3 py-1.5 text-xs text-red-300 transition-all hover:bg-red-500/20 disabled:opacity-50 font-one"
                       >
                         {disconnectingAppointmentId === moodboardModal.appointmentId
                           ? "..."
@@ -699,7 +705,7 @@ export default function RendezVousTab() {
                     )}
                   <button
                     onClick={() => setMoodboardModal(null)}
-                    className="w-8 h-8 flex items-center justify-center rounded-full bg-white/8 hover:bg-white/15 text-white/60 hover:text-white transition-all text-lg"
+                    className="w-8 h-8 flex items-center justify-center rounded-xl bg-white/8 hover:bg-white/15 text-white/60 hover:text-white transition-all text-lg"
                   >
                     ✕
                   </button>
@@ -732,7 +738,7 @@ export default function RendezVousTab() {
                         {moodboardDetail.images.map((img) => (
                           <div
                             key={img.id}
-                            className="relative group overflow-hidden rounded-2xl border border-white/10 bg-white/5 aspect-square"
+                            className="relative group overflow-hidden rounded-2xl bg-white/5 aspect-square"
                           >
                             <Image
                               src={img.url}
@@ -770,11 +776,11 @@ export default function RendezVousTab() {
           >
             <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" />
             <div
-              className="relative z-10 w-full max-w-lg max-h-[80vh] flex flex-col rounded-3xl border border-white/15 bg-noir-800 shadow-2xl overflow-hidden"
+              className="relative z-10 w-full max-w-lg max-h-[80vh] flex flex-col rounded-3xl bg-noir-500 shadow-2xl overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header */}
-              <div className="flex items-center justify-between gap-3 border-b border-white/10 px-5 py-4 shrink-0">
+              <div className="flex items-center justify-between gap-3 px-5 py-4 shrink-0">
                 <div>
                   <h3 className="text-base font-semibold text-white font-one">
                     Lier un moodboard
@@ -785,7 +791,7 @@ export default function RendezVousTab() {
                 </div>
                 <button
                   onClick={() => setConnectModal(null)}
-                  className="shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-white/8 hover:bg-white/15 text-white/60 hover:text-white transition-all text-lg"
+                  className="shrink-0 w-8 h-8 flex items-center justify-center rounded-xl bg-white/8 hover:bg-white/15 text-white/60 hover:text-white transition-all text-lg"
                 >
                   ✕
                 </button>
@@ -816,7 +822,7 @@ export default function RendezVousTab() {
                           handleConnectMoodboard(mb.id, connectModal.appointmentId)
                         }
                         disabled={connectingMoodboardId !== null}
-                        className="w-full cursor-pointer flex items-center gap-3 p-3 rounded-2xl border border-white/10 bg-white/4 hover:bg-white/8 hover:border-white/20 transition-all text-left disabled:opacity-60"
+                        className="w-full cursor-pointer flex items-center gap-3 p-3 rounded-xl bg-white/4 hover:bg-white/8 transition-all text-left disabled:opacity-60"
                       >
                         {mb.images[0] ? (
                           <Image
@@ -863,4 +869,34 @@ export default function RendezVousTab() {
         )}
     </div>
   );
+}
+
+/**
+ * Sépare les rendez-vous en « À venir » (du plus proche au plus lointain) et « Passés » (du plus récent au plus ancien),
+ * puis les regroupe par mois. Les rendez-vous annulés à venir restent dans « À venir », atténués par la tuile.
+ */
+function groupAppointments(appointments: Appointment[]) {
+  const now = Date.now();
+  const time = (value: string) => { const t = Date.parse(value); return Number.isNaN(t) ? 0 : t; };
+  const upcoming = appointments.filter(a => time(a.end) >= now).sort((a, b) => time(a.start) - time(b.start));
+  const past = appointments.filter(a => time(a.end) < now).sort((a, b) => time(b.start) - time(a.start));
+  const byMonth = (items: Appointment[]) => {
+    const months: { key: string; label: string; items: Appointment[] }[] = [];
+    for (const item of items) {
+      const date = new Date(item.start);
+      const valid = !Number.isNaN(date.getTime());
+      const key = valid ? `${date.getFullYear()}-${date.getMonth()}` : "sans-date";
+      let month = months.find(m => m.key === key);
+      if (!month) {
+        month = { key, label: valid ? date.toLocaleDateString("fr-FR", { month: "long", year: "numeric" }) : "Date inconnue", items: [] };
+        months.push(month);
+      }
+      month.items.push(item);
+    }
+    return months;
+  };
+  return [
+    { key: "upcoming", label: "À venir", count: upcoming.length, months: byMonth(upcoming) },
+    { key: "past", label: "Passés", count: past.length, months: byMonth(past) },
+  ].filter(section => section.count > 0);
 }

@@ -20,7 +20,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Hash, MapPin, Palette, Ruler, RotateCcw, SlidersHorizontal, Tags, ArrowUpRight, Images, X } from "lucide-react";
 import { createPortal } from "react-dom";
 import { FaInstagram } from "react-icons/fa";
-import { FaArrowLeft, FaArrowRight, FaXmark } from "react-icons/fa6";
+import { FaArrowLeft, FaArrowRight } from "react-icons/fa6";
 import {
   EMPTY_INSPIRATION_SELECTION,
   PIECE_SIZE_OPTIONS,
@@ -205,7 +205,7 @@ const mapPhotoToFeedItem = (photo: InspirationPhoto): PortfolioFeedItem => ({
 function Avatar({ src, name, size }: { src?: string; name: string; size: number }) {
   return (
     <div
-      className="relative shrink-0 overflow-hidden rounded-full border border-white/15 bg-white/10"
+      className="relative shrink-0 overflow-hidden rounded-xl bg-white/10"
       style={{ width: size, height: size }}
     >
       {src ? (
@@ -559,12 +559,12 @@ export default function InspirationMosaicFeed({
 
   return (
     <section className="space-y-4 font-one">
-      <header className="flex items-start gap-3 py-1 sm:py-2">
+      <header className="flex items-start gap-3 py-1 sm:py-2 mx-page">
         <span className="mt-0.5 grid size-9 shrink-0 place-items-center rounded-xl border border-tertiary-400/15 bg-tertiary-400/8 text-tertiary-400"><Images size={17} aria-hidden="true" /></span>
         <div><p className="mb-1 text-[9px] uppercase tracking-[0.16em] text-white/35">Vos prochaines idées</p><h1 className="text-xl font-medium leading-tight tracking-tight text-white sm:text-2xl">Inspirations tatouage</h1><p className="mt-1 text-xs leading-5 text-white/45">Explorez les créations et trouvez l’artiste de votre prochain projet.</p>{isUsingMockData && <p className="mt-2 text-[10px] leading-5 text-white/35">Images d’exemple : les noms et informations des artistes et salons sont fictifs.</p>}</div>
       </header>
 
-      <div className="flex flex-col gap-2 rounded-2xl border border-white/10 bg-noir-800 p-2.5 lg:flex-row lg:items-center">
+      <div className="flex flex-col gap-2 rounded-2xl border border-white/10 bg-noir-800 p-2.5 lg:flex-row lg:items-center mx-page">
         <div className="grid min-w-0 flex-1 grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
           <FilterSelect label="Choisissez votre ville" placeholder="Toutes les villes" unit="ville" icon={<MapPin size={14} />} selected={selection.city ? [selection.city] : []} options={availableCities.map(city => ({ value: city, label: formatCityLabel(city) }))} multiple={false} onApply={values => void applySelection({ ...selectionRef.current, city: values[0] || "" })} align="left" />
 
@@ -623,7 +623,7 @@ export default function InspirationMosaicFeed({
           Réinitialiser
         </AppButton>
       </div>
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mx-page">
         <p role="status" className="text-[11px] text-white/40">{filteredIntroText}</p>
         {hasActiveFilters && <div className="flex flex-wrap items-center gap-2 text-xs text-white/70">
           <SlidersHorizontal size={14} aria-hidden="true" className="text-tertiary-400" />
@@ -637,12 +637,12 @@ export default function InspirationMosaicFeed({
             ...selection.style,
             ...selection.hashtag.map((tag) => `#${tag}`),
           ].map((label) => (
-            <span key={label} className="max-w-full wrap-anywhere rounded-lg border border-tertiary-400/10 bg-tertiary-400/5 px-2 py-1 text-tertiary-400">{label}</span>
+            <span key={label} className="max-w-full wrap-anywhere rounded-xl border border-tertiary-400/10 bg-tertiary-400/5 px-2 py-1 text-tertiary-400">{label}</span>
           ))}
         </div>}
       </div>
 
-      <div className="columns-2 gap-3 sm:columns-3 sm:gap-3 xl:columns-4 2xl:columns-5">
+      <div className="columns-2 gap-3 sm:columns-3 sm:gap-3 xl:columns-4 2xl:columns-5 mx-page">
         {filteredItems.map((item, index) => (
           <article
             key={item.key}
@@ -689,13 +689,13 @@ export default function InspirationMosaicFeed({
       </div>
 
       {(isFiltering || (isLoading && hasMore)) && (
-        <div className="py-3 text-center text-sm text-white/60">
+        <div className="py-3 text-center text-sm text-white/60 mx-page">
           {isFiltering ? "Chargement..." : "Chargement des prochaines photos..."}
         </div>
       )}
 
       {!isLoading && filteredItems.length === 0 && (
-        <div className="rounded-2xl border border-white/12 bg-white/5 py-10 text-center text-sm text-white/65">
+        <div className="rounded-2xl border border-white/12 bg-white/5 py-10 text-center text-sm text-white/65 mx-page">
           {hasActiveFilters
             ? "Aucune photo ne correspond aux filtres sélectionnés pour le moment."
             : "Aucune photo de portfolio disponible pour le moment."}
@@ -703,13 +703,13 @@ export default function InspirationMosaicFeed({
       )}
 
       {loadError && (
-        <div className="rounded-2xl border border-red-300/20 bg-red-400/10 px-4 py-3 text-center text-sm text-red-100">
+        <div className="rounded-2xl border border-red-300/20 bg-red-400/10 px-4 py-3 text-center text-sm text-red-100 mx-page">
           {loadError}
         </div>
       )}
 
       {!hasMore && !isFiltering && !loadError && filteredItems.length > 0 && (
-        <div className="py-2 text-center text-xs text-white/45">Tu as atteint la fin de la mosaïque.</div>
+        <div className="py-2 text-center text-xs text-white/45 mx-page">Tu as atteint la fin de la mosaïque.</div>
       )}
 
       <div ref={sentinelRef} className="h-3 w-full" />
@@ -752,20 +752,11 @@ export default function InspirationMosaicFeed({
                 priority
               />
 
-              {/* Fermer */}
-              <button
-                onClick={closeLightbox}
-                aria-label="Fermer"
-                className="absolute top-4 right-4 z-10 inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl border border-white/15 bg-black/40 text-white/80 backdrop-blur-md transition hover:bg-white/10 hover:text-white"
-              >
-                <FaXmark className="h-4 w-4" />
-              </button>
-
               {/* Précédent */}
               <button
                 onClick={(e) => { e.stopPropagation(); prevImage(); }}
                 aria-label="Image précédente"
-                className="absolute left-4 top-1/2 z-10 -translate-y-1/2 cursor-pointer inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-white/20 bg-white/10 text-white transition hover:bg-white/20"
+                className="absolute left-4 top-1/2 z-10 -translate-y-1/2 cursor-pointer inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-white backdrop-blur-md transition hover:bg-white/20"
               >
                 <FaArrowLeft className="h-4 w-4" />
               </button>
@@ -774,30 +765,75 @@ export default function InspirationMosaicFeed({
               <button
                 onClick={(e) => { e.stopPropagation(); nextImage(); }}
                 aria-label="Image suivante"
-                className="absolute right-4 top-1/2 z-10 -translate-y-1/2 cursor-pointer inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-white/20 bg-white/10 text-white transition hover:bg-white/20"
+                className="absolute right-4 top-1/2 z-10 -translate-y-1/2 cursor-pointer inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-white backdrop-blur-md transition hover:bg-white/20"
               >
                 <FaArrowRight className="h-4 w-4" />
               </button>
 
               {/* Compteur */}
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-2xl bg-black/40 px-3 py-1 text-[11px] text-white/70 font-one">
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-xl bg-black/40 px-3 py-1 text-[11px] text-white/70 backdrop-blur-md font-one">
                 {lightboxIndex + 1} / {filteredItems.length}
               </div>
             </div>
 
             {/* Panneau infos — bas sur mobile/tablette, droite sur desktop */}
-            <aside className="flex max-h-[55dvh] shrink-0 flex-col overflow-hidden border-t border-white/10 bg-noir-800 font-one lg:max-h-none lg:w-[360px] lg:border-l lg:border-t-0 xl:w-[390px]" onClick={event => event.stopPropagation()}>
-              <div className="flex shrink-0 items-center justify-between gap-3 border-b border-white/8 px-4 py-3.5 sm:px-5"><p className="text-[10px] uppercase tracking-[0.14em] text-white/35">La réalisation & son artiste</p><button type="button" onClick={closeLightbox} aria-label="Fermer la photo" className="grid size-8 shrink-0 place-items-center rounded-lg border border-white/10 text-white/45 transition hover:bg-white/5 hover:text-white"><X size={15} /></button></div>
-              <div className="min-h-0 flex-1 space-y-5 overflow-y-auto overscroll-contain p-4 sm:p-5">
-                <div><h2 id="inspiration-photo-title" className="break-words text-xl font-medium leading-snug tracking-tight text-white">{activeItem.title}</h2>{activeItem.description && <p className="mt-2 whitespace-pre-line break-words text-xs leading-6 text-white/50">{activeItem.description}</p>}</div>
-                <div className="rounded-xl border border-white/8 bg-white/[0.015] p-3.5"><p className="mb-3 text-[9px] uppercase tracking-[0.14em] text-white/35">{activeItem.isTatoueurAccount ? "L’artiste" : "Le salon"}</p><Link href={activeItem.href} onClick={closeLightbox} className="group flex items-center gap-3"><Avatar src={activeItem.authorAvatar} name={activeItem.salonName} size={42} /><div className="min-w-0 flex-1"><p className="break-words text-sm font-medium text-white/90">{activeItem.salonName}</p>{activeItem.city && <p className="mt-1 flex items-center gap-1 text-[10px] text-white/40"><MapPin size={11} className="shrink-0" />{activeItem.city.toLocaleUpperCase("fr-FR")}</p>}</div><ArrowUpRight size={14} className="shrink-0 text-white/30 transition group-hover:text-tertiary-400" /></Link>{salonInstagramProfile && <a href={salonInstagramProfile.href} target="_blank" rel="noopener noreferrer" className="mt-3 inline-flex items-center gap-1.5 text-[11px] text-white/45 hover:text-tertiary-400"><FaInstagram size={13} />{salonInstagramProfile.label}</a>}</div>
-                {(activeItem.pieceSize || activeItem.categories.length > 0 || activeItem.styles.length > 0 || activeItem.hashtags.length > 0) && <div className="space-y-3"><p className="text-[9px] uppercase tracking-[0.14em] text-white/35">Les détails</p>{activeItem.pieceSize && <div className="flex items-center justify-between gap-3 rounded-lg border border-white/8 px-3 py-2.5 text-[11px]"><span className="inline-flex items-center gap-2 text-white/40"><Ruler size={13} />Taille de la pièce</span><span className="text-white/75">{PIECE_SIZE_OPTIONS.find(option => option.value === activeItem.pieceSize)?.label ?? activeItem.pieceSize}</span></div>}<div className="flex flex-wrap gap-1.5">{Array.from(new Set([...activeItem.categories, ...activeItem.styles])).map(label => <span key={label} className="max-w-full break-words rounded-lg border border-tertiary-400/15 bg-tertiary-400/5 px-2.5 py-1.5 text-[10px] text-tertiary-400/85">{label}</span>)}{activeItem.hashtags.map(tag => <span key={tag} className="max-w-full break-words rounded-lg border border-white/8 bg-white/[0.025] px-2 py-1.5 text-[10px] text-white/40">#{tag}</span>)}</div></div>}
-                {activeItem.artistName && activeItem.artistName !== activeItem.salonName && <div className="rounded-xl border border-white/8 p-3.5"><p className="mb-3 text-[9px] uppercase tracking-[0.14em] text-white/35">Réalisé par</p><div className="flex items-center gap-2.5"><Avatar src={activeItem.artistAvatar} name={activeItem.artistName} size={32} /><p className="min-w-0 break-words text-xs text-white/80">{activeItem.artistName}</p></div>{artistInstagramProfile && <a href={artistInstagramProfile.href} target="_blank" rel="noopener noreferrer" className="mt-3 inline-flex items-center gap-1.5 text-[11px] text-white/45 hover:text-tertiary-400"><FaInstagram size={13} />{artistInstagramProfile.label}</a>}</div>}
-                {activeItem.parentSalonName && <div className="rounded-xl border border-white/8 p-3.5"><p className="mb-3 text-[9px] uppercase tracking-[0.14em] text-white/35">Membre du salon</p><Link href={activeItem.parentSalonHref || activeItem.href} onClick={closeLightbox} className="group flex items-center gap-2.5"><Avatar src={activeItem.parentSalonAvatar} name={activeItem.parentSalonName} size={34} /><div className="min-w-0 flex-1"><p className="break-words text-xs text-white/80">{activeItem.parentSalonName}</p>{activeItem.parentSalonCity && <p className="mt-1 text-[10px] text-white/35">{activeItem.parentSalonCity.toLocaleUpperCase("fr-FR")}</p>}</div><ArrowUpRight size={13} className="shrink-0 text-white/30 group-hover:text-tertiary-400" /></Link>{activeItem.canMessageParentSalon && activeItem.parentSalonUserId && <div className="mt-3"><StartInkeraConversationButton key={`parent-${activeItem.key}`} variant="compact" targetUserId={activeItem.parentSalonUserId} recipientName={activeItem.parentSalonName} className="min-h-9! px-3! py-2! text-[11px]! shadow-none!" /></div>}</div>}
+            <aside className="flex max-h-[55dvh] shrink-0 flex-col overflow-hidden rounded-t-3xl bg-noir-700 font-one lg:my-3 lg:mr-3 lg:max-h-none lg:w-[380px] lg:rounded-3xl xl:w-[400px]" onClick={event => event.stopPropagation()}>
+              {/* En-tête : auteur + fermer */}
+              <div className="flex shrink-0 items-center gap-3 px-5 pb-3 pt-5">
+                <Link href={activeItem.href} onClick={closeLightbox} className="group flex min-w-0 flex-1 items-center gap-3">
+                  <Avatar src={activeItem.authorAvatar} name={activeItem.salonName} size={44} />
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-white transition group-hover:text-tertiary-400">{activeItem.salonName}</p>
+                    <p className="mt-0.5 flex items-center gap-1 truncate text-[11px] text-white/45">{activeItem.isTatoueurAccount ? "Artiste" : "Salon"}{activeItem.city && <><span aria-hidden="true">·</span><MapPin size={11} className="shrink-0" />{activeItem.city.toLocaleUpperCase("fr-FR")}</>}</p>
+                  </div>
+                </Link>
+                <button type="button" onClick={closeLightbox} aria-label="Fermer la photo" className="grid size-9 shrink-0 cursor-pointer place-items-center rounded-xl bg-white/6 text-white/60 transition hover:bg-white/10 hover:text-white"><X size={16} /></button>
               </div>
-              <div className="shrink-0 space-y-2 border-t border-white/10 bg-noir-800 p-3 sm:p-4">
-                {activeItem.canMessageSalon && <StartInkeraConversationButton key={`message-${activeItem.key}`} variant="compact" targetUserId={activeItem.salonUserId} recipientName={activeItem.salonName} className="min-h-10! px-3! py-2! text-xs! rounded-xl! shadow-none!" />}
-                <div className="flex items-center gap-2"><FavoritePortfolioBtn portfolioId={activeItem.key} initialFavorite={favoritePortfolioIds.has(activeItem.key)} variant="icon-only" className="size-10! shrink-0 rounded-xl!" onToggle={isFavorite => handleFavoriteToggle(activeItem.key, isFavorite)} /><AppButton href={activeItem.href} onClick={closeLightbox} fullWidth className="min-h-10! px-3! py-2! text-xs! shadow-none! hover:translate-y-0!">Voir le profil<ArrowUpRight size={14} /></AppButton></div>
+
+              <div className="min-h-0 flex-1 space-y-5 overflow-y-auto overscroll-contain px-5 pb-5">
+                {/* La réalisation */}
+                <div>
+                  <h2 id="inspiration-photo-title" className="break-words text-2xl font-semibold leading-tight tracking-tight text-white">{activeItem.title}</h2>
+                  {activeItem.description && <p className="mt-2 whitespace-pre-line break-words text-sm leading-6 text-white/55">{activeItem.description}</p>}
+                  {salonInstagramProfile && <a href={salonInstagramProfile.href} target="_blank" rel="noopener noreferrer" className="mt-3 inline-flex items-center gap-1.5 rounded-xl bg-white/5 px-2.5 py-1.5 text-[11px] text-white/60 transition hover:bg-white/10 hover:text-white"><FaInstagram size={13} />{salonInstagramProfile.label}</a>}
+                </div>
+
+                {/* Détails */}
+                {(activeItem.pieceSize || activeItem.categories.length > 0 || activeItem.styles.length > 0 || activeItem.hashtags.length > 0) && (
+                  <div className="space-y-3">
+                    {activeItem.pieceSize && <div className="flex items-center justify-between gap-3 rounded-xl bg-white/5 px-3.5 py-3 text-xs"><span className="inline-flex items-center gap-2 text-white/45"><Ruler size={14} className="text-tertiary-400" />Taille de la pièce</span><span className="font-medium text-white/85">{PIECE_SIZE_OPTIONS.find(option => option.value === activeItem.pieceSize)?.label ?? activeItem.pieceSize}</span></div>}
+                    <div className="flex flex-wrap gap-1.5">
+                      {Array.from(new Set([...activeItem.categories, ...activeItem.styles])).map(label => <span key={label} className="max-w-full break-words rounded-xl bg-linear-to-r from-tertiary-400/20 to-cuatro-500/15 px-2.5 py-1.5 text-[11px] text-white/85">{label}</span>)}
+                      {activeItem.hashtags.map(tag => <span key={tag} className="max-w-full break-words rounded-xl bg-white/5 px-2.5 py-1.5 text-[11px] text-white/45">#{tag}</span>)}
+                    </div>
+                  </div>
+                )}
+
+                {/* Artiste */}
+                {activeItem.artistName && activeItem.artistName !== activeItem.salonName && (
+                  <div className="rounded-2xl bg-white/4 p-4">
+                    <p className="mb-3 text-[10px] uppercase tracking-[0.14em] text-white/40">Réalisé par</p>
+                    <div className="flex items-center gap-3"><Avatar src={activeItem.artistAvatar} name={activeItem.artistName} size={36} /><p className="min-w-0 flex-1 break-words text-sm text-white/85">{activeItem.artistName}</p>{artistInstagramProfile && <a href={artistInstagramProfile.href} target="_blank" rel="noopener noreferrer" aria-label={`Instagram de ${activeItem.artistName}`} className="grid size-9 shrink-0 place-items-center rounded-xl bg-white/6 text-white/60 transition hover:bg-white/10 hover:text-white"><FaInstagram size={14} /></a>}</div>
+                  </div>
+                )}
+
+                {/* Salon parent */}
+                {activeItem.parentSalonName && (
+                  <div className="rounded-2xl bg-white/4 p-4">
+                    <p className="mb-3 text-[10px] uppercase tracking-[0.14em] text-white/40">Membre du salon</p>
+                    <Link href={activeItem.parentSalonHref || activeItem.href} onClick={closeLightbox} className="group flex items-center gap-3"><Avatar src={activeItem.parentSalonAvatar} name={activeItem.parentSalonName} size={36} /><div className="min-w-0 flex-1"><p className="break-words text-sm text-white/85 transition group-hover:text-tertiary-400">{activeItem.parentSalonName}</p>{activeItem.parentSalonCity && <p className="mt-0.5 text-[11px] text-white/40">{activeItem.parentSalonCity.toLocaleUpperCase("fr-FR")}</p>}</div><ArrowUpRight size={14} className="shrink-0 text-white/30 group-hover:text-tertiary-400" /></Link>
+                    {activeItem.canMessageParentSalon && activeItem.parentSalonUserId && <div className="mt-3"><StartInkeraConversationButton key={`parent-${activeItem.key}`} variant="compact" targetUserId={activeItem.parentSalonUserId} recipientName={activeItem.parentSalonName} className="min-h-10! rounded-xl! border-0! bg-white/6! px-3! py-2! text-xs! shadow-none! hover:bg-white/10!" /></div>}
+                  </div>
+                )}
+              </div>
+
+              {/* Actions */}
+              <div className="shrink-0 space-y-2 bg-noir-700 p-4 pt-3">
+                <div className="flex items-center gap-2">
+                  <FavoritePortfolioBtn portfolioId={activeItem.key} initialFavorite={favoritePortfolioIds.has(activeItem.key)} variant="icon-only" className="size-11! shrink-0 rounded-xl! border-0! bg-white/6!" onToggle={isFavorite => handleFavoriteToggle(activeItem.key, isFavorite)} />
+                  <AppButton href={activeItem.href} onClick={closeLightbox} fullWidth className="min-h-11! rounded-xl! px-4! py-2! text-sm! shadow-none! hover:translate-y-0!">Voir le profil<ArrowUpRight size={15} /></AppButton>
+                </div>
+                {activeItem.canMessageSalon && <StartInkeraConversationButton key={`message-${activeItem.key}`} variant="compact" tone="violet" targetUserId={activeItem.salonUserId} recipientName={activeItem.salonName} className="min-h-11! rounded-xl! px-4! py-2! text-sm! shadow-none!" />}
               </div>
             </aside>
           </div>,

@@ -26,6 +26,7 @@ import { uploadFiles } from "@/lib/utils/uploadthing";
 import imageCompression from "browser-image-compression";
 import { FlashProps, PiercingService, PiercingZone, Tatoueur } from "@/lib/type";
 import { BookingMoodboardOption, SkinToneOption } from "./types";
+import { PROJECT_BUDGET_RANGES, SAME_DAY_BOOKING_MESSAGE, addDaysToDateKey, getParisTodayKey, type ProjectClientInfo } from "@/lib/booking-link";
 
 type AppointmentRequestForm = z.infer<typeof appointmentRequestSchema>;
 
@@ -52,6 +53,28 @@ function getFlashDimensions(flash?: FlashProps): string {
 
   return "";
 }
+//! Période souhaitée, budget et premier tatouage d'un RDV Projet : seules les valeurs renseignées sont envoyées.
+function buildProjectClientInfo(project: AppointmentRequestForm["project"]): ProjectClientInfo {
+  const info: ProjectClientInfo = {};
+  const period = project?.desiredTattooPeriod;
+  if (period) {
+    info.desiredTattooPeriod = period;
+    if (period === "EXACT_DATE") info.desiredTattooDate = project?.desiredTattooDate;
+    if (period === "DATE_RANGE") {
+      info.desiredTattooStartDate = project?.desiredTattooStartDate;
+      info.desiredTattooEndDate = project?.desiredTattooEndDate;
+    }
+  }
+  const budget = PROJECT_BUDGET_RANGES.find((range) => range.key === project?.budget);
+  if (budget) {
+    info.projectBudgetMinCents = budget.min;
+    info.projectBudgetMaxCents = budget.max;
+  }
+  if (project?.isFirstTattoo === "yes") info.isFirstTattoo = true;
+  if (project?.isFirstTattoo === "no") info.isFirstTattoo = false;
+  return info;
+}
+
 //! Fonction utilitaire pour extraire les zones de piercing d'une réponse API
 function extractPiercingZones(payload: unknown): PiercingZone[] {
   const normalizeService = (service: unknown, index: number) => {
@@ -260,6 +283,7 @@ export function useBookingLogic({
       details: {},
       moodboardId: "",
       message: "",
+      project: { desiredTattooPeriod: "", desiredTattooDate: "", desiredTattooStartDate: "", desiredTattooEndDate: "", budget: "", isFirstTattoo: "" },
     },
   });
 
@@ -416,11 +440,17 @@ export function useBookingLogic({
     };
   }, []);
 
+  //! Réservation le jour même : « aujourd'hui » est calculé en Europe/Paris.
+  const allowSameDayBooking = salon.allowSameDayBooking !== false;
+  const getMinBookableDate = () => {
+    const today = getParisTodayKey();
+    return allowSameDayBooking ? today : addDaysToDateKey(today, 1);
+  };
+
   //! États pour les créneaux
   const [selectedTatoueur, setSelectedTatoueur] = useState<string | null>(null);
-  const [selectedDate, setSelectedDate] = useState<string>(
-    toDateInputValue(new Date()),
-  );
+  const [selectedDate, setSelectedDate] = useState<string>(getMinBookableDate);
+  const [slotsReloadKey, setSlotsReloadKey] = useState(0);
   const [timeSlots, setTimeSlots] = useState<{ start: string; end: string }[]>(
     [],
   );
@@ -590,85 +620,35 @@ export function useBookingLogic({
   //! Navigation entre étapes
   const goNext = async () => {
     setNavigationError("");
-    const reportNavigationError = (message: string) => setNavigationError(message);
-    const fieldsByStep: Record<
-      number,
-      (keyof AppointmentRequestForm | string)[]
-    > = {
-      1: ["prestation"],
-      2: [
-        "client.firstName",
-        "client.lastName",
-        "client.email",
-        "client.phone",
-        "client.birthDate",
-        "details.skin",
-      ],
-      3: [],
-      4: [],
-    };
+    const fail = (message: string) => setNavigationError(message);
 
-    if (step === 1 && !prestation) { reportNavigationError("Choisissez une prestation pour continuer."); return; }
-    if (step === 3 && linkedVenues.length && !selectedVenue?.publicBookingEnabled) { reportNavigationError("Choisissez un salon disponible."); return; }
-    if (step === 1 && isParTatoueurMode && !selectedTatoueur) {
-      reportNavigationError("Veuillez sélectionner un tatoueur avant de continuer.");
-      return;
+    // Étape 1 — quoi : prestation, puis le choix qui en dépend (flash, piercing, artiste).
+    if (step === 1) {
+      if (!prestation) return fail("Choisissez le type de rendez-vous.");
+      if (prestation === "TATTOO" && !selectedFlashId) return fail("Choisissez le flash que vous souhaitez.");
+      if (prestation === "PIERCING" && (!selectedPiercingZone || !selectedPiercingService)) return fail("Choisissez la zone et le type de piercing.");
+      if (isParTatoueurMode && !selectedTatoueur) return fail("Choisissez l’artiste qui vous accompagnera.");
     }
 
+    // Étape 2 — quand : jour et heure.
+    if (step === 2) {
+      if (linkedVenues.length && !selectedVenue?.publicBookingEnabled) return fail("Choisissez le salon où vous souhaitez venir.");
+      if (!selectedDate || selectedDate < getMinBookableDate()) {
+        return fail(!allowSameDayBooking && selectedDate === getParisTodayKey() ? `${SAME_DAY_BOOKING_MESSAGE}. Choisissez un autre jour.` : "Choisissez un jour à partir d’aujourd’hui.");
+      }
+      if (selectedSlots.length === 0) return fail("Choisissez une heure pour continuer.");
+      const expected = prestation === "PROJET" ? requiredProjectSlots : prestation === "TATTOO" ? requiredTattooSlots : prestation === "RETOUCHE" ? 2 : null;
+      if (expected !== null && selectedSlots.length !== expected) return fail("Cet horaire n’est plus disponible pour toute la durée du rendez-vous. Choisissez une autre heure.");
+    }
+
+    // Étape 3 — vous : coordonnées et précisions.
     if (step === 3) {
-      if (!selectedDate || selectedDate < toDateInputValue(new Date())) {
-        reportNavigationError("Choisissez une date à partir d’aujourd’hui.");
-        return;
-      }
-      if (isParTatoueurMode && !selectedTatoueur) {
-        reportNavigationError("Veuillez sélectionner un tatoueur");
-        return;
-      }
-      if (prestation === "RETOUCHE" && selectedSlots.length < 2) {
-        reportNavigationError("Un rendez-vous de retouche nécessite au minimum une heure.");
-        return;
-      }
-      if (selectedSlots.length === 0) {
-        reportNavigationError("Veuillez sélectionner au moins un créneau");
-        return;
-      }
-
-      if (prestation === "PROJET" && selectedSlots.length !== requiredProjectSlots) {
-        reportNavigationError(
-          `Pour un rendez-vous projet, vous devez sélectionner exactement ${requiredProjectSlots} créneau(x), soit ${projectAppointmentDurationMinutes} minutes.`,
-        );
-        return;
-      }
-
-      if (prestation === "TATTOO" && selectedSlots.length !== requiredTattooSlots) {
-        reportNavigationError(
-          `Pour ce flash, vous devez sélectionner exactement ${requiredTattooSlots} créneau(x), soit ${selectedFlashDurationMinutes} minutes.`,
-        );
-        return;
-      }
+      const fields = ["client.firstName", "client.lastName", "client.email", "client.phone", "client.birthDate", "details.skin", ...(prestation === "PROJET" ? ["project"] : [])];
+      const ok = await trigger(fields as any, { shouldFocus: true });
+      if (!ok) return fail("Il manque quelques informations : vérifiez les champs indiqués.");
     }
 
-    if (step === 2 && prestation === "TATTOO" && !selectedFlashId) {
-      reportNavigationError(
-        "Pour une prestation tattoo, veuillez sélectionner un flash avant de continuer.",
-      );
-      return;
-    }
-
-    if (step === 2 && prestation === "PIERCING" && (!selectedPiercingZone || !selectedPiercingService)) {
-      reportNavigationError("Choisissez une zone et un type de piercing pour continuer.");
-      return;
-    }
-    const ok = await trigger(fieldsByStep[step] as any, { shouldFocus: true });
-    if (!ok) { setNavigationError("Vérifiez les champs indiqués avant de continuer."); return; }
-
-    if (step === 3) {
-      setStep(4);
-
-    } else {
-      setStep((s) => Math.min(4, s + 1));
-    }
-
+    setStep((s) => Math.min(4, s + 1));
   };
 
   const goPrev = () => {
@@ -755,6 +735,7 @@ export function useBookingLogic({
     isStandaloneTatoueurAccount,
     salon.id,
     salon.appointmentBookingEnabled,
+    slotsReloadKey,
   ]);
 
   //! Vérifier si un créneau est bloqué
@@ -1087,7 +1068,8 @@ export function useBookingLogic({
           isAuthenticated && sessionUserId
             ? selectedMoodboardId || undefined
             : undefined,
-        reference: uploadedFileUrls.reference || data.details?.reference || "",
+        // Pour un flash, son image sert de référence : elle s'affiche ensuite dans le détail du rendez-vous.
+        reference: uploadedFileUrls.reference || data.details?.reference || (data.prestation === "TATTOO" ? selectedFlash?.imageUrl || "" : ""),
         sketch: uploadedFileUrls.sketch || data.details?.sketch || "",
         piercingZone: selectedPiercingZone || undefined,
         price:
@@ -1098,6 +1080,8 @@ export function useBookingLogic({
           data.prestation === "PROJET"
             ? projectAppointmentResolvedPrice
             : undefined,
+        // Champs Projet facultatifs : jamais envoyés pour une autre prestation.
+        ...(data.prestation === "PROJET" ? buildProjectClientInfo(data.project) : {}),
       };
 
       const result = await createAppointmentByClient(
@@ -1127,6 +1111,19 @@ export function useBookingLogic({
         if (redirectHref) {
           router.push(redirectHref + (redirectHref.includes("?") ? "&" : "?") + "venueSalonId=" + encodeURIComponent(salon.id));
         }
+        return;
+      }
+
+      if (result.error === true && result.code === "SAME_DAY_BOOKING_DISABLED") {
+        toast.error(`${SAME_DAY_BOOKING_MESSAGE}.`);
+        setSelectedSlots([]);
+        setTimeSlots([]);
+        setOccupiedSlots([]);
+        setBlockedSlots([]);
+        setSelectedDate(addDaysToDateKey(getParisTodayKey(), 1));
+        setSlotsReloadKey((key) => key + 1);
+        setNavigationError(`${SAME_DAY_BOOKING_MESSAGE}. Choisissez un autre jour.`);
+        setStep(2);
         return;
       }
 
