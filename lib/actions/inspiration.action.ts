@@ -2,6 +2,8 @@
 
 type InspirationSalon = {
 	id: string;
+	/** VISIBLE : affiché partout ; SEARCH_HIDDEN / HIDDEN : masqué de la liste des salons. */
+	publicVisibility?: "VISIBLE" | "SEARCH_HIDDEN" | "HIDDEN" | null;
 	salonName: string | null;
 	displayName?: string;
 	image: string | null;
@@ -523,10 +525,12 @@ const fetchInspirationPhotosFromApi = async (
 		throw new Error(data.message || "Erreur API inspiration");
 	}
 
-	return {
-		...(data as Omit<InspirationPhotosResponse, "source">),
-		source: "api",
-	};
+	const payload = data as Omit<InspirationPhotosResponse, "source">;
+	// Garde-fou : un profil masqué de la liste des salons ne doit pas apparaître dans les inspirations.
+	const photos = (payload.photos || []).filter(
+		(photo) => !photo.user?.publicVisibility || photo.user.publicVisibility === "VISIBLE",
+	);
+	return { ...payload, photos, source: "api" };
 };
 
 const fetchStringList = async (path: string): Promise<string[]> => {
