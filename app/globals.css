@@ -123,19 +123,19 @@ body {
    jusqu'au bord, ex. une barre qui défile sur mobile).
    ------------------------------------------------------------------ */
 :root {
-  --page-gutter: 1.25rem; /* mobile : 20px */
+  --page-gutter: 1rem; /* mobile : 16px */
 }
 @media (min-width: 40rem) {
-  :root { --page-gutter: 2.5rem; } /* sm : 40px */
+  :root { --page-gutter: 2rem; } /* sm : 32px */
 }
 @media (min-width: 64rem) {
-  :root { --page-gutter: 4rem; } /* lg : 64px */
+  :root { --page-gutter: 3rem; } /* lg : 48px */
 }
 @media (min-width: 80rem) {
-  :root { --page-gutter: 7rem; } /* xl : 112px */
+  :root { --page-gutter: 5.5rem; } /* xl : 88px */
 }
 @media (min-width: 96rem) {
-  :root { --page-gutter: 9rem; } /* 2xl : 144px */
+  :root { --page-gutter: 7rem; } /* 2xl : 112px */
 }
 
 @utility px-page {

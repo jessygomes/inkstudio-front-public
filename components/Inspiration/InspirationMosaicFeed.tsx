@@ -12,6 +12,7 @@ import FilterSelect from "@/components/Shared/FilterSelect";
 import { formatCityLabel } from "@/lib/utils/searchCities";
 import FavoritePortfolioBtn from "@/components/Shared/FavoritePortfolioBtn";
 import StartInkeraConversationButton from "@/components/Contact/StartInkeraConversationButton";
+import InspirationInfo from "./InspirationInfo";
 import { useUser } from "@/components/Context/UserContext";
 import { toSlug } from "@/lib/utils";
 import Image from "next/image";
@@ -561,7 +562,7 @@ export default function InspirationMosaicFeed({
     <section className="space-y-4 font-one">
       <header className="flex items-start gap-3 py-1 sm:py-2 mx-page">
         <span className="mt-0.5 grid size-9 shrink-0 place-items-center rounded-xl border border-tertiary-400/15 bg-tertiary-400/8 text-tertiary-400"><Images size={17} aria-hidden="true" /></span>
-        <div><p className="mb-1 text-[9px] uppercase tracking-[0.16em] text-white/35">Vos prochaines idées</p><h1 className="text-xl font-medium leading-tight tracking-tight text-white sm:text-2xl">Inspirations tatouage</h1><p className="mt-1 text-xs leading-5 text-white/45">Explorez les créations et trouvez l’artiste de votre prochain projet.</p>{isUsingMockData && <p className="mt-2 text-[10px] leading-5 text-white/35">Images d’exemple : les noms et informations des artistes et salons sont fictifs.</p>}</div>
+        <div><p className="mb-1 text-[9px] uppercase tracking-[0.16em] text-white/35">Vos prochaines idées</p><div className="flex items-center gap-1.5"><h1 className="text-xl font-medium leading-tight tracking-tight text-white sm:text-2xl">Inspirations tatouage</h1><InspirationInfo /></div><p className="mt-1 text-xs leading-5 text-white/45">Explorez les créations et trouvez l’artiste de votre prochain projet.</p>{isUsingMockData && <p className="mt-2 text-[10px] leading-5 text-white/35">Images d’exemple : les noms et informations des artistes et salons sont fictifs.</p>}</div>
       </header>
 
       <div className="flex flex-col gap-2 rounded-2xl border border-white/10 bg-noir-800 p-2.5 lg:flex-row lg:items-center mx-page">
