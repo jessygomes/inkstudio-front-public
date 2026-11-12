@@ -173,6 +173,8 @@ type RdvBody = {
   piercingZoneCorps?: string | null;
   piercingZoneMicrodermal?: string | null;
   moodboardId?: string;
+  /** Flash choisi : le serveur en reprend le prix et ajoute son visuel aux photos du rendez-vous. */
+  flashId?: string;
   // RDV Projet uniquement
   desiredTattooPeriod?: string | null;
   desiredTattooDate?: string | null;

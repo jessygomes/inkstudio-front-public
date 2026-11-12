@@ -1068,8 +1068,9 @@ export function useBookingLogic({
           isAuthenticated && sessionUserId
             ? selectedMoodboardId || undefined
             : undefined,
-        // Pour un flash, son image sert de référence : elle s'affiche ensuite dans le détail du rendez-vous.
-        reference: uploadedFileUrls.reference || data.details?.reference || (data.prestation === "TATTOO" ? selectedFlash?.imageUrl || "" : ""),
+        // Flash choisi : le serveur en reprend le prix et ajoute son visuel aux photos du rendez-vous.
+        flashId: selectedFlash?.id || undefined,
+        reference: uploadedFileUrls.reference || data.details?.reference || "",
         sketch: uploadedFileUrls.sketch || data.details?.sketch || "",
         piercingZone: selectedPiercingZone || undefined,
         price:

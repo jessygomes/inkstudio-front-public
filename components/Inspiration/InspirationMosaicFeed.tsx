@@ -18,21 +18,28 @@ import { toSlug } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Hash, MapPin, Palette, Ruler, RotateCcw, SlidersHorizontal, Tags, ArrowUpRight, Images, X } from "lucide-react";
+import { Clock3, Hash, MapPin, Palette, Ruler, RotateCcw, SlidersHorizontal, Tags, ArrowUpRight, Images, X, Zap } from "lucide-react";
 import { createPortal } from "react-dom";
 import { FaInstagram } from "react-icons/fa";
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa6";
 import {
   EMPTY_INSPIRATION_SELECTION,
+  INSPIRATION_TYPE_OPTIONS,
   PIECE_SIZE_OPTIONS,
   buildInspirationQuery,
   hasActiveInspirationFilters,
   parseHashtagInput,
   type InspirationSelection,
+  type InspirationType,
 } from "./inspirationFilters";
 
 type PortfolioFeedItem = {
   key: string;
+  /** `flash` : un flash disponible (prix, durée, dimensions) ; sinon une photo de portfolio. */
+  kind: "photo" | "flash";
+  price?: number;
+  durationMinutes?: number;
+  dimension?: string;
   imageUrl: string;
   title: string;
   description: string;
@@ -161,8 +168,19 @@ const normalizeInstagramProfile = (
   };
 };
 
+const formatPrice = (price: number) => price.toLocaleString("fr-FR", { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
+const formatDuration = (minutes: number) => {
+  const hours = Math.floor(minutes / 60);
+  const rest = minutes % 60;
+  return hours ? `${hours} h${rest ? ` ${String(rest).padStart(2, "0")}` : ""}` : `${rest} min`;
+};
+
 const mapPhotoToFeedItem = (photo: InspirationPhoto): PortfolioFeedItem => ({
   key: photo.id,
+  kind: photo.kind === "flash" ? "flash" : "photo",
+  price: typeof photo.price === "number" ? photo.price : undefined,
+  durationMinutes: photo.appointmentDurationMinutes || undefined,
+  dimension: photo.dimension?.trim() || undefined,
   imageUrl: photo.imageUrl,
   title: photo.title,
   description: photo.description,
@@ -566,10 +584,27 @@ export default function InspirationMosaicFeed({
       </header>
 
       <div className="flex flex-col gap-2 rounded-2xl border border-white/10 bg-noir-800 p-2.5 lg:flex-row lg:items-center mx-page">
-        <div className="grid min-w-0 flex-1 grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
+        <div className={`grid min-w-0 flex-1 grid-cols-2 gap-2 sm:grid-cols-3 ${selection.type === "flash" ? "lg:grid-cols-3" : "lg:grid-cols-6"}`}>
+          <FilterSelect
+            label="Type"
+            placeholder="Photos et flashs"
+            unit="type"
+            icon={<Zap size={15} aria-hidden="true" className="text-tertiary-400" />}
+            options={INSPIRATION_TYPE_OPTIONS.map((option) => ({ value: option.value, label: option.label }))}
+            selected={selection.type !== "all" ? [selection.type] : []}
+            multiple={false}
+            align="left"
+            onApply={(values) => {
+              const type = (values[0] || "all") as InspirationType;
+              // Taille de pièce, catégories et hashtags n'existent que sur les photos : retirés en passant aux flashs.
+              if (type === "flash") setHashtagInput("");
+              void applySelection({ ...selectionRef.current, type, ...(type === "flash" ? { pieceSize: [], category: [], hashtag: [] } : {}) });
+            }}
+          />
+
           <FilterSelect label="Choisissez votre ville" placeholder="Toutes les villes" unit="ville" icon={<MapPin size={14} />} selected={selection.city ? [selection.city] : []} options={availableCities.map(city => ({ value: city, label: formatCityLabel(city) }))} multiple={false} onApply={values => void applySelection({ ...selectionRef.current, city: values[0] || "" })} align="left" />
 
-          <FilterSelect
+          {selection.type !== "flash" && <FilterSelect
             label="Taille de la pièce"
             placeholder="Toutes les tailles"
             unit="taille"
@@ -580,9 +615,9 @@ export default function InspirationMosaicFeed({
             }))}
             selected={selection.pieceSize}
             onApply={values => void applySelection({ ...selectionRef.current, pieceSize: values })}
-          />
+          />}
 
-          <FilterSelect
+          {selection.type !== "flash" && <FilterSelect
             label="Catégories"
             placeholder="Toutes les catégories"
             unit="catégorie"
@@ -593,7 +628,7 @@ export default function InspirationMosaicFeed({
             }))}
             selected={selection.category}
             onApply={values => void applySelection({ ...selectionRef.current, category: values })}
-          />
+          />}
 
           <FilterSelect
             label="Styles"
@@ -605,7 +640,7 @@ export default function InspirationMosaicFeed({
             onApply={values => void applySelection({ ...selectionRef.current, style: values })}
           />
 
-          <div className="min-w-0 font-one">
+          {selection.type !== "flash" && <div className="min-w-0 font-one">
             <label className="sr-only" htmlFor="inspiration-hashtag-input">
               <Hash size={15} aria-hidden="true" className="text-tertiary-400" /> Hashtags
             </label>
@@ -617,7 +652,7 @@ export default function InspirationMosaicFeed({
               placeholder="#fleur #minimaliste"
               className="h-11 w-full min-w-0 rounded-xl border border-white/10 bg-noir-800 px-3 font-one text-xs text-white transition-colors placeholder:text-white/30 hover:border-white/25 focus:outline-none focus:border-tertiary-400/50 focus:ring-2 focus:ring-tertiary-400/10"
             />
-          </div>
+          </div>}
         </div>
 
         <AppButton type="button" variant="secondary" onClick={clearAllFilters} disabled={!hasActiveFilters && !hashtagInput} icon={<RotateCcw size={15} aria-hidden="true" />} className="h-11! px-3! py-2! text-xs! rounded-xl! shadow-none! cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-tertiary-400">
@@ -630,6 +665,7 @@ export default function InspirationMosaicFeed({
           <SlidersHorizontal size={14} aria-hidden="true" className="text-tertiary-400" />
           <span>Filtres actifs :</span>
           {[
+            ...(selection.type !== "all" ? [INSPIRATION_TYPE_OPTIONS.find((option) => option.value === selection.type)?.label ?? selection.type] : []),
             ...(selection.city ? [selection.city] : []),
             ...selection.pieceSize.map(
               (size) => PIECE_SIZE_OPTIONS.find((option) => option.value === size)?.label ?? size,
@@ -649,14 +685,22 @@ export default function InspirationMosaicFeed({
             key={item.key}
             className="group relative mb-3 break-inside-avoid overflow-hidden rounded-2xl border border-white/10 bg-noir-800 shadow-xl"
           >
-            <div className="absolute top-3 right-3 z-20">
-              <FavoritePortfolioBtn
-                portfolioId={item.key}
-                initialFavorite={favoritePortfolioIds.has(item.key)}
-                variant="icon-only"
-                onToggle={(isFavorite) => handleFavoriteToggle(item.key, isFavorite)}
-              />
-            </div>
+            {item.kind === "flash" && (
+              <span className="absolute left-3 top-3 z-20 inline-flex items-center gap-1 rounded-lg bg-black/65 px-2 py-1 text-[10px] font-medium text-white backdrop-blur-sm">
+                <Zap size={11} className="text-tertiary-400" aria-hidden="true" />Flash{typeof item.price === "number" && <> · {formatPrice(item.price)}</>}
+              </span>
+            )}
+            {/* Les favoris portent sur les photos de portfolio : pas pour un flash. */}
+            {item.kind !== "flash" && (
+              <div className="absolute top-3 right-3 z-20">
+                <FavoritePortfolioBtn
+                  portfolioId={item.key}
+                  initialFavorite={favoritePortfolioIds.has(item.key)}
+                  variant="icon-only"
+                  onToggle={(isFavorite) => handleFavoriteToggle(item.key, isFavorite)}
+                />
+              </div>
+            )}
 
             <button
               type="button"
@@ -698,8 +742,8 @@ export default function InspirationMosaicFeed({
       {!isLoading && filteredItems.length === 0 && (
         <div className="rounded-2xl border border-white/12 bg-white/5 py-10 text-center text-sm text-white/65 mx-page">
           {hasActiveFilters
-            ? "Aucune photo ne correspond aux filtres sélectionnés pour le moment."
-            : "Aucune photo de portfolio disponible pour le moment."}
+            ? "Aucune photo ni aucun flash ne correspond aux filtres sélectionnés pour le moment."
+            : "Aucune photo ni aucun flash disponible pour le moment."}
         </div>
       )}
 
@@ -800,8 +844,13 @@ export default function InspirationMosaicFeed({
                 </div>
 
                 {/* Détails */}
-                {(activeItem.pieceSize || activeItem.categories.length > 0 || activeItem.styles.length > 0 || activeItem.hashtags.length > 0) && (
+                {(activeItem.kind === "flash" || activeItem.pieceSize || activeItem.categories.length > 0 || activeItem.styles.length > 0 || activeItem.hashtags.length > 0) && (
                   <div className="space-y-3">
+                    {activeItem.kind === "flash" && <div className="space-y-2">
+                      {typeof activeItem.price === "number" && <div className="flex items-center justify-between gap-3 rounded-xl bg-white/5 px-3.5 py-3 text-xs"><span className="inline-flex items-center gap-2 text-white/45"><Zap size={14} className="text-tertiary-400" />Prix du flash</span><span className="font-medium text-white/85">{formatPrice(activeItem.price)}</span></div>}
+                      {activeItem.durationMinutes && <div className="flex items-center justify-between gap-3 rounded-xl bg-white/5 px-3.5 py-3 text-xs"><span className="inline-flex items-center gap-2 text-white/45"><Clock3 size={14} className="text-tertiary-400" />Durée estimée</span><span className="font-medium text-white/85">{formatDuration(activeItem.durationMinutes)}</span></div>}
+                      {activeItem.dimension && <div className="flex items-center justify-between gap-3 rounded-xl bg-white/5 px-3.5 py-3 text-xs"><span className="inline-flex items-center gap-2 text-white/45"><Ruler size={14} className="text-tertiary-400" />Dimensions</span><span className="font-medium text-white/85">{activeItem.dimension}</span></div>}
+                    </div>}
                     {activeItem.pieceSize && <div className="flex items-center justify-between gap-3 rounded-xl bg-white/5 px-3.5 py-3 text-xs"><span className="inline-flex items-center gap-2 text-white/45"><Ruler size={14} className="text-tertiary-400" />Taille de la pièce</span><span className="font-medium text-white/85">{PIECE_SIZE_OPTIONS.find(option => option.value === activeItem.pieceSize)?.label ?? activeItem.pieceSize}</span></div>}
                     <div className="flex flex-wrap gap-1.5">
                       {Array.from(new Set([...activeItem.categories, ...activeItem.styles])).map(label => <span key={label} className="max-w-full break-words rounded-xl bg-linear-to-r from-tertiary-400/20 to-cuatro-500/15 px-2.5 py-1.5 text-[11px] text-white/85">{label}</span>)}
@@ -831,7 +880,7 @@ export default function InspirationMosaicFeed({
               {/* Actions */}
               <div className="shrink-0 space-y-2 bg-noir-700 p-4 pt-3">
                 <div className="flex items-center gap-2">
-                  <FavoritePortfolioBtn portfolioId={activeItem.key} initialFavorite={favoritePortfolioIds.has(activeItem.key)} variant="icon-only" className="size-11! shrink-0 rounded-xl! border-0! bg-white/6!" onToggle={isFavorite => handleFavoriteToggle(activeItem.key, isFavorite)} />
+                  {activeItem.kind !== "flash" && <FavoritePortfolioBtn portfolioId={activeItem.key} initialFavorite={favoritePortfolioIds.has(activeItem.key)} variant="icon-only" className="size-11! shrink-0 rounded-xl! border-0! bg-white/6!" onToggle={isFavorite => handleFavoriteToggle(activeItem.key, isFavorite)} />}
                   <AppButton href={activeItem.href} onClick={closeLightbox} fullWidth className="min-h-11! rounded-xl! px-4! py-2! text-sm! shadow-none! hover:translate-y-0!">Voir le profil<ArrowUpRight size={15} /></AppButton>
                 </div>
                 {activeItem.canMessageSalon && <StartInkeraConversationButton key={`message-${activeItem.key}`} variant="compact" tone="violet" targetUserId={activeItem.salonUserId} recipientName={activeItem.salonName} className="min-h-11! rounded-xl! px-4! py-2! text-sm! shadow-none!" />}

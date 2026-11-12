@@ -57,6 +57,11 @@ export type InspirationPhoto = {
 	updatedAt: string;
 	user: InspirationSalon;
 	tatoueur: InspirationTatoueur | null;
+	/** `flash` : un flash disponible d'un tatoueur (prix, durée et dimensions renseignés) ; absent = photo de portfolio. */
+	kind?: "photo" | "flash";
+	price?: number;
+	dimension?: string | null;
+	appointmentDurationMinutes?: number;
 };
 
 export type InspirationPagination = {
@@ -87,6 +92,8 @@ type ApiError = {
 };
 
 export type InspirationFilters = {
+	/** Photos et flashs mélangés (défaut), photos seulement ou flashs seulement. */
+	type?: "all" | "photos" | "flash";
 	city?: string;
 	pieceSize?: string[];
 	category?: string[];
@@ -403,7 +410,8 @@ const buildMockResponse = (
 	const matchesAny = (selected: string[], values: string[]) =>
 		selected.length === 0 || selected.some((value) => values.includes(value));
 
-	const filtered = MOCK_INSPIRATION_PHOTOS.filter(
+	// Les images de démonstration sont toutes des photos : aucun flash.
+	const filtered = filters.type === "flash" ? [] : MOCK_INSPIRATION_PHOTOS.filter(
 		(photo) =>
 			(!city || (photo.user.city || "").toLowerCase().includes(city)) &&
 			matchesAny(styles, photo.style.map((value) => value.toLowerCase())) &&
@@ -484,6 +492,7 @@ const fetchInspirationPhotosFromApi = async (
 
 	const city = filters.city?.trim();
 	if (city) params.set("city", city);
+	if (filters.type === "photos" || filters.type === "flash") params.set("type", filters.type);
 
 	const csvFilters = {
 		pieceSize: filters.pieceSize,
@@ -560,6 +569,7 @@ export const getInspirationPortfolioPhotosAction = async (
 ): Promise<InspirationPhotosResponse> => {
 	const { page, limit } = clampPagination(options);
 	const filters: InspirationFilters = {
+		type: options?.type,
 		city: options?.city,
 		pieceSize: options?.pieceSize,
 		category: options?.category,
