@@ -14,6 +14,7 @@ import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 
 import { parseRateLimit } from "../../lib/auth-rate-limit";
+import { setAuthReturnPath } from "@/lib/booking-link";
 
 // Schema de validation pour l'inscription client
 const registerSchema = z
@@ -51,7 +52,24 @@ const registerSchema = z
 
 type RegisterForm = z.infer<typeof registerSchema>;
 
-export default function Register() {
+/** Connexion depuis une invitation : retour sur la page d'invitation (chemin stocké hors URL). */
+function goToLoginForInvitation(path: string) {
+  setAuthReturnPath(path);
+  // eslint-disable-next-line @next/next/no-location-assign-relative-destination
+  window.location.assign("/se-connecter");
+}
+
+/** Inscription depuis l'invitation d'un salon : e-mail imposé (celui de la fiche), retour sur la page d'invitation. */
+export type RegisterInvitation = {
+  token: string;
+  salonName: string;
+  email: string;
+  firstName?: string | null;
+  lastName?: string | null;
+};
+
+export default function Register({ invitation }: { invitation?: RegisterInvitation } = {}) {
+  const invitationPath = invitation ? `/invitation/${encodeURIComponent(invitation.token)}` : null;
   const router = useRouter();
   const [isPending, setIsPending] = useState(false);
   const [isGooglePending, setIsGooglePending] = useState(false);
@@ -64,9 +82,9 @@ export default function Register() {
     resolver: zodResolver(registerSchema),
     mode: "onBlur",
     defaultValues: {
-      firstName: "",
-      lastName: "",
-      email: "",
+      firstName: invitation?.firstName || "",
+      lastName: invitation?.lastName || "",
+      email: invitation?.email || "",
       password: "",
       confirmPassword: "",
       birthDate: "",
@@ -114,11 +132,12 @@ export default function Register() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            email: data.email,
+            email: invitation ? invitation.email : data.email,
             password: data.password,
             firstName: data.firstName,
             lastName: data.lastName,
             birthDate: data.birthDate || null,
+            ...(invitation ? { invitationToken: invitation.token } : {}),
           }),
         },
       );
@@ -142,6 +161,12 @@ export default function Register() {
 
       setSuccess("Inscription réussie ! Connexion...");
       form.reset();
+
+      // Invitation : la fiche du salon est reliée dès que l'adresse e-mail est confirmée (lien reçu par e-mail).
+      if (invitation) {
+        setSuccess(`Compte créé ! Confirmez votre adresse e-mail avec le lien que nous venons de vous envoyer : vos rendez-vous avec ${invitation.salonName} apparaîtront alors dans votre espace.`);
+        return;
+      }
 
       // Auto-login après inscription
       const loginResult = await signIn("credentials", {
@@ -178,7 +203,7 @@ export default function Register() {
     setIsGooglePending(true);
 
     try {
-      await signIn("google", { callbackUrl: "/" });
+      await signIn("google", { callbackUrl: invitationPath || "/" });
     } catch (err) {
       console.error("Erreur Google:", err);
       setError("Impossible de continuer avec Google pour le moment.");
@@ -190,7 +215,9 @@ export default function Register() {
 
   return (
     <div className="font-one">
-      <div className="mb-6"><p className="text-[10px] uppercase tracking-[0.18em] text-tertiary-400">Compte client · Gratuit</p><h1 className="mt-3 font-two text-3xl font-medium tracking-tight text-white">Faites place à vos idées.</h1><p className="mt-3 text-sm leading-7 text-white/55">Créez votre compte pour garder vos inspirations et échanger avec les artistes.</p></div>
+      <div className="mb-6"><p className="text-[10px] uppercase tracking-[0.18em] text-tertiary-400">Compte client · Gratuit</p>{invitation
+        ? <><h1 className="mt-3 font-two text-3xl font-medium tracking-tight text-white">Créez votre compte</h1><p className="mt-3 text-sm leading-7 text-white/55">Suivez vos rendez-vous avec {invitation.salonName}, échangez avec votre tatoueur dans la messagerie Inkera et créez vos moodboards.</p></>
+        : <><h1 className="mt-3 font-two text-3xl font-medium tracking-tight text-white">Faites place à vos idées.</h1><p className="mt-3 text-sm leading-7 text-white/55">Créez votre compte pour suivre vos rendez-vous, garder vos inspirations et échanger avec les artistes.</p></>}</div>
       <div className="mb-5"><AuthFeedback error={error} success={success} /></div>
       <AuthGoogleButton onClick={handleGoogleSignIn} pending={isGooglePending} disabled={busy} />
       <div className="my-5 flex items-center gap-3 text-[10px] text-white/35"><span className="h-px flex-1 bg-white/10" />ou avec votre e-mail<span className="h-px flex-1 bg-white/10" /></div>
@@ -202,7 +229,7 @@ export default function Register() {
             <AuthField id="register-firstName" label="Prénom" autoComplete="given-name" placeholder="Votre prénom" required error={form.formState.errors.firstName?.message} {...form.register("firstName")} />
             <AuthField id="register-lastName" label="Nom" autoComplete="family-name" placeholder="Votre nom" required error={form.formState.errors.lastName?.message} {...form.register("lastName")} />
           </div>
-          <AuthField id="register-email" label="Adresse e-mail" type="email" autoComplete="email" placeholder="vous@exemple.fr" required error={form.formState.errors.email?.message} {...form.register("email")} />
+          <AuthField id="register-email" label="Adresse e-mail" type="email" autoComplete="email" placeholder="vous@exemple.fr" required readOnly={!!invitation} hint={invitation ? `L’adresse à laquelle ${invitation.salonName} vous a invité : c’est elle qui vous permet de retrouver vos rendez-vous avec ce salon.` : undefined} error={form.formState.errors.email?.message} {...form.register("email")} />
           <AuthField id="register-birthDate" label="Date de naissance (facultatif)" type="date" autoComplete="bday" error={form.formState.errors.birthDate?.message} {...form.register("birthDate")} />
           <div className="grid gap-4 sm:grid-cols-2">
             <AuthField id="register-password" label="Mot de passe" type="password" autoComplete="new-password" placeholder="Votre mot de passe" aria-describedby="password-requirements" required error={form.formState.errors.password?.message} {...form.register("password")} />
@@ -216,7 +243,9 @@ export default function Register() {
           <AppButton type="submit" fullWidth disabled={busy || isBlocked} icon={<ArrowUpRight size={16} aria-hidden="true" />} className="min-h-11 px-4!">{isBlocked ? "Réessayer dans " + cooldownSeconds + " s" : isPending ? "Création du compte…" : "Créer mon compte"}</AppButton>
         </fieldset>
       </form>
-      <p className="mt-6 border-t border-white/10 pt-5 text-center text-xs leading-6 text-white/55">Déjà un compte ? <Link href="/se-connecter" className="rounded-sm text-tertiary-400 transition hover:text-white focus-visible:outline-2 focus-visible:outline-tertiary-400">Me connecter</Link></p>
+      <p className="mt-6 border-t border-white/10 pt-5 text-center text-xs leading-6 text-white/55">Déjà un compte ? {invitationPath
+        ? <button type="button" onClick={() => goToLoginForInvitation(invitationPath)} className="rounded-sm text-tertiary-400 transition hover:text-white focus-visible:outline-2 focus-visible:outline-tertiary-400">Me connecter</button>
+        : <Link href="/se-connecter" className="rounded-sm text-tertiary-400 transition hover:text-white focus-visible:outline-2 focus-visible:outline-tertiary-400">Me connecter</Link>}</p>
     </div>
   );
 }

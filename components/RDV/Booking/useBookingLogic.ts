@@ -26,7 +26,7 @@ import { uploadFiles } from "@/lib/utils/uploadthing";
 import imageCompression from "browser-image-compression";
 import { FlashProps, PiercingService, PiercingZone, Tatoueur } from "@/lib/type";
 import { BookingMoodboardOption, SkinToneOption } from "./types";
-import { PROJECT_BUDGET_RANGES, SAME_DAY_BOOKING_MESSAGE, addDaysToDateKey, getParisTodayKey, type ProjectClientInfo } from "@/lib/booking-link";
+import { PROJECT_BUDGET_RANGES, SAME_DAY_BOOKING_MESSAGE, addDaysToDateKey, getParisTodayKey, setAuthReturnPath, type ProjectClientInfo } from "@/lib/booking-link";
 
 type AppointmentRequestForm = z.infer<typeof appointmentRequestSchema>;
 
@@ -1112,6 +1112,21 @@ export function useBookingLogic({
         if (redirectHref) {
           router.push(redirectHref + (redirectHref.includes("?") ? "&" : "?") + "venueSalonId=" + encodeURIComponent(salon.id));
         }
+        return;
+      }
+
+      // E-mail déjà connu du salon : on ne crée pas de doublon, le client réserve avec son compte (cette adresse).
+      if (result.error === true && result.code === "CLIENT_EMAIL_KNOWN") {
+        const returnTo = window.location.pathname + window.location.search;
+        toast.error(result.message || "Cette adresse e-mail est déjà connue de ce salon. Connectez-vous pour réserver.", {
+          duration: 20000,
+          action: { label: "Se connecter", onClick: () => { setAuthReturnPath(returnTo); router.push("/se-connecter"); } },
+          cancel: { label: "Créer un compte", onClick: () => { setAuthReturnPath(returnTo); router.push("/creer-un-compte"); } },
+        });
+        return;
+      }
+      if (result.error === true && (result.code === "CLIENT_EMAIL_UNVERIFIED" || result.code === "CLIENT_EMAIL_LINKED_ELSEWHERE")) {
+        toast.error(result.message || "Réservation impossible avec cette adresse e-mail.", { duration: 15000 });
         return;
       }
 

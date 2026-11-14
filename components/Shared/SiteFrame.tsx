@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 
 export default function SiteFrame({ children, header, footer }: { children: ReactNode; header: ReactNode; footer: ReactNode }) {
   const pathname = usePathname();
-  const fullscreenAuth = pathname === "/se-connecter" || pathname === "/creer-un-compte";
+  const fullscreenAuth = pathname === "/se-connecter" || pathname === "/creer-un-compte" || pathname.startsWith("/invitation/");
 
   useEffect(() => {
     if (!fullscreenAuth) return;
