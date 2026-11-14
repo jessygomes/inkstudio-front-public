@@ -103,6 +103,13 @@ export async function prepareUpload(
   files: readonly { name: string; size: number; type: string }[],
   context: Context,
 ) {
+  // Photo de suivi de cicatrisation : le lien personnel suffit, aucun compte n'est demandé.
+  // La session est ignorée (même expirée, elle ne doit pas bloquer la réponse du client).
+  if (context.followUpToken) {
+    const { bookingSalonId: _ignored, ...followUpContext } = context;
+    void _ignored;
+    return finishPrepare(route, files, followUpContext, null);
+  }
   const session = await auth();
   if (session && !hasUsableSession(session))
     throw new UploadThingError({
@@ -117,15 +124,24 @@ export async function prepareUpload(
     !connected && input.bookingSalonId && application === "public"
       ? await guestIdentity()
       : undefined;
+  return finishPrepare(route, files, { ...input, ...(guestId ? { guestId } : {}) }, connected ? session.accessToken : null);
+}
+
+/** Demande la réservation au backend et vérifie sa réponse (commun aux envois connectés, invités et de suivi). */
+async function finishPrepare(
+  route: string,
+  files: readonly { name: string; size: number; type: string }[],
+  input: Record<string, unknown>,
+  accessToken: string | null,
+) {
   const result = await uploadControl(
     "prepare",
     {
       route,
       files: files.map((file) => ({ size: file.size, type: file.type })),
       ...input,
-      ...(guestId ? { guestId } : {}),
     },
-    connected ? session.accessToken : undefined,
+    accessToken ?? undefined,
   );
   if (
     !result ||

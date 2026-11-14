@@ -28,7 +28,7 @@ function VerifyEmailContent() {
     const verify = async () => {
       try {
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_BACK_URL}/auth/verify-email?token=${token}&email=${email}`
+          `${process.env.NEXT_PUBLIC_BACK_URL}/auth/verify-email?token=${encodeURIComponent(token)}&email=${encodeURIComponent(email)}`
         );
         const data = await res.json();
 
@@ -37,7 +37,7 @@ function VerifyEmailContent() {
         setStatus("success");
         setMessage(data.message || "Email vérifié avec succès !");
 
-        setTimeout(() => router.push("/connexion"), 4000);
+        setTimeout(() => router.push("/se-connecter"), 4000);
       } catch (err: unknown) {
         setStatus("error");
         if (err instanceof Error) {

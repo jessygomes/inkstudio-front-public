@@ -7,6 +7,7 @@ import Link from "next/link";
 import { toSlug } from "@/lib/utils";
 import AppointmentDrawer from "./AppointmentDrawer";
 import AppointmentReview from "./AppointmentReview";
+import AppointmentFollowUp from "./AppointmentFollowUp";
 import { CiInstagram } from "react-icons/ci";
 import { TfiWorld } from "react-icons/tfi";
 import { focusRing } from "@/components/Shared/ui";
@@ -218,6 +219,8 @@ export default function RendezVousCard({
           </section>
 
           <RdvPrestationCard appointment={{ ...appointment, tattooDetail: appointment.prestationDetails }} piercingZoneName={appointment.prestationDetails?.piercingDetails?.zoneOreille || appointment.prestationDetails?.piercingDetails?.zoneVisage || appointment.prestationDetails?.piercingDetails?.zoneBouche || appointment.prestationDetails?.piercingDetails?.zoneCorps || appointment.prestationDetails?.piercingDetails?.zoneMicrodermal} />
+
+          <AppointmentFollowUp followUp={appointment.followUp} followUpToken={appointment.followUpToken} salonName={salonName} />
 
           {/* Gestion */}
           {(appointment.moodboard || (appointment.status !== "CANCELED" && appointment.status !== "COMPLETED")) && (

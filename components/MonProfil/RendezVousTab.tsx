@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import type { ClientFollowUp } from "@/lib/follow-up";
 import Link from "next/link";
 import {
   FaCalendarAlt,
@@ -105,6 +106,10 @@ export type Appointment = {
     salonResponse?: string | null;
     salonRespondedAt?: string | null;
   };
+  /** Suivi de cicatrisation envoyé (et réponse du salon). */
+  followUp?: ClientFollowUp | null;
+  /** Lien du suivi encore à envoyer. */
+  followUpToken?: string | null;
 };
 
 type RdvResponse = {
