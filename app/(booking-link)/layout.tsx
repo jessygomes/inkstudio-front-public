@@ -1,3 +1,4 @@
+import FriendlyErrors from "@/components/Shared/FriendlyErrors";
 import { auth } from "@/auth";
 import { AuthProvider } from "@/components/Auth/AuthProvider";
 import { EditAppointmentProvider } from "@/components/Context/EditAppointmentContext";
@@ -35,6 +36,7 @@ export default async function BookingLinkLayout({ children }: { children: React.
       <MessagingProvider>
         <EditAppointmentProvider>
           <Toaster />
+          <FriendlyErrors />
           <UserProvider user={user}>
             <SiteFrame header={<Header />} footer={<Footer />}>
               {children}

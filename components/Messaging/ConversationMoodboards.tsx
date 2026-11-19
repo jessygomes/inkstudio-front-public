@@ -1,4 +1,5 @@
 "use client";
+import { userErrorMessage } from "@/lib/user-error";
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
@@ -51,7 +52,7 @@ export default function ConversationMoodboards({ conversationId }: { conversatio
       if (!result.ok || !result.data) throw new Error(result.message || "Ce moodboard n’est plus disponible.");
       setBoard(result.data);
     }).catch(error => {
-      if (active) setError(error instanceof Error ? error.message : "Impossible de charger ce moodboard.");
+      if (active) setError(userErrorMessage(error, "Impossible de charger ce moodboard."));
     }).finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
   }, [selected]);

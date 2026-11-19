@@ -1,3 +1,4 @@
+import { httpErrorMessage } from "@/lib/user-error";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import BookingFlowNew from "@/components/RDV/BookingFlowNew";
 import Link from "next/link";
@@ -75,7 +76,7 @@ async function getSalon(slug: string, loc: string) {
   )}`;
   const res = await fetch(url, { cache: "no-store" });
   if (res.status === 404) return null;
-  if (!res.ok) throw new Error(`Failed to load salon (${res.status})`);
+  if (!res.ok) throw new Error(httpErrorMessage(res.status));
   return res.json();
 }
 

@@ -1,4 +1,5 @@
 "use client";
+import { userErrorMessage } from "@/lib/user-error";
 
 import {
   type InspirationFilterOptions,
@@ -367,9 +368,7 @@ export default function InspirationMosaicFeed({
     } catch (error) {
       if (requestId !== requestIdRef.current) return;
       const message =
-        error instanceof Error
-          ? error.message
-          : "Impossible de charger plus d'images pour le moment.";
+        userErrorMessage(error, "Impossible de charger plus d'images pour le moment.");
       setLoadError(message);
       setHasMore(false);
     } finally {
@@ -412,9 +411,7 @@ export default function InspirationMosaicFeed({
       setHasMore(false);
       setTotal(0);
       setLoadError(
-        error instanceof Error
-          ? error.message
-          : "Impossible de charger les images pour le moment.",
+        userErrorMessage(error, "Impossible de charger les images pour le moment."),
       );
     } finally {
       if (requestId === requestIdRef.current) {

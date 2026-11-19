@@ -1,3 +1,4 @@
+import { httpErrorMessage } from "@/lib/user-error";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState, useMemo } from "react";
 import { useForm } from "react-hook-form";
@@ -418,7 +419,7 @@ export function useBookingLogic({
         const response = await getSkinTones();
 
         if (!response.ok) {
-          throw new Error(`Erreur lors du chargement (${response.status})`);
+          throw new Error(httpErrorMessage(response.status));
         }
 
         const data = response.data as SkinToneOption[];

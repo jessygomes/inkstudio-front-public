@@ -1,4 +1,5 @@
 "use client";
+import { userErrorMessage } from "@/lib/user-error";
 
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -188,7 +189,7 @@ export default function Register({ invitation }: { invitation?: RegisterInvitati
     } catch (error) {
       console.error("Erreur inscription:", error);
       setError(
-        error instanceof Error ? error.message : "Erreur lors de l'inscription",
+        userErrorMessage(error, "Erreur lors de l'inscription"),
       );
     } finally {
       setIsPending(false);

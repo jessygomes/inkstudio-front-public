@@ -1,4 +1,5 @@
 "use client";
+import { userErrorMessage } from "@/lib/user-error";
 
 import { useState, useTransition } from "react";
 import { useSession } from "next-auth/react";
@@ -32,7 +33,7 @@ export default function SalonMessageCard({ targetUserId, recipientName, classNam
         const { id } = await startConversationFromPublicProfileAction(targetUserId);
         router.push(`/mon-profil?tab=messagerie&conversation=${encodeURIComponent(id)}`);
       } catch (cause) {
-        setError(cause instanceof Error ? cause.message : "Impossible d’ouvrir la conversation.");
+        setError(userErrorMessage(cause, "Impossible d’ouvrir la conversation."));
       }
     });
   };

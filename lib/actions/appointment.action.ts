@@ -1,4 +1,6 @@
 "use server";
+import { httpErrorMessage } from "@/lib/user-error";
+import { actionError } from "@/lib/action-error";
 
 import { getAuthHeaders } from "../session";
 
@@ -34,7 +36,7 @@ export const getAllRdvClient = async (options?: {
     if (!response.ok || (data && data.error)) {
       const message =
         data?.message ||
-        `Erreur lors de la récupération des rdv (${response.status})`;
+        httpErrorMessage(response.status);
       return { ok: false, error: true, status: response.status, message, data };
     }
 
@@ -59,8 +61,8 @@ export const fetchAppointmentById = async (appointmentId: string) => {
     },
   );
   if (!response.ok) {
-    throw new Error(
-      `Erreur lors de la récupération du rendez-vous: ${response.statusText}`,
+    throw actionError(
+      httpErrorMessage(response.status),
     );
   }
   const data = await response.json();
@@ -91,7 +93,7 @@ export const cancelAppointmentByClient = async (
     if (!response.ok || (data && data.error)) {
       const message =
         data?.message ||
-        `Erreur lors de l'annulation du rendez-vous (${response.status})`;
+        httpErrorMessage(response.status);
       return { ok: false, error: true, status: response.status, message, data };
     }
 
@@ -131,7 +133,7 @@ export const modifyAppointmentByClient = async (
     if (!response.ok || (data && data.error)) {
       const message =
         data?.message ||
-        `Erreur lors de la modification du rendez-vous (${response.status})`;
+        httpErrorMessage(response.status);
       const code: string | undefined = typeof data?.code === "string" ? data.code : undefined;
       return { ok: false, error: true, status: response.status, message, code, data };
     }
@@ -266,7 +268,7 @@ export const getSkinTones = async () => {
     if (!response.ok || (data && data.error)) {
       const message =
         data?.message ||
-        `Erreur lors du chargement des teintes de peau (${response.status})`;
+        httpErrorMessage(response.status);
       return { ok: false, error: true, status: response.status, message, data };
     }
 

@@ -1,3 +1,4 @@
+import { httpErrorMessage } from "@/lib/user-error";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ArrowLeft, ArrowUpRight, CalendarDays } from "lucide-react";
 import SalonPresentation from "@/components/ProfilSalon/SalonPresentation";
@@ -53,7 +54,7 @@ async function getSalon(slug: string, loc: string) {
   )}`;
   const res = await fetch(url, { cache: "no-store" });
   if (res.status === 404) return null;
-  if (!res.ok) throw new Error(`Failed to load salon (${res.status})`);
+  if (!res.ok) throw new Error(httpErrorMessage(res.status));
 
   // Vérifier si la réponse contient du JSON valide
   const text = await res.text();

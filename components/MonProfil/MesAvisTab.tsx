@@ -1,4 +1,5 @@
 ﻿"use client";
+import { userErrorMessage } from "@/lib/user-error";
 
 import { useCallback, useEffect, useId, useState } from "react";
 import { getClientReviews, deleteReview } from "@/lib/actions/review.action";
@@ -82,7 +83,7 @@ export default function MesAvisTab() {
       setHasPrev(res.data.pagination?.hasPreviousPage || false);
       setPage(res.data.pagination?.currentPage || requestedPage);
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Impossible de charger vos avis. Réessayez dans un instant.");
+      setError(userErrorMessage(cause, "Impossible de charger vos avis. Réessayez dans un instant."));
     } finally {
       setLoading(false);
     }
@@ -99,7 +100,7 @@ export default function MesAvisTab() {
       setReviewToDelete(null);
       await load(reviews.length === 1 && page > 1 ? page - 1 : page);
     } catch (cause) {
-      toast.error(cause instanceof Error ? cause.message : "La suppression a échoué. Vous pouvez réessayer.");
+      toast.error(userErrorMessage(cause, "La suppression a échoué. Vous pouvez réessayer."));
     } finally {
       setDeletingId(null);
     }

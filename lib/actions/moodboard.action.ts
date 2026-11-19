@@ -1,4 +1,5 @@
 "use server";
+import { httpErrorMessage } from "@/lib/user-error";
 
 import { getAuthHeaders } from "../session";
 
@@ -97,7 +98,7 @@ const moodboardRequest = async <T>(
 		if (!response.ok || (data && data.error)) {
 			const message =
 				data?.message ||
-				`Erreur lors de l'opération moodboard (${response.status})`;
+				httpErrorMessage(response.status);
 
 			return {
 				ok: false,

@@ -1,4 +1,5 @@
 "use server";
+import { httpErrorMessage } from "@/lib/user-error";
 import { getAuthHeaders } from "../session";
 
 //! ----------------------------------------------------------------------------
@@ -34,7 +35,7 @@ export const createReview = async (payload: CreateReviewPayload) => {
     if (!response.ok || data?.error) {
       const message =
         data?.message ||
-        `Erreur lors de la création de l'avis (${response.status})`;
+        httpErrorMessage(response.status);
       return { ok: false, error: true, status: response.status, message, data };
     }
 
@@ -84,7 +85,7 @@ export const getSalonReviews = async (
     if (!response.ok || data?.error) {
       const message =
         data?.message ||
-        `Erreur lors de la récupération des avis (${response.status})`;
+        httpErrorMessage(response.status);
       return { ok: false, error: true, status: response.status, message, data };
     }
 
@@ -131,7 +132,7 @@ export const getClientReviews = async (
     if (!response.ok || data?.error) {
       const message =
         data?.message ||
-        `Erreur lors de la récupération des avis (${response.status})`;
+        httpErrorMessage(response.status);
       return { ok: false, error: true, status: response.status, message, data };
     }
 
@@ -168,7 +169,7 @@ export const updateReviewVisibility = async (
     if (!response.ok || data?.error) {
       const message =
         data?.message ||
-        `Erreur lors de la mise à jour de la visibilité (${response.status})`;
+        httpErrorMessage(response.status);
       return { ok: false, error: true, status: response.status, message, data };
     }
 
@@ -200,7 +201,7 @@ export const deleteReview = async (reviewId: string) => {
     if (!response.ok || data?.error) {
       const message =
         data?.message ||
-        `Erreur lors de la suppression de l'avis (${response.status})`;
+        httpErrorMessage(response.status);
       return { ok: false, error: true, status: response.status, message, data };
     }
     return { ok: true, error: false, status: response.status, data };

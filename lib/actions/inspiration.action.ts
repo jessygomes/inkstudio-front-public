@@ -1,4 +1,6 @@
 "use server";
+import { httpErrorMessage } from "@/lib/user-error";
+import { actionError } from "@/lib/action-error";
 
 type InspirationSalon = {
 	id: string;
@@ -474,7 +476,7 @@ const buildMockFilterOptions = (): InspirationFilterOptions => {
 const getBackUrl = () => {
 	const backUrl = process.env.NEXT_PUBLIC_BACK_URL;
 	if (!backUrl) {
-		throw new Error("NEXT_PUBLIC_BACK_URL est manquant dans les variables d'environnement");
+		throw actionError("NEXT_PUBLIC_BACK_URL est manquant dans les variables d'environnement");
 	}
 
 	return backUrl;
@@ -519,19 +521,19 @@ const fetchInspirationPhotosFromApi = async (
 	try {
 		data = await response.json();
 	} catch {
-		throw new Error("Réponse invalide du serveur inspiration");
+		throw actionError("Réponse invalide du serveur inspiration");
 	}
 
 	if (!response.ok) {
 		const message =
 			data && typeof data === "object" && "message" in data && data.message
 				? String(data.message)
-				: `Erreur API inspiration (${response.status})`;
-		throw new Error(message);
+				: httpErrorMessage(response.status);
+		throw actionError(message);
 	}
 
 	if (data && typeof data === "object" && "error" in data && data.error) {
-		throw new Error(data.message || "Erreur API inspiration");
+		throw actionError(data.message || "Erreur API inspiration");
 	}
 
 	const payload = data as Omit<InspirationPhotosResponse, "source">;
@@ -552,13 +554,13 @@ const fetchStringList = async (path: string): Promise<string[]> => {
 	});
 
 	if (!response.ok) {
-		throw new Error(`Erreur API inspiration (${response.status})`);
+		throw actionError(httpErrorMessage(response.status));
 	}
 
 	const data = await response.json();
 
 	if (!Array.isArray(data)) {
-		throw new Error("Réponse invalide pour les filtres inspiration");
+		throw actionError("Réponse invalide pour les filtres inspiration");
 	}
 
 	return getUniqueSortedValues(data);
@@ -600,13 +602,13 @@ const fetchStyleNames = async (): Promise<string[]> => {
 		cache: "no-store",
 	});
 	if (!response.ok) {
-		throw new Error(`Erreur API inspiration (${response.status})`);
+		throw actionError(httpErrorMessage(response.status));
 	}
 
 	const data = await response.json();
 	const styles: unknown = data?.styles;
 	if (!Array.isArray(styles)) {
-		throw new Error("Réponse invalide pour les styles inspiration");
+		throw actionError("Réponse invalide pour les styles inspiration");
 	}
 
 	return getUniqueSortedValues(
@@ -625,12 +627,12 @@ const fetchCategories = async (): Promise<InspirationCategory[]> => {
 		cache: "no-store",
 	});
 	if (!response.ok) {
-		throw new Error(`Erreur API inspiration (${response.status})`);
+		throw actionError(httpErrorMessage(response.status));
 	}
 
 	const data = await response.json();
 	if (!Array.isArray(data)) {
-		throw new Error("Réponse invalide pour les catégories inspiration");
+		throw actionError("Réponse invalide pour les catégories inspiration");
 	}
 
 	return data

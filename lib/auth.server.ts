@@ -1,4 +1,5 @@
 "use server";
+import { actionError } from "@/lib/action-error";
 import { auth } from "@/auth";
 import { hasUsableSession } from "./auth-security";
 import { getAuthenticatedUserSchema } from "./zod/validator-schema";
@@ -12,7 +13,7 @@ export const getAuthenticatedUser = async () => {
   const session = await auth();
 
   if (!hasUsableSession(session)) {
-    throw new Error(
+    throw actionError(
       "Aucun token d'accès trouvé. L'utilisateur n'est pas authentifié."
     );
   }
@@ -20,7 +21,7 @@ export const getAuthenticatedUser = async () => {
   const accessToken = session.accessToken;
 
   if (!accessToken) {
-    throw new Error("Token d'accès non trouvé dans la session.");
+    throw actionError("Token d'accès non trouvé dans la session.");
   }
 
   // ✅ Les données utilisateur sont déjà disponibles dans la session

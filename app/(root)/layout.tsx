@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import FriendlyErrors from "@/components/Shared/FriendlyErrors";
 import { auth } from "@/auth";
 import { AuthProvider } from "@/components/Auth/AuthProvider";
 import CookieBanner from "@/components/Analytics/CookieBanner";
@@ -54,6 +55,7 @@ export default async function RootLayout({
           <CookieConsentProvider>
             <GoogleAnalytics measurementId="G-YG3WKCC1JL" />
             <Toaster />
+            <FriendlyErrors />
             <CookieBanner />
             <UserProvider user={user}>
               <SiteFrame header={<Header />} footer={<Footer />}>

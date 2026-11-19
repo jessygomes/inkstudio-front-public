@@ -1,3 +1,4 @@
+import { userErrorMessage } from "@/lib/user-error";
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
@@ -119,7 +120,7 @@ export default function FollowUpFlow({ token }: { token: string }) {
       setStage("done");
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Impossible d’envoyer votre suivi. Réessayez dans un instant.");
+      setError(userErrorMessage(err, "Impossible d’envoyer votre suivi. Réessayez dans un instant."));
       setStage("idle");
     }
   };

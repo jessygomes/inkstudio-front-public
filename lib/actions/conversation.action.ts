@@ -1,4 +1,6 @@
 "use server";
+import { httpErrorMessage } from "@/lib/user-error";
+import { actionError } from "@/lib/action-error";
 import { getAuthHeaders } from "../session";
 import { ConversationDto, PaginatedConversationsDto } from "../type";
 
@@ -10,7 +12,7 @@ export const getConversationsAction = async (page = 1): Promise<PaginatedConvers
   const response = await fetch(`${apiBase()}/messaging/conversations?page=${Math.max(1, page)}&limit=20`, {
     headers, cache: "no-store",
   });
-  if (!response.ok) throw new Error(`Chargement des conversations impossible (${response.status}).`);
+  if (!response.ok) throw actionError(httpErrorMessage(response.status));
   return response.json();
 };
 
@@ -30,7 +32,7 @@ export const getConversationAppointmentsAction = async (conversationId: string, 
   const response = await fetch(`${apiBase()}/messaging/conversations/${encodeURIComponent(conversationId)}/appointments?page=${Math.max(1, page)}`, {
     headers, cache: "no-store",
   });
-  if (!response.ok) throw new Error(`Rendez-vous indisponibles (${response.status}).`);
+  if (!response.ok) throw actionError(httpErrorMessage(response.status));
   return response.json();
 };
 
@@ -38,10 +40,10 @@ export const getConversationAppointmentsAction = async (conversationId: string, 
 export const startConversationFromPublicProfileAction = async (
   professionalUserId: string,
 ): Promise<{ id: string }> => {
-  if (!professionalUserId) throw new Error("Profil professionnel manquant.");
+  if (!professionalUserId) throw actionError("Profil professionnel manquant.");
 
   const headers = await getAuthHeaders();
-  if (!headers.Authorization) throw new Error("Connectez-vous avec un compte client Inkera.");
+  if (!headers.Authorization) throw actionError("Connectez-vous avec un compte client Inkera.");
 
   const response = await fetch(
     `${process.env.NEXT_PUBLIC_BACK_URL}/messaging/conversations/start`,
@@ -55,9 +57,9 @@ export const startConversationFromPublicProfileAction = async (
   const result = await response.json().catch(() => ({}));
   if (!response.ok) {
     const message = result?.message;
-    throw new Error(Array.isArray(message) ? message.join(" · ") : message || "Impossible d'ouvrir la conversation.");
+    throw actionError(Array.isArray(message) ? message.join(" · ") : message || "Impossible d'ouvrir la conversation.");
   }
-  if (typeof result?.id !== "string") throw new Error("Identifiant de conversation manquant.");
+  if (typeof result?.id !== "string") throw actionError("Identifiant de conversation manquant.");
   return { id: result.id };
 };
 
@@ -81,8 +83,8 @@ export const getUnreadMessagesCountAction = async (): Promise<number> => {
   }
 
   if (!response.ok) {
-    throw new Error(
-      `Failed to fetch unread messages count: ${response.statusText}`
+    throw actionError(
+      httpErrorMessage(response.status)
     );
   }
   const data = await response.json();
@@ -101,7 +103,7 @@ export const getConversationByIdAction = async (
   const headers = await getAuthHeaders();
 
   if (!id) {
-    throw new Error("Invalid conversation ID");
+    throw actionError("Invalid conversation ID");
   }
 
   // Récupérer la conversation complète avec tous les messages
@@ -124,12 +126,12 @@ export const getConversationByIdAction = async (
   );
 
   if (!response.ok) {
-    throw new Error(`Failed to fetch conversation: ${response.statusText}`);
+    throw actionError(httpErrorMessage(response.status));
   }
 
   if (!messageResponse.ok) {
-    throw new Error(
-      `Failed to fetch conversation messages: ${messageResponse.statusText}`
+    throw actionError(
+      httpErrorMessage(messageResponse.status)
     );
   }
 
@@ -158,7 +160,7 @@ export const deleteMessageAction = async (
     }
   );
   if (!response.ok) {
-    throw new Error(`Failed to delete message: ${response.statusText}`);
+    throw actionError(httpErrorMessage(response.status));
   }
   return;
 };
@@ -182,8 +184,8 @@ export const markConversationAsReadAction = async (
     );
 
     if (!response.ok) {
-      throw new Error(
-        `Failed to mark conversation as read: ${response.statusText}`
+      throw actionError(
+        httpErrorMessage(response.status)
       );
     }
   } catch (error) {

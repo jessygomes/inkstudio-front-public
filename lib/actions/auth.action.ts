@@ -1,4 +1,5 @@
 "use server";
+import { actionError } from "@/lib/action-error";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -40,7 +41,7 @@ export async function registerAction(data: RegisterClientData) {
     console.log("Response data from registerAction:", responseData);
 
     if (!response.ok || responseData.error) {
-      throw new Error(
+      throw actionError(
         responseData.message || "Échec de l'inscription. Veuillez réessayer.",
       );
     }

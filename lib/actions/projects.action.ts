@@ -1,4 +1,5 @@
 "use server";
+import { actionError } from "@/lib/action-error";
 import { getAuthHeaders } from "../session";
 
 export async function projectRequest<T>(
@@ -11,7 +12,7 @@ export async function projectRequest<T>(
       path,
     )
   )
-    throw new Error("Requête invalide.");
+    throw actionError("Requête invalide.");
   const response = await fetch(
     `${process.env.NEXT_PUBLIC_BACK_URL}/projects${path}`,
     {
@@ -23,7 +24,7 @@ export async function projectRequest<T>(
   );
   const data = await response.json();
   if (!response.ok)
-    throw new Error(
+    throw actionError(
       Array.isArray(data.message)
         ? data.message.join(" · ")
         : data.message || "Opération impossible.",

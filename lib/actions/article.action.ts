@@ -1,4 +1,6 @@
 "use server";
+import { httpErrorMessage } from "@/lib/user-error";
+import { actionError } from "@/lib/action-error";
 
 export type PublicArticle = {
 	id: string;
@@ -18,7 +20,7 @@ type ApiError = {
 const getBackUrl = () => {
 	const backUrl = process.env.NEXT_PUBLIC_BACK_URL;
 	if (!backUrl) {
-		throw new Error("NEXT_PUBLIC_BACK_URL est manquant dans les variables d'environnement");
+		throw actionError("NEXT_PUBLIC_BACK_URL est manquant dans les variables d'environnement");
 	}
 	return backUrl;
 };
@@ -36,15 +38,15 @@ const fetchPublicArticlesApi = async <T>(path: string): Promise<T> => {
 	try {
 		data = await response.json();
 	} catch {
-		throw new Error("Réponse invalide du serveur articles");
+		throw actionError("Réponse invalide du serveur articles");
 	}
 
 	if (!response.ok) {
 		const apiMessage =
 			data && typeof data === "object" && "message" in data
 				? String(data.message)
-				: `Erreur API articles (${response.status})`;
-		throw new Error(apiMessage);
+				: httpErrorMessage(response.status);
+		throw actionError(apiMessage);
 	}
 
 	if (
@@ -54,7 +56,7 @@ const fetchPublicArticlesApi = async <T>(path: string): Promise<T> => {
 		data.error === true
 	) {
 		const message = "message" in data ? String(data.message) : "Erreur API articles";
-		throw new Error(message);
+		throw actionError(message);
 	}
 
 	return data as T;
@@ -72,7 +74,7 @@ export const getPublicArticleByIdAction = async (
 	id: string,
 ): Promise<PublicArticle> => {
 	if (!id) {
-		throw new Error("ID article invalide");
+		throw actionError("ID article invalide");
 	}
 
 	return fetchPublicArticlesApi<PublicArticle>(`/articles/${id}`);

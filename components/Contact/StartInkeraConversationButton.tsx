@@ -1,4 +1,5 @@
 "use client";
+import { userErrorMessage } from "@/lib/user-error";
 
 import { useState, useTransition } from "react";
 import { useSession } from "next-auth/react";
@@ -35,7 +36,7 @@ export default function StartInkeraConversationButton({ targetUserId, recipientN
         const { id } = await startConversationFromPublicProfileAction(targetUserId);
         router.push(`/mon-profil?tab=messagerie&conversation=${encodeURIComponent(id)}`);
       } catch (cause) {
-        setError(cause instanceof Error ? cause.message : "Une erreur est survenue.");
+        setError(userErrorMessage(cause, "Une erreur est survenue."));
       }
     });
   };

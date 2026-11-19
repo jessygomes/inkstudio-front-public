@@ -1,3 +1,4 @@
+import { httpErrorMessage } from "@/lib/user-error";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -118,7 +119,7 @@ export default function SearchNavbar({
           signal: controller.signal,
           cache: "no-store",
         });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        if (!res.ok) throw new Error(httpErrorMessage(res.status));
         const data = await res.json();
 
         const salons: Salon[] = Array.isArray(data?.users)

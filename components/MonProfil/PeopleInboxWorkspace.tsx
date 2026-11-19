@@ -1,4 +1,5 @@
 "use client";
+import { userErrorMessage } from "@/lib/user-error";
 
 import { toHourLabel } from "@/lib/utils/date";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -76,7 +77,7 @@ export default function PeopleInboxWorkspace() {
       setTotalPages(Math.max(1, result.totalPages));
       setListError("");
     } catch (error) {
-      setListError(error instanceof Error ? error.message : "Liste indisponible");
+      setListError(userErrorMessage(error, "Liste indisponible"));
     } finally {
       setLoadingList(false);
     }
@@ -93,7 +94,7 @@ export default function PeopleInboxWorkspace() {
       refreshUnread();
     } catch (error) {
       if (selectedIdRef.current === id) {
-        setDetailError(error instanceof Error ? error.message : "Conversation indisponible");
+        setDetailError(userErrorMessage(error, "Conversation indisponible"));
       }
     } finally {
       if (selectedIdRef.current === id) setLoadingDetail(false);
@@ -144,7 +145,7 @@ export default function PeopleInboxWorkspace() {
       setRdvTotal(result.total);
       setRdvPages(Math.max(1, result.totalPages));
     }).catch((error) => {
-      if (active) setRdvError(error instanceof Error ? error.message : "Rendez-vous indisponibles");
+      if (active) setRdvError(userErrorMessage(error, "Rendez-vous indisponibles"));
     }).finally(() => { if (active) setRdvLoading(false); });
     return () => { active = false; };
   }, [selectedId, rdvPage]);

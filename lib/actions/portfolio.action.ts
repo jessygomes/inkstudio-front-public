@@ -1,3 +1,4 @@
+import { httpErrorMessage } from "@/lib/user-error";
 import type { PortfolioProps } from "@/lib/type";
 
 type PortfolioPagination = {
@@ -61,7 +62,7 @@ export const getPortfolioPhotosAction = async (
 		if (!response.ok || data?.error) {
 			const message =
 				data?.message ||
-				`Erreur lors de la récupération des photos du portfolio (${response.status})`;
+				httpErrorMessage(response.status);
 			return { ok: false, error: true, status: response.status, message, data };
 		}
 

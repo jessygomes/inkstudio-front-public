@@ -1,4 +1,5 @@
 "use client";
+import { userErrorMessage } from "@/lib/user-error";
 import { RdvPlanningCard, RdvPrestationCard, RdvPaymentCard } from "../MonProfil/RdvInformationCards";
 
 
@@ -76,7 +77,7 @@ export default function ConversationRDVDetails({
         setAppointment(result);
       } catch (err) {
         const errorMessage =
-          err instanceof Error ? err.message : "Erreur inconnue";
+          userErrorMessage(err, "Erreur inconnue");
         setError(errorMessage);
         console.error("Erreur lors du chargement du RDV:", err);
       } finally {

@@ -1,4 +1,5 @@
 "use client";
+import { userErrorMessage } from "@/lib/user-error";
 import { useEffect, useId, useState } from "react";
 import { Globe2, LockKeyhole, MapPin, Palette, Save, Share2 } from "lucide-react";
 import SideDrawer from "../Shared/SideDrawer";
@@ -86,7 +87,7 @@ export default function ProjectPublication({
       );
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Enregistrement impossible.",
+        userErrorMessage(error, "Enregistrement impossible."),
       );
     } finally {
       setBusy(false);
@@ -103,7 +104,7 @@ export default function ProjectPublication({
       setOpen(false);
       toast.success("Votre moodboard est privé et retiré d’Explorer.");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Impossible de rendre le moodboard privé.");
+      toast.error(userErrorMessage(error, "Impossible de rendre le moodboard privé."));
     } finally { setBusy(false); }
   }
 

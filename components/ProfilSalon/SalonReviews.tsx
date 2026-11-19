@@ -1,4 +1,5 @@
 "use client";
+import { userErrorMessage } from "@/lib/user-error";
 
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 
@@ -76,7 +77,7 @@ export default function SalonReviews({ salonId, salonName }: Props) {
       setHasPrev(res.data.pagination?.hasPreviousPage || false);
       setPage(res.data.pagination?.currentPage || requestedPage);
     } catch (cause) {
-      if (currentRequest === requestId.current) setError(cause instanceof Error ? cause.message : "Impossible de charger les avis. Réessayez dans un instant.");
+      if (currentRequest === requestId.current) setError(userErrorMessage(cause, "Impossible de charger les avis. Réessayez dans un instant."));
     } finally {
       if (currentRequest === requestId.current) setLoading(false);
     }
@@ -101,7 +102,7 @@ export default function SalonReviews({ salonId, salonName }: Props) {
       if (sort === "recent") await load(1, "recent");
       else setSort("recent");
     } catch (cause) {
-      toast.error(cause instanceof Error ? cause.message : "L’envoi a échoué. Votre texte a été conservé, vous pouvez réessayer.");
+      toast.error(userErrorMessage(cause, "L’envoi a échoué. Votre texte a été conservé, vous pouvez réessayer."));
     } finally {
       setSubmitting(false);
     }

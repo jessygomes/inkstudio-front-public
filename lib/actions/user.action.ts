@@ -1,3 +1,4 @@
+import { httpErrorMessage } from "@/lib/user-error";
 import { getAuthHeaders } from "../session";
 
 //! ----------------------------------------------------------------------------
@@ -23,7 +24,7 @@ export const updateUserInfoAction = async (payload: any) => {
 
     if (!response.ok || (data && data.error)) {
       const message =
-        data?.message || `Erreur lors de l'opération (${response.status})`;
+        data?.message || httpErrorMessage(response.status);
       return { ok: false, error: true, status: response.status, message, data };
     }
 
@@ -51,7 +52,7 @@ export const getClientProfile = async () => {
     if (!response.ok || (data && data.error)) {
       const message =
         data?.message ||
-        `Erreur lors de la récupération du profil (${response.status})`;
+        httpErrorMessage(response.status);
       return { ok: false, error: true, status: response.status, message, data };
     }
 
@@ -80,7 +81,7 @@ export const getFavoriteSalon = async () => {
     if (!response.ok || (data && data.error)) {
       const message =
         data?.message ||
-        `Erreur lors de la récupération des salons favoris (${response.status})`;
+        httpErrorMessage(response.status);
       return { ok: false, error: true, status: response.status, message, data };
     }
     return { ok: true, error: false, status: response.status, data };
@@ -111,7 +112,7 @@ export const toggleFavoriteSalon = async (salonId: string) => {
     if (!response.ok || (data && data.error)) {
       const message =
         data?.message ||
-        `Erreur lors de la mise à jour des favoris (${response.status})`;
+        httpErrorMessage(response.status);
       return { ok: false, error: true, status: response.status, message, data };
     }
 
@@ -177,7 +178,7 @@ export const toggleFavoritePortfolio = async (portfolioId: string) => {
     if (!response.ok || (data && data.error)) {
       const message =
         data?.message ||
-        `Erreur lors de la mise à jour des favoris image (${response.status})`;
+        httpErrorMessage(response.status);
       return {
         ok: false,
         error: true,
@@ -223,7 +224,7 @@ export const getFavoritePortfolioImages = async () => {
     if (!response.ok || (data && data.error)) {
       const message =
         data?.message ||
-        `Erreur lors de la récupération des images favorites (${response.status})`;
+        httpErrorMessage(response.status);
       return {
         ok: false,
         error: true,
@@ -279,7 +280,7 @@ export const sendPublicProfileContact = async (
 
     if (!response.ok || (data && data.error)) {
       const message =
-        data?.message || `Erreur lors de l'envoi du message (${response.status})`;
+        data?.message || httpErrorMessage(response.status);
       return {
         ok: false,
         error: true,

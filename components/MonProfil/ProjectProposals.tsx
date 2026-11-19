@@ -1,4 +1,5 @@
 "use client";
+import { userErrorMessage } from "@/lib/user-error";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { projectRequest, getProjectProposals, type ProjectProposal } from "@/lib/actions/projects.action";
@@ -34,7 +35,7 @@ export default function ProjectProposals({
       setError("");
     } catch (error) {
       setError(
-        error instanceof Error ? error.message : "Demandes indisponibles.",
+        userErrorMessage(error, "Demandes indisponibles."),
       );
     } finally {
       setLoading(false);
@@ -84,7 +85,7 @@ export default function ProjectProposals({
       window.dispatchEvent(new Event("unreadCountRefresh"));
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Opération impossible.",
+        userErrorMessage(error, "Opération impossible."),
       );
     } finally {
       setBusy(null);

@@ -1,3 +1,4 @@
+import { userErrorMessage } from "@/lib/user-error";
 /* eslint-disable react/no-unescaped-entities */
 "use client";
 import { MessagingMessage, useMessaging } from "@/lib/hook/useMessaging";
@@ -60,7 +61,7 @@ export default function Conversation() {
       window.dispatchEvent(new Event("unreadCountRefresh"));
     } catch (err) {
       const errorMessage =
-        err instanceof Error ? err.message : "Erreur inconnue";
+        userErrorMessage(err, "Erreur inconnue");
       setError(errorMessage);
       console.error("Erreur lors du chargement de la conversation:", err);
     } finally {
