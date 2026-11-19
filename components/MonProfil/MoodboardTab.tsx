@@ -24,6 +24,7 @@ import { extractUploadThingKey } from "@/lib/utils/extractUploadThingKey";
 import MoodboardCreateModal from "./MoodboardCreateModal";
 import MoodboardCard from "./MoodboardCard";
 import MoodboardSelectedPanel from "./MoodboardSelectedPanel";
+import { MoodboardSkeleton } from "./ProfileSkeletons";
 
 type ConfirmState =
   | {
@@ -433,14 +434,7 @@ export default function MoodboardTab() {
   };
 
   if (loading) {
-    return (
-      <div className="rounded-3xl bg-linear-to-br from-noir-500/6 to-white/3 p-4 shadow-xl backdrop-blur-lg sm:p-6">
-        <div className="py-12 text-center">
-          <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-tertiary-400 border-t-transparent"></div>
-          <p className="font-one text-white/60">Chargement des moodboards...</p>
-        </div>
-      </div>
-    );
+    return <MoodboardSkeleton />;
   }
 
   return (

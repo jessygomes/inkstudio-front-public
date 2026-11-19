@@ -19,6 +19,7 @@ import {
 import FavoriteBtn from "@/components/Shared/FavoriteBtn";
 import FavoritePortfolioBtn from "@/components/Shared/FavoritePortfolioBtn";
 import AppButton from "@/components/Shared/AppButton";
+import { FavorisSkeleton } from "./ProfileSkeletons";
 
 type FavoriteSalon = {
   id: string;
@@ -239,14 +240,7 @@ export default function FavorisTab() {
   );
 
   if (loading) {
-    return (
-      <div className="bg-linear-to-br from-noir-500/6 to-white/3 backdrop-blur-lg rounded-3xl p-4 sm:p-6 shadow-xl">
-        <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-2 border-tertiary-400 border-t-transparent mx-auto mb-4" />
-          <p className="text-white/60 font-one">Chargement des favoris...</p>
-        </div>
-      </div>
-    );
+    return <FavorisSkeleton />;
   }
 
   return (

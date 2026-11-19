@@ -29,6 +29,7 @@ import { useEditAppointmentModal } from "@/components/Context/EditAppointmentCon
 import CancelAppointmentModal from "./CancelAppointmentModal";
 import RendezVousCard from "./RendezVousCard";
 import RendezVousFilters from "./RendezVousFilters";
+import { RdvSkeleton } from "./ProfileSkeletons";
 
 export type Appointment = {
   id: string;
@@ -523,12 +524,7 @@ export default function RendezVousTab() {
       />
 
       {loading ? (
-        <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-2 border-tertiary-400 border-t-transparent mx-auto mb-4" />
-          <p className="text-white/60 font-one">
-            Chargement des rendez-vous...
-          </p>
-        </div>
+        <RdvSkeleton />
       ) : loadError ? (
         <div role="alert" className="rounded-3xl bg-noir-700 p-6 text-center"><p className="text-sm text-white/65">Impossible de charger vos rendez-vous.</p><button type="button" onClick={() => fetchRdvClient(statusFilter, currentPage, limit)} className="mt-3 min-h-11 cursor-pointer rounded-xl bg-white/8 px-5 text-sm text-white transition hover:bg-white/12">Réessayer</button></div>
       ) : !rdvData || rdvData.appointments.length === 0 ? (

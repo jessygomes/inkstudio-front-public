@@ -4,7 +4,7 @@ import { getClientProfile } from "@/lib/actions/user.action";
 import { User } from "@/lib/type";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useMessagingContext } from "@/components/Context/MessageProvider";
 import InfosTab from "./InfosTab";
 import FavorisTab from "./FavorisTab";
@@ -12,6 +12,7 @@ import RendezVousTab from "./RendezVousTab";
 import MesAvisTab from "./MesAvisTab";
 import MoodboardTab from "./MoodboardTab";
 import PeopleInboxWorkspace from "./PeopleInboxWorkspace";
+import { FavorisSkeleton, MoodboardSkeleton, RdvSkeleton } from "./ProfileSkeletons";
 
 
 import Image from "next/image";
@@ -21,7 +22,6 @@ type TabKey = "rdv" | "messagerie" | "moodboard" | "favoris" | "mesavis" | "info
 const VALID_TABS: TabKey[] = ["rdv", "messagerie", "moodboard", "favoris", "mesavis", "infos"];
 
 export default function ProfilGlobal(user: User) {
-  const router = useRouter();
   const { proposalCount, messageCount } = useMessagingContext();
   const searchParams = useSearchParams();
 
@@ -43,7 +43,9 @@ export default function ProfilGlobal(user: User) {
     const params = new URLSearchParams(searchParams.toString());
     params.set("tab", key);
     params.delete("conversation");
-    router.replace(`?${params.toString()}`, { scroll: false });
+    // Mise à jour de l'URL sans navigation Next : pas de nouveau rendu serveur de la page,
+    // seul le contenu de l'onglet change (useSearchParams suit l'historique natif).
+    window.history.replaceState(window.history.state, "", `?${params.toString()}`);
   };
 
   // État pour les données complètes du profil avec type explicite
@@ -51,8 +53,10 @@ export default function ProfilGlobal(user: User) {
   const [loading, setLoading] = useState(true);
 
   // Récupération des données complètes du profil
+  // Le profil n'est relu que si le compte change (les props de session sont recréées à chaque rendu serveur).
+  const userId = user?.id;
   useEffect(() => {
-    if (!user) return;
+    if (!userId) return;
 
     const fetchProfile = async () => {
       try {
@@ -72,7 +76,7 @@ export default function ProfilGlobal(user: User) {
     };
 
     fetchProfile();
-  }, [user]);
+  }, [userId]);
 
   // Fonction pour rafraîchir les données après modification
   const refreshProfile = async () => {
@@ -93,7 +97,8 @@ export default function ProfilGlobal(user: User) {
           </div>
           <div className="mt-6 flex gap-1 overflow-hidden rounded-2xl bg-noir-700 p-1.5">{Array.from({ length: 6 }, (_, index) => <div key={index} className={"h-11 w-28 shrink-0 rounded-xl lg:flex-1 " + (index === 0 ? "bg-white/8" : "bg-white/3")} />)}</div>
         </div>
-        <div aria-hidden="true" className="space-y-4 motion-safe:animate-pulse">{[0, 1, 2].map(index => <div key={index} className="h-40 rounded-3xl bg-white/5" />)}</div>
+        {/* Contenu de l'onglet demandé, pour que la page ne « saute » pas à la fin du chargement. */}
+        {activeTab === "rdv" ? <RdvSkeleton /> : activeTab === "moodboard" ? <MoodboardSkeleton /> : activeTab === "favoris" ? <FavorisSkeleton /> : activeTab === "messagerie" ? <div aria-hidden="true" className="h-[calc(100dvh-220px)] min-h-[520px] rounded-3xl bg-noir-700 motion-safe:animate-pulse" /> : <div aria-hidden="true" className="space-y-4 motion-safe:animate-pulse">{[0, 1].map(index => <div key={index} className="h-40 rounded-3xl bg-white/5" />)}</div>}
       </div>
     );
   }

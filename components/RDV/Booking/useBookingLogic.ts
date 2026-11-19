@@ -297,10 +297,8 @@ export function useBookingLogic({
     if (!methods.getFieldState("client.phone").isDirty && !methods.getValues("client.phone")) {
       methods.setValue("client.phone", effectivePhone);
     }
-    methods.setValue(
-      "client.birthDate",
-      effectiveBirthDate ? toDateInputValue(effectiveBirthDate) : "",
-    );
+    // Ne pas effacer une date déjà connue (lue dans le profil complet) quand la session n’en a pas.
+    if (effectiveBirthDate) methods.setValue("client.birthDate", toDateInputValue(effectiveBirthDate));
   }, [
     isAuthenticated,
     effectiveBirthDate,
@@ -311,25 +309,6 @@ export function useBookingLogic({
     methods,
   ]);
 
-  // The full profile can contain a newer phone number than the login session.
-  useEffect(() => {
-    if (!isAuthenticated || !sessionUserId) return;
-    let active = true;
-    const prefillPhone = async () => {
-      try {
-        const result = await getClientProfile();
-        if (!active || !result.ok || !result.data) return;
-        const phone = result.data.phone || result.data.clientProfile?.phone;
-        if (typeof phone === "string" && phone.trim() && !methods.getFieldState("client.phone").isDirty) {
-          methods.setValue("client.phone", phone.trim(), { shouldValidate: true });
-        }
-      } catch {
-        // A profile fetch must not interrupt booking or clear a number already entered.
-      }
-    };
-    void prefillPhone();
-    return () => { active = false; };
-  }, [isAuthenticated, sessionUserId, methods]);
 
   //! Déstructurer les méthodes du formulaire
   const {
@@ -351,6 +330,35 @@ export function useBookingLogic({
   const confirmDisabled = false;
   const [navigationError, setNavigationError] = useState("");
   const [appointmentCreated, setAppointmentCreated] = useState(false);
+
+  // Le profil complet (GET /auth) peut contenir un téléphone ou une date de naissance plus récents que la session
+  // (renseignés dans « Mes informations » après la connexion). Lu à l'ouverture, puis de nouveau en arrivant
+  // sur l'étape « Vos informations » si l'un des deux manque encore. Jamais d'écrasement d'une saisie du client.
+  const atContactStep = step === 3;
+  useEffect(() => {
+    if (!isAuthenticated || !sessionUserId) return;
+    const missing = () => !methods.getValues("client.phone")?.trim() || !methods.getValues("client.birthDate");
+    if (atContactStep && !missing()) return;
+    let active = true;
+    const prefillFromProfile = async () => {
+      try {
+        const result = await getClientProfile();
+        if (!active || !result.ok || !result.data) return;
+        const phone = result.data.phone || result.data.clientProfile?.phone;
+        if (typeof phone === "string" && phone.trim() && !methods.getFieldState("client.phone").isDirty) {
+          methods.setValue("client.phone", phone.trim(), { shouldValidate: atContactStep });
+        }
+        const birthDate = result.data.clientProfile?.birthDate;
+        if (birthDate && !methods.getValues("client.birthDate") && !methods.getFieldState("client.birthDate").isDirty) {
+          methods.setValue("client.birthDate", toDateInputValue(birthDate), { shouldValidate: atContactStep });
+        }
+      } catch {
+        // A profile fetch must not interrupt booking or clear a number already entered.
+      }
+    };
+    void prefillFromProfile();
+    return () => { active = false; };
+  }, [isAuthenticated, sessionUserId, methods, atContactStep]);
 
   //! Prestation et artistes
   const prestation = watch("prestation");

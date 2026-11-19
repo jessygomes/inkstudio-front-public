@@ -13,7 +13,7 @@ import NavbarSocialLinks from "./NavbarSocialLinks";
 
 const links = [
   { href: "/", label: "Accueil" },
-  { href: "/trouver-un-salon", label: "Trouver un salon" },
+  { href: "/trouver-un-salon", label: "Trouver un tatoueur" },
   { href: "/inspiration", label: "Inspirations" },
   { href: "/journal", label: "Journal" },
   { href: "/en-savoir-plus", label: "En savoir plus" },
