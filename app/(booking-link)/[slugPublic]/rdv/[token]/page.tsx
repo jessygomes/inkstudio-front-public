@@ -5,6 +5,7 @@ import { hasUsableSession } from "@/lib/auth-security";
 import { getBookingLinkPublic } from "@/lib/actions/bookingLink.action";
 import { dateOnlyPart, terminalCodeFromStatus } from "@/lib/booking-link";
 import BookingLinkFlow, { type BookingLinkViewer } from "@/components/RDV/BookingLink/BookingLinkFlow";
+import OpenInAppPrompt from "@/components/Shared/OpenInAppPrompt";
 
 export const dynamic = "force-dynamic";
 
@@ -73,6 +74,14 @@ export default async function BookingLinkPage({ params }: PageParams) {
 
   return (
     <div className="min-h-screen bg-noir-800 px-page pb-12 pt-6">
+      {/* Sur téléphone : ouvrir la réservation dans l'app (même chemin), la télécharger, ou rester sur le site. */}
+      {result.ok && !terminal && (
+        <OpenInAppPrompt
+          appPath={`${encodeURIComponent(safeDecode(slugPublic))}/rdv/${encodeURIComponent(safeDecode(token))}`}
+          title="Réservez dans l’app"
+          text={`Choisissez votre rendez-vous avec ${result.data.professional.name} dans l’app Inkera People, et retrouvez-le ensuite avec vos échanges et vos rappels.`}
+        />
+      )}
       <div className="mx-auto max-w-5xl">
         <BookingLinkFlow
           token={safeDecode(token)}

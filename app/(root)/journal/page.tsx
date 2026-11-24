@@ -3,6 +3,7 @@ import { BookOpen, Newspaper } from "lucide-react";
 import { getPublicArticlesAction } from "@/lib/actions/article.action";
 import FinalCtaSection from "@/components/Home/FinalCtaSection";
 import ArticleCard from "@/components/Articles/ArticleCard";
+import GradientIconBadge from "@/components/Shared/GradientIconBadge";
 
 export const metadata: Metadata = {
   title: "Le journal - Inkera",
@@ -22,7 +23,7 @@ export default async function ArticlesPage() {
     <>
       <main className="min-h-[60vh] w-full bg-noir-800 pb-16 pt-4 font-one sm:pt-5 px-page">
         <header className="flex items-start gap-3 py-1 sm:py-2">
-          <span className="mt-0.5 grid size-10 shrink-0 place-items-center rounded-2xl bg-linear-to-br from-tertiary-400/20 to-cuatro-500/15 text-tertiary-400"><Newspaper size={17} aria-hidden="true" /></span>
+          <GradientIconBadge icon={Newspaper} />
           <div><p className="mb-1 text-[9px] uppercase tracking-[0.16em] text-white/35">Un autre regard sur le tatouage</p><h1 className="text-xl font-medium leading-tight tracking-tight text-white sm:text-2xl">Le journal Inkera</h1><p className="mt-1 text-xs leading-5 text-white/45">Conseils, histoires et inspirations pour accompagner votre prochain projet.</p></div>
         </header>
 

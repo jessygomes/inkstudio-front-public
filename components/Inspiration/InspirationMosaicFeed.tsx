@@ -1,4 +1,5 @@
 "use client";
+import GradientIconBadge from "@/components/Shared/GradientIconBadge";
 import { userErrorMessage } from "@/lib/user-error";
 
 import {
@@ -10,6 +11,7 @@ import {
 import { getFavoritePortfolioImages } from "@/lib/actions/user.action";
 import AppButton from "@/components/Shared/AppButton";
 import FilterSelect from "@/components/Shared/FilterSelect";
+import FiltersToggleButton from "@/components/Shared/FiltersToggleButton";
 import { formatCityLabel } from "@/lib/utils/searchCities";
 import FavoritePortfolioBtn from "@/components/Shared/FavoritePortfolioBtn";
 import StartInkeraConversationButton from "@/components/Contact/StartInkeraConversationButton";
@@ -264,6 +266,7 @@ export default function InspirationMosaicFeed({
   const [hashtagInput, setHashtagInput] = useState(
     initialSelection.hashtag.map((tag) => `#${tag}`).join(" "),
   );
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [favoritePortfolioIds, setFavoritePortfolioIds] = useState<Set<string>>(
     () => new Set(),
   );
@@ -453,6 +456,7 @@ export default function InspirationMosaicFeed({
   }, [hasMore, isLoading, loadNextPage]);
 
   const hasActiveFilters = hasActiveInspirationFilters(selection);
+  const activeFilterCount = [selection.type !== "all", selection.city, selection.pieceSize.length, selection.category.length, selection.style.length, selection.hashtag.length].filter(Boolean).length;
 
   const availableCities = useMemo(
     () =>
@@ -576,13 +580,15 @@ export default function InspirationMosaicFeed({
   return (
     <section className="space-y-4 font-one">
       <header className="flex items-start gap-3 py-1 sm:py-2 mx-page">
-        <span className="mt-0.5 grid size-9 shrink-0 place-items-center rounded-xl border border-tertiary-400/15 bg-tertiary-400/8 text-tertiary-400"><Images size={17} aria-hidden="true" /></span>
-        <div><p className="mb-1 text-[9px] uppercase tracking-[0.16em] text-white/35">Vos prochaines idées</p><div className="flex items-center gap-1.5"><h1 className="text-xl font-medium leading-tight tracking-tight text-white sm:text-2xl">Inspirations tatouage</h1><InspirationInfo /></div><p className="mt-1 text-xs leading-5 text-white/45">Explorez les créations et trouvez l’artiste de votre prochain projet.</p>{isUsingMockData && <p className="mt-2 text-[10px] leading-5 text-white/35">Images d’exemple : les noms et informations des artistes et salons sont fictifs.</p>}</div>
+        <GradientIconBadge icon={Images} />
+        <div><p className="mb-1 hidden text-[9px] uppercase tracking-[0.16em] text-white/35 lg:block">Vos prochaines idées</p><div className="flex items-center gap-1.5"><h1 className="text-xl font-medium leading-tight tracking-tight text-white sm:text-2xl">Inspirations tatouage</h1><InspirationInfo /></div><p className="mt-1 text-xs leading-5 text-white/45">Explorez les créations et trouvez l’artiste de votre prochain projet.</p>{isUsingMockData && <p className="mt-2 text-[10px] leading-5 text-white/35">Images d’exemple : les noms et informations des artistes et salons sont fictifs.</p>}</div>
       </header>
 
-      <div className="flex flex-col gap-2 rounded-2xl border border-white/10 bg-noir-800 p-2.5 lg:flex-row lg:items-center mx-page">
+      <div className="flex flex-col gap-2 lg:flex-row lg:items-center mx-page">
+        <FiltersToggleButton open={filtersOpen} onToggle={() => setFiltersOpen(value => !value)} activeCount={activeFilterCount} controls="inspiration-filters" />
+        <div id="inspiration-filters" className={filtersOpen ? "contents" : "hidden lg:contents"}>
         <div className={`grid min-w-0 flex-1 grid-cols-2 gap-2 sm:grid-cols-3 ${selection.type === "flash" ? "lg:grid-cols-3" : "lg:grid-cols-6"}`}>
-          <FilterSelect
+          <FilterSelect surfaceClassName="border-transparent! bg-noir-500"
             label="Type"
             placeholder="Photos et flashs"
             unit="type"
@@ -599,9 +605,9 @@ export default function InspirationMosaicFeed({
             }}
           />
 
-          <FilterSelect label="Choisissez votre ville" placeholder="Toutes les villes" unit="ville" icon={<MapPin size={14} />} selected={selection.city ? [selection.city] : []} options={availableCities.map(city => ({ value: city, label: formatCityLabel(city) }))} multiple={false} onApply={values => void applySelection({ ...selectionRef.current, city: values[0] || "" })} align="left" />
+          <FilterSelect surfaceClassName="border-transparent! bg-noir-500" label="Choisissez votre ville" placeholder="Toutes les villes" unit="ville" icon={<MapPin size={14} />} selected={selection.city ? [selection.city] : []} options={availableCities.map(city => ({ value: city, label: formatCityLabel(city) }))} multiple={false} onApply={values => void applySelection({ ...selectionRef.current, city: values[0] || "" })} align="left" />
 
-          {selection.type !== "flash" && <FilterSelect
+          {selection.type !== "flash" && <FilterSelect surfaceClassName="border-transparent! bg-noir-500"
             label="Taille de la pièce"
             placeholder="Toutes les tailles"
             unit="taille"
@@ -614,7 +620,7 @@ export default function InspirationMosaicFeed({
             onApply={values => void applySelection({ ...selectionRef.current, pieceSize: values })}
           />}
 
-          {selection.type !== "flash" && <FilterSelect
+          {selection.type !== "flash" && <FilterSelect surfaceClassName="border-transparent! bg-noir-500"
             label="Catégories"
             placeholder="Toutes les catégories"
             unit="catégorie"
@@ -627,7 +633,7 @@ export default function InspirationMosaicFeed({
             onApply={values => void applySelection({ ...selectionRef.current, category: values })}
           />}
 
-          <FilterSelect
+          <FilterSelect surfaceClassName="border-transparent! bg-noir-500"
             label="Styles"
             placeholder="Tous les styles"
             unit="style"
@@ -647,7 +653,7 @@ export default function InspirationMosaicFeed({
               value={hashtagInput}
               onChange={(e) => setHashtagInput(e.target.value)}
               placeholder="#fleur #minimaliste"
-              className="h-11 w-full min-w-0 rounded-xl border border-white/10 bg-noir-800 px-3 font-one text-xs text-white transition-colors placeholder:text-white/30 hover:border-white/25 focus:outline-none focus:border-tertiary-400/50 focus:ring-2 focus:ring-tertiary-400/10"
+              className="h-11 w-full min-w-0 rounded-xl bg-noir-500 px-3 font-one text-xs text-white transition-colors placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-tertiary-400/10"
             />
           </div>}
         </div>
@@ -655,6 +661,7 @@ export default function InspirationMosaicFeed({
         <AppButton type="button" variant="secondary" onClick={clearAllFilters} disabled={!hasActiveFilters && !hashtagInput} icon={<RotateCcw size={15} aria-hidden="true" />} className="h-11! px-3! py-2! text-xs! rounded-xl! shadow-none! cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-tertiary-400">
           Réinitialiser
         </AppButton>
+        </div>
       </div>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mx-page">
         <p role="status" className="text-[11px] text-white/40">{filteredIntroText}</p>

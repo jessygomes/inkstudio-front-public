@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import FollowUpFlow from "@/components/FollowUp/FollowUpFlow";
+import OpenInAppPrompt from "@/components/Shared/OpenInAppPrompt";
 
 export const dynamic = "force-dynamic";
 
@@ -22,6 +23,12 @@ export default async function FollowUpPage({ params }: { params: Promise<{ token
   const token = safeDecode((await params).token);
   return (
     <div className="min-h-screen bg-noir-800 font-one">
+      {/* Sur téléphone : envoyer le suivi depuis l'app (même chemin), la télécharger, ou rester sur le site. */}
+      <OpenInAppPrompt
+        appPath={`suivi/${encodeURIComponent(token)}`}
+        title="Envoyez votre suivi dans l’app"
+        text="Prenez vos photos et envoyez votre suivi de cicatrisation depuis l’app Inkera People. Votre salon pourra vous y répondre."
+      />
       <div className="mx-page pb-16 pt-8 sm:pt-12">
         <FollowUpFlow key={token} token={token} />
       </div>

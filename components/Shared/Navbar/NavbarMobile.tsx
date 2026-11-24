@@ -56,9 +56,9 @@ export default function NavbarMobile() {
     <nav aria-label="Navigation mobile" className="ml-auto font-one">
       <div className="flex items-center gap-2 text-white">
         {authenticated ? (
-          <Link href="/mon-profil" aria-label="Mon compte client" className="relative flex size-10 items-center justify-center overflow-hidden rounded-xl bg-white/6 focus-visible:outline-2 focus-visible:outline-tertiary-400">
+          <Link href="/mon-profil" aria-label="Mon compte client" className="relative flex size-10 items-center justify-center rounded-xl bg-white/6 focus-visible:outline-2 focus-visible:outline-tertiary-400">
             {session.user.image ? <Image src={session.user.image} alt="" fill sizes="40px" className="rounded-xl object-cover" /> : <UserRound size={18} aria-hidden="true" />}
-            {unreadCount > 0 && <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-tertiary-500 px-1 text-[9px] text-white">{unreadCount > 99 ? "99+" : unreadCount}</span>}
+            {unreadCount > 0 && <span className="absolute -right-1.5 -top-1.5 z-10 flex h-4 min-w-4 items-center justify-center rounded-full bg-linear-to-r from-tertiary-400 to-cuatro-500 px-1 text-[9px] font-semibold text-white shadow-md shadow-black/40">{unreadCount > 99 ? "99+" : unreadCount}</span>}
           </Link>
         ) : <AppButton href="/se-connecter" className="px-3! text-xs! shadow-none!">Connexion</AppButton>}
         <button ref={triggerRef} type="button" onClick={() => setIsOpen(true)} aria-label="Ouvrir le menu" aria-expanded={isOpen} aria-controls="mobile-navigation" className="flex size-10 items-center justify-center rounded-xl border border-white/15 text-white/85 transition hover:bg-white/5 focus-visible:outline-2 focus-visible:outline-tertiary-400"><Menu size={21} aria-hidden="true" /></button>

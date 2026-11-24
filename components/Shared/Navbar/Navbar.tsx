@@ -62,9 +62,9 @@ export default function Navbar({ showLogo = false }: { showLogo?: boolean }) {
           <NavbarSocialLinks />
           {status === "authenticated" && session?.user ? (
             <div ref={profileMenuRef} className="relative">
-              <button ref={triggerRef} type="button" onClick={() => setIsProfileMenuOpen(value => !value)} aria-label="Mon espace client" aria-expanded={isProfileMenuOpen} aria-controls="desktop-profile-menu" className="relative flex size-10 items-center justify-center overflow-hidden rounded-xl bg-white/6 text-white/75 transition hover:opacity-85 focus-visible:outline-2 focus-visible:outline-tertiary-400">
+              <button ref={triggerRef} type="button" onClick={() => setIsProfileMenuOpen(value => !value)} aria-label="Mon espace client" aria-expanded={isProfileMenuOpen} aria-controls="desktop-profile-menu" className="relative flex size-10 items-center justify-center rounded-xl bg-white/6 text-white/75 transition hover:opacity-85 focus-visible:outline-2 focus-visible:outline-tertiary-400">
                 {session.user.image ? <Image src={session.user.image} alt="" fill sizes="40px" className="rounded-xl object-cover" /> : <UserRound size={18} aria-hidden="true" />}
-                {unreadCount > 0 && <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-tertiary-500 px-1 text-[9px] text-white">{unreadCount > 99 ? "99+" : unreadCount}</span>}
+                {unreadCount > 0 && <span className="absolute -right-1.5 -top-1.5 z-10 flex h-4 min-w-4 items-center justify-center rounded-full bg-linear-to-r from-tertiary-400 to-cuatro-500 px-1 text-[9px] font-semibold text-white shadow-md shadow-black/40">{unreadCount > 99 ? "99+" : unreadCount}</span>}
               </button>
               {isProfileMenuOpen && <div id="desktop-profile-menu" className="absolute right-0 top-full z-50 mt-3 w-72 rounded-3xl bg-noir-700 p-2 font-one shadow-2xl shadow-black/70">
                 <Link href="/mon-profil" onClick={() => setIsProfileMenuOpen(false)} className="group flex items-center gap-3 rounded-2xl bg-linear-to-br from-tertiary-400/20 via-tertiary-500/10 to-cuatro-500/20 p-3 transition hover:from-tertiary-400/30 hover:to-cuatro-500/30 focus-visible:outline-2 focus-visible:outline-tertiary-400">
