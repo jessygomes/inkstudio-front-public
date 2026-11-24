@@ -10,6 +10,7 @@ import { ArrowUpRight, CalendarDays, Heart, Home, Images, Menu, MessageCircle, N
 import { useMessagingContext } from "@/components/Context/MessageProvider";
 import AppButton from "@/components/Shared/AppButton";
 import NavbarSocialLinks from "./NavbarSocialLinks";
+import { INKERA_ICON_GRADIENT, InkeraIconGradientDefs } from "@/components/Shared/GradientIconBadge";
 
 const links = [
   { href: "/", label: "Accueil", Icon: Home },
@@ -74,10 +75,11 @@ export default function NavbarMobile() {
 
             <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-6">
               <h2 id="mobile-navigation-title" className="mb-4 text-[10px] uppercase tracking-[0.18em] text-white/40">Explorer Inkera</h2>
+              <InkeraIconGradientDefs />
               <ul className="space-y-1.5">
                 {links.map(({ href, label, Icon }) => {
                   const active = pathname === href || (href !== "/" && pathname.startsWith(href + "/"));
-                  return <li key={href}><Link href={href} onClick={close} aria-current={active ? "page" : undefined} className={"group flex items-center gap-3 rounded-xl border px-3 py-3 text-sm transition focus-visible:outline-2 focus-visible:outline-tertiary-400 " + (active ? "border-tertiary-400/20 bg-tertiary-400/10 text-white" : "border-transparent text-white/65 hover:bg-white/5 hover:text-white")}><Icon size={18} strokeWidth={1.5} aria-hidden="true" className={active ? "text-tertiary-400" : "text-white/40"} /><span className="flex-1">{label}</span><ArrowUpRight size={14} aria-hidden="true" className={active ? "text-tertiary-400" : "text-white/20 group-hover:text-white/60"} /></Link></li>;
+                  return <li key={href}><Link href={href} onClick={close} aria-current={active ? "page" : undefined} className={"group flex items-center gap-3 rounded-xl border px-3 py-3 text-sm transition focus-visible:outline-2 focus-visible:outline-tertiary-400 " + (active ? "border-transparent bg-linear-to-r from-tertiary-400/20 via-tertiary-500/15 to-cuatro-500/25 text-white" : "border-transparent text-white/65 hover:bg-white/5 hover:text-white")}><Icon size={18} strokeWidth={active ? 1.75 : 1.5} aria-hidden="true" color={active ? INKERA_ICON_GRADIENT : undefined} className={active ? undefined : "text-white/40"} /><span className="flex-1">{label}</span><ArrowUpRight size={14} aria-hidden="true" color={active ? INKERA_ICON_GRADIENT : undefined} className={active ? undefined : "text-white/20 group-hover:text-white/60"} /></Link></li>;
                 })}
               </ul>
 

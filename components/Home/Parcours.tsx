@@ -26,7 +26,7 @@ export default function Parcours() {
         <ol className={styles.panels}>
           {steps.map((step, index) => (
             <li key={step.label} tabIndex={0} aria-labelledby={"journey-step-" + index} className={styles.panel}>
-              <Image src={step.image} alt="" fill sizes="(min-width: 768px) 55vw, 100vw" className={styles.image} />
+              <Image src={step.image} alt="" fill sizes="(min-width: 1024px) 55vw, 100vw" className={styles.image} />
               <div aria-hidden="true" className={styles.overlay} />
               <span aria-hidden="true" className="absolute left-5 top-5 grid size-9 place-items-center rounded-xl bg-noir-900/45 font-two text-xs font-bold text-white backdrop-blur-md">0{index + 1}</span>
               <div className={styles.content}>

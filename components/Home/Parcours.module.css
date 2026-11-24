@@ -57,7 +57,7 @@
   transition: grid-template-rows 400ms ease, opacity 300ms ease;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 1024px) {
   .details {
     display: grid;
   }
@@ -73,7 +73,7 @@
 }
 
 /* On larger touch screens, descriptions remain visible without a hover. */
-@media (min-width: 768px) and (hover: hover) and (pointer: fine) {
+@media (min-width: 1024px) and (hover: hover) and (pointer: fine) {
   .details {
     grid-template-rows: 0fr;
     opacity: 0;
