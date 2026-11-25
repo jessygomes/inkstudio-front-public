@@ -206,6 +206,52 @@ export const toggleFavoritePortfolio = async (portfolioId: string) => {
 };
 
 //! ----------------------------------------------------------------------------
+//!  METTRE EN FAVORI / RETIRER UN FLASH (le tatoueur est prévenu avec le pseudo du client)
+//! ----------------------------------------------------------------------------
+export const toggleFavoriteFlash = async (flashId: string) => {
+  const headers = await getAuthHeaders();
+  const response = await fetch(`${process.env.NEXT_PUBLIC_BACK_URL}/work-favorites/flash/${encodeURIComponent(flashId)}`, { method: "PATCH", headers });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok || data?.error) {
+    return { ok: false, error: true, status: response.status, message: (data?.message as string) || httpErrorMessage(response.status), isFavorite: undefined as boolean | undefined };
+  }
+  return { ok: true, error: false, status: response.status, message: data?.message as string, isFavorite: data?.favorite === true };
+};
+
+//! Identifiants des flashs en favori du client (pour afficher les cœurs)
+export const getFavoriteFlashIds = async (): Promise<string[]> => {
+  try {
+    const headers = await getAuthHeaders();
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BACK_URL}/work-favorites/flash/ids`, { headers, cache: "no-store" });
+    if (!response.ok) return [];
+    const data = await response.json();
+    return Array.isArray(data?.flashIds) ? data.flashIds : [];
+  } catch {
+    return [];
+  }
+};
+
+export type FavoriteFlash = {
+  id: string; title: string; description?: string | null; imageUrl: string; price: number; dimension?: string | null;
+  appointmentDurationMinutes?: number | null; isAvailable: boolean; style?: string[]; favoritedAt: string;
+  user: { id: string; salonName?: string | null; firstName?: string | null; lastName?: string | null; nickname?: string | null; image?: string | null; profileImage?: string | null; city?: string | null; postalCode?: string | null; role?: string };
+  tatoueur?: { id: string; name: string; img?: string | null } | null;
+};
+
+//! Flashs en favori du client
+export const getFavoriteFlashes = async (): Promise<{ ok: boolean; flashes: FavoriteFlash[]; message?: string }> => {
+  try {
+    const headers = await getAuthHeaders();
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BACK_URL}/work-favorites/flash`, { headers, cache: "no-store" });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || data?.error) return { ok: false, flashes: [], message: data?.message || httpErrorMessage(response.status) };
+    return { ok: true, flashes: Array.isArray(data?.favoriteFlashes) ? data.favoriteFlashes : [] };
+  } catch {
+    return { ok: false, flashes: [], message: "Impossible de charger vos flashs favoris." };
+  }
+};
+
+//! ----------------------------------------------------------------------------
 //!  RÉCUPÉRER LES IMAGES DE PORTFOLIO FAVORITES DU CLIENT
 //! ----------------------------------------------------------------------------
 export const getFavoritePortfolioImages = async () => {

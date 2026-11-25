@@ -7,6 +7,9 @@ import { useMemo, useRef, useState, useCallback, useEffect } from "react";
 import { createPortal } from "react-dom";
 import type { FlashProps, PortfolioProps, ProductSalonProps } from "@/lib/type";
 import { getPortfolioPhotosAction } from "@/lib/actions/portfolio.action";
+import { getFavoriteFlashIds, getFavoritePortfolioImages } from "@/lib/actions/user.action";
+import { useUser } from "@/components/Context/UserContext";
+import FavoritePortfolioBtn from "@/components/Shared/FavoritePortfolioBtn";
 
 type Tatoueur = {
   id: string;
@@ -185,6 +188,28 @@ export default function SalonTabs({
   tatoueurs = [],
 }: Props) {
   const [flashSort, setFlashSort] = useState<FlashSort>("default");
+  // Favoris du client connecté (réalisations et flashs) : cœur sur chaque pièce. Masqué pour un compte professionnel.
+  const { isAuthenticated, isClient } = useUser();
+  const showFavorites = !isAuthenticated || isClient;
+  const [loadedFavoriteIds, setFavoriteIds] = useState<Set<string>>(() => new Set());
+  const favoriteIds = useMemo(() => (isAuthenticated && isClient ? loadedFavoriteIds : new Set<string>()), [isAuthenticated, isClient, loadedFavoriteIds]);
+  useEffect(() => {
+    if (!isAuthenticated || !isClient) return;
+    let cancelled = false;
+    void Promise.all([
+      getFavoritePortfolioImages().catch(() => null),
+      getFavoriteFlashIds(),
+    ]).then(([portfolioResult, flashIds]) => {
+      if (cancelled) return;
+      const raw = (portfolioResult?.data as { favoritePortfolioImages?: { id?: string }[] } | undefined)?.favoritePortfolioImages;
+      const portfolioIds = Array.isArray(raw) ? raw.map((p) => p.id).filter((id): id is string => typeof id === "string") : [];
+      setFavoriteIds(new Set([...portfolioIds, ...flashIds]));
+    });
+    return () => { cancelled = true; };
+  }, [isAuthenticated, isClient]);
+  const onFavoriteToggle = useCallback((id: string, on: boolean) => {
+    setFavoriteIds((current) => { const next = new Set(current); if (on) next.add(id); else next.delete(id); return next; });
+  }, []);
   const [portfolioTatoueurFilter, setPortfolioTatoueurFilter] = useState<string | null>(null);
   const [portfolioApiItems, setPortfolioApiItems] = useState<PortfolioProps[] | null>(null);
   const [portfolioApiMeta, setPortfolioApiMeta] = useState<{
@@ -572,8 +597,9 @@ export default function SalonTabs({
                   return (
                     <li
                       key={item.id}
-                      className="group flex min-w-0 flex-col rounded-2xl bg-white/4 overflow-hidden transition hover:bg-white/7"
+                      className="group relative flex min-w-0 flex-col rounded-2xl bg-white/4 overflow-hidden transition hover:bg-white/7"
                     >
+                      {showFavorites && <div className="absolute right-2 top-2 z-10"><FavoritePortfolioBtn portfolioId={item.id} initialFavorite={favoriteIds.has(item.id)} onToggle={(on) => onFavoriteToggle(item.id, on)} /></div>}
                       <button
                         className="relative block aspect-4/3 w-full shrink-0 cursor-zoom-in overflow-hidden"
                         onClick={() => openLightbox(imageIndex)}
@@ -625,8 +651,9 @@ export default function SalonTabs({
                   return (
                     <li
                       key={f.id}
-                      className="group flex min-w-0 flex-col rounded-2xl bg-white/4 overflow-hidden transition hover:bg-white/7"
+                      className="group relative flex min-w-0 flex-col rounded-2xl bg-white/4 overflow-hidden transition hover:bg-white/7"
                     >
+                      {showFavorites && <div className="absolute right-2 top-2 z-10"><FavoritePortfolioBtn kind="flash" portfolioId={f.id} initialFavorite={favoriteIds.has(f.id)} onToggle={(on) => onFavoriteToggle(f.id, on)} /></div>}
                       <button
                         type="button"
                         className="relative block aspect-4/3 w-full shrink-0 cursor-zoom-in bg-noir-800 text-left disabled:cursor-default"

@@ -17,7 +17,21 @@ export type ProjectFields = {
   projectBodyPlacement?: string | null;
   projectMobility?: string | null;
   projectRadiusKm?: number | null;
+  /** Besoins affichés aux tatoueurs (URGENT, NEED_HELP, WANT_DRAWING…), qui peuvent filtrer dessus. */
+  projectNeeds?: string[];
 };
+
+/** Mêmes valeurs que le backend (src/moodboard/project-needs.ts). */
+export const PROJECT_NEEDS: { value: string; label: string }[] = [
+  { value: "URGENT", label: "À faire rapidement" },
+  { value: "NEED_HELP", label: "J'ai besoin d'aide" },
+  { value: "WANT_DRAWING", label: "Je veux un dessin" },
+  { value: "HAVE_DRAWING", label: "J'ai déjà mon dessin" },
+  { value: "FIRST_TATTOO", label: "Premier tatouage" },
+  { value: "COVER_UP", label: "Recouvrement" },
+  { value: "NOT_IN_A_HURRY", label: "Pas pressé" },
+];
+export const projectNeedLabel = (value: string) => PROJECT_NEEDS.find((n) => n.value === value)?.label ?? value;
 const inputClass =
   "mt-1.5 min-h-11 w-full min-w-0 rounded-2xl bg-white/5 px-4 py-2.5 text-sm text-white outline-none hover:bg-white/7 focus:bg-white/8 transition placeholder:text-white/25 focus:ring-2 focus:ring-tertiary-400/40 [color-scheme:dark] disabled:opacity-50";
 const selectClass = `${inputClass} [&_option]:bg-noir-800 [&_option]:text-white`;
@@ -37,6 +51,8 @@ export default function ProjectPublication({
   );
   const [busy, setBusy] = useState(false);
   const [mobility, setMobility] = useState(board.projectMobility || "");
+  const [needs, setNeeds] = useState<string[]>(board.projectNeeds ?? []);
+  const toggleNeed = (value: string) => setNeeds((current) => (current.includes(value) ? current.filter((v) => v !== value) : [...current, value]));
   const [options, setOptions] = useState<{
     styles: string[];
   }>({ styles: [] });
@@ -45,7 +61,8 @@ export default function ProjectPublication({
     if (!open) return;
     setStatus(board.projectStatus || "PRIVATE");
     setMobility(board.projectMobility || "");
-  }, [open, board.projectStatus, board.projectMobility]);
+    setNeeds(board.projectNeeds ?? []);
+  }, [open, board.projectStatus, board.projectMobility, board.projectNeeds]);
   useEffect(() => {
     if (!open) return;
     void projectRequest<{ styles: string[] }>("/options")
@@ -73,6 +90,7 @@ export default function ProjectPublication({
           styles: tags("styles"),
           hashtags: tags("hashtags"),
           bodyPlacement: text("bodyPlacement"),
+          needs,
           mobility,
           ...(mobility === "RADIUS" && { radiusKm: Number(text("radiusKm")) }),
         },
@@ -117,9 +135,8 @@ export default function ProjectPublication({
       </>}>
         <div className="mb-7 space-y-2">
           <h3 className="text-sm font-semibold text-white/90">Les tatoueurs viennent à vous</h3>
-          <p className="text-xs leading-6 text-white/55">En ouvrant votre projet aux propositions, vous rendez votre moodboard visible aux salons et tatoueurs dans leur page Explorer. Ils découvrent vos images, vos envies et peuvent se proposer pour réaliser votre tatouage.</p>
-          <p className="text-xs leading-6 text-white/55">Votre identité reste masquée aux salons et tatoueurs. Elle n’est révélée au professionnel que lorsque vous acceptez sa proposition.</p>
-          <p className="text-xs leading-6 text-white/55">Vous recevez leurs propositions ici, consultez leur profil et choisissez avec qui échanger. Acceptez une proposition pour ouvrir la conversation et construire votre projet ensemble.</p>
+          <p className="text-xs leading-6 text-white/55">En partageant votre projet, vous rendez votre moodboard visible aux salons et tatoueurs dans leur page Explorer. Ils découvrent vos images, vos envies et ce dont vous avez besoin, et peuvent le mettre en favori.</p>
+          <p className="text-xs leading-6 text-white/55">Seul votre pseudo est visible : votre nom, votre e-mail et vos coordonnées restent privés.</p>
         </div>
         <form id={formId} onSubmit={submit} aria-busy={busy} className="space-y-7">
           <fieldset disabled={busy} className="min-w-0 p-0">
@@ -133,7 +150,7 @@ export default function ProjectPublication({
               onChange={(e) => setStatus(e.target.value)}
             >
               <option value="PRIVATE">Privé — retirer d’Explorer</option>
-              <option value="OPEN">Ouvert aux propositions</option>
+              <option value="OPEN">Visible dans Explorer</option>
               <option value="MATCHED">Tatoueur trouvé</option>
               <option value="CLOSED">Fermé</option>
             </select>
@@ -142,6 +159,17 @@ export default function ProjectPublication({
           <fieldset disabled={busy} className="min-w-0 p-0">
             <legend className="sr-only">Détails du tatouage</legend>
             <div className="mb-4 flex items-start gap-3"><span className="grid size-9 shrink-0 place-items-center rounded-xl bg-tertiary-400/10 text-tertiary-400"><Palette size={17} /></span><div><p className="text-[10px] uppercase tracking-widest text-white/30">02 · Vos envies</p><h3 className="mt-1 text-sm font-semibold text-white/85">Précisez votre tatouage</h3><p className="mt-1 text-[11px] leading-5 text-white/40">Ces précisions sont facultatives et peuvent être complétées plus tard.</p></div></div>
+            <div className="mb-5 min-w-0">
+              <p className="text-[11px] font-medium text-white/60">Ce dont vous avez besoin</p>
+              <p className="mt-0.5 text-[11px] leading-5 text-white/40">Les tatoueurs peuvent filtrer les projets selon ces besoins.</p>
+              <div className="mt-2 flex flex-wrap gap-2" role="group" aria-label="Besoins du projet">
+                {PROJECT_NEEDS.map((need) => {
+                  const on = needs.includes(need.value);
+                  return <button key={need.value} type="button" aria-pressed={on} onClick={() => toggleNeed(need.value)}
+                    className={"min-h-9 cursor-pointer rounded-xl px-3 text-xs transition focus-visible:outline-2 focus-visible:outline-tertiary-400 " + (on ? "bg-tertiary-400/15 font-medium text-tertiary-400" : "bg-white/5 text-white/65 hover:bg-white/8 hover:text-white")}>{need.label}</button>;
+                })}
+              </div>
+            </div>
             <div className="grid min-w-0 gap-4 sm:grid-cols-2">
           <label className="block min-w-0 text-[11px] font-medium text-white/60">
             Ville souhaitée

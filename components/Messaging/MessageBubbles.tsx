@@ -19,6 +19,8 @@ interface MessageBubblesProps {
   currentUserId?: string;
   onDeleteMessage?: (messageId: string) => void;
   compact?: boolean;
+  /** Demande d'accès d'un professionnel aux informations du client : réponse oui / non tant qu'elle est en attente. */
+  accessRequest?: { status?: string | null; busy?: boolean; onRespond?: (accept: boolean) => void };
 }
 
 export default function MessageBubbles({
@@ -26,6 +28,7 @@ export default function MessageBubbles({
   currentUserId,
   onDeleteMessage,
   compact = false,
+  accessRequest,
 }: MessageBubblesProps) {
   if (!messages || messages.length === 0) {
     return (
@@ -38,9 +41,33 @@ export default function MessageBubbles({
     );
   }
 
+  // Seule la demande d'accès la plus récente reçoit les boutons oui / non.
+  const lastAccessRequestId = [...messages].reverse().find((m) => m.type === "ACCESS_REQUEST")?.id;
+
   return (
     <>
       {messages.map((message, index) => {
+        if (message.type === "ACCESS_REQUEST") {
+          const canAnswer = message.id === lastAccessRequestId && accessRequest?.status === "REQUESTED" && !!accessRequest.onRespond && message.sender.id !== currentUserId;
+          return (
+            <div key={message.id} className="my-4 flex justify-center">
+              <div className="w-full max-w-md rounded-2xl bg-tertiary-400/10 p-4">
+                <p className="text-sm font-semibold text-white">Demande d’accès à vos informations</p>
+                <p className="mt-1.5 whitespace-pre-wrap text-xs leading-5 text-white/70">{message.content}</p>
+                {canAnswer ? (
+                  <div className="mt-3 flex gap-2">
+                    <button type="button" disabled={accessRequest?.busy} onClick={() => accessRequest?.onRespond?.(false)} className="min-h-10 flex-1 cursor-pointer rounded-xl bg-white/8 text-xs font-medium text-white transition hover:bg-white/12 disabled:opacity-50">Non</button>
+                    <button type="button" disabled={accessRequest?.busy} onClick={() => accessRequest?.onRespond?.(true)} className="min-h-10 flex-1 cursor-pointer rounded-xl bg-linear-to-r from-tertiary-400 to-tertiary-500 text-xs font-semibold text-white transition hover:opacity-90 disabled:opacity-50">Oui, partager</button>
+                  </div>
+                ) : accessRequest?.status === "GRANTED" && message.id === lastAccessRequestId ? (
+                  <p className="mt-2 text-[11px] text-white/50">Vous avez accepté : le professionnel voit vos informations.</p>
+                ) : accessRequest?.status === "DECLINED" && message.id === lastAccessRequestId ? (
+                  <p className="mt-2 text-[11px] text-white/50">Vous avez refusé : vos informations restent privées.</p>
+                ) : null}
+              </div>
+            </div>
+          );
+        }
         const isOwnMessage = message.sender.id === currentUserId;
         const sender = message.sender;
         const imageFromText = inlineImageUrl(message.content || "");

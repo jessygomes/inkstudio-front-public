@@ -9,7 +9,7 @@ import { Moodboard } from "@/lib/actions/moodboard.action";
 import AppButton from "../Shared/AppButton";
 import MoodboardAddImageModal from "./MoodboardAddImageModal";
 import MoodboardEditModal from "./MoodboardEditModal";
-import ProjectPublication from "./ProjectPublication";
+import ProjectPublication, { projectNeedLabel } from "./ProjectPublication";
 import type { ProjectFields } from "./ProjectPublication";
 import ProjectProposals from "./ProjectProposals";
 
@@ -122,6 +122,7 @@ export default function MoodboardSelectedPanel({
             </div>
           </div>
           {selectedMoodboard.description && <p className="mt-2 whitespace-pre-line break-words text-xs leading-5 text-white/55">{selectedMoodboard.description}</p>}
+          {!!selectedMoodboard.projectNeeds?.length && <div className="mt-2 flex flex-wrap gap-1.5" aria-label="Besoins du projet">{selectedMoodboard.projectNeeds.map((need) => <span key={need} className="rounded-lg bg-tertiary-400/10 px-2 py-0.5 text-[11px] text-tertiary-400">{projectNeedLabel(need)}</span>)}</div>}
         </>
       </div>
 

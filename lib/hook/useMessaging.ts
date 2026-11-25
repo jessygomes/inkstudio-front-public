@@ -9,7 +9,7 @@ export interface MessagingMessage {
   conversationId: string;
   content: string;
   senderId: string;
-  type: "USER" | "SYSTEM";
+  type: "USER" | "SYSTEM" | "TEXT" | "IMAGE" | "FILE" | "ACCESS_REQUEST";
   isRead: boolean;
   readAt?: Date;
   createdAt: Date | string;

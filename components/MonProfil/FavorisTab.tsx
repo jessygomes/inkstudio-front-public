@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { ArrowUpRight, Expand, MapPin, Heart, Images, Store } from "lucide-react";
+import { ArrowUpRight, Expand, MapPin, Heart, Images, Store, Zap } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { createPortal } from "react-dom";
@@ -13,8 +13,10 @@ import {
 } from "react-icons/fa";
 import { FaArrowLeft, FaArrowRight, FaXmark } from "react-icons/fa6";
 import {
+  getFavoriteFlashes,
   getFavoritePortfolioImages,
   getFavoriteSalon,
+  type FavoriteFlash,
 } from "@/lib/actions/user.action";
 import FavoriteBtn from "@/components/Shared/FavoriteBtn";
 import FavoritePortfolioBtn from "@/components/Shared/FavoritePortfolioBtn";
@@ -57,7 +59,7 @@ type FavoritePortfolioImage = {
   };
 };
 
-type FavoritesView = "salons" | "images";
+type FavoritesView = "salons" | "images" | "flashs";
 
 type InstagramProfile = {
   href: string;
@@ -121,6 +123,11 @@ export default function FavorisTab() {
     FavoritePortfolioImage[]
   >([]);
   const [activeView, setActiveView] = useState<FavoritesView>("salons");
+  const [favoriteFlashes, setFavoriteFlashes] = useState<FavoriteFlash[]>([]);
+  const fetchFavoriteFlashes = async () => {
+    const result = await getFavoriteFlashes();
+    setFavoriteFlashes(result.ok ? result.flashes : []);
+  };
   const [loading, setLoading] = useState(true);
   const lightboxRef = useRef<HTMLDivElement>(null);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
@@ -169,7 +176,7 @@ export default function FavorisTab() {
   useEffect(() => {
     const load = async () => {
       setLoading(true);
-      await Promise.all([fetchFavoriteSalons(), fetchFavoritePortfolio()]);
+      await Promise.all([fetchFavoriteSalons(), fetchFavoritePortfolio(), fetchFavoriteFlashes()]);
       setLoading(false);
     };
     load();
@@ -222,7 +229,9 @@ export default function FavorisTab() {
   const activeCount =
     activeView === "salons"
       ? favoriteSalons.length
-      : favoritePortfolioImages.length;
+      : activeView === "flashs"
+        ? favoriteFlashes.length
+        : favoritePortfolioImages.length;
 
   const activeImage =
     lightboxIndex !== null ? favoritePortfolioImages[lightboxIndex] : null;
@@ -247,7 +256,7 @@ export default function FavorisTab() {
     <div className="space-y-3 font-one [&_button:focus-visible]:outline-2 [&_button:focus-visible]:outline-offset-2 [&_button:focus-visible]:outline-tertiary-400 [&_a:focus-visible]:outline-2 [&_a:focus-visible]:outline-tertiary-400">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap gap-1 rounded-xl bg-noir-700 p-1" role="group" aria-label="Type de favoris">
-          {([{ key: "salons", label: "Salons & artistes", count: favoriteSalons.length, Icon: Store }, { key: "images", label: "Inspirations", count: favoritePortfolioImages.length, Icon: Images }] as const).map(({key,label,count,Icon}) => <button key={key} type="button" aria-pressed={activeView === key} onClick={() => { setActiveView(key); closeLightbox(); }} className={`inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-xl px-3 text-sm transition ${activeView === key ? "bg-white/10 text-white" : "text-white/50 hover:text-white"}`}><Icon size={15} className={activeView === key ? "text-tertiary-400" : ""} /><span>{label}</span><span className="rounded-xl bg-white/5 px-1.5 py-0.5 text-[10px] text-white/50">{count}</span></button>)}
+          {([{ key: "salons", label: "Salons & artistes", count: favoriteSalons.length, Icon: Store }, { key: "images", label: "Inspirations", count: favoritePortfolioImages.length, Icon: Images }, { key: "flashs", label: "Flashs", count: favoriteFlashes.length, Icon: Zap }] as const).map(({key,label,count,Icon}) => <button key={key} type="button" aria-pressed={activeView === key} onClick={() => { setActiveView(key); closeLightbox(); }} className={`inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-xl px-3 text-sm transition ${activeView === key ? "bg-white/10 text-white" : "text-white/50 hover:text-white"}`}><Icon size={15} className={activeView === key ? "text-tertiary-400" : ""} /><span>{label}</span><span className="rounded-xl bg-white/5 px-1.5 py-0.5 text-[10px] text-white/50">{count}</span></button>)}
         </div>
         <AppButton href={activeView === "salons" ? "/trouver-un-salon" : "/inspiration"} variant="secondary" className="min-h-11" icon={<ArrowUpRight size={16} />}>Explorer</AppButton>
       </div>
@@ -256,6 +265,27 @@ export default function FavorisTab() {
           <Heart size={28} className="mx-auto mb-3 text-tertiary-400/60" /><h4 className="text-lg text-white">Votre sélection commence ici</h4>
           <p className="mx-auto mb-4 mt-2 max-w-md text-sm leading-6 text-white/55">{activeView === "salons" ? "Enregistrez les salons et artistes qui vous plaisent pour les retrouver facilement." : "Enregistrez vos créations préférées pour préparer votre prochain projet."}</p>
           <AppButton href={activeView === "salons" ? "/trouver-un-salon" : "/inspiration"} className="min-h-11">{activeView === "salons" ? "Découvrir les salons" : "Trouver l’inspiration"}</AppButton>
+        </div>
+      ) : activeView === "flashs" ? (
+        <div className="grid grid-cols-2 items-start gap-3 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+          {favoriteFlashes.map((flash) => {
+            const owner = flash.user;
+            const ownerName = owner.salonName || [owner.firstName, owner.lastName].filter(Boolean).join(" ") || owner.nickname || "Artiste";
+            const href = buildSalonHref(owner.salonName || ownerName, owner.city || undefined, owner.postalCode || undefined);
+            return <article key={flash.id} className="group overflow-hidden rounded-2xl bg-noir-700 transition">
+              <div className="relative aspect-square bg-noir-800">
+                <Image src={flash.imageUrl} alt={flash.title || "Flash favori"} fill sizes="(min-width:1280px) 25vw, (min-width:1024px) 33vw, 50vw" className="object-contain p-2" />
+                {!flash.isAvailable && <span className="absolute left-2 top-2 rounded-lg bg-black/60 px-2 py-1 text-[10px] text-white">Plus disponible</span>}
+                <div className="absolute right-2 top-2"><FavoritePortfolioBtn kind="flash" portfolioId={flash.id} initialFavorite variant="icon-only" onToggle={(isFav) => { if (!isFav) void fetchFavoriteFlashes(); }} /></div>
+              </div>
+              <div className="px-3 pb-2 pt-3">
+                <h4 className="line-clamp-2 break-words text-sm text-white">{flash.title || "Flash"}</h4>
+                <p className="mt-1 text-xs font-semibold text-white/80">{new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(flash.price)}</p>
+                {flash.tatoueur?.name && <p className="mt-1 truncate text-xs text-white/50">{flash.tatoueur.name}</p>}
+                <Link href={href} className="mt-1 inline-flex min-h-11 max-w-full items-center gap-1 text-xs text-white/60 hover:text-tertiary-400"><span className="truncate">{ownerName}</span><ArrowUpRight size={13} className="shrink-0" /></Link>
+              </div>
+            </article>;
+          })}
         </div>
       ) : activeView === "salons" ? (
         <div className="grid grid-cols-1 gap-3 xl:grid-cols-2 2xl:grid-cols-3">

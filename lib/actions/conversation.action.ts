@@ -97,6 +97,20 @@ export const getUnreadMessagesCountAction = async (): Promise<number> => {
 //! ============================================================================
 export type ConversationResponseDto = ConversationDto;
 
+/** Réponse du client à la demande d'accès d'un professionnel à ses informations (prénom, nom, e-mail, téléphone, date de naissance). */
+export const respondClientAccessAction = async (conversationId: string, accept: boolean) => {
+  const headers = await getAuthHeaders();
+  const response = await fetch(`${process.env.NEXT_PUBLIC_BACK_URL}/messaging/client-access/${encodeURIComponent(conversationId)}/respond`, {
+    method: "POST",
+    headers: { ...headers, "Content-Type": "application/json" },
+    body: JSON.stringify({ accept }),
+    cache: "no-store",
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw actionError(data?.message || httpErrorMessage(response.status));
+  return data as { clientAccess: string };
+};
+
 export const getConversationByIdAction = async (
   id: string
 ): Promise<ConversationResponseDto> => {

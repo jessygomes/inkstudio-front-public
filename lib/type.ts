@@ -188,7 +188,7 @@ export type UserContextType = {
 };
 
 export type ConversationStatus = "ACTIVE" | "ARCHIVED" | "CLOSED";
-export type MessageType = "SYSTEM" | "USER" | "CLIENT";
+export type MessageType = "SYSTEM" | "USER" | "CLIENT" | "TEXT" | "IMAGE" | "FILE" | "ACCESS_REQUEST";
 
 export interface ConversationUserDto {
   id: string;
@@ -241,6 +241,8 @@ export interface MessagesResponseDto {
 
 export interface ConversationDto {
   projectContactPending?: boolean;
+  /** Conversation ouverte par un professionnel après un favori : REQUESTED = demande d'accès à vos informations en attente. */
+  clientAccess?: "HIDDEN" | "REQUESTED" | "GRANTED" | "DECLINED" | null;
   contactBlocked?: boolean;
   id: string;
   salonId: string;

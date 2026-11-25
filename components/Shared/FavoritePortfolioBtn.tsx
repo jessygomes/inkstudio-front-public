@@ -3,11 +3,14 @@
 import { useEffect, useState, useTransition } from "react";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
 import { toast } from "sonner";
-import { toggleFavoritePortfolio } from "@/lib/actions/user.action";
+import { toggleFavoriteFlash, toggleFavoritePortfolio } from "@/lib/actions/user.action";
 import { useUser } from "@/components/Context/UserContext";
 
 type FavoritePortfolioBtnProps = {
+  /** Identifiant de la réalisation (ou du flash avec `kind="flash"`). */
   portfolioId: string;
+  /** Réalisation du portfolio (défaut) ou flash. */
+  kind?: "portfolio" | "flash";
   initialFavorite?: boolean;
   variant?: "default" | "icon-only";
   className?: string;
@@ -16,6 +19,7 @@ type FavoritePortfolioBtnProps = {
 
 export default function FavoritePortfolioBtn({
   portfolioId,
+  kind = "portfolio",
   initialFavorite = false,
   variant = "icon-only",
   className = "",
@@ -31,7 +35,7 @@ export default function FavoritePortfolioBtn({
 
   const handleToggle = () => {
     if (!isAuthenticated) {
-      toast.error("Connectez-vous pour ajouter cette image aux favoris");
+      toast.error(kind === "flash" ? "Connectez-vous pour ajouter ce flash aux favoris" : "Connectez-vous pour ajouter cette image aux favoris");
       return;
     }
 
@@ -42,7 +46,7 @@ export default function FavoritePortfolioBtn({
 
     startTransition(async () => {
       try {
-        const result = await toggleFavoritePortfolio(portfolioId);
+        const result = kind === "flash" ? await toggleFavoriteFlash(portfolioId) : await toggleFavoritePortfolio(portfolioId);
 
         if (!result.ok) {
           toast.error(result.message || "Erreur lors de la mise à jour");
@@ -55,10 +59,12 @@ export default function FavoritePortfolioBtn({
         setFavorite(nextFavorite);
         onToggle?.(nextFavorite);
 
+        // Le tatoueur est prévenu du favori, avec le seul pseudo du client.
         toast.success(
           nextFavorite
-            ? "Image ajoutée aux favoris !"
-            : "Image retirée des favoris",
+            ? (kind === "flash" ? "Flash ajouté aux favoris !" : "Image ajoutée aux favoris !")
+            : (kind === "flash" ? "Flash retiré des favoris" : "Image retirée des favoris"),
+          nextFavorite ? { description: "Le tatoueur en est informé : il ne voit que votre pseudo." } : undefined,
         );
       } catch (error) {
         console.error("Erreur toggle favorite portfolio:", error);

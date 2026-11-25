@@ -36,6 +36,8 @@ export type Moodboard = {
 	projectStyles?: string[];
 	projectHashtags?: string[];
 	projectBodyPlacement?: string | null;
+	/** Besoins affichés aux tatoueurs dans Explorer. */
+	projectNeeds?: string[];
 	projectMobility?: string | null;
 	projectRadiusKm?: number | null;
 	id: string;

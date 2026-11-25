@@ -8,7 +8,7 @@ import {
   type InspirationPhoto,
   type InspirationPhotosResponse,
 } from "@/lib/actions/inspiration.action";
-import { getFavoritePortfolioImages } from "@/lib/actions/user.action";
+import { getFavoriteFlashIds, getFavoritePortfolioImages } from "@/lib/actions/user.action";
 import AppButton from "@/components/Shared/AppButton";
 import FilterSelect from "@/components/Shared/FilterSelect";
 import FiltersToggleButton from "@/components/Shared/FiltersToggleButton";
@@ -313,8 +313,10 @@ export default function InspirationMosaicFeed({
           })
           .filter(Boolean);
 
+        // Les flashs en favori partagent le même ensemble (identifiants uniques).
+        const flashIds = await getFavoriteFlashIds();
         if (!isCancelled) {
-          setFavoritePortfolioIds(new Set(ids));
+          setFavoritePortfolioIds(new Set([...ids, ...flashIds]));
         }
       } catch {
         if (!isCancelled) {
@@ -694,11 +696,12 @@ export default function InspirationMosaicFeed({
                 <Zap size={11} className="text-tertiary-400" aria-hidden="true" />Flash{typeof item.price === "number" && <> · {formatPrice(item.price)}</>}
               </span>
             )}
-            {/* Les favoris portent sur les photos de portfolio : pas pour un flash. */}
-            {item.kind !== "flash" && (
+            {/* Favori d'une réalisation ou d'un flash : le tatoueur est prévenu avec le pseudo du client. */}
+            {(
               <div className="absolute top-3 right-3 z-20">
                 <FavoritePortfolioBtn
                   portfolioId={item.key}
+                  kind={item.kind === "flash" ? "flash" : "portfolio"}
                   initialFavorite={favoritePortfolioIds.has(item.key)}
                   variant="icon-only"
                   onToggle={(isFavorite) => handleFavoriteToggle(item.key, isFavorite)}
@@ -884,7 +887,7 @@ export default function InspirationMosaicFeed({
               {/* Actions */}
               <div className="shrink-0 space-y-2 bg-noir-700 p-4 pt-3">
                 <div className="flex items-center gap-2">
-                  {activeItem.kind !== "flash" && <FavoritePortfolioBtn portfolioId={activeItem.key} initialFavorite={favoritePortfolioIds.has(activeItem.key)} variant="icon-only" className="size-11! shrink-0 rounded-xl! border-0! bg-white/6!" onToggle={isFavorite => handleFavoriteToggle(activeItem.key, isFavorite)} />}
+                  {<FavoritePortfolioBtn portfolioId={activeItem.key} kind={activeItem.kind === "flash" ? "flash" : "portfolio"} initialFavorite={favoritePortfolioIds.has(activeItem.key)} variant="icon-only" className="size-11! shrink-0 rounded-xl! border-0! bg-white/6!" onToggle={isFavorite => handleFavoriteToggle(activeItem.key, isFavorite)} />}
                   <AppButton href={activeItem.href} onClick={closeLightbox} fullWidth className="min-h-11! rounded-xl! px-4! py-2! text-sm! shadow-none! hover:translate-y-0!">Voir le profil<ArrowUpRight size={15} /></AppButton>
                 </div>
                 {activeItem.canMessageSalon && <StartInkeraConversationButton key={`message-${activeItem.key}`} variant="compact" tone="violet" targetUserId={activeItem.salonUserId} recipientName={activeItem.salonName} className="min-h-11! rounded-xl! px-4! py-2! text-sm! shadow-none!" />}

@@ -9,12 +9,14 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft, CalendarDays, ChevronLeft, ChevronRight, ExternalLink, Info, MapPin, MessageCircle, RefreshCw, Search, PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen } from "lucide-react";
 import { toSlug } from "@/lib/utils";
+import { toast } from "sonner";
 import type { AttachmentDto, ConversationDto, ConversationMessageDto } from "@/lib/type";
 import {
   getConversationAppointmentsAction,
   getConversationByIdAction,
   getConversationsAction,
   markConversationAsReadAction,
+  respondClientAccessAction,
   type ConversationAppointment,
 } from "@/lib/actions/conversation.action";
 import { useMessaging } from "@/lib/hook/useMessaging";
@@ -64,6 +66,7 @@ export default function PeopleInboxWorkspace() {
   const [rdvError, setRdvError] = useState("");
   const [activeRDV, setActiveRDV] = useState<ConversationAppointment | null>(null);
   const messagesScrollRef = useRef<HTMLDivElement>(null);
+  const [accessBusy, setAccessBusy] = useState(false);
 
   const {
     isConnected, messages: liveMessages, joinConversation, leaveConversation,
@@ -133,6 +136,29 @@ export default function PeopleInboxWorkspace() {
       }).catch(() => undefined);
     }
   }, [selectedId, liveMessages, session?.user?.id, markAsRead]);
+
+  // Demande d'accès reçue en direct : on relit la conversation pour afficher les boutons oui / non.
+  useEffect(() => {
+    if (!selectedId) return;
+    if (!liveMessages.some((msg) => msg.conversationId === selectedId && msg.type === "ACCESS_REQUEST")) return;
+    const timer = window.setTimeout(() => void loadDetail(selectedId), 0);
+    return () => window.clearTimeout(timer);
+  }, [selectedId, liveMessages, loadDetail]);
+
+  const respondAccess = useCallback(async (accept: boolean) => {
+    if (!selectedId) return;
+    if (accept && !window.confirm("Partager vos informations ? Le professionnel verra votre prénom, votre nom, votre e-mail, votre téléphone et votre date de naissance, et pourra vous créer une fiche client et des rendez-vous.")) return;
+    setAccessBusy(true);
+    try {
+      await respondClientAccessAction(selectedId, accept);
+      toast.success(accept ? "Vos informations sont partagées avec ce professionnel." : "Vos informations restent privées.");
+      await loadDetail(selectedId);
+    } catch (error) {
+      toast.error(userErrorMessage(error, "Réponse impossible."));
+    } finally {
+      setAccessBusy(false);
+    }
+  }, [selectedId, loadDetail]);
 
   useEffect(() => {
     if (!selectedId) { setAppointments([]); setRdvTotal(0); return; }
@@ -259,7 +285,7 @@ export default function PeopleInboxWorkspace() {
           {!selectedId ? <div className="m-auto px-6 text-center text-white/45"><MessageCircle className="mx-auto mb-3 text-tertiary-400/50" size={34}/><p className="text-sm">Choisissez une conversation</p></div> : <>
             <div className="flex shrink-0 items-center gap-2 px-3 py-2 sm:px-4"><button type="button" aria-label="Retour aux conversations" onClick={() => setMobilePane("list")} className="cursor-pointer disabled:cursor-not-allowed rounded-xl p-2 hover:bg-white/10 lg:hidden"><ArrowLeft size={17}/></button><div className="flex min-w-0 flex-1 items-center gap-3"><p className="truncate text-sm font-semibold">{conversation ? name : "Conversation"}</p><p className="shrink-0 text-[11px] text-white/50">{isConnected ? "En ligne" : "Reconnexion…"}</p></div><button type="button" onClick={() => setMobilePane("details")} className="cursor-pointer disabled:cursor-not-allowed inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs hover:bg-white/10 xl:hidden"><Info size={15}/> Afficher les détails</button><button type="button" aria-label={detailsCollapsed ? "Afficher les détails" : "Replier les détails"} aria-expanded={!detailsCollapsed} onClick={() => setDetailsCollapsed((v) => !v)} className="cursor-pointer disabled:cursor-not-allowed hidden h-8 w-8 shrink-0 items-center justify-center text-white/60 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-tertiary-400 xl:flex">{detailsCollapsed ? <PanelRightOpen size={18}/> : <PanelRightClose size={18}/>}</button></div>
             {loadingDetail ? <ConversationSkeleton /> : detailError ? <div className="m-auto px-4 text-center text-xs text-red-300">{detailError}<button onClick={() => void loadDetail(selectedId)} className="cursor-pointer disabled:cursor-not-allowed mt-3 block underline">Réessayer</button></div> : <>
-              <div ref={messagesScrollRef} role="log" aria-label="Messages de la conversation" className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain px-4 py-6 sm:px-8"><MessageBubbles compact messages={displayedMessages} currentUserId={session?.user?.id}/>{typingUsers.size > 0 && <p className="text-xs italic text-white/40">En train d’écrire…</p>}</div>
+              <div ref={messagesScrollRef} role="log" aria-label="Messages de la conversation" className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain px-4 py-6 sm:px-8"><MessageBubbles compact messages={displayedMessages} currentUserId={session?.user?.id} accessRequest={{ status: conversation?.clientAccess, busy: accessBusy, onRespond: (accept) => void respondAccess(accept) }}/>{typingUsers.size > 0 && <p className="text-xs italic text-white/40">En train d’écrire…</p>}</div>
               <div className="shrink-0 bg-noir-700 p-2 sm:px-3 sm:py-2"><MessageInput compact key={selectedId} onSendMessage={handleSendMessage} onInputChange={handleInputChange} disabled={!isConnected}/></div>
             </>}
           </>}
