@@ -8,6 +8,8 @@ import type { UseFormReturn } from "react-hook-form";
 import type { z } from "zod";
 import type { updateProfileSchema } from "@/lib/zod/validator-schema";
 import SalonImageUploader from "@/components/Shared/ImageProfileUpload";
+import { pseudoFeedback, usePseudoAvailability } from "@/lib/pseudo";
+import { checkPseudoAction } from "@/lib/actions/user.action";
 
 type Values = z.infer<typeof updateProfileSchema>;
 type Field = { name: keyof Values; label: string; type?: string; autoComplete: string; required?: boolean };
@@ -15,7 +17,7 @@ const sections: { title: string; description: string; fields: Field[] }[] = [
   { title: "Identité", description: "Les informations qui vous présentent.", fields: [
     { name: "firstName", label: "Prénom", autoComplete: "given-name", required: true },
     { name: "lastName", label: "Nom", autoComplete: "family-name", required: true },
-    { name: "pseudo", label: "Pseudo", autoComplete: "nickname" },
+    { name: "pseudo", label: "Pseudo", autoComplete: "nickname", required: true },
     { name: "birthDate", label: "Date de naissance", type: "date", autoComplete: "bday" },
   ] },
   { title: "Coordonnées", description: "Les informations utiles pour vos échanges avec les salons.", fields: [
@@ -26,13 +28,19 @@ const sections: { title: string; description: string; fields: Field[] }[] = [
   ] },
 ];
 
-export default function ProfileEditorForm({ form, onSubmit, isSubmitting, onCancel }: {
+export default function ProfileEditorForm({ form, onSubmit, isSubmitting, onCancel, initialPseudo }: {
   form: UseFormReturn<Values>;
   onSubmit: (values: Values) => Promise<void>;
   isSubmitting: boolean;
   onCancel: () => void;
+  /** Pseudo actuel du compte : considéré comme disponible. */
+  initialPseudo?: string | null;
 }) {
   const { register, handleSubmit, watch, setValue, formState: { errors, isDirty } } = form;
+  // Pseudo unique : disponibilité vérifiée en direct.
+  const pseudoStatus = usePseudoAvailability(watch("pseudo") ?? "", checkPseudoAction, initialPseudo);
+  const pseudoMessages = pseudoFeedback(pseudoStatus);
+  const pseudoBlocked = pseudoStatus.state === "taken" || pseudoStatus.state === "invalid" || pseudoStatus.state === "checking";
   const [photoBusy, setPhotoBusy] = useState(false);
   const name = [watch("firstName"), watch("lastName")].filter(Boolean).join(" ") || "Votre profil";
   return (
@@ -56,7 +64,7 @@ export default function ProfileEditorForm({ form, onSubmit, isSubmitting, onCanc
           </nav>
           <div className="mt-5 hidden space-y-2 px-2 pt-5 xl:block"><p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/35">En un coup d’œil</p><p className="break-words text-sm font-medium text-white/85">{name}</p><p className="break-all text-[11px] text-white/40">{watch("email") || "Email à renseigner"}</p></div>
         </aside>
-        <form noValidate onSubmit={handleSubmit(async values => { if (!photoBusy) await onSubmit(values); })} aria-busy={isSubmitting || photoBusy} className="min-w-0 space-y-4">
+        <form noValidate onSubmit={handleSubmit(async values => { if (!photoBusy && !pseudoBlocked) await onSubmit(values); })} aria-busy={isSubmitting || photoBusy} className="min-w-0 space-y-4">
         <fieldset disabled={isSubmitting} className="min-w-0 space-y-4 disabled:opacity-70">
           <section id="profile-photo" aria-labelledby="profile-photo-title" className="scroll-mt-24 rounded-3xl bg-noir-700 p-4 sm:p-6">
             <div className="mb-5 flex items-start gap-3"><span className="grid size-9 shrink-0 place-items-center rounded-xl bg-tertiary-400/10 text-tertiary-400"><Camera size={17} aria-hidden="true" /></span><div><p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/35">01 · Votre image</p><h2 id="profile-photo-title" className="mt-1 text-sm font-semibold tracking-tight text-white sm:text-base">Photo de profil</h2><p className="mt-1 font-two text-[11px] leading-relaxed text-white/40">Ajoutez une touche personnelle à votre espace.</p></div></div>
@@ -77,7 +85,8 @@ export default function ProfileEditorForm({ form, onSubmit, isSubmitting, onCanc
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2">
                   {section.fields.map((field) => {
-                    const error = errors[field.name];
+                    const isPseudo = field.name === "pseudo";
+                    const error = isPseudo && pseudoMessages.error ? { message: pseudoMessages.error } : errors[field.name];
                     return (
                       <div key={field.name} className="min-w-0">
                         <label htmlFor={field.name} className="mb-1.5 flex items-center gap-1 text-[11px] font-medium text-white/60">
@@ -88,6 +97,7 @@ export default function ProfileEditorForm({ form, onSubmit, isSubmitting, onCanc
                           maxLength={field.name === "postalCode" ? 5 : undefined} {...register(field.name)}
                           className={`min-h-11 w-full min-w-0 rounded-2xl bg-white/5 px-4 py-2.5 font-two text-sm text-white outline-none hover:bg-white/7 focus:bg-white/8 transition [color-scheme:dark] focus:ring-2 focus:ring-tertiary-400/40 ${error ? "bg-red-400/10 ring-1 ring-red-400/40" : ""}`} />
                         {error && <p id={`${field.name}-error`} role="alert" className="mt-1 text-[10px] text-red-300">{error.message}</p>}
+                        {isPseudo && !error && pseudoMessages.hint && <p className={`mt-1 text-[10px] ${pseudoStatus.state === "available" ? "text-emerald-300" : "text-white/40"}`}>{pseudoMessages.hint}</p>}
                       </div>
                     );
                   })}
@@ -103,7 +113,7 @@ export default function ProfileEditorForm({ form, onSubmit, isSubmitting, onCanc
           </p>
           <div className="ml-auto flex w-full gap-2 sm:w-auto">
             <AppButton type="button" variant="secondary" onClick={onCancel} disabled={isSubmitting || photoBusy} className="min-h-11 flex-1 cursor-pointer !px-4 !text-xs sm:flex-none">Annuler</AppButton>
-            <AppButton type="submit" disabled={isSubmitting || photoBusy || !isDirty} icon={isSubmitting ? <LoaderCircle size={14} className="animate-spin" aria-hidden="true" /> : <Save size={14} aria-hidden="true" />} className="min-h-11 flex-1 cursor-pointer !px-4 !text-xs !shadow-none sm:flex-none">
+            <AppButton type="submit" disabled={isSubmitting || photoBusy || !isDirty || pseudoBlocked} icon={isSubmitting ? <LoaderCircle size={14} className="animate-spin" aria-hidden="true" /> : <Save size={14} aria-hidden="true" />} className="min-h-11 flex-1 cursor-pointer !px-4 !text-xs !shadow-none sm:flex-none">
               {isSubmitting ? "Enregistrement…" : "Enregistrer"}
             </AppButton>
           </div>

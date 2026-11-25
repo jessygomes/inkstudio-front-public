@@ -7,6 +7,14 @@ import { getAuthHeaders } from "../session";
 
 //! ----------------------------------------------------------------------------
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
+/** Disponibilité d'un pseudo pour le compte connecté (son propre pseudo reste disponible). */
+export const checkPseudoAction = async (pseudo: string): Promise<{ available: boolean; message?: string; code?: string }> => {
+  const headers = await getAuthHeaders();
+  const response = await fetch(`${process.env.NEXT_PUBLIC_BACK_URL}/auth/pseudo-available?pseudo=${encodeURIComponent(pseudo)}`, { headers, cache: "no-store" });
+  if (!response.ok) throw new Error("Vérification du pseudo indisponible.");
+  return response.json();
+};
+
 export const updateUserInfoAction = async (payload: any) => {
   try {
     const headers = await getAuthHeaders();

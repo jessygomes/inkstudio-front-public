@@ -16,6 +16,7 @@ import { signIn } from "next-auth/react";
 
 import { parseRateLimit } from "../../lib/auth-rate-limit";
 import { setAuthReturnPath } from "@/lib/booking-link";
+import { pseudoFeedback, pseudoFormatError, usePseudoAvailability } from "@/lib/pseudo";
 
 // Schema de validation pour l'inscription client
 const registerSchema = z
@@ -28,6 +29,11 @@ const registerSchema = z
       .string()
       .min(2, "Le nom doit contenir au moins 2 caractères")
       .max(50, "Le nom ne peut pas dépasser 50 caractères"),
+    // Pseudo obligatoire et unique : sa disponibilité est vérifiée en direct pendant la saisie.
+    pseudo: z.string().superRefine((value, ctx) => {
+      const message = pseudoFormatError(value);
+      if (message) ctx.addIssue({ code: "custom", message });
+    }),
     email: z.string().email("Veuillez entrer un email valide").toLowerCase(),
     password: z
       .string()
@@ -85,6 +91,7 @@ export default function Register({ invitation }: { invitation?: RegisterInvitati
     defaultValues: {
       firstName: invitation?.firstName || "",
       lastName: invitation?.lastName || "",
+      pseudo: "",
       email: invitation?.email || "",
       password: "",
       confirmPassword: "",
@@ -108,8 +115,21 @@ export default function Register({ invitation }: { invitation?: RegisterInvitati
     return () => window.clearInterval(intervalId);
   }, [cooldownSeconds, hasRateLimitError]);
 
+  const pseudoValue = form.watch("pseudo") ?? "";
+  const pseudoStatus = usePseudoAvailability(pseudoValue);
+  const pseudoMessages = pseudoFeedback(pseudoStatus);
+
   const onSubmit = async (data: RegisterForm) => {
     if (cooldownSeconds > 0) {
+      return;
+    }
+    // Pseudo déjà pris ou encore en vérification : on ne lance pas l'inscription.
+    if (pseudoStatus.state === "taken" || pseudoStatus.state === "invalid") {
+      form.setFocus("pseudo");
+      return;
+    }
+    if (pseudoStatus.state === "checking") {
+      setError("Vérification du pseudo en cours, réessayez dans un instant.");
       return;
     }
 
@@ -137,6 +157,7 @@ export default function Register({ invitation }: { invitation?: RegisterInvitati
             password: data.password,
             firstName: data.firstName,
             lastName: data.lastName,
+            pseudo: data.pseudo.trim(),
             birthDate: data.birthDate || null,
             ...(invitation ? { invitationToken: invitation.token } : {}),
           }),
@@ -154,6 +175,11 @@ export default function Register({ invitation }: { invitation?: RegisterInvitati
 
       const registerData = await registerResponse.json().catch(() => null);
 
+      if (registerData?.code === "PSEUDO_TAKEN" || registerData?.code === "PSEUDO_INVALID") {
+        form.setError("pseudo", { message: registerData.message });
+        form.setFocus("pseudo");
+        return;
+      }
       if (!registerResponse.ok || registerData?.error) {
         throw new Error(
           registerData?.message || "Échec de l'inscription. Veuillez réessayer.",
@@ -230,6 +256,10 @@ export default function Register({ invitation }: { invitation?: RegisterInvitati
             <AuthField id="register-firstName" label="Prénom" autoComplete="given-name" placeholder="Votre prénom" required error={form.formState.errors.firstName?.message} {...form.register("firstName")} />
             <AuthField id="register-lastName" label="Nom" autoComplete="family-name" placeholder="Votre nom" required error={form.formState.errors.lastName?.message} {...form.register("lastName")} />
           </div>
+          <AuthField id="register-pseudo" label="Pseudo" autoComplete="nickname" autoCapitalize="none" spellCheck={false} placeholder="Ex. inkfan_42" required maxLength={30}
+            hint={form.formState.errors.pseudo?.message ? undefined : pseudoMessages.hint}
+            error={pseudoMessages.error || form.formState.errors.pseudo?.message}
+            {...form.register("pseudo")} />
           <AuthField id="register-email" label="Adresse e-mail" type="email" autoComplete="email" placeholder="vous@exemple.fr" required readOnly={!!invitation} hint={invitation ? `L’adresse à laquelle ${invitation.salonName} vous a invité : c’est elle qui vous permet de retrouver vos rendez-vous avec ce salon.` : undefined} error={form.formState.errors.email?.message} {...form.register("email")} />
           <AuthField id="register-birthDate" label="Date de naissance (facultatif)" type="date" autoComplete="bday" error={form.formState.errors.birthDate?.message} {...form.register("birthDate")} />
           <div className="grid gap-4 sm:grid-cols-2">

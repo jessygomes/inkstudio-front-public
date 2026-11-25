@@ -139,5 +139,5 @@ export default function UpdateProfil(user: User) {
     }
   };
 
-  return <ProfileEditorForm form={form} onSubmit={onSubmit} isSubmitting={isSubmitting} onCancel={() => router.push("/mon-profil")} />;
+  return <ProfileEditorForm form={form} onSubmit={onSubmit} isSubmitting={isSubmitting} onCancel={() => router.push("/mon-profil")} initialPseudo={profileData?.clientProfile?.pseudo} />;
 }

@@ -1,5 +1,6 @@
 import { image } from "motion/react-client";
 import * as z from "zod";
+import { pseudoFormatError } from "@/lib/pseudo-rules";
 import { DESIRED_TATTOO_PERIODS, PROJECT_BUDGET_RANGES, isDateKey } from "@/lib/booking-link";
 
 const skinToneValues = [
@@ -189,7 +190,11 @@ export const updateProfileSchema = z.object({
   lastName: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
   email: z.string().email("Veuillez entrer un email valide"),
   phone: z.string().optional(),
-  pseudo: z.string().optional(),
+  // Pseudo obligatoire et unique (disponibilité vérifiée en direct par le formulaire).
+  pseudo: z.string().superRefine((value, ctx) => {
+    const message = pseudoFormatError(value);
+    if (message) ctx.addIssue({ code: "custom", message });
+  }),
   city: z.string().optional(),
   postalCode: z.string().optional(),
   birthDate: z.string().optional(),
